@@ -18,13 +18,13 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := net-snmp
-SRC_FILENAME = net-snmp-5.1.tar.gz
-EXTRACTED_DIR = net-snmp-5.1
+SRC_FILENAME = net-snmp-5.1.2.tar.gz
+EXTRACTED_DIR = net-snmp-5.1.2
 DOWNLOAD_SITES = \
 		http://heanet.dl.sourceforge.net/sourceforge/net-snmp/ \
 		http://unc.dl.sourceforge.net/sourceforge/net-snmp/ \
 		$(CFLINUX_PACKAGES)
-PATCHES = net-snmp.patch
+#PATCHES = net-snmp.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -33,16 +33,22 @@ configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
 	(cd $(PKG_ROOT); $(UC_PATH) ./configure \
-	 --prefix=/usr --sysconfdir=/etc \
-	 --disable-applications --disable-scripts \
-	 --disable-debugging --enable-shared \
-	 --with-openssl=../openssl --without-root-access \
+	 --prefix=/usr \
+	 --sysconfdir=/etc \
+	 --disable-applications \
+	 --disable-scripts \
+	 --disable-debugging \
+	 --enable-shared \
+	 --with-openssl=../openssl \
+	 --without-root-access \
 	 --with-sys-contact="net-admin@" \
 	 --with-mib-modules="host" \
-	 --with-default-snmp-version=3 --with-sys-location="default" \
+	 --with-default-snmp-version=3 \
+	 --with-sys-location="default" \
 	 --with-logfile=/var/log/snmpd.log \
 	 --with-persistent-directory=/var/lib/net-snmp \
 	 --localstatedir=/var/run \
+	 --enable-local-smux \
 	 --without-rpm )
 	touch $(CONFIGURED_STAMP)
 
