@@ -1,0 +1,11 @@
+--- busybox-1.00-pre9/miscutils/crond.c.orig	Sat Apr 10 23:31:24 2004
++++ busybox-1.00-pre9/miscutils/crond.c	Sat Apr 10 23:33:47 2004
+@@ -36,7 +36,7 @@
+ #define arysize(ary)    (sizeof(ary)/sizeof((ary)[0]))
+ 
+ #ifndef CRONTABS
+-#define CRONTABS        "/var/spool/cron/crontabs"
++#define CRONTABS        "/etc/crontabs"
+ #endif
+ #ifndef TMPDIR
+ #define TMPDIR          "/var/spool/cron"

@@ -109,8 +109,6 @@ case "$inetd_enable" in
 esac
 case "$crond_enable" in
 	[Yy][Ee][Ss])
-		mkdir -p /var/spool/cron
-		ln -s /etc/crontabs /var/spool/cron/
 		/usr/sbin/crond $crond_flags
 		echo -n " crond"
 		;;

@@ -4,7 +4,7 @@
  echo "$verb Pluto subsystem..." | logger -p authpriv.error -t ipsec__plutorun
  execdir=${IPSEC_EXECDIR-@IPSEC_EXECDIR@}
  libdir=${IPSEC_LIBDIR-@IPSEC_LIBDIR@}
-+exec 2>-
++exec 2>&-
  until (
  	if test -s $info
  	then
