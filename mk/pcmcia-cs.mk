@@ -54,7 +54,7 @@ $(BUILT_STAMP):
 
 install: build
 	for i in etc cardmgr wireless ; do \
-		$(MAKE) -C $(PKG_ROOT)/$$i install \
+		$(MAKE) -C $(PKG_ROOT)/$$i install $(UC_PATH) \
 		ETC_PREFIX=$(FDEVEL_DIR)/fs_config ; done
 
 .PHONY: configure clean build install

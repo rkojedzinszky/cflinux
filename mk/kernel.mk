@@ -29,7 +29,10 @@ DOWNLOAD_SITES = \
 		ftp://ftp.sm.kernel.org/pub/linux/kernel/v2.4/ \
 		ftp://ftp.kernel.org/pub/linux/kernel/v2.4/ \
 		$(CFLINUX_PACKAGES)
-PATCHES = kernel.patch kernel.mppe.patch
+PATCHES = kernel.vlan_mtu.patch \
+	kernel.mppe.patch \
+	kernel.multigate.patch \
+	kernel.init.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

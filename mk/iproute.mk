@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := iproute
-SRC_FILENAME = iproute2.tar.bz2
+SRC_FILENAME = iproute2-1.tar.bz2
 EXTRACTED_DIR = iproute
 DOWNLOAD_SITES = $(CFLINUX_PACKAGES)
 

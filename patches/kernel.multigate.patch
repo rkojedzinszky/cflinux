@@ -1,7 +1,7 @@
-diff -ruNP linux-2.4.25.orig/Documentation/Configure.help linux-2.4.25/Documentation/Configure.help
---- linux-2.4.25.orig/Documentation/Configure.help	Wed Feb 18 15:18:56 2004
-+++ linux-2.4.25/Documentation/Configure.help	Wed Feb 18 16:38:12 2004
-@@ -14244,14 +14244,27 @@
+diff -NurpabB linux-2.4.27/Documentation/Configure.help linux-2.4.27-multigate/Documentation/Configure.help
+--- linux-2.4.27/Documentation/Configure.help	2004-08-08 01:26:04.000000000 +0200
++++ linux-2.4.27-multigate/Documentation/Configure.help	2004-08-17 14:34:31.000000000 +0200
+@@ -14467,14 +14467,27 @@ CONFIG_MTD_CSTM_MIPS_IXX_BUSWIDTH
    This is the total bus width of the mapping of the flash chips
    on your particular board.
  
@@ -36,9 +36,9 @@ diff -ruNP linux-2.4.25.orig/Documentation/Configure.help linux-2.4.25/Documenta
  
  JEDEC Flash device mapped on Octagon 5066 SBC
  CONFIG_MTD_OCTAGON
-diff -ruNP linux-2.4.25.orig/drivers/mtd/chips/jedec.c linux-2.4.25/drivers/mtd/chips/jedec.c
---- linux-2.4.25.orig/drivers/mtd/chips/jedec.c	Wed Feb 18 15:18:22 2004
-+++ linux-2.4.25/drivers/mtd/chips/jedec.c	Wed Feb 18 16:38:12 2004
+diff -NurpabB linux-2.4.27/drivers/mtd/chips/jedec.c linux-2.4.27-multigate/drivers/mtd/chips/jedec.c
+--- linux-2.4.27/drivers/mtd/chips/jedec.c	2003-06-13 16:51:34.000000000 +0200
++++ linux-2.4.27-multigate/drivers/mtd/chips/jedec.c	2004-08-17 14:34:31.000000000 +0200
 @@ -15,6 +15,7 @@
   */
  
@@ -47,7 +47,7 @@ diff -ruNP linux-2.4.25.orig/drivers/mtd/chips/jedec.c linux-2.4.25/drivers/mtd/
  
  static struct mtd_info *jedec_probe(struct map_info *);
  static int jedec_probe8(struct map_info *map,unsigned long base,
-@@ -33,13 +34,14 @@
+@@ -33,13 +34,14 @@ static unsigned long my_bank_size;
  
  /* Listing of parts and sizes. We need this table to learn the sector
     size of the chip and the total length */
@@ -69,7 +69,7 @@ diff -ruNP linux-2.4.25.orig/drivers/mtd/chips/jedec.c linux-2.4.25/drivers/mtd/
     {}};
  
  static const struct JEDECTable *jedec_idtoinf(__u8 mfr,__u8 id);
-@@ -79,6 +81,14 @@
+@@ -79,6 +81,14 @@ static struct mtd_info *jedec_probe(stru
     memset(MTD, 0, sizeof(struct mtd_info) + sizeof(struct jedec_private));
     priv = (struct jedec_private *)&MTD[1];
     
@@ -84,7 +84,7 @@ diff -ruNP linux-2.4.25.orig/drivers/mtd/chips/jedec.c linux-2.4.25/drivers/mtd/
     my_bank_size = map->size;
  
     if (map->size/my_bank_size > MAX_JEDEC_CHIPS)
-@@ -87,6 +97,7 @@
+@@ -87,6 +97,7 @@ static struct mtd_info *jedec_probe(stru
        kfree(MTD);
        return 0;
     }
@@ -92,7 +92,7 @@ diff -ruNP linux-2.4.25.orig/drivers/mtd/chips/jedec.c linux-2.4.25/drivers/mtd/
     
     for (Base = 0; Base < map->size; Base += my_bank_size)
     {
-@@ -96,9 +107,8 @@
+@@ -96,9 +107,8 @@ static struct mtd_info *jedec_probe(stru
        
        if (map->buswidth == 1){
  	 if (jedec_probe8(map,Base,priv) == 0) {
@@ -103,7 +103,7 @@ diff -ruNP linux-2.4.25.orig/drivers/mtd/chips/jedec.c linux-2.4.25/drivers/mtd/
  	 }
        }
        if (map->buswidth == 2)
-@@ -107,9 +117,16 @@
+@@ -107,9 +117,16 @@ static struct mtd_info *jedec_probe(stru
  	 jedec_probe32(map,Base,priv);
     }
     
@@ -121,7 +121,7 @@ diff -ruNP linux-2.4.25.orig/drivers/mtd/chips/jedec.c linux-2.4.25/drivers/mtd/
     {
  	   //	   printk("priv->chips[%d].jedec is %x\n",I,priv->chips[I].jedec);
  	   //	   printk("priv->chips[%d].sectorsize is %lx\n",I,priv->chips[I].sectorsize);
-@@ -128,6 +145,8 @@
+@@ -128,6 +145,8 @@ static struct mtd_info *jedec_probe(stru
        }      
     }
     
@@ -130,7 +130,7 @@ diff -ruNP linux-2.4.25.orig/drivers/mtd/chips/jedec.c linux-2.4.25/drivers/mtd/
     /* Generate a part name that includes the number of different chips and
        other configuration information */
     count = 1;
-@@ -193,7 +212,7 @@
+@@ -193,7 +212,7 @@ static struct mtd_info *jedec_probe(stru
  		      
  		      /* This even could be eliminated, but new de-optimized read/write
  			 functions have to be written */
@@ -139,7 +139,7 @@ diff -ruNP linux-2.4.25.orig/drivers/mtd/chips/jedec.c linux-2.4.25/drivers/mtd/
  		      if (priv->bank_fill[I] != priv->bank_fill[0])
  		      {
  			 printk("mtd: Failed. Cannot handle unsymmetric banking\n");
-@@ -218,7 +237,7 @@
+@@ -218,7 +237,7 @@ static struct mtd_info *jedec_probe(stru
     //   printk("MTD->erasesize is %x\n",(unsigned int)MTD->erasesize);
     MTD->size = priv->size;
     //   printk("MTD->size is %x\n",(unsigned int)MTD->size);
@@ -148,7 +148,7 @@ diff -ruNP linux-2.4.25.orig/drivers/mtd/chips/jedec.c linux-2.4.25/drivers/mtd/
     MTD->erase = flash_erase;
     if (priv->is_banked == 1)
        MTD->read = jedec_read_banked;
-@@ -312,12 +331,14 @@
+@@ -312,12 +331,14 @@ static int handle_jedecs(struct map_info
  	 
        JEDEC = jedec_idtoinf(Mfg[J],Id[J]);
        priv->chips[I].jedec = (Mfg[J] << 8) | Id[J];
@@ -164,7 +164,7 @@ diff -ruNP linux-2.4.25.orig/drivers/mtd/chips/jedec.c linux-2.4.25/drivers/mtd/
  
        // log2 n :|
        priv->chips[I].addrshift = 0;
-@@ -351,8 +372,8 @@
+@@ -351,8 +372,8 @@ static const struct JEDECTable *jedec_id
  static int jedec_probe8(struct map_info *map,unsigned long base,
  		  struct jedec_private *priv)
  { 
@@ -175,7 +175,7 @@ diff -ruNP linux-2.4.25.orig/drivers/mtd/chips/jedec.c linux-2.4.25/drivers/mtd/
  
     const unsigned long AutoSel1 = 0xAA;
     const unsigned long AutoSel2 = 0x55;
-@@ -396,8 +417,8 @@
+@@ -396,8 +417,8 @@ static int jedec_probe8(struct map_info 
     
     return 1;
     
@@ -186,7 +186,7 @@ diff -ruNP linux-2.4.25.orig/drivers/mtd/chips/jedec.c linux-2.4.25/drivers/mtd/
  }
  
  // Look for flash using a 16 bit bus interface (ie 2 8-bit chips)
-@@ -480,8 +501,8 @@
+@@ -480,8 +501,8 @@ static int jedec_probe32(struct map_info
     
     return 1;
     
@@ -197,7 +197,7 @@ diff -ruNP linux-2.4.25.orig/drivers/mtd/chips/jedec.c linux-2.4.25/drivers/mtd/
  }
  
  /* Linear read. */
-@@ -545,8 +566,8 @@
+@@ -545,8 +566,8 @@ static void jedec_flash_failed(unsigned 
  static int flash_erase(struct mtd_info *mtd, struct erase_info *instr)
  {
     // Does IO to the currently selected chip
@@ -208,7 +208,7 @@ diff -ruNP linux-2.4.25.orig/drivers/mtd/chips/jedec.c linux-2.4.25/drivers/mtd/
     
     unsigned long Time = 0;
     unsigned long NoTime = 0;
-@@ -693,8 +714,8 @@
+@@ -693,8 +714,8 @@ static int flash_erase(struct mtd_info *
  	       todo_left--;
  	    }
  	    
@@ -219,7 +219,7 @@ diff -ruNP linux-2.4.25.orig/drivers/mtd/chips/jedec.c linux-2.4.25/drivers/mtd/
  	    NoTime = 0;
  
  	    switch (map->buswidth) {
-@@ -710,12 +731,12 @@
+@@ -710,12 +731,12 @@ static int flash_erase(struct mtd_info *
  	    }
  	    Count++;
  	    
@@ -234,7 +234,7 @@ diff -ruNP linux-2.4.25.orig/drivers/mtd/chips/jedec.c linux-2.4.25/drivers/mtd/
  	 }
  	 	 
  	 // Skip to the next chip if we used chip erase
-@@ -743,8 +764,8 @@
+@@ -743,8 +764,8 @@ static int flash_erase(struct mtd_info *
  	instr->callback(instr);
     return 0;
     
@@ -245,7 +245,7 @@ diff -ruNP linux-2.4.25.orig/drivers/mtd/chips/jedec.c linux-2.4.25/drivers/mtd/
  }
  
  /* This is the simple flash writing function. It writes to every byte, in
-@@ -757,8 +778,8 @@
+@@ -757,8 +778,8 @@ static int flash_write(struct mtd_info *
     /* Does IO to the currently selected chip. It takes the bank addressing
        base (which is divisable by the chip size) adds the necesary lower bits
        of addrshift (interleve index) and then adds the control register index. */
@@ -256,7 +256,7 @@ diff -ruNP linux-2.4.25.orig/drivers/mtd/chips/jedec.c linux-2.4.25/drivers/mtd/
     
     struct map_info *map = (struct map_info *)mtd->priv;
     struct jedec_private *priv = (struct jedec_private *)map->fldrv_priv;
-@@ -806,9 +827,9 @@
+@@ -806,9 +827,9 @@ static int flash_write(struct mtd_info *
  	    printk("mtd: warn: Trying to set a 0 to a 1\n");
  	     
  	 // Write
@@ -269,7 +269,7 @@ diff -ruNP linux-2.4.25.orig/drivers/mtd/chips/jedec.c linux-2.4.25/drivers/mtd/
  	 map->write8(map,*buf,base + off);
  	 Last[0] = map->read8(map,base + off);
  	 Last[1] = map->read8(map,base + off);
-@@ -819,8 +840,13 @@
+@@ -819,8 +840,13 @@ static int flash_write(struct mtd_info *
  	    it failed. The toggle bits keep toggling when there is a 
  	    failure */
  	 for (Count = 3; Last[(Count - 1) % 4] != Last[(Count - 2) % 4] &&
@@ -284,10 +284,10 @@ diff -ruNP linux-2.4.25.orig/drivers/mtd/chips/jedec.c linux-2.4.25/drivers/mtd/
  	 if (Last[(Count - 1) % 4] != *buf)
  	 {
  	    jedec_flash_failed(Last[(Count - 3) % 4]);
-diff -ruNP linux-2.4.25.orig/drivers/mtd/maps/Makefile linux-2.4.25/drivers/mtd/maps/Makefile
---- linux-2.4.25.orig/drivers/mtd/maps/Makefile	Wed Feb 18 15:18:23 2004
-+++ linux-2.4.25/drivers/mtd/maps/Makefile	Wed Feb 18 16:38:12 2004
-@@ -34,6 +34,7 @@
+diff -NurpabB linux-2.4.27/drivers/mtd/maps/Makefile linux-2.4.27-multigate/drivers/mtd/maps/Makefile
+--- linux-2.4.27/drivers/mtd/maps/Makefile	2003-06-13 16:51:34.000000000 +0200
++++ linux-2.4.27-multigate/drivers/mtd/maps/Makefile	2004-08-17 14:34:31.000000000 +0200
+@@ -34,6 +34,7 @@ ifneq ($(CONFIG_MTD_PHYSMAP),n)
      obj-$(CONFIG_MTD_PHYSMAP)	+= physmap.o 
    endif
  endif
@@ -295,9 +295,9 @@ diff -ruNP linux-2.4.25.orig/drivers/mtd/maps/Makefile linux-2.4.25/drivers/mtd/
  obj-$(CONFIG_MTD_PNC2000)	+= pnc2000.o
  obj-$(CONFIG_MTD_PCMCIA)	+= pcmciamtd.o
  obj-$(CONFIG_MTD_RPXLITE)	+= rpxlite.o
-diff -ruNP linux-2.4.25.orig/drivers/mtd/maps/mixmem.c linux-2.4.25/drivers/mtd/maps/mixmem.c
---- linux-2.4.25.orig/drivers/mtd/maps/mixmem.c	Thu Jan  1 01:00:00 1970
-+++ linux-2.4.25/drivers/mtd/maps/mixmem.c	Wed Feb 18 16:38:12 2004
+diff -NurpabB linux-2.4.27/drivers/mtd/maps/mixmem.c linux-2.4.27-multigate/drivers/mtd/maps/mixmem.c
+--- linux-2.4.27/drivers/mtd/maps/mixmem.c	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.4.27-multigate/drivers/mtd/maps/mixmem.c	2004-08-17 14:34:31.000000000 +0200
 @@ -0,0 +1,430 @@
 +/*
 +* mixmem - device driver for flash rom found on the flashcom and
@@ -729,250 +729,72 @@ diff -ruNP linux-2.4.25.orig/drivers/mtd/maps/mixmem.c linux-2.4.25/drivers/mtd/
 +MODULE_LICENSE("GPL");
 +MODULE_AUTHOR("Pásztor Szilárd <don@itc.hu>");
 +MODULE_DESCRIPTION("MTD map driver for FlashCOM and MixMEM boards");
-diff -ruNP linux-2.4.25.orig/drivers/net/3c59x.c linux-2.4.25/drivers/net/3c59x.c
---- linux-2.4.25.orig/drivers/net/3c59x.c	Wed Feb 18 15:17:32 2004
-+++ linux-2.4.25/drivers/net/3c59x.c	Wed Feb 18 16:38:12 2004
-@@ -313,6 +313,9 @@
-    code size of a per-interface flag is not worthwhile. */
- static char mii_preamble_required;
+diff -NurpabB linux-2.4.27/drivers/net/wan/comx.c linux-2.4.27-multigate/drivers/net/wan/comx.c
+--- linux-2.4.27/drivers/net/wan/comx.c	2002-08-03 02:39:44.000000000 +0200
++++ linux-2.4.27-multigate/drivers/net/wan/comx.c	2004-08-17 14:34:31.000000000 +0200
+@@ -60,6 +60,7 @@
+ #include <linux/types.h>
+ #include <linux/sched.h>
+ #include <linux/netdevice.h>
++#include <linux/rtnetlink.h>
+ #include <linux/proc_fs.h>
+ #include <asm/uaccess.h>
+ #include <linux/ctype.h>
+@@ -113,7 +114,8 @@ static struct dentry_operations comx_den
  
-+/* The Ethernet Type used for 802.1q tagged frames */
-+#define VLAN_ETHER_TYPE 0x8100
-+
- #define PFX DRV_NAME ": "
+ static struct proc_dir_entry * comx_root_dir;
  
- 
-@@ -681,7 +684,7 @@
- 	Wn2_ResetOptions=12,
- };
- enum Window3 {			/* Window 3: MAC/config bits. */
--	Wn3_Config=0, Wn3_MAC_Ctrl=6, Wn3_Options=8,
-+	Wn3_Config=0, Wn3_MaxPktSize=4, Wn3_MAC_Ctrl=6, Wn3_Options=8,
- };
- 
- #define BFEXT(value, offset, bitcount)  \
-@@ -709,7 +712,8 @@
- 	Media_LnkBeat = 0x0800,
- };
- enum Window7 {					/* Window 7: Bus Master control. */
--	Wn7_MasterAddr = 0, Wn7_MasterLen = 6, Wn7_MasterStatus = 12,
-+	Wn7_MasterAddr = 0, Wn7_VlanEtherType=4, Wn7_MasterLen = 6,
-+	Wn7_MasterStatus = 12,
- };
- /* Boomerang bus master control registers. */
- enum MasterCtrl {
-@@ -806,7 +810,8 @@
- 		pm_state_valid:1,				/* power_state[] has sane contents */
- 		open:1,
- 		medialock:1,
--		must_free_region:1;				/* Flag: if zero, Cardbus owns the I/O region */
-+		must_free_region:1,				/* Flag: if zero, Cardbus owns the I/O region */
-+		large_frames:1;			/* accept large frames */
- 	int drv_flags;
- 	u16 status_enable;
- 	u16 intr_enable;
-@@ -875,6 +880,9 @@
- static void vortex_tx_timeout(struct net_device *dev);
- static void acpi_set_WOL(struct net_device *dev);
- static struct ethtool_ops vortex_ethtool_ops;
-+#if defined(CONFIG_VLAN_8021Q) || defined(CONFIG_VLAN_8021Q_MODULE)
-+static void set_8021q_mode(struct net_device *dev, int enable);
-+#endif
- 
- /* This driver uses 'options' to pass the media type, full-duplex flag, etc. */
- /* Option count limit only -- unlimited interfaces are supported. */
-@@ -1058,6 +1066,7 @@
- 	dev->base_addr = ioaddr;
- 	dev->irq = irq;
- 	dev->mtu = mtu;
-+	vp->large_frames = mtu > 1500;
- 	vp->drv_flags = vci->drv_flags;
- 	vp->has_nway = (vci->drv_flags & HAS_NWAY) ? 1 : 0;
- 	vp->io_size = vci->io_size;
-@@ -1482,7 +1491,7 @@
- 
- 	/* Set the full-duplex bit. */
- 	outw(	((vp->info1 & 0x8000) || vp->full_duplex ? 0x20 : 0) |
--		 	(dev->mtu > 1500 ? 0x40 : 0) |
-+		 	(vp->large_frames ? 0x40 : 0) |
- 			((vp->full_duplex && vp->flow_ctrl && vp->partner_flow_ctrl) ? 0x100 : 0),
- 			ioaddr + Wn3_MAC_Ctrl);
- 
-@@ -1566,6 +1575,10 @@
- 	}
- 	/* Set receiver mode: presumably accept b-case and phys addr only. */
- 	set_rx_mode(dev);
-+#if defined(CONFIG_VLAN_8021Q) || defined(CONFIG_VLAN_8021Q_MODULE)
-+	/* enable 802.1q tagged frames */
-+	set_8021q_mode(dev, 1);
-+#endif
- 	outw(StatsEnable, ioaddr + EL3_CMD); /* Turn on statistics. */
- 
- //	issue_and_wait(dev, SetTxStart|0x07ff);
-@@ -1706,7 +1719,7 @@
- 						/* Set the full-duplex bit. */
- 						EL3WINDOW(3);
- 						outw(	(vp->full_duplex ? 0x20 : 0) |
--								(dev->mtu > 1500 ? 0x40 : 0) |
-+								(vp->large_frames ? 0x40 : 0) |
- 								((vp->full_duplex && vp->flow_ctrl && vp->partner_flow_ctrl) ? 0x100 : 0),
- 								ioaddr + Wn3_MAC_Ctrl);
- 						if (vortex_debug > 1)
-@@ -1929,6 +1942,10 @@
- 			issue_and_wait(dev, RxReset|0x07);
- 			/* Set the Rx filter to the current state. */
- 			set_rx_mode(dev);
-+#if defined(CONFIG_VLAN_8021Q) || defined(CONFIG_VLAN_8021Q_MODULE)
-+			/* enable 802.1q VLAN tagged frames */
-+			set_8021q_mode(dev, 1);
-+#endif
- 			outw(RxEnable, ioaddr + EL3_CMD); /* Re-enable the receiver. */
- 			outw(AckIntr | HostError, ioaddr + EL3_CMD);
- 		}
-@@ -2526,6 +2543,11 @@
- 	outw(RxDisable, ioaddr + EL3_CMD);
- 	outw(TxDisable, ioaddr + EL3_CMD);
- 
-+#if defined(CONFIG_VLAN_8021Q) || defined(CONFIG_VLAN_8021Q_MODULE)
-+	/* Disable receiving 802.1q tagged frames */
-+	set_8021q_mode(dev, 0);
-+#endif
-+
- 	if (dev->if_port == XCVR_10base2)
- 		/* Turn off thinnet power.  Green! */
- 		outw(StopCoax, ioaddr + EL3_CMD);
-@@ -2775,6 +2797,50 @@
- 
- 	outw(new_mode, ioaddr + EL3_CMD);
- }
-+
-+#if defined(CONFIG_VLAN_8021Q) || defined(CONFIG_VLAN_8021Q_MODULE)
-+/* Setup the card so that it can receive frames with an 802.1q VLAN tag.
-+   Note that this must be done after each RxReset due to some backwards
-+   compatibility logic in the Cyclone and Tornado ASICs */
-+static void set_8021q_mode(struct net_device *dev, int enable)
+-struct comx_debugflags_struct	comx_debugflags[] = {
++struct comx_debugflags_struct	comx_debugflags[] =
 +{
-+	struct vortex_private *vp = (struct vortex_private *)dev->priv;
-+	long ioaddr = dev->base_addr;
-+	int old_window = inw(ioaddr + EL3_CMD);
-+	int mac_ctrl;
-+	
-+	if (vp->drv_flags&IS_CYCLONE || vp->drv_flags&IS_TORNADO) {
-+		/* cyclone and tornado chipsets can recognize 802.1q
-+		 * tagged frames and treat them correctly */
-+
-+		int max_pkt_size = dev->mtu+14;	/* MTU+Ethernet header */
-+		if (enable)
-+			max_pkt_size += 4;	/* 802.1Q VLAN tag */
-+
-+		EL3WINDOW(3);
-+		outw(max_pkt_size, ioaddr+Wn3_MaxPktSize);
-+
-+		/* set VlanEtherType to let the hardware checksumming
-+		   treat tagged frames correctly */
-+		EL3WINDOW(7);
-+		outw(VLAN_ETHER_TYPE, ioaddr+Wn7_VlanEtherType);
-+	} else {
-+		/* on older cards we have to enable large frames */
-+
-+		vp->large_frames = dev->mtu > 1500 || enable;
-+
-+		EL3WINDOW(3);
-+		mac_ctrl = inw(ioaddr+Wn3_MAC_Ctrl);
-+		if (vp->large_frames)
-+			mac_ctrl |= 0x40;
-+		else
-+			mac_ctrl &= ~0x40;
-+		outw(mac_ctrl, ioaddr+Wn3_MAC_Ctrl);
-+	}
-+
-+	EL3WINDOW(old_window);
-+}
-+#endif
+ 	{ "comx_rx",		DEBUG_COMX_RX		},
+ 	{ "comx_tx", 		DEBUG_COMX_TX		},
+ 	{ "hw_tx",		DEBUG_HW_TX		},
+@@ -614,6 +616,7 @@ static int comx_write_proc(struct file *
+ 	struct comx_protocol *line = comx_lines;
+ 	char str[30];
+ 	int ret=0;
++	spinlock_t mister_lock = SPIN_LOCK_UNLOCKED;
  
- /* MII transceiver control section.
-    Read and write the MII registers using software-generated serial
-diff -ruNP linux-2.4.25.orig/drivers/net/eepro100.c linux-2.4.25/drivers/net/eepro100.c
---- linux-2.4.25.orig/drivers/net/eepro100.c	Wed Feb 18 15:17:32 2004
-+++ linux-2.4.25/drivers/net/eepro100.c	Wed Feb 18 16:38:12 2004
-@@ -507,12 +507,12 @@
- static const char i82557_config_cmd[CONFIG_DATA_SIZE] = {
- 	22, 0x08, 0, 0,  0, 0, 0x32, 0x03,  1, /* 1=Use MII  0=Use AUI */
- 	0, 0x2E, 0,  0x60, 0,
--	0xf2, 0x48,   0, 0x40, 0xf2, 0x80, 		/* 0x40=Force full-duplex */
-+	0xf2, 0x48,   0, 0x40, 0xfa, 0x80, 		/* 0x40=Force full-duplex */
- 	0x3f, 0x05, };
- static const char i82558_config_cmd[CONFIG_DATA_SIZE] = {
- 	22, 0x08, 0, 1,  0, 0, 0x22, 0x03,  1, /* 1=Use MII  0=Use AUI */
- 	0, 0x2E, 0,  0x60, 0x08, 0x88,
--	0x68, 0, 0x40, 0xf2, 0x84,		/* Disable FC */
-+	0x68, 0, 0x40, 0xfa, 0x84,		/* Disable FC */
- 	0x31, 0x05, };
+ 	if (count > PAGE_SIZE) {
+ 		printk(KERN_ERR "count is %lu > %d!!!\n", count, (int)PAGE_SIZE);
+@@ -644,14 +647,14 @@ static int comx_write_proc(struct file *
+ 		if ((i = simple_strtoul(page, NULL, 10)) != 0) {
+ 			unsigned long flags;
  
- /* PHY media interface chips. */
-diff -ruNP linux-2.4.25.orig/drivers/net/tulip/interrupt.c linux-2.4.25/drivers/net/tulip/interrupt.c
---- linux-2.4.25.orig/drivers/net/tulip/interrupt.c	Wed Feb 18 15:17:41 2004
-+++ linux-2.4.25/drivers/net/tulip/interrupt.c	Wed Feb 18 16:38:12 2004
-@@ -128,8 +128,8 @@
- 				   dev->name, entry, status);
- 		if (--rx_work_limit < 0)
- 			break;
--		if ((status & 0x38008300) != 0x0300) {
--			if ((status & 0x38000300) != 0x0300) {
-+		if ((status & (0x38000000 | RxDescFatalErr | RxWholePkt)) != RxWholePkt) {
-+                if ((status & (0x38000000 | RxWholePkt)) != RxWholePkt) {
- 				/* Ingore earlier buffers. */
- 				if ((status & 0xffff) != 0x7fff) {
- 					if (tulip_debug > 1)
-@@ -155,10 +155,10 @@
- 			struct sk_buff *skb;
- 
- #ifndef final_version
--			if (pkt_len > 1518) {
-+			if (pkt_len > 1522) {
- 				printk(KERN_WARNING "%s: Bogus packet size of %d (%#x).\n",
- 					   dev->name, pkt_len, pkt_len);
--				pkt_len = 1518;
-+				pkt_len = 1522;
- 				tp->stats.rx_length_errors++;
+-			save_flags(flags); cli();
++			spin_lock_irqsave(&mister_lock, flags);
+ 			if (ch->debug_area) kfree(ch->debug_area);
+ 			if ((ch->debug_area = kmalloc(ch->debug_size = i, 
+ 				GFP_KERNEL)) == NULL) {
+ 				ret = -ENOMEM;
  			}
- #endif
-diff -ruNP linux-2.4.25.orig/drivers/net/tulip/tulip.h linux-2.4.25/drivers/net/tulip/tulip.h
---- linux-2.4.25.orig/drivers/net/tulip/tulip.h	Wed Feb 18 15:17:41 2004
-+++ linux-2.4.25/drivers/net/tulip/tulip.h	Wed Feb 18 16:38:12 2004
-@@ -188,7 +188,7 @@
+ 			ch->debug_start = ch->debug_end = 0;
+-			restore_flags(flags);
++			spin_unlock_irqrestore(&mister_lock, flags);
+ 			free_page((unsigned long)page);
+ 			return ret ? ret : count;
+ 		}
+@@ -829,9 +832,15 @@ static int comx_mkdir(struct inode *dir,
+ 	strcpy(dev->name, (char *)new_dir->name);
+ 	dev->init = comx_init_dev;
  
- enum desc_status_bits {
- 	DescOwned = 0x80000000,
--	RxDescFatalErr = 0x8000,
-+	RxDescFatalErr = 0x4842,
- 	RxWholePkt = 0x0300,
- };
- 
-@@ -266,7 +266,7 @@
- 
- #define MEDIA_MASK     31
- 
--#define PKT_BUF_SZ		1536	/* Size of each temporary Rx buffer. */
-+#define PKT_BUF_SZ		1540	/* Size of each temporary Rx buffer. */
- 
- #define TULIP_MIN_CACHE_LINE	8	/* in units of 32-bit words */
- 
-diff -ruNP linux-2.4.25.orig/drivers/net/tulip/tulip_core.c linux-2.4.25/drivers/net/tulip/tulip_core.c
---- linux-2.4.25.orig/drivers/net/tulip/tulip_core.c	Wed Feb 18 15:17:41 2004
-+++ linux-2.4.25/drivers/net/tulip/tulip_core.c	Wed Feb 18 16:38:12 2004
-@@ -64,7 +64,7 @@
- #if defined(__alpha__) || defined(__arm__) || defined(__hppa__) \
- 	|| defined(__sparc_) || defined(__ia64__) \
- 	|| defined(__sh__) || defined(__mips__) || defined(__SH5__)
--static int rx_copybreak = 1518;
-+static int rx_copybreak = 1522;
- #else
- static int rx_copybreak = 100;
- #endif
-diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers/net/wan/comx-hw-comx.c
---- linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c	Wed Feb 18 15:17:36 2004
-+++ linux-2.4.25/drivers/net/wan/comx-hw-comx.c	Wed Feb 18 16:38:12 2004
+-	if (register_netdevice(dev)) {
++	{
++	    int ret2;
++	    rtnl_lock();
++	    ret2 = register_netdevice(dev);
++	    rtnl_unlock();
++	    if (ret2)
+ 		goto cleanup_filename_debug;
+ 	}
++
+ 	ch=dev->priv;
+ 	if((ch->if_ptr = (void *)kmalloc(sizeof(struct ppp_device), 
+ 				 GFP_KERNEL)) == NULL) {
+diff -NurpabB linux-2.4.27/drivers/net/wan/comx-hw-comx.c linux-2.4.27-multigate/drivers/net/wan/comx-hw-comx.c
+--- linux-2.4.27/drivers/net/wan/comx-hw-comx.c	2002-11-29 00:53:14.000000000 +0100
++++ linux-2.4.27-multigate/drivers/net/wan/comx-hw-comx.c	2004-08-17 14:34:31.000000000 +0200
 @@ -1,11 +1,12 @@
  /*
   * Hardware-level driver for the COMX and HICOMX cards
@@ -1027,7 +849,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  	struct comx_firmware *firmware;
  	u16	clock;
  	char	channel;		// channel no.
-@@ -100,26 +104,30 @@
+@@ -100,26 +104,30 @@ static void COMX_interrupt(int irq, void
  
  static void COMX_board_on(struct net_device *dev)
  {
@@ -1066,7 +888,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  }
  
  static void COMX_set_clock(struct net_device *dev)
-@@ -134,48 +142,56 @@
+@@ -134,48 +142,56 @@ static struct net_device *COMX_access_bo
  {
  	struct comx_channel *ch = dev->priv;
  	struct net_device *ret;
@@ -1139,7 +961,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  }
  
  static int COMX_txe(struct net_device *dev) 
-@@ -185,13 +201,13 @@
+@@ -185,13 +201,13 @@ static int COMX_txe(struct net_device *d
  	int rc = 0;
  
  	savep = ch->HW_access_board(dev);
@@ -1149,18 +971,17 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
 -	ch->HW_release_board(dev,savep);
 -	if(rc==0xffff) {
 -		printk(KERN_ERR "%s, OFF_A_L2_TxEMPTY is %d\n",dev->name, rc);
--	}
 +    if (COMX_readw(dev, OFF_A_L2_LINKUP) == LINKUP_READY)
 +    {
 +	rc = COMX_readw(dev, OFF_A_L2_TxEMPTY);
-+	}
+ 	}
 +    ch->HW_release_board(dev, savep);
 +    if (rc == 0xffff)
 +	printk(KERN_ERR "%s, OFF_A_L2_TxEMPTY is %d\n", dev->name, rc);
  	return rc;
  }
  
-@@ -205,50 +221,58 @@
+@@ -205,50 +221,58 @@ static int COMX_send_packet(struct net_d
  
  	savep = ch->HW_access_board(dev);	
  
@@ -1211,13 +1032,12 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  		}
 -		if (skb->len == 1) {
 -			writew(*((byte *)data), dev->mem_start + dest);
--		}
--		writew(0, dev->mem_start + (int)hw->channel * 
--		   COMX_CHANNEL_OFFSET + OFF_A_L2_TxEMPTY);
 +	if (skb->len == 1)
 +	{
 +	    writew(*((byte *) data), phys_to_virt(dev->mem_start + dest));
-+		}
+ 		}
+-		writew(0, dev->mem_start + (int)hw->channel * 
+-		   COMX_CHANNEL_OFFSET + OFF_A_L2_TxEMPTY);
 +	writew(0,
 +	       dev->mem_start +
 +	       phys_to_virt((int)hw->channel * COMX_CHANNEL_OFFSET +
@@ -1244,7 +1064,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  	ch->HW_release_board(dev, savep);
  	dev_kfree_skb(skb);
  	return ret;
-@@ -260,21 +284,24 @@
+@@ -260,21 +284,24 @@ static inline int comx_read_buffer(struc
  	word rbuf_offs;
  	struct sk_buff *skb;
  	word len;
@@ -1276,7 +1096,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  		ch->stats.rx_dropped++;
  		COMX_WRITE(dev, OFF_A_L2_DAV, 0);
  		return 0;
-@@ -283,49 +310,58 @@
+@@ -283,49 +310,58 @@ static inline int comx_read_buffer(struc
  	skb_reserve(skb, 16);
  	skb_put(skb, len);
  	skb->dev = dev;
@@ -1305,10 +1125,10 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  {
 -	struct comx_channel *ch=dev->priv;
 -	char idle=1;
+-	
 +    struct comx_channel *ch = dev->priv;
 +    char idle = 1;
  	
--	
 -	if (linestat & LINE_UP) { /* Vonal fol */
 -		if (ch->lineup_delay) {
 -			if (!test_and_set_bit(0, &ch->lineup_pending)) {
@@ -1326,10 +1146,10 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  				add_timer(&ch->lineup_timer);
 -				idle=0;
 +		idle = 0;
-+			}
  			}
 -		} else {
 -			idle=0;
++			}
 +	else
 +	{
 +	    idle = 0;
@@ -1356,7 +1176,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  				ch->LINE_status(dev, ch->line_status);
  			}
  		}
-@@ -346,7 +382,8 @@
+@@ -346,7 +382,8 @@ static void COMX_interrupt(int irq, void
  	int count = 0;
  	word tmp;
  
@@ -1366,7 +1186,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  		printk(KERN_ERR "COMX_interrupt: irq %d for unknown device\n", irq);
  		return;
  	}
-@@ -355,84 +392,109 @@
+@@ -355,84 +392,109 @@ static void COMX_interrupt(int irq, void
  
  	interrupted = ch->HW_access_board(dev);
  
@@ -1503,7 +1323,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  			}
  				
  			hw->histogram[(int)buffers_emptied]++;
-@@ -440,8 +502,9 @@
+@@ -440,8 +502,9 @@ static void COMX_interrupt(int irq, void
  		count++;
  	}
  
@@ -1515,7 +1335,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  	}
  
  	ch->HW_release_board(dev, interrupted);
-@@ -453,32 +516,35 @@
+@@ -453,32 +516,35 @@ static int COMX_open(struct net_device *
  	struct comx_privdata *hw = ch->HW_privdata;
  	struct proc_dir_entry *procfile = ch->procdir->subdir;
  	unsigned long jiffs;
@@ -1528,17 +1348,16 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
 +    if (!dev->base_addr || !dev->irq || !dev->mem_start)
  		return -ENODEV;
 -	}
--
+ 
 -	if (ch->twin && (((struct comx_channel *)(ch->twin->priv))->init_status & HW_OPEN)) {
 -		twin_open=1;
 -	}
- 
--	if (!twin_open) {
--		if (!request_region(dev->base_addr, hw->io_extent, dev->name)) {
 +    if (ch->twin &&
 +	(((struct comx_channel *)(ch->twin->priv))->init_status & HW_OPEN))
 +	twin_open = 1;
-+
+ 
+-	if (!twin_open) {
+-		if (!request_region(dev->base_addr, hw->io_extent, dev->name)) {
 +    if (!twin_open)
 +    {
 +	if (check_region(dev->base_addr, hw->io_extent))
@@ -1566,7 +1385,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  			goto error;
  		}
  	}
-@@ -486,69 +552,72 @@
+@@ -486,69 +552,72 @@ static int COMX_open(struct net_device *
  	savep = ch->HW_access_board(dev);
  	COMX_WRITE(dev, OFF_A_L2_LINKUP, 0);
  
@@ -1665,7 +1484,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  		release_region(dev->base_addr, hw->io_extent);
  		free_irq(dev->irq, (void *)dev);
  	}
-@@ -567,33 +636,37 @@
+@@ -567,33 +636,37 @@ static int COMX_close(struct net_device 
  	savep = ch->HW_access_board(dev);
  
  	COMX_CMD(dev, COMX_CMD_CLOSE);
@@ -1715,7 +1534,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  			procfile->mode = S_IFREG | 0644;
  		}
  	}
-@@ -611,7 +684,8 @@
+@@ -611,7 +684,8 @@ static int COMX_statistics(struct net_de
  
  	savep = ch->HW_access_board(dev);
  
@@ -1725,7 +1544,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  		"MODSTAT: %02x, LINKUP: %02x, DAV: %02x\nRxBUFP: %02x, "
  		"TxEMPTY: %02x, TxBUFP: %02x\n",
  		(ch->init_status & HW_OPEN) ? "HW_OPEN" : "",
-@@ -619,16 +693,18 @@
+@@ -619,16 +693,18 @@ static int COMX_statistics(struct net_de
  		(ch->init_status & FW_LOADED) ? "FW_LOADED" : "",
  		(ch->init_status & IRQ_ALLOCATED) ? "IRQ_ALLOCATED" : "",
  		COMX_readw(dev, OFF_A_L1_PBUFOVR) & 0xff,
@@ -1752,7 +1571,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  
  	ch->HW_release_board(dev, savep);
  
-@@ -641,7 +717,9 @@
+@@ -641,7 +717,9 @@ static int COMX_load_board(struct net_de
  	struct comx_privdata *hw = ch->HW_privdata;
  	struct comx_firmware *fw = hw->firmware;
  	word board_segment = dev->mem_start >> 16;
@@ -1763,7 +1582,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  	unsigned long flags;
  	unsigned char id1, id2;
  	struct net_device *saved;
-@@ -650,25 +728,24 @@
+@@ -650,25 +728,24 @@ static int COMX_load_board(struct net_de
  	int len;
  	byte *COMX_address;
  
@@ -1796,7 +1615,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  		return -EAGAIN;
  	}
  
-@@ -677,98 +754,109 @@
+@@ -677,84 +754,97 @@ static int COMX_load_board(struct net_de
  
  	id1 = fw->data[OFF_FW_L2_ID]; 
  	id2 = fw->data[OFF_FW_L2_ID + 1];
@@ -1933,6 +1752,10 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  		goto out;
  	}
  
+@@ -758,17 +848,15 @@ static int COMX_load_board(struct net_de
+ 		goto out;
+ 	}
+ 
 -
  	ch->init_status |= FW_LOADED;
 -	retval=0;
@@ -1952,7 +1775,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  	return retval;
  }
  
-@@ -778,33 +866,35 @@
+@@ -778,33 +866,35 @@ static int CMX_load_board(struct net_dev
  	struct comx_privdata *hw = ch->HW_privdata;
  	struct comx_firmware *fw = hw->firmware;
  	word board_segment = dev->mem_start >> 16;
@@ -1997,7 +1820,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  		printk(KERN_ERR "%s: CMX id byte is invalid(%02x)\n", dev->name,
  			inb_p(dev->base_addr));
  		return -ENODEV;
-@@ -813,60 +903,63 @@
+@@ -813,60 +903,63 @@ static int CMX_load_board(struct net_dev
  	printk(KERN_INFO "%s: Loading CMX Layer 1 firmware %s\n", dev->name, 
  		(char *)(fw->data + OFF_FW_L1_ID + 2));
  
@@ -2087,7 +1910,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  	return retval;
  }
  
-@@ -876,36 +969,35 @@
+@@ -876,36 +969,35 @@ static int HICOMX_load_board(struct net_
  	struct comx_privdata *hw = ch->HW_privdata;
  	struct comx_firmware *fw = hw->firmware;
  	word board_segment = dev->mem_start >> 12;
@@ -2135,7 +1958,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  		printk(KERN_ERR "%s: can't find HICOMX at 0x%04x, id[%d] = %02x\n",
  			dev->name, (unsigned int)dev->base_addr, id - 1,
  			inb_p(dev->base_addr + id - 1));
-@@ -914,7 +1006,8 @@
+@@ -914,7 +1006,8 @@ static int HICOMX_load_board(struct net_
  
  	id1 = fw->data[OFF_FW_L1_ID]; 
  	id2 = fw->data[OFF_FW_L1_ID + 1];
@@ -2145,7 +1968,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  		printk(KERN_ERR "%s: incorrect firmware, load aborted\n", dev->name);
  		return -EAGAIN;
  	}
-@@ -924,7 +1017,8 @@
+@@ -924,7 +1017,8 @@ static int HICOMX_load_board(struct net_
  
  	id1 = fw->data[OFF_FW_L2_ID]; 
  	id2 = fw->data[OFF_FW_L2_ID + 1];
@@ -2155,7 +1978,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  		printk(KERN_INFO "with Layer 2 code %s\n", 
  			(char *)(fw->data + OFF_FW_L2_ID + 2));
  	}
-@@ -932,33 +1026,37 @@
+@@ -932,33 +1026,37 @@ static int HICOMX_load_board(struct net_
  	outb_p(board_segment | HICOMX_BOARD_RESET, dev->base_addr);
  	udelay(10);	
  
@@ -2207,7 +2030,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  		goto out;
  	}
  
-@@ -967,30 +1065,32 @@
+@@ -967,30 +1065,32 @@ static int HICOMX_load_board(struct net_
  
  	outb_p(board_segment | HICOMX_ENABLE_BOARD_MEM, dev->base_addr);
  
@@ -2251,7 +2074,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  	return retval;
  }
  
-@@ -1004,26 +1104,23 @@
+@@ -1004,26 +1104,23 @@ static struct net_device *comx_twin_chec
  	struct comx_channel *ch_twin;
  	struct comx_privdata *hw_twin;
  
@@ -2285,7 +2108,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  	return NULL;
  }
  
-@@ -1036,51 +1133,62 @@
+@@ -1036,51 +1133,62 @@ static int comxhw_write_proc(struct file
  	struct comx_privdata *hw = ch->HW_privdata;
  	char *page;
  
@@ -2365,7 +2188,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  			kfree(hw->firmware->data);
  		}
  		copy_from_user(tmp + file->f_pos, buffer, count);
-@@ -1090,68 +1198,92 @@
+@@ -1090,68 +1198,92 @@ static int comxhw_write_proc(struct file
  		return count;
  	}
  
@@ -2479,7 +2302,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  	free_page((unsigned long)page);
  	return count;
  }
-@@ -1165,45 +1297,64 @@
+@@ -1165,45 +1297,64 @@ static int comxhw_read_proc(char *page, 
  	struct comx_privdata *hw = ch->HW_privdata;
  	int len = 0;
  
@@ -2562,7 +2385,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  		*eof = 1;
  	}
  	return min_t(int, count, len - off);
-@@ -1216,32 +1367,40 @@
+@@ -1216,32 +1367,40 @@ static int COMX_init(struct net_device *
  	struct comx_privdata *hw;
  	struct proc_dir_entry *new_file;
  
@@ -2611,7 +2434,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  	    goto cleanup_HW_privdata;
  	}
  	new_file->data = (void *)new_file;
-@@ -1250,8 +1409,9 @@
+@@ -1250,8 +1409,9 @@ static int COMX_init(struct net_device *
  	new_file->size = 6;
  	new_file->nlink = 1;
  
@@ -2623,7 +2446,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  	    goto cleanup_filename_io;
  	}
  	new_file->data = (void *)new_file;
-@@ -1260,8 +1420,10 @@
+@@ -1260,8 +1420,10 @@ static int COMX_init(struct net_device *
  	new_file->size = 5;
  	new_file->nlink = 1;
  
@@ -2636,7 +2459,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  	    goto cleanup_filename_irq;
  	}
  	new_file->data = (void *)new_file;
-@@ -1270,9 +1432,12 @@
+@@ -1270,9 +1432,12 @@ static int COMX_init(struct net_device *
  	new_file->size = 2;		// Ezt tudjuk
  	new_file->nlink = 1;
  
@@ -2652,7 +2475,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  		    goto cleanup_filename_channel;
  		}
  		new_file->data = (void *)new_file;
-@@ -1282,8 +1447,10 @@
+@@ -1282,8 +1447,10 @@ static int COMX_init(struct net_device *
  		new_file->nlink = 1;
  	}
  
@@ -2665,7 +2488,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  		    goto cleanup_filename_clock;
  	}
  	new_file->data = (void *)new_file;
-@@ -1292,8 +1459,9 @@
+@@ -1292,8 +1459,9 @@ static int COMX_init(struct net_device *
  	new_file->size = 8;
  	new_file->nlink = 1;
  
@@ -2677,7 +2500,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  		    goto cleanup_filename_memaddr;
  	}
  	new_file->data = (void *)new_file;
-@@ -1301,8 +1469,10 @@
+@@ -1301,8 +1469,10 @@ static int COMX_init(struct net_device *
  	new_file->write_proc = NULL;
  	new_file->nlink = 1;
  
@@ -2690,7 +2513,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  		    goto cleanup_filename_twin;
  	}
  	new_file->data = (void *)new_file;
-@@ -1310,22 +1480,30 @@
+@@ -1310,22 +1480,30 @@ static int COMX_init(struct net_device *
  	new_file->write_proc = &comxhw_write_proc;
  	new_file->nlink = 1;
  
@@ -2726,7 +2549,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  	}
  
  	ch->HW_access_board = COMX_access_board;
-@@ -1336,7 +1514,8 @@
+@@ -1336,7 +1514,8 @@ static int COMX_init(struct net_device *
  	ch->HW_send_packet = COMX_send_packet;
  	ch->HW_statistics = COMX_statistics;
  
@@ -2736,7 +2559,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  		struct comx_channel *twin_ch = ch->twin->priv;
  
  		twin_ch->twin = dev;
-@@ -1345,20 +1524,20 @@
+@@ -1345,20 +1524,20 @@ static int COMX_init(struct net_device *
  	MOD_INC_USE_COUNT;
  	return 0;
  
@@ -2764,7 +2587,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  	kfree(ch->HW_privdata);
  	return -EIO;
  }
-@@ -1369,10 +1548,14 @@
+@@ -1369,10 +1548,14 @@ static int COMX_exit(struct net_device *
  	struct comx_channel *ch = dev->priv;
  	struct comx_privdata *hw = ch->HW_privdata;
  
@@ -2782,7 +2605,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  		struct comx_channel *twin_ch = ch->twin->priv;
  
  		twin_ch->twin = NULL;
-@@ -1385,7 +1568,8 @@
+@@ -1385,7 +1568,8 @@ static int COMX_exit(struct net_device *
  	remove_proc_entry(FILENAME_MEMADDR, ch->procdir);
  	remove_proc_entry(FILENAME_FIRMWARE, ch->procdir);
  	remove_proc_entry(FILENAME_TWIN, ch->procdir);
@@ -2792,7 +2615,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  		remove_proc_entry(FILENAME_CLOCK, ch->procdir);
  	}
  
-@@ -1399,7 +1583,8 @@
+@@ -1399,7 +1583,8 @@ static int COMX_dump(struct net_device *
  	return 0;
  }
  
@@ -2802,7 +2625,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  	"comx",
  	VERSION,
  	COMX_init,
-@@ -1408,7 +1593,8 @@
+@@ -1408,7 +1593,8 @@ static struct comx_hardware comx_hw = {
  	NULL
  };
  
@@ -2812,7 +2635,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  	"cmx",
  	VERSION,
  	COMX_init,
-@@ -1417,7 +1603,8 @@
+@@ -1417,7 +1603,8 @@ static struct comx_hardware cmx_hw = {
  	NULL
  };
  
@@ -2822,10 +2645,10 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-comx.c linux-2.4.25/drivers
  	"hicomx",
  	VERSION,
  	COMX_init,
-diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-locomx.c linux-2.4.25/drivers/net/wan/comx-hw-locomx.c
---- linux-2.4.25.orig/drivers/net/wan/comx-hw-locomx.c	Wed Feb 18 15:17:36 2004
-+++ linux-2.4.25/drivers/net/wan/comx-hw-locomx.c	Wed Feb 18 16:38:12 2004
-@@ -63,13 +63,17 @@
+diff -NurpabB linux-2.4.27/drivers/net/wan/comx-hw-locomx.c linux-2.4.27-multigate/drivers/net/wan/comx-hw-locomx.c
+--- linux-2.4.27/drivers/net/wan/comx-hw-locomx.c	2002-08-03 02:39:44.000000000 +0200
++++ linux-2.4.27-multigate/drivers/net/wan/comx-hw-locomx.c	2004-08-17 14:34:31.000000000 +0200
+@@ -63,13 +63,17 @@ MODULE_LICENSE("GPL");
  #define LOCOMX_DEFAULT_IO 0x368
  #define LOCOMX_DEFAULT_IRQ 7
  
@@ -2845,7 +2668,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-locomx.c linux-2.4.25/drive
  	int	io_extent;
  	struct	z8530_dev board;
  	struct timer_list status_timer;
-@@ -83,16 +87,15 @@
+@@ -83,16 +87,15 @@ static int LOCOMX_txe(struct net_device 
  	return (!hw->board.chanA.tx_next_skb);
  }
  
@@ -2867,7 +2690,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-locomx.c linux-2.4.25/drive
  }
  
  static int LOCOMX_send_packet(struct net_device *dev, struct sk_buff *skb) 
-@@ -100,48 +103,37 @@
+@@ -100,48 +103,37 @@ static int LOCOMX_send_packet(struct net
  	struct comx_channel *ch = (struct comx_channel *)dev->priv;
  	struct locomx_data *hw = ch->HW_privdata;
  
@@ -2929,7 +2752,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-locomx.c linux-2.4.25/drive
  static int LOCOMX_open(struct net_device *dev)
  {
  	struct comx_channel *ch = dev->priv;
-@@ -150,58 +142,57 @@
+@@ -150,58 +142,57 @@ static int LOCOMX_open(struct net_device
  	unsigned long flags;
  	int ret;
  
@@ -3017,7 +2840,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-locomx.c linux-2.4.25/drive
  
  	z8530_channel_load(&hw->board.chanA, z8530_hdlc_kilostream_85230);
  	z8530_channel_load(&hw->board.chanA, z8530_locomx);
-@@ -209,47 +200,43 @@
+@@ -209,47 +200,43 @@ static int LOCOMX_open(struct net_device
  
  	z8530_describe(&hw->board, "I/O", dev->base_addr);
  
@@ -3083,7 +2906,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-locomx.c linux-2.4.25/drive
  	release_region(dev->base_addr, hw->io_extent);
  	return ret;
  }
-@@ -260,7 +247,7 @@
+@@ -260,7 +247,7 @@ static int LOCOMX_close(struct net_devic
  	struct locomx_data *hw = ch->HW_privdata;
  	struct proc_dir_entry *procfile = ch->procdir->subdir;
  
@@ -3092,7 +2915,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-locomx.c linux-2.4.25/drive
  	netif_stop_queue(dev);
  	z8530_sync_dma_close(dev, &hw->board.chanA);
  
-@@ -269,21 +256,22 @@
+@@ -269,21 +256,22 @@ static int LOCOMX_close(struct net_devic
  	del_timer(&hw->status_timer);
  	free_dma(RX_DMA);
  	free_dma(TX_DMA);
@@ -3122,7 +2945,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-locomx.c linux-2.4.25/drive
  {
  	int len = 0;
  
-@@ -292,9 +280,10 @@
+@@ -292,9 +280,10 @@ static int LOCOMX_statistics(struct net_
  	return len;
  }
  
@@ -3135,7 +2958,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-locomx.c linux-2.4.25/drive
  }
  
  static int locomx_read_proc(char *page, char **start, off_t off, int count,
-@@ -304,25 +293,26 @@
+@@ -304,25 +293,26 @@ static int locomx_read_proc(char *page, 
  	struct net_device *dev = file->parent->data;
  	int len = 0;
  
@@ -3169,7 +2992,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-locomx.c linux-2.4.25/drive
  	return min_t(int, count, len - off);
  }
  
-@@ -334,31 +324,34 @@
+@@ -334,31 +324,34 @@ static int locomx_write_proc(struct file
  	int val;
  	char *page;
  
@@ -3217,7 +3040,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-locomx.c linux-2.4.25/drive
  		printk(KERN_ERR "locomx_write_proc: internal error, filename %s\n", 
  			entry->name);
  		free_page((unsigned long)page);
-@@ -377,45 +370,45 @@
+@@ -377,45 +370,45 @@ static int LOCOMX_init(struct net_device
  	struct locomx_data *hw;
  	struct proc_dir_entry *new_file;
  
@@ -3285,7 +3108,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-locomx.c linux-2.4.25/drive
  
  	ch->HW_access_board = NULL;
  	ch->HW_release_board = NULL;
-@@ -432,13 +425,14 @@
+@@ -432,13 +425,14 @@ static int LOCOMX_init(struct net_device
  	dev->base_addr = LOCOMX_DEFAULT_IO;
  	dev->irq = LOCOMX_DEFAULT_IRQ;
  	
@@ -3304,7 +3127,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-locomx.c linux-2.4.25/drive
  	kfree(ch->HW_privdata);
  	return -EIO;
  }
-@@ -463,13 +457,14 @@
+@@ -463,13 +457,14 @@ static int LOCOMX_exit(struct net_device
  
  	remove_proc_entry(FILENAME_IO, ch->procdir);
  	remove_proc_entry(FILENAME_IRQ, ch->procdir);
@@ -3321,9 +3144,9 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-locomx.c linux-2.4.25/drive
  	"locomx",
  	VERSION,
  	LOCOMX_init, 
-diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drivers/net/wan/comx-hw-mixcom.c
---- linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c	Wed Feb 18 15:17:36 2004
-+++ linux-2.4.25/drivers/net/wan/comx-hw-mixcom.c	Wed Feb 18 16:38:12 2004
+diff -NurpabB linux-2.4.27/drivers/net/wan/comx-hw-mixcom.c linux-2.4.27-multigate/drivers/net/wan/comx-hw-mixcom.c
+--- linux-2.4.27/drivers/net/wan/comx-hw-mixcom.c	2003-06-13 16:51:35.000000000 +0200
++++ linux-2.4.27-multigate/drivers/net/wan/comx-hw-mixcom.c	2004-08-17 14:34:31.000000000 +0200
 @@ -57,7 +57,8 @@
  #include "hscx.h"
  
@@ -3334,7 +3157,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
  MODULE_LICENSE("GPL");
  
  #define MIXCOM_DATA(d) ((struct mixcom_privdata *)(COMX_CHANNEL(d)-> \
-@@ -69,12 +70,20 @@
+@@ -69,12 +70,20 @@ MODULE_LICENSE("GPL");
  #define MIXCOM_DEV_BASE(port,channel) (port + MIXCOM_SERIAL_OFFSET + \
  	(1 - channel) * MIXCOM_CHANNEL_OFFSET)
  
@@ -3358,7 +3181,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
  	u16	clock;
  	char	channel;
  	long	txbusy;
-@@ -86,6 +95,8 @@
+@@ -86,6 +95,8 @@ struct mixcom_privdata {
  	char	card_has_status;
  };
  
@@ -3367,7 +3190,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
  static inline void wr_hscx(struct net_device *dev, int reg, unsigned char val) 
  {
  	outb(val, dev->base_addr + reg);
-@@ -102,16 +113,17 @@
+@@ -102,16 +113,17 @@ static inline void hscx_cmd(struct net_d
  	unsigned char cec;
  	unsigned delay = 0;
  
@@ -3392,7 +3215,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
  }
  
  static inline void hscx_fill_fifo(struct net_device *dev)
-@@ -120,15 +132,17 @@
+@@ -120,15 +132,17 @@ static inline void hscx_fill_fifo(struct
  	struct mixcom_privdata *hw = ch->HW_privdata;
  	register word to_send = hw->sending->len - hw->tx_ptr;
  
@@ -3416,7 +3239,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
  	        hscx_cmd(dev, HSCX_XTF);
          	hw->tx_ptr += 32;
          }
-@@ -139,23 +153,28 @@
+@@ -139,23 +153,28 @@ static inline void hscx_empty_fifo(struc
  	struct comx_channel *ch = dev->priv;
  	struct mixcom_privdata *hw = ch->HW_privdata;
  
@@ -3452,7 +3275,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
  	hw->rx_ptr += cnt;
  	hscx_cmd(dev, HSCX_RMC);
  }
-@@ -172,51 +191,44 @@
+@@ -172,51 +191,44 @@ static int MIXCOM_txe(struct net_device 
  static int mixcom_probe(struct net_device *dev)
  {
  	unsigned long flags;
@@ -3527,7 +3350,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
  	udelay(1000);
  	outb_p(mixcom_set_irq[dev->irq] | MIXCOM_ON, 
  		MIXCOM_BOARD_BASE(dev) + MIXCOM_IT_OFFSET);
-@@ -225,7 +237,7 @@
+@@ -225,7 +237,7 @@ static void mixcom_board_on(struct net_d
  
  static void mixcom_board_off(struct net_device *dev)
  {
@@ -3536,7 +3359,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
  	udelay(1000);
  }
  
-@@ -240,12 +252,13 @@
+@@ -240,12 +252,13 @@ static void mixcom_on(struct net_device 
  
  	wr_hscx(dev, HSCX_CCR1, HSCX_PU | HSCX_ODS | HSCX_ITF); // power up, push-pull
  	wr_hscx(dev, HSCX_CCR2, HSCX_CIE /* | HSCX_RIE */ );
@@ -3553,7 +3376,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
  
  }
  
-@@ -255,24 +268,26 @@
+@@ -255,24 +268,26 @@ static int MIXCOM_send_packet(struct net
  	struct mixcom_privdata *hw = ch->HW_privdata;
  	unsigned long flags;
  
@@ -3589,7 +3412,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
  		return FRAME_DROPPED;
  	}
  
-@@ -282,128 +297,124 @@
+@@ -282,63 +297,54 @@ static int MIXCOM_send_packet(struct net
  	hw->txbusy = 1;
  //	atomic_inc(&skb->users);	// save it
  	hscx_fill_fifo(dev);
@@ -3671,6 +3494,9 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
 +    else if (hw->recving)
 +	mixcom_kfree_skb(hw->recving);
  	hw->recving = NULL; 
+ 	hw->rx_ptr = 0;
+ }
+@@ -343,67 +349,72 @@ static inline void mixcom_receive_frame(
  	hw->rx_ptr = 0;
  }
  
@@ -3772,7 +3598,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
  				hw->tx_ptr = 0;
  			}
  		}
-@@ -419,58 +430,62 @@
+@@ -419,58 +430,62 @@ static void MIXCOM_interrupt(int irq, vo
  	struct mixcom_privdata *hw, *twin_hw;
  	register unsigned char ista;
  
@@ -3863,7 +3689,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
  					clear_bit(0, &twin_hw->txbusy);
  					ch->LINE_tx(ch->twin);
  				}
-@@ -478,7 +493,7 @@
+@@ -478,7 +493,7 @@ static void MIXCOM_interrupt(int irq, vo
  		}
  	}
  
@@ -3872,7 +3698,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
  	return;
  }
  
-@@ -493,82 +508,87 @@
+@@ -493,11 +508,12 @@ static int MIXCOM_open(struct net_device
  	if (!dev->base_addr || !dev->irq)
  		goto err_ret;
  
@@ -3889,6 +3715,8 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
 +	    printk(KERN_ERR "%s: channel 0 not yet initialized\n", dev->name);
  			ret = -EAGAIN;
  			goto err_ret;
+ 		}
+@@ -503,72 +519,76 @@ static int MIXCOM_open(struct net_device
  		}
  	}
  
@@ -3991,7 +3819,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
  	return ret;
  }
  
-@@ -579,14 +599,15 @@
+@@ -579,14 +599,15 @@ static int MIXCOM_close(struct net_devic
  	struct proc_dir_entry *procfile = ch->procdir->subdir;
  	unsigned long flags;
  
@@ -4011,7 +3839,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
  		mixcom_board_off(dev);
  		free_irq(dev->irq, dev);
  		release_region(dev->base_addr, MIXCOM_IO_EXTENT);
-@@ -595,8 +616,10 @@
+@@ -595,8 +616,10 @@ static int MIXCOM_close(struct net_devic
  
  	/* This is channel 1, channel 0 has already been shutdown, we can release
  	   this one too */
@@ -4024,7 +3852,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
  			mixcom_board_off(TWIN(dev));
  			free_irq(TWIN(dev)->irq, TWIN(dev));
  			release_region(TWIN(dev)->base_addr, MIXCOM_IO_EXTENT);
-@@ -605,57 +628,59 @@
+@@ -605,46 +628,48 @@ static int MIXCOM_close(struct net_devic
  	}
  
  	/* the ioports for channel 1 can be safely released */
@@ -4092,6 +3920,10 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
  	// struct mixcom_privdata *hw = ch->HW_privdata;
  	int len = 0;
  
+@@ -648,14 +673,14 @@ static int MIXCOM_statistics(struct net_
+ 	// struct mixcom_privdata *hw = ch->HW_privdata;
+ 	int len = 0;
+ 
 -	if(ch->init_status && IRQ_ALLOCATED) {
 +    if (ch->init_status && IRQ_ALLOCATED)
  		len += sprintf(page + len, "Mixcom board: hardware open\n");
@@ -4106,7 +3938,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
  	return 0;
  }
  
-@@ -668,33 +693,41 @@
+@@ -668,33 +693,41 @@ static int mixcom_read_proc(char *page, 
  	struct mixcom_privdata *hw = ch->HW_privdata;
  	int len = 0;
  
@@ -4164,7 +3996,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
  	return min_t(int, count, len - off);
  }
  
-@@ -709,42 +742,37 @@
+@@ -709,42 +742,37 @@ static struct net_device *mixcom_twin_ch
  	struct comx_channel *ch_twin;
  	struct mixcom_privdata *hw_twin;
  
@@ -4226,7 +4058,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
  	}	
  }
  
-@@ -758,58 +786,65 @@
+@@ -758,58 +786,65 @@ static int mixcom_write_proc(struct file
  	char *page;
  	int value;
  
@@ -4317,7 +4149,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
  		printk(KERN_ERR "hw_read_proc: internal error, filename %s\n", 
  			entry->name);
  		return -EBADF;
-@@ -821,60 +856,48 @@
+@@ -821,60 +856,48 @@ static int mixcom_write_proc(struct file
  	return count;
  }
  
@@ -4393,7 +4225,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
  	new_file->data = (void *)new_file;
  	new_file->read_proc = &mixcom_read_proc;
  	new_file->write_proc = &mixcom_write_proc;
-@@ -892,18 +915,18 @@
+@@ -892,18 +915,18 @@ static int MIXCOM_init(struct net_device
  	ch->HW_statistics = MIXCOM_statistics;
  	ch->HW_set_clock = NULL;
  
@@ -4417,7 +4249,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
  	kfree(ch->HW_privdata);
  	return -EIO;
  }
-@@ -913,13 +936,11 @@
+@@ -913,13 +936,11 @@ static int MIXCOM_exit(struct net_device
  	struct comx_channel *ch = dev->priv;
  	struct mixcom_privdata *hw = ch->HW_privdata;
  
@@ -4434,7 +4266,7 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
  
  	kfree(ch->HW_privdata);
  	remove_proc_entry(FILENAME_IO, ch->procdir);
-@@ -951,12 +972,11 @@
+@@ -951,12 +972,11 @@ static struct comx_hardware mixcomhw = {
  
  int __init comx_hw_mixcom_init(void)
  {
@@ -4449,2523 +4281,10 @@ diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx-hw-mixcom.c linux-2.4.25/drive
  {
  	comx_unregister_hardware("mixcom");
  }
-diff -ruNP linux-2.4.25.orig/drivers/net/wan/comx.c linux-2.4.25/drivers/net/wan/comx.c
---- linux-2.4.25.orig/drivers/net/wan/comx.c	Wed Feb 18 15:17:36 2004
-+++ linux-2.4.25/drivers/net/wan/comx.c	Wed Feb 18 16:38:12 2004
-@@ -60,6 +60,7 @@
- #include <linux/types.h>
- #include <linux/sched.h>
- #include <linux/netdevice.h>
-+#include <linux/rtnetlink.h>
- #include <linux/proc_fs.h>
- #include <asm/uaccess.h>
- #include <linux/ctype.h>
-@@ -113,7 +114,8 @@
- 
- static struct proc_dir_entry * comx_root_dir;
- 
--struct comx_debugflags_struct	comx_debugflags[] = {
-+struct comx_debugflags_struct	comx_debugflags[] =
-+{
- 	{ "comx_rx",		DEBUG_COMX_RX		},
- 	{ "comx_tx", 		DEBUG_COMX_TX		},
- 	{ "hw_tx",		DEBUG_HW_TX		},
-@@ -614,6 +616,7 @@
- 	struct comx_protocol *line = comx_lines;
- 	char str[30];
- 	int ret=0;
-+	spinlock_t mister_lock = SPIN_LOCK_UNLOCKED;
- 
- 	if (count > PAGE_SIZE) {
- 		printk(KERN_ERR "count is %lu > %d!!!\n", count, (int)PAGE_SIZE);
-@@ -644,14 +647,14 @@
- 		if ((i = simple_strtoul(page, NULL, 10)) != 0) {
- 			unsigned long flags;
- 
--			save_flags(flags); cli();
-+			spin_lock_irqsave(&mister_lock, flags);
- 			if (ch->debug_area) kfree(ch->debug_area);
- 			if ((ch->debug_area = kmalloc(ch->debug_size = i, 
- 				GFP_KERNEL)) == NULL) {
- 				ret = -ENOMEM;
- 			}
- 			ch->debug_start = ch->debug_end = 0;
--			restore_flags(flags);
-+			spin_unlock_irqrestore(&mister_lock, flags);
- 			free_page((unsigned long)page);
- 			return ret ? ret : count;
- 		}
-@@ -829,9 +832,15 @@
- 	strcpy(dev->name, (char *)new_dir->name);
- 	dev->init = comx_init_dev;
- 
--	if (register_netdevice(dev)) {
-+	{
-+	    int ret2;
-+	    rtnl_lock();
-+	    ret2 = register_netdevice(dev);
-+	    rtnl_unlock();
-+	    if (ret2)
- 		goto cleanup_filename_debug;
- 	}
-+
- 	ch=dev->priv;
- 	if((ch->if_ptr = (void *)kmalloc(sizeof(struct ppp_device), 
- 				 GFP_KERNEL)) == NULL) {
-diff -ruNP linux-2.4.25.orig/drivers/net/wan/farsync.c linux-2.4.25/drivers/net/wan/farsync.c
---- linux-2.4.25.orig/drivers/net/wan/farsync.c	Wed Feb 18 15:17:36 2004
-+++ linux-2.4.25/drivers/net/wan/farsync.c	Wed Feb 18 16:38:12 2004
-@@ -1,9 +1,9 @@
- /*
-- *      FarSync X21 driver for Linux (generic HDLC version)
-+ *      FarSync X21 driver for Linux (2.4.x kernel version)
-  *
-  *      Actually sync driver for X.21, V.35 and V.24 on FarSync T-series cards
-  *
-- *      Copyright (C) 2001 FarSite Communications Ltd.
-+ *      Copyright (C) 2001-2002 FarSite Communications Ltd.
-  *      www.farsite.co.uk
-  *
-  *      This program is free software; you can redistribute it and/or
-@@ -11,17 +11,74 @@
-  *      as published by the Free Software Foundation; either version
-  *      2 of the License, or (at your option) any later version.
-  *
-- *      Author: R.J.Dunlop      <bob.dunlop@farsite.co.uk>
-+ *      Author:      R.J.Dunlop    <bob.dunlop@farsite.co.uk>
-+ *      Maintainer:  Kevin Curtis  <kevin.curtis@farsite.co.uk>
-+ */
-+/*      Revision History
-+ *
-+ *      Revision 1.14  2003/01/10 14:21:58  kevinc
-+ *      Final changes
-+ *
-+ *      Revision 1.13  2003/01/02 13:11:46  kevinc
-+ *      Changes to support the TxU family of cards.
-+ *      Required the introduction of bottom halves.  Thus most of the
-+ *      processing is now done out og interrupt mode.
-+ *
-+ *      Revision 1.12  2002/04/23 09:18:51  kevinc
-+ *      Performance enhancement changes
-+ *
-+ *      Revision 1.11  2002/04/23 08:52:59  kevinc
-+ *      Changes from the Kernel team regarding calls to pci device routines
-+ *
-+ *      Revision 1.10  2001/09/10 11:13:56  rjd
-+ *      Correct ioctl parameter checking for security problem highlighted on
-+ *      kernel developer list.
-+ *
-+ *      Revision 1.9  2001/08/21 11:45:08  rjd
-+ *      Brought code into line with that used for the official 2.4.9 kernel
-+ *
-+ *      Revision 1.8  2001/07/03 15:55:54  rjd
-+ *      First non-beta version.
-+ *      Started preparations for the generic-HDLC version.
-+ *
-+ *      Revision 1.7  2001/05/29 09:05:27  rjd
-+ *      Improved startup carrier processing.
-+ *      Removed interrupt loop optimistation as never used.
-+ *      Added support of 2.4.5 kernel.
-+ *
-+ *      Revision 1.6  2001/05/11 12:16:35  rjd
-+ *      Fixes for Red Hat 7.1 where 2.4.2 kernel has 2.4.3 version of syncppp.
-+ *      Corrected printing macros for later compilers.
-+ *
-+ *      Revision 1.5  2001/05/10 08:27:43  rjd
-+ *      Added configurable MTU support and RH7.1 installation patch
-+ *
-+ *      Revision 1.4  2001/05/02 09:30:22  rjd
-+ *      Reboot with noisy lines causing Opps fixed.
-+ *      Tx buffer reordering problem fixed.
-+ *      Port configuration code simplified.
-+ *
-+ *      Revision 1.3  2001/04/19 15:43:53  rjd
-+ *      SyncPPP module and header file location changed under 2.4.3
-+ *
-+ *      Revision 1.2  2001/04/05 16:35:32  rjd
-+ *      Upgrade to SMC version 11
-+ *
-+ *      Revision 1.1.1.1  2001/03/30 13:46:42  rjd
-+ *      Import after first Beta shipped.
-+ *
-  */
- 
- #include <linux/module.h>
- #include <linux/kernel.h>
- #include <linux/pci.h>
- #include <linux/ioport.h>
-+#include <linux/netdevice.h>
- #include <linux/init.h>
-+#include <linux/if_arp.h>
- #include <asm/uaccess.h>
--#include <linux/if.h>
--#include <linux/hdlc.h>
-+#include <net/syncppp.h>
-+#include <asm/delay.h>
- 
- #include "farsync.h"
- 
-@@ -31,7 +88,11 @@
-  */
- MODULE_AUTHOR("R.J.Dunlop <bob.dunlop@farsite.co.uk>");
- MODULE_DESCRIPTION("FarSync T-Series X21 driver. FarSite Communications Ltd.");
--MODULE_LICENSE("GPL");
-+MODULE_PARM (fst_txq_low, "i");
-+MODULE_PARM (fst_txq_high, "i");
-+MODULE_PARM (fst_max_reads, "i");
-+MODULE_PARM (fst_excluded_cards, "i");
-+MODULE_PARM (fst_excluded_list, "0-32i");
- 
- EXPORT_NO_SYMBOLS;
- 
-@@ -40,16 +101,19 @@
-  *      ==========================================
-  */
- 
--/*      Number of ports (per card) supported
-+/*      Number of ports (per card) and cards supported
-  */
- #define FST_MAX_PORTS           4
--
-+#define FST_MAX_CARDS           32
- 
- /*      PCI vendor and device IDs
-  */
- #define FSC_PCI_VENDOR_ID       0x1619  /* FarSite Communications Ltd */
- #define T2P_PCI_DEVICE_ID       0x0400  /* T2P X21 2 port card */
- #define T4P_PCI_DEVICE_ID       0x0440  /* T4P X21 4 port card */
-+#define T1U_PCI_DEVICE_ID       0x0610  /* T2U X21 1 port card */
-+#define T2U_PCI_DEVICE_ID       0x0620  /* T2U X21 2 port card */
-+#define T4U_PCI_DEVICE_ID       0x0640  /* T2U X21 4 port card */
- 
- 
- /*      Default parameters for the link
-@@ -59,6 +123,15 @@
-                                          * this down assuming a slower line I
-                                          * guess.
-                                          */
-+#define FST_TXQ_DEPTH           16      /* This one is for the buffering
-+                                         * of frames on the way down to the card
-+                                         * so that we can keep the card busy
-+                                         * and maximise throughput
-+					 */
-+#define FST_HIGH_WATER_MARK     12      /* Point at which we flow control
-+					 * network layer */
-+#define FST_LOW_WATER_MARK      8       /* Point at which we remove flow
-+					 * control from network layer */
- #define FST_MAX_MTU             8000    /* Huge but possible */
- #define FST_DEF_MTU             1500    /* Common sane value */
- 
-@@ -72,6 +145,15 @@
- #endif
- 
- 
-+/*
-+ * Modules parameters and associated varaibles
-+ */
-+int   fst_txq_low=FST_LOW_WATER_MARK;
-+int   fst_txq_high=FST_HIGH_WATER_MARK;
-+int   fst_max_reads=7;
-+int   fst_excluded_cards=0;
-+int   fst_excluded_list[FST_MAX_CARDS];
-+
- /*      Card shared memory layout
-  *      =========================
-  */
-@@ -87,7 +169,7 @@
-  *      be used to check that we have not got out of step with the firmware
-  *      contained in the .CDE files.
-  */
--#define SMC_VERSION 11
-+#define SMC_VERSION 13
- 
- #define FST_MEMSIZE 0x100000    /* Size of card memory (1Mb) */
- 
-@@ -161,7 +243,7 @@
- #define RX_ENP          0x01            /* Rx: end of packet */
- 
- 
--/* Interrupts from the card are caused by various events and these are presented
-+/* Interrupts from the card are caused by various events which are presented
-  * in a circular buffer as several events may be processed on one physical int
-  */
- #define MAX_CIRBUFF     32
-@@ -199,6 +281,9 @@
-         u16  lineInterface;     /* Physical interface type */
-         u8   x25op;             /* Unused at present */
-         u8   internalClock;     /* 1 => internal clock, 0 => external */
-+        u8   transparentMode;   /* 1 => on, 0 => off */
-+        u8   invertClock;       /* 0 => normal, 1 => inverted */
-+        u8   padBytes[6];       /* Padding */
-         u32  lineSpeed;         /* Speed in bps */
- };
- 
-@@ -259,14 +344,14 @@
-         u16 portMailbox[FST_MAX_PORTS][2];      /* command, modifier */
-         u16 cardMailbox[4];                     /* Not used */
- 
--                                /* Number of times that card thinks the host has
-+                                /* Number of times the card thinks the host has
-                                  * missed an interrupt by not acknowledging
-                                  * within 2mS (I guess NT has problems)
-                                  */
-         u32 interruptRetryCount;
- 
-                                 /* Driver private data used as an ID. We'll not
--                                 * use this on Linux I'd rather keep such things
-+                                 * use this as I'd rather keep such things
-                                  * in main memory rather than on the PCI bus
-                                  */
-         u32 portHandle[FST_MAX_PORTS];
-@@ -294,8 +379,8 @@
-         u16 portScheduleOffset;
- 
-         u32 endOfSmcSignature;  /* endOfSmcSignature MUST be the last member of
--                                 * the structure and marks the end of the shared
--                                 * memory. Adapter code initializes its value as
-+                                 * the structure and marks the end of shared
-+                                 * memory. Adapter code initializes it as
-                                  * END_SIG.
-                                  */
- };
-@@ -312,6 +397,42 @@
- #define ABORTTX         5       /* Abort the transmitter for a port */
- #define SETV24O         6       /* Set V24 outputs */
- 
-+/* PLX Chip Register Offsets */
-+#define CNTRL_9052      0x50    /* Control Register */
-+#define CNTRL_9054      0x6c    /* Control Register */
-+
-+#define PCIILR          0x3c    /* Interrupt Line Register */
-+#define PCICR           0x04    /* Interrupt Control Register */
-+#define INTCSR_9052     0x4c    /* Interrupt control/status register */
-+#define INTCSR_9054     0x68    /* Interrupt control/status register */
-+
-+/* 9054 DMA Registers */
-+/*
-+ * Note that we will be using DMA Channel 0 for copying rx data
-+ * and Channel 1 for copying tx data
-+ */
-+#define DMAMODE0        0x80
-+#define DMAPADR0        0x84
-+#define DMALADR0        0x88
-+#define DMASIZ0         0x8c
-+#define DMADPR0         0x90
-+#define DMAMODE1        0x94
-+#define DMAPADR1        0x98
-+#define DMALADR1        0x9c
-+#define DMASIZ1         0xa0
-+#define DMADPR1         0xa4
-+#define DMACSR0         0xa8
-+#define DMACSR1         0xa9
-+#define DMAARB          0xac
-+#define DMATHR          0xb0
-+#define DMADAC0         0xb4
-+#define DMADAC1         0xb8
-+#define DMAMARBR        0xac
-+
-+#define FST_MIN_DMA_LEN 64
-+#define FST_RX_DMA_INT  0x01
-+#define FST_TX_DMA_INT  0x02
-+#define FST_CARD_INT    0x04
- 
- /* Larger buffers are positioned in memory at offset BFM_BASE */
- struct buf_window {
-@@ -331,15 +452,33 @@
- /*      Per port (line or channel) information
-  */
- struct fst_port_info {
--        hdlc_device             hdlc;   /* HDLC device struct - must be first */
-+        void                   *if_ptr; /* Some drivers describe this as a
-+                                         * general purpose pointer. However if
-+                                         * using syncPPP it has a very specific
-+                                         * purpose: must be the first item in
-+                                         * the structure pointed to by dev->priv
-+                                         * and must in turn point to the
-+                                         * associated ppp_device structure.
-+                                         */
-         struct fst_card_info   *card;   /* Card we're associated with */
-         int                     index;  /* Port index on the card */
-+        int                     proto;  /* Protocol we are running */
-         int                     hwif;   /* Line hardware (lineInterface copy) */
-         int                     run;    /* Port is running */
-         int                     rxpos;  /* Next Rx buffer to use */
-         int                     txpos;  /* Next Tx buffer to use */
-         int                     txipos; /* Next Tx buffer to check for free */
--        int                     txcnt;  /* Count of Tx buffers in use */
-+        int                     start;  /* Indication of start/stop to network */
-+        struct net_device      *dev;    /* Kernel network device entry */
-+        struct net_device_stats stats;  /* Standard statistics */
-+        struct ppp_device       pppdev; /* Link to syncPPP */
-+  /*
-+   * A sixteen entry transmit queue
-+   */
-+        int                     txqs;  /* index to get next buffer to tx */
-+        int                     txqe;  /* index to queue next packet */
-+        struct sk_buff         *txq[FST_TXQ_DEPTH]; /* The queue */
-+        int                     rxqdepth;
- };
- 
- /*      Per card information
-@@ -357,13 +496,35 @@
-         unsigned short pci_conf;        /* PCI card config in I/O space */
-                                         /* Per port info */
-         struct fst_port_info ports[ FST_MAX_PORTS ];
-+        struct pci_dev *device;          /* Information about the pci device */
-+/*
-+ *      Device Driver Task Queues
-+ *
-+ *      So that we don't spend too much time processing events in the 
-+ *      Interrupt Service routine, we will declare a task queue per Card 
-+ *      and make the ISR schedule a task in the queue for later execution.
-+ */
-+        int            card_no;        /* Instance of the card on the system */
-+        struct tq_struct card_isr_task;
-+        struct tq_struct card_tx_task;
-+        int            family;          /* TxP or TxU */
-+        int            dmarx_in_progress;
-+        int            dmatx_in_progress;
-+        unsigned long  int_count;
-+        unsigned long  int_time_ave;
-+	void          *rx_dma_handle_host;
-+	dma_addr_t     rx_dma_handle_card;  
-+	void          *tx_dma_handle_host;
-+	dma_addr_t     tx_dma_handle_card;  
-+        struct sk_buff *dma_skb_rx;
-+        struct fst_port_info *dma_port_rx;
-+        struct fst_port_info *dma_port_tx;
-+        int            dma_len_rx;
-+        int            dma_len_tx;
-+        int            dma_txpos;
-+        int            dma_rxpos;
- };
- 
--/* Convert an HDLC device pointer into a port info pointer and similar */
--#define hdlc_to_port(H) ((struct fst_port_info *)(H))
--#define dev_to_port(D)  hdlc_to_port(dev_to_hdlc(D))
--#define port_to_dev(P)  hdlc_to_dev(&(P)->hdlc)
--
- 
- /*
-  *      Shared memory window access macros
-@@ -403,7 +564,7 @@
-                                 printk ( KERN_DEBUG FST_NAME ": " fmt, ## A )
- 
- #else
--# define dbg(X...)      /* NOP */
-+#define dbg(X...)      /* NOP */
- #endif
- 
- 
-@@ -422,6 +583,12 @@
-                                         FST_TYPE_T2P },
-         { FSC_PCI_VENDOR_ID, T4P_PCI_DEVICE_ID, PCI_ANY_ID, PCI_ANY_ID, 0, 0,
-                                         FST_TYPE_T4P },
-+        { FSC_PCI_VENDOR_ID, T1U_PCI_DEVICE_ID, PCI_ANY_ID, PCI_ANY_ID, 0, 0,
-+                                        FST_TYPE_T1U },
-+        { FSC_PCI_VENDOR_ID, T2U_PCI_DEVICE_ID, PCI_ANY_ID, PCI_ANY_ID, 0, 0,
-+                                        FST_TYPE_T2U },
-+        { FSC_PCI_VENDOR_ID, T4U_PCI_DEVICE_ID, PCI_ANY_ID, PCI_ANY_ID, 0, 0,
-+                                        FST_TYPE_T4U },
-         { 0, }                          /* End */
- };
- 
-@@ -436,17 +603,55 @@
-  * Used to be a simple write to card control space but a glitch in the latest
-  * AMD Am186CH processor means that we now have to do it by asserting and de-
-  * asserting the PLX chip PCI Adapter Software Reset. Bit 30 in CNTRL register
-- * at offset 0x50.
-+ * at offset 9052_CNTRL.  Note the updates for the T2U.
-  */
- static inline void
- fst_cpureset ( struct fst_card_info *card )
- {
-+        unsigned char interrupt_line_register;
-+	unsigned long j = jiffies + 1;
-         unsigned int regval;
- 
--        regval = inl ( card->pci_conf + 0x50 );
--
--        outl ( regval |  0x40000000, card->pci_conf + 0x50 );
--        outl ( regval & ~0x40000000, card->pci_conf + 0x50 );
-+ 	if (card->family == FST_FAMILY_TXU)
-+	  {
-+	    if (pci_read_config_byte(card->device, PCIILR, &interrupt_line_register))
-+	      {
-+		dbg (DBG_ASS, "Error in reading interrupt line register\n");
-+	      }
-+	    /*
-+	     * Assert PLX software reset and Am186 hardware reset
-+	     * and then deassert the PLX software reset but 186 still in reset
-+	     */
-+	    outw ( 0x440f, card->pci_conf + CNTRL_9054 + 2 );
-+	    outw ( 0x040f, card->pci_conf + CNTRL_9054 + 2 );
-+	    /*
-+	     * We are delaying here to allow the 9054 to reset itself
-+	     */
-+	    j = jiffies + 1;
-+	    while (jiffies < j)
-+	      /* Do nothing */;
-+	    outw ( 0x240f, card->pci_conf + CNTRL_9054 + 2 );
-+	    /*
-+	     * We are delaying here to allow the 9054 to reload its eeprom
-+	     */
-+	    j = jiffies + 1;
-+	    while (jiffies < j)
-+	      /* Do nothing */;
-+	    outw ( 0x040f, card->pci_conf + CNTRL_9054 + 2 );
-+	    
-+	    if (pci_write_config_byte(card->device, PCIILR, interrupt_line_register))
-+	      {
-+		dbg (DBG_ASS, "Error in writing interrupt line register\n");
-+	      }
-+	    
-+	  }
-+	else
-+	  {
-+	    regval = inl ( card->pci_conf + CNTRL_9052 );
-+
-+	    outl ( regval |  0x40000000, card->pci_conf + CNTRL_9052 );
-+	    outl ( regval & ~0x40000000, card->pci_conf + CNTRL_9052 );
-+	  }
- }
- 
- /*      Release the processor from reset
-@@ -454,7 +659,24 @@
- static inline void
- fst_cpurelease ( struct fst_card_info *card )
- {
--        (void) readb ( card->ctlmem );
-+	if (card->family == FST_FAMILY_TXU)
-+	  {
-+	    /*
-+	     * Force posted writes to complete
-+	     */
-+	    (void) readb (card->mem);
-+
-+	    /*
-+	     * Release LRESET DO = 1
-+	     * Then release Local Hold, DO = 1
-+	     */
-+	    outw ( 0x040e, card->pci_conf + CNTRL_9054 + 2 );
-+	    outw ( 0x040f, card->pci_conf + CNTRL_9054 + 2 );
-+	  }
-+	else
-+	  {
-+	    (void) readb ( card->ctlmem );
-+	  }
- }
- 
- /*      Clear the cards interrupt flag
-@@ -462,9 +684,31 @@
- static inline void
- fst_clear_intr ( struct fst_card_info *card )
- {
--        /* Poke the appropriate PLX chip register (same as enabling interrupts)
--         */
--        outw ( 0x0543, card->pci_conf + 0x4C );
-+	if (card->family == FST_FAMILY_TXU)
-+	  {
-+	    (void) readb ( card->ctlmem );
-+	  }
-+	else
-+	  {
-+	    /* Poke the appropriate PLX chip register (same as enabling interrupts)
-+	     */
-+	    outw ( 0x0543, card->pci_conf + INTCSR_9052 );
-+	  }
-+}
-+
-+/*      Enable card interrupts
-+ */
-+static inline void
-+fst_enable_intr ( struct fst_card_info *card )
-+{
-+	if (card->family == FST_FAMILY_TXU)
-+	  {
-+	    outl ( 0x0f0c0900, card->pci_conf + INTCSR_9054 );
-+	  }
-+	else
-+	  {
-+	    outw ( 0x0543, card->pci_conf + INTCSR_9052 );
-+	  }
- }
- 
- /*      Disable card interrupts
-@@ -472,7 +716,151 @@
- static inline void
- fst_disable_intr ( struct fst_card_info *card )
- {
--        outw ( 0x0000, card->pci_conf + 0x4C );
-+	if (card->family == FST_FAMILY_TXU)
-+	  {
-+	    outl ( 0x00000000, card->pci_conf + INTCSR_9054 );
-+	  }
-+	else
-+	  {
-+	    outw ( 0x0000, card->pci_conf + INTCSR_9052 );
-+	  }
-+}
-+
-+/*      Initilaise DMA for PLX 9054
-+ */
-+static inline void
-+fst_init_dma ( struct fst_card_info *card )
-+{
-+  unsigned short pci_cr;
-+
-+  /*
-+   * This is only required for the PLX 9054
-+   */
-+  if (card->family == FST_FAMILY_TXU)
-+    {
-+      pci_read_config_word (card->device, PCICR, &pci_cr);
-+      pci_cr |= 0x0004;
-+      pci_write_config_word (card->device, PCICR, pci_cr);  /* Enable DMA Bus mastering */
-+      outl ( 0x00020441, card->pci_conf + DMAMODE0 );
-+      outl ( 0x00020441, card->pci_conf + DMAMODE1 );
-+      outl ( 0x0, card->pci_conf + DMATHR );
-+    }
-+}
-+
-+
-+/*      Tx dma complete interrupt
-+ */
-+static void
-+fst_tx_dma_complete ( struct fst_card_info *card, struct fst_port_info *port, 
-+		      int len, int txpos)
-+{
-+	/*
-+	 * Everything is now set, just tell the card to go
-+	 */
-+
-+	FST_WRB ( card, txDescrRing[port->index][txpos].bits, 
-+		  DMA_OWN | TX_STP | TX_ENP );
-+	port->stats.tx_packets++;
-+	port->stats.tx_bytes += len;
-+	port->dev->trans_start = jiffies;
-+}
-+
-+/*      Rx dma complete interrupt
-+ */
-+static void
-+fst_rx_dma_complete ( struct fst_card_info *card, struct fst_port_info *port,
-+		      int len, struct sk_buff *skb, int rxp)
-+{
-+    
-+        int pi;
-+	int rx_status;
-+
-+	pi = port->index;
-+	memcpy(skb_put(skb, len), card->rx_dma_handle_host, len);
-+
-+	/* Reset buffer descriptor */
-+        FST_WRB ( card, rxDescrRing[pi][rxp].bits, DMA_OWN );
-+
-+        /* Update stats */
-+        port->stats.rx_packets++;
-+        port->stats.rx_bytes += len;
-+
-+        /* Push upstream */
-+        if ( port->proto == FST_HDLC || port->proto == FST_PPP )
-+        {
-+                /* Mark for further processing by sPPP module */
-+                skb->protocol = htons ( ETH_P_WAN_PPP );
-+        }
-+        else
-+        {
-+                /* DEC customer specific protocol (since nothing defined for
-+                 * marking raw data), at least one other driver uses this value
-+                 * for this purpose.
-+                 */
-+                skb->protocol = htons ( ETH_P_CUST );
-+                skb->pkt_type = PACKET_HOST;
-+        }
-+        skb->mac.raw = skb->data;
-+        skb->dev = port->dev;
-+        rx_status = netif_rx ( skb );
-+	if (rx_status != NET_RX_SUCCESS)
-+	  dbg(DBG_ASS, "Received packet dropped by network layer on port %d\n",
-+                 pi);
-+        port->dev->last_rx = jiffies;
-+}
-+
-+/*
-+ *      Receive a frame through the DMA
-+ */
-+static inline void
-+fst_rx_dma (struct fst_card_info *card, unsigned char *skb, 
-+	    unsigned char *mem, int len)
-+{
-+  /*
-+   * This routine will setup the DMA and start it
-+   */
-+
-+  dbg(DBG_RX, "In fst_rx_dma %p %p %d\n", skb, mem, len);
-+  if (card->dmarx_in_progress)
-+    dbg(DBG_ASS, "In fst_rx_dma while dma in progress\n");
-+
-+  outl ( (unsigned long)skb, card->pci_conf + DMAPADR0 );   /* Copy to here */
-+  outl ( (unsigned long)mem, card->pci_conf + DMALADR0 );   /* from here */
-+  outl ( len, card->pci_conf + DMASIZ0 );       /* for this length */
-+  outl ( 0x00000000c, card->pci_conf + DMADPR0); /* In this direction */
-+
-+  /*
-+   * We use the dmarx_in_progress flag to flag the channel as busy
-+   */
-+  card->dmarx_in_progress = 1;
-+  outb ( 0x03, card->pci_conf + DMACSR0 );     /* Start the transfer */
-+}
-+
-+/*
-+ *      Send a frame through the DMA
-+ */
-+static inline void
-+fst_tx_dma (struct fst_card_info *card, unsigned char *skb, 
-+	    unsigned char *mem, int len)
-+{
-+  /*
-+   * This routine will setup the DMA and start it.
-+   */
-+
-+  dbg(DBG_TX, "In fst_tx_dma %p %p %d\n", skb, mem, len);
-+  if (card->dmatx_in_progress)
-+    dbg(DBG_ASS, "In fst_tx_dma while dma in progress\n");
-+
-+  outl ( (unsigned long)skb, card->pci_conf + DMAPADR1 );  /* Copy from here */
-+  outl ( (unsigned long)mem, card->pci_conf + DMALADR1 );  /* to here */
-+  outl ( len, card->pci_conf + DMASIZ1 );       /* for this length */
-+  outl ( 0x000000004, card->pci_conf + DMADPR1); /* In this direction */
-+
-+  /*
-+   * We use the dmatx_in_progress to flag the channel as busy
-+   */
-+  card->dmatx_in_progress = 1;
-+  outb ( 0x03, card->pci_conf + DMACSR1 );     /* Start the transfer */
- }
- 
- 
-@@ -496,11 +884,11 @@
-         /* Wait for any previous command to complete */
-         while ( mbval > NAK )
-         {
--                spin_unlock_irqrestore ( &card->card_lock, flags );
-+	        spin_unlock_irqrestore ( &card->card_lock, flags );
-                 schedule_timeout ( 1 );
-                 spin_lock_irqsave ( &card->card_lock, flags );
- 
--                if ( ++safety > 1000 )
-+                if ( ++safety > 2000 )
-                 {
-                         printk_err ("Mailbox safety timeout\n");
-                         break;
-@@ -523,7 +911,7 @@
-         {
-                 port->txpos  = 0;
-                 port->txipos = 0;
--                port->txcnt  = 0;
-+                port->start  = 0;
-         }
- 
-         spin_unlock_irqrestore ( &card->card_lock, flags );
-@@ -576,7 +964,7 @@
-                 FST_WRB ( card, rxDescrRing[pi][i].hadr, (u8)( offset >> 16 ));
-                 FST_WRW ( card, rxDescrRing[pi][i].bcnt,
-                                         cnv_bcnt ( LEN_RX_BUFFER ));
--                FST_WRW ( card, rxDescrRing[pi][i].mcnt, 0 );
-+                FST_WRW ( card, rxDescrRing[pi][i].mcnt, LEN_RX_BUFFER );
-                 FST_WRB ( card, rxDescrRing[pi][i].bits, DMA_OWN );
-         }
-         port->rxpos  = 0;
-@@ -610,7 +998,7 @@
-         }
-         port->txpos  = 0;
-         port->txipos = 0;
--        port->txcnt  = 0;
-+        port->start  = 0;
-         spin_unlock_irqrestore ( &card->card_lock, flags );
- }
- 
-@@ -624,25 +1012,34 @@
- 
-         signals = FST_RDL ( card, v24DebouncedSts[port->index]);
- 
--        if ( signals & (( port->hwif == X21 ) ? IPSTS_INDICATE : IPSTS_DCD ))
-+        if ( signals & (((port->hwif == X21) || (port->hwif == X21D)) 
-+			? IPSTS_INDICATE : IPSTS_DCD ))
-         {
--                if ( ! netif_carrier_ok ( port_to_dev ( port )))
-+                if ( ! netif_carrier_ok ( port->dev ))
-                 {
-                         dbg ( DBG_INTR,"DCD active\n");
--                        netif_carrier_on ( port_to_dev ( port ));
-+
-+                        /* Poke sPPP to renegotiate */
-+                        if ( port->proto == FST_HDLC || port->proto == FST_PPP )
-+                        {
-+                                sppp_reopen ( port->dev );
-+                        }
-+
-+                        netif_carrier_on ( port->dev );
-                 }
-         }
-         else
-         {
--                if ( netif_carrier_ok ( port_to_dev ( port )))
-+                if ( netif_carrier_ok ( port->dev ))
-                 {
-                         dbg ( DBG_INTR,"DCD lost\n");
--                        netif_carrier_off ( port_to_dev ( port ));
-+                        netif_carrier_off ( port->dev );
-                 }
-         }
- }
- 
- 
-+
- /*      Rx complete interrupt
-  */
- static void
-@@ -651,10 +1048,10 @@
-         unsigned char dmabits;
-         int pi;
-         int rxp;
-+	int i;
-+	int rx_status;
-         unsigned short len;
-         struct sk_buff *skb;
--        int i;
--
- 
-         /* Check we have a buffer to process */
-         pi  = port->index;
-@@ -666,6 +1063,10 @@
-                                         pi, rxp );
-                 return;
-         }
-+	if (card->dmarx_in_progress)
-+	{
-+	        return;
-+	}
- 
-         /* Get buffer length */
-         len = FST_RDW ( card, rxDescrRing[pi][rxp].mcnt );
-@@ -680,24 +1081,32 @@
-                                         len );
-         if ( dmabits != ( RX_STP | RX_ENP ) || len > LEN_RX_BUFFER - 2 )
-         {
--                port->hdlc.stats.rx_errors++;
-+                port->stats.rx_errors++;
- 
-                 /* Update error stats and discard buffer */
-                 if ( dmabits & RX_OFLO )
-                 {
--                        port->hdlc.stats.rx_fifo_errors++;
-+                        port->stats.rx_fifo_errors++;
-+			dbg(DBG_ASS, "Rx fifo error on card %d port %d buffer %d\n", 
-+			       card->card_no, port->index, rxp);
-                 }
-                 if ( dmabits & RX_CRC )
-                 {
--                        port->hdlc.stats.rx_crc_errors++;
-+                        port->stats.rx_crc_errors++;
-+			dbg(DBG_ASS, "Rx crc error on card %d port %d\n",
-+			    card->card_no, port->index);
-                 }
-                 if ( dmabits & RX_FRAM )
-                 {
--                        port->hdlc.stats.rx_frame_errors++;
-+                        port->stats.rx_frame_errors++;
-+			dbg(DBG_ASS, "Rx frame error on card %d port %d\n",
-+			    card->card_no, port->index);
-                 }
-                 if ( dmabits == ( RX_STP | RX_ENP ))
-                 {
--                        port->hdlc.stats.rx_length_errors++;
-+                        port->stats.rx_length_errors++;
-+			dbg(DBG_ASS, "Rx length error (%d) on card %d port %d\n", 
-+			       len,card->card_no, port->index);
-                 }
- 
-                 /* Discard buffer descriptors until we see the end of packet
-@@ -734,7 +1143,7 @@
-         {
-                 dbg ( DBG_RX,"intr_rx: can't allocate buffer\n");
- 
--                port->hdlc.stats.rx_dropped++;
-+                port->stats.rx_dropped++;
- 
-                 /* Return descriptor to card */
-                 FST_WRB ( card, rxDescrRing[pi][rxp].bits, DMA_OWN );
-@@ -746,28 +1155,260 @@
-                 return;
-         }
- 
--        memcpy_fromio ( skb_put ( skb, len ),
--                                card->mem + BUF_OFFSET ( rxBuffer[pi][rxp][0]),
--                                len );
-+	/*
-+	 * We know the length we need to receive, len.
-+	 * It's not worth using the DMA for reads of less than
-+	 * FST_MIN_DMA_LEN
-+	 */
-+
-+	if ((len < FST_MIN_DMA_LEN) || (card->family == FST_FAMILY_TXP))
-+	  {
-+		memcpy_fromio ( skb_put ( skb, len ),
-+				card->mem + BUF_OFFSET ( rxBuffer[pi][rxp][0]),
-+				len );
-+
-+		/* Reset buffer descriptor */
-+		FST_WRB ( card, rxDescrRing[pi][rxp].bits, DMA_OWN );
-+
-+		/* Update stats */
-+		port->stats.rx_packets++;
-+		port->stats.rx_bytes += len;
-+		
-+		/* Push upstream */
-+		if ( port->proto == FST_HDLC || port->proto == FST_PPP )
-+		  {
-+		    /* Mark for further processing by sPPP module */
-+		    skb->protocol = htons ( ETH_P_WAN_PPP );
-+		  }
-+		else
-+		  {
-+		    /* DEC customer specific protocol (since nothing defined for
-+		     * marking raw data), at least one other driver uses this value
-+		     * for this purpose.
-+		     */
-+		    skb->protocol = htons ( ETH_P_CUST );
-+		    skb->pkt_type = PACKET_HOST;
-+		  }
-+		skb->mac.raw = skb->data;
-+		skb->dev = port->dev;
-+		rx_status = netif_rx ( skb );
-+		if (rx_status == NET_RX_DROP)
-+		  dbg(DBG_ASS, "Received packet dropped by network layer on port %d\n",
-+			 pi);
-+		port->dev->last_rx = jiffies;
-+	  }
-+	else
-+	  {
-+	    card->dma_skb_rx = skb;
-+	    card->dma_port_rx = port;
-+	    card->dma_len_rx = len;
-+	    card->dma_rxpos = rxp;
-+	    fst_rx_dma(card, (char*)card->rx_dma_handle_card, 
-+		       (char*)BUF_OFFSET(rxBuffer[pi][rxp][0]), 
-+		       len);
-+	  }
-+	if (rxp != port->rxpos)
-+	  {
-+	    dbg(DBG_ASS, "About to increment rxpos by more than 1\n");
-+	    dbg(DBG_ASS, "rxp = %d rxpos = %d\n", rxp, port->rxpos);
-+	  }
-+	if ( ++rxp >= NUM_RX_BUFFER )
-+	  port->rxpos = 0;
-+	else
-+	  port->rxpos = rxp;
-+}
- 
--        /* Reset buffer descriptor */
--        FST_WRB ( card, rxDescrRing[pi][rxp].bits, DMA_OWN );
--        if ( ++rxp >= NUM_RX_BUFFER )
--                port->rxpos = 0;
--        else
--                port->rxpos = rxp;
- 
--        /* Update stats */
--        port->hdlc.stats.rx_packets++;
--        port->hdlc.stats.rx_bytes += len;
-+/*
-+ *      The bottom halfs to the ISR
-+ *
-+ */
- 
--        /* Push upstream */
--        skb->mac.raw = skb->data;
--        skb->dev = hdlc_to_dev ( &port->hdlc );
--        skb->protocol = hdlc_type_trans(skb, skb->dev);
--        netif_rx ( skb );
-+static void do_bottom_half_tx (struct fst_card_info *card)
-+{
-+  struct fst_port_info *port;
-+  int pi;
-+  int txq_length;
-+  struct sk_buff *skb;
-+  unsigned long flags;
-+
-+  /*
-+   *  Find a free buffer for the transmit
-+   *  Step through each port on this card
-+   */
-+
-+  for ( pi = 0, port = card->ports ; pi < card->nports ; pi++, port++ )
-+    {
-+      if ( port->dev == NULL || ! port->run )
-+	continue;
-+
-+      while (!(FST_RDB ( card, txDescrRing[pi][port->txpos].bits ) & DMA_OWN)
-+	     && !(card->dmatx_in_progress))
-+	{
-+	  /*
-+	   * There doesn't seem to be a txdone event per-se
-+	   * We seem to have to deduce it, by checking the DMA_OWN
-+	   * bit on the next buffer we think we can use
-+	   */
-+	  spin_lock_irqsave ( &card->card_lock, flags );
-+	  if ((txq_length = port->txqe - port->txqs) < 0)
-+	    {
-+	      /*
-+	       * This is the case where one has wrapped and the
-+	       * maths gives us a negative number
-+	       */
-+	      txq_length = txq_length + FST_TXQ_DEPTH ;
-+	    }
-+	  spin_unlock_irqrestore ( &card->card_lock, flags );
-+	  if (txq_length > 0)
-+	    {
-+	      /*
-+	       * There is something to send
-+	       */
-+	      spin_lock_irqsave ( &card->card_lock, flags );
-+	      skb = port->txq[port->txqs];
-+	      port->txqs++;
-+	      if (port->txqs == FST_TXQ_DEPTH)
-+		{
-+		  port->txqs = 0;
-+		}
-+	      spin_unlock_irqrestore ( &card->card_lock, flags );
-+	      /*
-+	       * copy the data and set the required indicators on the
-+	       * card.
-+	       */
-+	      FST_WRW ( card, txDescrRing[pi][port->txpos].bcnt, cnv_bcnt ( skb->len ));
-+	      if ((skb->len < FST_MIN_DMA_LEN) || (card->family == FST_FAMILY_TXP))
-+		{
-+	          /* Enqueue the packet with normal io*/
-+	          memcpy_toio ( card->mem + BUF_OFFSET ( txBuffer[pi][port->txpos][0]),
-+		                skb->data, skb->len );
-+		  FST_WRB ( card, txDescrRing[pi][port->txpos].bits, DMA_OWN | TX_STP | TX_ENP );
-+		  port->stats.tx_packets++;
-+		  port->stats.tx_bytes += skb->len;
-+		  port->dev->trans_start = jiffies;
-+		}
-+	      else
-+		{
-+	          /* Or do it through dma */
-+	          memcpy(card->tx_dma_handle_host, skb->data, skb->len);
-+		  card->dma_port_tx = port;
-+		  card->dma_len_tx = skb->len;
-+		  card->dma_txpos = port->txpos;
-+	          fst_tx_dma(card, (char*)card->tx_dma_handle_card, 
-+		             (char*)BUF_OFFSET(txBuffer[pi][port->txpos][0]), 
-+		             skb->len);
-+	        }
-+	      if ( ++port->txpos >= NUM_TX_BUFFER )
-+		port->txpos = 0;
-+	      /*
-+	       * If we have flow control on, can we now release it?
-+	       */
-+	      if (port->start)
-+		{
-+		  if (txq_length < fst_txq_low)
-+		    {
-+		      netif_wake_queue ( port->dev );
-+		      port->start = 0;
-+		    }
-+		}
-+	      dev_kfree_skb ( skb );
-+	    }
-+	  else
-+	    {
-+	      /*
-+	       * Nothing to send so break out of the while loop
-+	       */
-+	      break;
-+	    }
-+	}
-+    }
-+}
-+
-+static void do_bottom_half_rx (struct fst_card_info *card)
-+{
-+  struct fst_port_info *port;
-+  int pi;
-+  int rx_count=0;
-+
-+  /* Check for rx completions on all ports on this card */
-+  for ( pi = 0, port = card->ports ; pi < card->nports ; pi++, port++ )
-+    {
-+      //rx_count = 0;
-+      if ( port->dev == NULL || ! port->run )
-+	continue;
-+      while (!( FST_RDB ( card, rxDescrRing[pi][port->rxpos].bits )
-+		& DMA_OWN ) && !(card->dmarx_in_progress))
-+	{
-+	  if (rx_count > fst_max_reads)
-+	    {
-+	      /*
-+	       * Don't spend forever in receive processing
-+	       * Schedule another event
-+	       */
-+	      queue_task(&card->card_isr_task, &tq_immediate); 
-+	      mark_bh(IMMEDIATE_BH); /* Note that this call must follow queue_task */
-+	      //pi = card->nports;
-+	      break;  /* Leave the loop */
-+	    }
-+	  fst_intr_rx ( card, port );
-+	  rx_count++;
-+	}
-+    }
-+}
-+
-+
-+static void
-+fst_bh_task_1 ( void *card_ptr)
-+{
-+  do_bottom_half_tx(card_ptr);
-+  do_bottom_half_rx(card_ptr);
-+}
-+
-+static void
-+fst_bh_task_2 ( void *card_ptr)
-+{
-+  do_bottom_half_rx(card_ptr);
-+  do_bottom_half_tx(card_ptr);
-+}
-+
-+static void
-+fst_bh_task_3 ( void *card_ptr)
-+{
-+  do_bottom_half_rx(card_ptr);
-+  do_bottom_half_tx(card_ptr);
-+}
-+
-+static void
-+fst_bh_task_4 ( void *card_ptr)
-+{
-+  do_bottom_half_rx(card_ptr);
-+  do_bottom_half_tx(card_ptr);
-+}
-+
-+
-+static void
-+fst_bh_task_tx_1 ( void *card_ptr)
-+{
-+  do_bottom_half_tx(card_ptr);
-+}
- 
--        port_to_dev ( port )->last_rx = jiffies;
-+static void
-+fst_bh_task_tx_2 ( void *card_ptr)
-+{
-+  do_bottom_half_tx(card_ptr);
-+}
-+
-+static void
-+fst_bh_task_tx_3 ( void *card_ptr)
-+{
-+  do_bottom_half_tx(card_ptr);
-+}
-+
-+static void
-+fst_bh_task_tx_4 ( void *card_ptr)
-+{
-+  do_bottom_half_tx(card_ptr);
- }
- 
- 
-@@ -783,7 +1424,9 @@
-         int rdidx;                      /* Event buffer indices */
-         int wridx;
-         int event;                      /* Actual event for processing */
--        int pi;
-+	unsigned int dma_intcsr=0;
-+	unsigned int do_card_interrupt;
-+	unsigned int int_retry_count;
- 
-         if (( card = dev_id ) == NULL )
-         {
-@@ -791,100 +1434,151 @@
-                 return;
-         }
- 
-+	/*
-+	 * Check to see if the interrupt was for this card
-+	 * return if not
-+	 * Note that the call to clear the interrupt is important
-+	 */
-         dbg ( DBG_INTR,"intr: %d %p\n", irq, card );
--
--        spin_lock ( &card->card_lock );
-+	if (card->state != FST_RUNNING)
-+	  {
-+	    printk_err("FarSync: Interrupt received for card %d in a non running state (%d)\n", card->card_no, card->state);
-+
-+	    /* 
-+	     * It is possible to really be running, i.e. we have re-loaded
-+	     * a running card
-+	     * Clear and reprime the interrupt source 
-+	     */
-+	    fst_clear_intr ( card );
-+	    return;
-+	  }
- 
-         /* Clear and reprime the interrupt source */
-         fst_clear_intr ( card );
- 
--        /* Set the software acknowledge */
--        FST_WRB ( card, interruptHandshake, 0xEE );
--
-+	/*
-+	 * Is the interrupt for this card (handshake == 1)
-+	 */
-+	do_card_interrupt = 0;
-+	if (FST_RDB( card, interruptHandshake) == 1)
-+	  {
-+	    do_card_interrupt += FST_CARD_INT;
-+	    /* Set the software acknowledge */
-+	    FST_WRB ( card, interruptHandshake, 0xEE );
-+	  }
-+	if (card->family == FST_FAMILY_TXU)
-+	  {
-+	    /*
-+	     * Is it a DMA Interrupt
-+	     */
-+	    dma_intcsr = inl (card->pci_conf + INTCSR_9054);
-+	    if (dma_intcsr & 0x00200000)
-+	      {
-+		/*
-+		 * DMA Channel 0 (Rx transfer complete)
-+		 */
-+		dbg(DBG_RX, "DMA Rx xfer complete\n");
-+		outb( 0x8, card->pci_conf + DMACSR0);
-+		fst_rx_dma_complete (card, card->dma_port_rx, card->dma_len_rx,
-+				     card->dma_skb_rx, card->dma_rxpos);
-+		card->dmarx_in_progress = 0;
-+		do_card_interrupt += FST_RX_DMA_INT;
-+	      }
-+	    if (dma_intcsr & 0x00400000)
-+	      {
-+		/*
-+		 * DMA Channel 1 (Tx transfer complete)
-+		 */
-+		dbg(DBG_TX, "DMA Tx xfer complete\n");
-+		outb( 0x8, card->pci_conf + DMACSR1);
-+		fst_tx_dma_complete (card, card->dma_port_tx, card->dma_len_tx,
-+				     card->dma_txpos);
-+                card->dmatx_in_progress = 0;
-+		do_card_interrupt += FST_TX_DMA_INT;
-+	      }
-+	  }
-+	
-+	/*
-+	 * Have we been missing Interrupts
-+	 */
-+	int_retry_count = FST_RDL( card, interruptRetryCount);
-+	if (int_retry_count)
-+	  {
-+	    dbg(DBG_ASS, "Missed %d interrupts\n", int_retry_count);
-+	    FST_WRL( card, interruptRetryCount, 0);
-+	  }
-+
-+	if (!do_card_interrupt)
-+	  {
-+	    return;
-+	  }
-+
-+	/* Scehdule the bottom half of the ISR */
-+	queue_task(&card->card_isr_task, &tq_immediate); 
-+	mark_bh(IMMEDIATE_BH); /* Note that this call must follow 
-+				  queue_task */
-+	
-         /* Drain the event queue */
--        rdidx = FST_RDB ( card, interruptEvent.rdindex );
--        wridx = FST_RDB ( card, interruptEvent.wrindex );
-+        rdidx = FST_RDB ( card, interruptEvent.rdindex ) & 0x1f;
-+        wridx = FST_RDB ( card, interruptEvent.wrindex ) & 0x1f;
-         while ( rdidx != wridx )
--        {
--                event = FST_RDB ( card, interruptEvent.evntbuff[rdidx]);
--
--                port = &card->ports[event & 0x03];
--
-+	  {
-+	    event = FST_RDB ( card, interruptEvent.evntbuff[rdidx]);
-+	    port = &card->ports[event & 0x03];
-+	    
-                 dbg ( DBG_INTR,"intr: %x\n", event );
--
-+		
-                 switch ( event )
--                {
--                case CTLA_CHG:
--                case CTLB_CHG:
--                case CTLC_CHG:
--                case CTLD_CHG:
--                        if ( port->run )
--                                fst_intr_ctlchg ( card, port );
--                        break;
--
--                case ABTA_SENT:
--                case ABTB_SENT:
--                case ABTC_SENT:
--                case ABTD_SENT:
--                        dbg ( DBG_TX,"Abort complete port %d\n", event & 0x03 );
--                        break;
--
--                case TXA_UNDF:
--                case TXB_UNDF:
--                case TXC_UNDF:
--                case TXD_UNDF:
--                        /* Difficult to see how we'd get this given that we
--                         * always load up the entire packet for DMA.
--                         */
--                        dbg ( DBG_TX,"Tx underflow port %d\n", event & 0x03 );
--                        port->hdlc.stats.tx_errors++;
--                        port->hdlc.stats.tx_fifo_errors++;
--                        break;
--
--                case INIT_CPLT:
--                        dbg ( DBG_INIT,"Card init OK intr\n");
--                        break;
--
--                case INIT_FAIL:
--                        dbg ( DBG_INIT,"Card init FAILED intr\n");
--                        card->state = FST_IFAILED;
--                        break;
--
--                default:
--                        printk_err ("intr: unknown card event code. ignored\n");
--                        break;
-+		  {
-+		  case CTLA_CHG:
-+		  case CTLB_CHG:
-+		  case CTLC_CHG:
-+		  case CTLD_CHG:
-+		    if ( port->run && port->dev != NULL )
-+		      fst_intr_ctlchg ( card, port );
-+		    break;
-+		    
-+		  case ABTA_SENT:
-+		  case ABTB_SENT:
-+		  case ABTC_SENT:
-+		  case ABTD_SENT:
-+		    dbg (DBG_TX,"Abort complete port %d\n", port->index );
-+		    break;
-+		    
-+		  case TXA_UNDF:
-+		  case TXB_UNDF:
-+		  case TXC_UNDF:
-+		  case TXD_UNDF:
-+		    /* Difficult to see how we'd get this given that we
-+		     * always load up the entire packet for DMA.
-+		     */
-+		    dbg (DBG_TX,"Tx underflow port %d\n", port->index );
-+		    
-+		    port->stats.tx_errors++;
-+		    port->stats.tx_fifo_errors++;
-+		    dbg(DBG_ASS, "Tx underflow on card %d port %d\n",
-+			card->card_no, port->index);
-+		    break;
-+
-+		  case INIT_CPLT:
-+		    dbg ( DBG_INIT,"Card init OK intr\n");
-+		    break;
-+		    
-+		  case INIT_FAIL:
-+		    dbg ( DBG_INIT,"Card init FAILED intr\n");
-+		    card->state = FST_IFAILED;
-+		    break;
-+		    
-+		  default:
-+		    printk_err ("intr: unknown card event code. ignored\n");
-+		    break;
-                 }
--
-+		
-                 /* Bump and wrap the index */
-                 if ( ++rdidx >= MAX_CIRBUFF )
--                        rdidx = 0;
--        }
-+		  rdidx = 0;
-+	  }
-         FST_WRB ( card, interruptEvent.rdindex, rdidx );
--
--        for ( pi = 0, port = card->ports ; pi < card->nports ; pi++, port++ )
--        {
--                if ( ! port->run )
--                        continue;
--
--                /* Check for rx completions */
--                while ( ! ( FST_RDB ( card, rxDescrRing[pi][port->rxpos].bits )
--                                                                & DMA_OWN ))
--                {
--                        fst_intr_rx ( card, port );
--                }
--
--                /* Check for Tx completions */
--                while ( port->txcnt > 0 && ! ( FST_RDB ( card,
--                        txDescrRing[pi][port->txipos].bits ) & DMA_OWN ))
--                {
--                        --port->txcnt;
--                        if ( ++port->txipos >= NUM_TX_BUFFER )
--                                port->txipos = 0;
--                        netif_wake_queue ( port_to_dev ( port ));
--                }
--        }
--
--        spin_unlock ( &card->card_lock );
- }
- 
- 
-@@ -942,28 +1636,165 @@
- 
- 
- static int
-+fst_change_mtu ( struct net_device *dev, int new_mtu )
-+{
-+        if ( new_mtu < 128 || new_mtu > FST_MAX_MTU )
-+                return -EINVAL;
-+        dev->mtu = new_mtu;
-+        return 0;
-+}
-+
-+
-+/* Sooner or later you can't avoid a forward declaration */
-+static int fst_ioctl ( struct net_device *dev, struct ifreq *ifr, int cmd );
-+
-+static int
-+switch_proto ( struct fst_port_info *port, int new_proto )
-+{
-+        int err;
-+        int orig_mtu;
-+        struct net_device *dev;
-+
-+        dev = port->dev;
-+
-+        /* Turn off sPPP module ? */
-+        if (( new_proto != FST_HDLC && new_proto != FST_PPP )
-+                && ( port->proto == FST_HDLC || port->proto == FST_PPP ))
-+        {
-+	        /*
-+		 * Only close if we have opened before
-+		 */
-+                if ( port->pppdev.dev != NULL)
-+		{
-+                    sppp_close ( port->pppdev.dev );
-+                    sppp_detach ( port->pppdev.dev );
-+		}
-+
-+                /* Reset some fields overwritten by sPPP */
-+                dev->hard_header     = NULL;
-+                dev->rebuild_header  = NULL;
-+                dev->tx_queue_len    = FST_TX_QUEUE_LEN;
-+                dev->type            = ARPHRD_MYTYPE;
-+                dev->addr_len        = 0;
-+                dev->hard_header_len = 0;
-+                dev->do_ioctl        = fst_ioctl;
-+                dev->change_mtu      = fst_change_mtu;
-+                dev->flags           = IFF_POINTOPOINT|IFF_NOARP;
-+
-+                return 0;
-+        }
-+
-+        /* Turn on sPPP ? */
-+        if (( new_proto == FST_HDLC || new_proto == FST_PPP )
-+                && ( port->proto != FST_HDLC && port->proto != FST_PPP ))
-+        {
-+	        /*
-+		 * I don't think we need this, as the way to return
-+		 * to non-raw mode is to do ifdown/ifup on the
-+		 * interface.  All of this is done in the ifup
-+		 * processing
-+		 */
-+	        return 0;
-+                orig_mtu = dev->mtu;
-+
-+                /* Attach to sync PPP module */
-+                port->pppdev.dev = dev;
-+                sppp_attach ( &port->pppdev );
-+
-+                if ( orig_mtu < dev->mtu )
-+                        dev->change_mtu ( dev, orig_mtu );
-+
-+                /* Claw back the ioctl routine. We promise to be good and call
-+                 * the sync PPP routines once we've eliminated our functions.
-+                 */
-+                dev->do_ioctl = fst_ioctl;
-+
-+                /* Set the mode */
-+                if ( new_proto == FST_HDLC )
-+                {
-+                        err = sppp_do_ioctl ( port->pppdev.dev, NULL,
-+                                                                SPPPIOCCISCO );
-+                }
-+                else
-+                {
-+                        err = sppp_do_ioctl ( port->pppdev.dev, NULL,
-+                                                                SPPPIOCPPP );
-+                }
-+
-+                /* Open the device */
-+                if ( err == 0 )
-+                {
-+                        (void) sppp_open ( port->dev );
-+                }
-+
-+                return err;
-+        }
-+
-+        /* Switch sPPP mode to that desired */
-+        err = 0;
-+        if ( new_proto == FST_HDLC && port->pppdev.dev != NULL )
-+        {
-+                err = sppp_do_ioctl ( port->pppdev.dev, NULL, SPPPIOCCISCO );
-+        }
-+        else if ( new_proto == FST_PPP && port->pppdev.dev != NULL )
-+        {
-+                err = sppp_do_ioctl ( port->pppdev.dev, NULL, SPPPIOCPPP );
-+        }
-+
-+        /* Anything else is switching from one raw mode to another which is
-+         * basically a NOP
-+         */
-+
-+        return err;
-+}
-+
-+
-+static int
- set_conf_from_info ( struct fst_card_info *card, struct fst_port_info *port,
-                 struct fstioc_info *info )
- {
-         int err;
- 
--        /* Set things according to the user set valid flags.
--         * Several of the old options have been invalidated/replaced by the
--         * generic HDLC package.
--         */
-+        /* Set things according to the user set valid flags */
-         err = 0;
-         if ( info->valid & FSTVAL_PROTO )
--                err = -EINVAL;
-+        {
-+                if ( port->proto != info->proto )
-+                {
-+                        err = switch_proto ( port, info->proto );
-+                        if ( err == 0 )
-+                                port->proto = info->proto;
-+                }
-+        }
-         if ( info->valid & FSTVAL_CABLE )
--                err = -EINVAL;
-+        {
-+                FST_WRB ( card, portConfig[port->index].lineInterface,
-+                                        info->lineInterface );
-+                port->hwif = info->lineInterface;
-+        }
-         if ( info->valid & FSTVAL_SPEED )
--                err = -EINVAL;
--
-+        {
-+                FST_WRL ( card, portConfig[port->index].lineSpeed,
-+                                        info->lineSpeed );
-+                FST_WRB ( card, portConfig[port->index].internalClock,
-+                                        info->internalClock );
-+                FST_WRB ( card, portConfig[port->index].transparentMode,
-+                                        0 );
-+        }
-+        if ( info->valid & FSTVAL_PHASE )
-+	{
-+                FST_WRB ( card, portConfig[port->index].invertClock,
-+                                        info->invertClock );
-+	}
-         if ( info->valid & FSTVAL_MODE )
-+        {
-                 FST_WRW ( card, cardMode, info->cardMode );
-+        }
- #if FST_DEBUG
-         if ( info->valid & FSTVAL_DEBUG )
-+        {
-                 fst_debug_mask = info->debug;
-+        }
- #endif
- 
-         return err;
-@@ -981,7 +1812,7 @@
-         info->nports = card->nports;
-         info->type   = card->type;
-         info->state  = card->state;
--        info->proto  = FST_GEN_HDLC;
-+        info->proto  = port->proto;
-         info->index  = i;
- #if FST_DEBUG
-         info->debug  = fst_debug_mask;
-@@ -1000,113 +1831,37 @@
-         info->lineInterface = FST_RDW ( card, portConfig[i].lineInterface );
-         info->internalClock = FST_RDB ( card, portConfig[i].internalClock );
-         info->lineSpeed     = FST_RDL ( card, portConfig[i].lineSpeed );
-+	info->invertClock   = FST_RDB ( card, portConfig[i].invertClock );
-         info->v24IpSts      = FST_RDL ( card, v24IpSts[i] );
-         info->v24OpSts      = FST_RDL ( card, v24OpSts[i] );
-         info->clockStatus   = FST_RDW ( card, clockStatus[i] );
-         info->cableStatus   = FST_RDW ( card, cableStatus );
-         info->cardMode      = FST_RDW ( card, cardMode );
-         info->smcFirmwareVersion  = FST_RDL ( card, smcFirmwareVersion );
--}
--
--
--static int
--fst_set_iface ( struct fst_card_info *card, struct fst_port_info *port,
--                struct ifreq *ifr )
--{
--        sync_serial_settings sync;
--        int i;
--
--        if (copy_from_user (&sync, ifr->ifr_settings.ifs_ifsu.sync,
--			    sizeof (sync)))
--                return -EFAULT;
--
--        if ( sync.loopback )
--                return -EINVAL;
- 
--        i = port->index;
--
--        switch (ifr->ifr_settings.type)
--        {
--        case IF_IFACE_V35:
--                FST_WRW ( card, portConfig[i].lineInterface, V35 );
--                port->hwif = V35;
--                break;
--
--        case IF_IFACE_V24:
--                FST_WRW ( card, portConfig[i].lineInterface, V24 );
--                port->hwif = V24;
--                break;
--
--        case IF_IFACE_X21:
--                FST_WRW ( card, portConfig[i].lineInterface, X21 );
--                port->hwif = X21;
--                break;
--
--        case IF_IFACE_SYNC_SERIAL:
--                break;
--
--        default:
--                return -EINVAL;
--        }
--
--        switch ( sync.clock_type )
--        {
--        case CLOCK_EXT:
--                FST_WRB ( card, portConfig[i].internalClock, EXTCLK );
--                break;
--
--        case CLOCK_INT:
--                FST_WRB ( card, portConfig[i].internalClock, INTCLK );
--                break;
--
--        default:
--                return -EINVAL;
--        }
--        FST_WRL ( card, portConfig[i].lineSpeed, sync.clock_rate );
--        return 0;
--}
--
--static int
--fst_get_iface ( struct fst_card_info *card, struct fst_port_info *port,
--                struct ifreq *ifr )
--{
--        sync_serial_settings sync;
--        int i;
--
--        /* First check what line type is set, we'll default to reporting X.21
--         * if nothing is set as IF_IFACE_SYNC_SERIAL implies it can't be
--         * changed
--         */
--        switch ( port->hwif )
--        {
--        case V35:
--                ifr->ifr_settings.type = IF_IFACE_V35;
--                break;
--        case V24:
--                ifr->ifr_settings.type = IF_IFACE_V24;
--                break;
--        case X21:
--        default:
--                ifr->ifr_settings.type = IF_IFACE_X21;
--                break;
--        }
--
--	if (ifr->ifr_settings.size < sizeof(sync)) {
--		ifr->ifr_settings.size = sizeof(sync); /* data size wanted */
--		return -ENOBUFS;
--	}
--
--        i = port->index;
--        sync.clock_rate = FST_RDL ( card, portConfig[i].lineSpeed );
--        /* Lucky card and linux use same encoding here */
--        sync.clock_type = FST_RDB ( card, portConfig[i].internalClock );
--        sync.loopback = 0;
--
--        if (copy_to_user (ifr->ifr_settings.ifs_ifsu.sync, &sync,
--			  sizeof(sync)))
--                return -EFAULT;
--
--        return 0;
-+	/*
-+	 * The T2U can report cable presence for both A or B
-+	 * in bits 0 and 1 of cableStatus.  See which port we are and 
-+	 * do the mapping.
-+	 */
-+ 	if (card->family == FST_FAMILY_TXU)
-+	  {
-+	    if (port->index == 0)
-+	      {
-+		/*
-+		 * Port A
-+		 */
-+		info->cableStatus = info->cableStatus & 1;
-+	      }
-+	    else
-+	      {
-+		/*
-+		 * Port B
-+		 */
-+		info->cableStatus = info->cableStatus >> 1;
-+		info->cableStatus = info->cableStatus & 1;
-+	      }
-+	  }
- }
- 
- 
-@@ -1121,7 +1876,7 @@
- 
-         dbg ( DBG_IOCTL,"ioctl: %x, %p\n", cmd, ifr->ifr_data );
- 
--        port = dev_to_port ( dev );
-+        port = dev->priv;
-         card = port->card;
- 
-         if ( !capable ( CAP_NET_ADMIN ))
-@@ -1158,7 +1913,7 @@
-                  * when going over the top
-                  */
-                 if ( wrthdr.size > FST_MEMSIZE || wrthdr.offset > FST_MEMSIZE
--				|| wrthdr.size + wrthdr.offset > FST_MEMSIZE )
-+                                || wrthdr.size + wrthdr.offset > FST_MEMSIZE )
-                 {
-                         return -ENXIO;
-                 }
-@@ -1196,7 +1951,7 @@
-                         if ( card->state == FST_RUNNING )
-                         {
-                                 spin_lock_irqsave ( &card->card_lock, flags );
--                                fst_clear_intr ( card );
-+                                fst_enable_intr ( card );
-                                 FST_WRB ( card, interruptHandshake, 0xEE );
-                                 spin_unlock_irqrestore ( &card->card_lock,
-                                                                 flags );
-@@ -1218,9 +1973,11 @@
- 
-         case FSTSETCONF:
- 
--                /* Most of the setting have been moved to the generic ioctls
--                 * this just covers debug and board ident mode now
--                 */
-+                if(card->state != FST_RUNNING)
-+	        {
-+		  printk_err("FarSync: Attempt to configure card %d in non-running state (%d)\n", card->card_no, card->state);
-+	                return -EIO;
-+	        }
-                 if ( copy_from_user ( &info,  ifr->ifr_data, sizeof ( info )))
-                 {
-                         return -EFAULT;
-@@ -1228,25 +1985,12 @@
- 
-                 return set_conf_from_info ( card, port, &info );
- 
--        case SIOCWANDEV:
--                switch (ifr->ifr_settings.type)
--                {
--                case IF_GET_IFACE:
--                        return fst_get_iface ( card, port, ifr );
--
--                case IF_IFACE_SYNC_SERIAL:
--                case IF_IFACE_V35:
--                case IF_IFACE_V24:
--                case IF_IFACE_X21:
--                        return fst_set_iface ( card, port, ifr );
--
--                default:
--                        return hdlc_ioctl ( dev, ifr, cmd );
--                }
--
-         default:
--                /* Not one of ours. Pass through to HDLC package */
--                return hdlc_ioctl ( dev, ifr, cmd );
-+                /* Not one of ours. Pass it through to sPPP package */
-+                if ( port->proto == FST_HDLC || port->proto == FST_PPP )
-+                        return sppp_do_ioctl ( dev, ifr, cmd );
-+                else
-+                        return -EINVAL;
-         }
- }
- 
-@@ -1277,12 +2021,13 @@
-                 port->run = 1;
- 
-                 signals = FST_RDL ( port->card, v24DebouncedSts[port->index]);
--                if ( signals & (( port->hwif == X21 ) ? IPSTS_INDICATE
--                                                      : IPSTS_DCD ))
--                        netif_carrier_on ( port_to_dev ( port ));
-+                if ( signals & (((port->hwif == X21) || (port->hwif == X21D))
-+				? IPSTS_INDICATE : IPSTS_DCD ))
-+                        netif_carrier_on ( port->dev );
-                 else
--                        netif_carrier_off ( port_to_dev ( port ));
-+                        netif_carrier_off ( port->dev );
-         }
-+
- }
- 
- static void
-@@ -1308,15 +2053,64 @@
- static int
- fst_open ( struct net_device *dev )
- {
-+        struct fst_card_info *card;
-+        struct fst_port_info *port;
-+        int orig_mtu;
-         int err;
- 
--        err = hdlc_open ( dev_to_hdlc ( dev ));
--        if ( err )
--                return err;
--
-         MOD_INC_USE_COUNT;
- 
--        fst_openport ( dev_to_port ( dev ));
-+        port = dev->priv;
-+        card = port->card;
-+
-+        switch ( port->proto )
-+        {
-+        case FST_HDLC:
-+        case FST_PPP:
-+
-+                orig_mtu = dev->mtu;
-+
-+                /* Attach to sync PPP module */
-+                port->pppdev.dev = dev;
-+                sppp_attach ( &port->pppdev );
-+
-+                if ( orig_mtu < dev->mtu )
-+                        dev->change_mtu ( dev, orig_mtu );
-+
-+                /* Claw back the ioctl routine. We promise to be good and call
-+                 * the sync PPP routines once we've eliminated our functions.
-+                 */
-+                dev->do_ioctl = fst_ioctl;
-+
-+                err = sppp_do_ioctl ( dev, NULL, port->proto == FST_HDLC
-+                                                ? SPPPIOCCISCO : SPPPIOCPPP );
-+                if ( err )
-+		{
-+			sppp_detach ( dev );
-+			MOD_DEC_USE_COUNT;
-+			return err;
-+		}
-+
-+                err = sppp_open ( dev );
-+                if ( err )
-+		{
-+			sppp_detach ( dev );
-+			MOD_DEC_USE_COUNT;
-+			return err;
-+		}
-+                break;
-+
-+        case FST_MONITOR:
-+        case FST_RAW:
-+                break;
-+
-+        default:
-+                dbg ( DBG_OPEN,"open: Unknown proto %d\n", port->proto );
-+                break;
-+        }
-+
-+        fst_openport ( port );
-+
-         netif_wake_queue ( dev );
-         return 0;
- }
-@@ -1324,19 +2118,42 @@
- static int
- fst_close ( struct net_device *dev )
- {
--        netif_stop_queue ( dev );
--        fst_closeport ( dev_to_port ( dev ));
--        hdlc_close ( dev_to_hdlc  ( dev ));
--        MOD_DEC_USE_COUNT;
--        return 0;
--}
-+        struct fst_port_info *port;
-+        struct fst_card_info *card;
-+	unsigned char tx_dma_done;
-+	unsigned char rx_dma_done;
- 
--static int
--fst_attach ( hdlc_device *hdlc, unsigned short encoding, unsigned short parity )
--{
--        /* Setting currently fixed in FarSync card so we check and forget */
--        if ( encoding != ENCODING_NRZ || parity != PARITY_CRC16_PR1_CCITT )
--                return -EINVAL;
-+        port = dev->priv;
-+	card = port->card;
-+
-+	tx_dma_done = inb ( card->pci_conf + DMACSR1 );
-+	rx_dma_done = inb ( card->pci_conf + DMACSR0 );
-+	dbg(DBG_ASS, "Port Close: tx_dma_in_progress = %d (%x) rx_dma_in_progress = %d (%x)\n",
-+	       card->dmatx_in_progress, tx_dma_done, 
-+	       card->dmarx_in_progress, rx_dma_done);
-+
-+
-+	netif_stop_queue ( dev );
-+        switch ( port->proto )
-+        {
-+        case FST_HDLC:
-+        case FST_PPP:
-+                sppp_close ( dev );
-+                sppp_detach ( dev );
-+                break;
-+
-+        case FST_MONITOR:
-+        case FST_RAW:
-+                break;
-+
-+        default:
-+                dbg ( DBG_OPEN,"close: Unknown proto %d\n", port->proto );
-+                break;
-+        }
-+
-+        fst_closeport ( port );
-+
-+        MOD_DEC_USE_COUNT;
-         return 0;
- }
- 
-@@ -1345,19 +2162,20 @@
- fst_tx_timeout ( struct net_device *dev )
- {
-         struct fst_port_info *port;
-+        struct fst_card_info *card;
- 
--        dbg ( DBG_INTR | DBG_TX,"tx_timeout\n");
--
--        port = dev_to_port ( dev );
--
--        port->hdlc.stats.tx_errors++;
--        port->hdlc.stats.tx_aborted_errors++;
-+        port = dev->priv;
-+        card = port->card;
- 
--        if ( port->txcnt > 0 )
--                fst_issue_cmd ( port, ABORTTX );
-+        port->stats.tx_errors++;
-+        port->stats.tx_aborted_errors++;
-+	dbg(DBG_ASS, "Tx timeout card %d port %d\n", 
-+	    card->card_no, port->index);
-+        fst_issue_cmd ( port, ABORTTX );
- 
-         dev->trans_start = jiffies;
-         netif_wake_queue ( dev );
-+	port->start = 0;
- }
- 
- 
-@@ -1366,70 +2184,104 @@
- {
-         struct fst_card_info *card;
-         struct fst_port_info *port;
--        unsigned char dmabits;
-         unsigned long flags;
--        int pi;
--        int txp;
-+	int txq_length;
- 
--        port = dev_to_port ( dev );
-+        port = dev->priv;
-         card = port->card;
- 
-+        /* Drop packet if in monitor (rx only) mode */
-+        if ( port->proto == FST_MONITOR )
-+        {
-+                dev_kfree_skb ( skb );
-+                return 0;
-+        }
-+
-         /* Drop packet with error if we don't have carrier */
-         if ( ! netif_carrier_ok ( dev ))
-         {
-                 dev_kfree_skb ( skb );
--                port->hdlc.stats.tx_errors++;
--                port->hdlc.stats.tx_carrier_errors++;
-+                port->stats.tx_errors++;
-+                port->stats.tx_carrier_errors++;
-+		dbg(DBG_ASS, "No carrier on card %d por %d\n",
-+		    card->card_no, port->index);
-                 return 0;
-         }
- 
-         /* Drop it if it's too big! MTU failure ? */
-         if ( skb->len > LEN_TX_BUFFER )
-         {
--                dbg ( DBG_TX,"Packet too large %d vs %d\n", skb->len,
-+                dbg ( DBG_ASS,"Packet too large %d vs %d\n", skb->len,
-                                                 LEN_TX_BUFFER );
-                 dev_kfree_skb ( skb );
--                port->hdlc.stats.tx_errors++;
-+                port->stats.tx_errors++;
-                 return 0;
-         }
- 
--        /* Check we have a buffer */
--        pi = port->index;
-+	/*
-+	 * We are always going to queue the packet
-+	 * so that the bottom half is the only place we tx from
-+	 * Check there is room in the port txq
-+	 */
-         spin_lock_irqsave ( &card->card_lock, flags );
--        txp = port->txpos;
--        dmabits = FST_RDB ( card, txDescrRing[pi][txp].bits );
--        if ( dmabits & DMA_OWN )
--        {
--                spin_unlock_irqrestore ( &card->card_lock, flags );
--                dbg ( DBG_TX,"Out of Tx buffers\n");
--                dev_kfree_skb ( skb );
--                port->hdlc.stats.tx_errors++;
--                return 0;
--        }
--        if ( ++port->txpos >= NUM_TX_BUFFER )
--                port->txpos = 0;
--
--        if ( ++port->txcnt >= NUM_TX_BUFFER )
--                netif_stop_queue ( dev );
--
--        /* Release the card lock before we copy the data as we now have
--         * exclusive access to the buffer.
--         */
--        spin_unlock_irqrestore ( &card->card_lock, flags );
-+	if ((txq_length = port->txqe - port->txqs) < 0)
-+	  {
-+	    /*
-+	     * This is the case where the next free has wrapped but the
-+	     * last used hasn't
-+	     */
-+	    txq_length = txq_length + FST_TXQ_DEPTH;
-+	  }
-+	spin_unlock_irqrestore ( &card->card_lock, flags );
-+	if (txq_length > fst_txq_high)
-+	  {
-+	    /*
-+	     * We have got enough buffers in the pipeline.  Ask the network
-+	     * layer to stop sending frames down
-+	     */
-+	    netif_stop_queue ( dev );
-+	    port->start = 1;   /* I'm using this to signal stop sent up */
-+	  }
-+
-+	if (txq_length == FST_TXQ_DEPTH - 1)
-+	  {
-+	    /*
-+	     * This shouldn't have happened but such is life
-+	     */
-+	    dev_kfree_skb ( skb );
-+	    port->stats.tx_errors++;
-+	    dbg(DBG_ASS, "Tx queue overflow card %d port %d\n",
-+		card->card_no, port->index);
-+	    return 0;
-+	  }
-+
-+	/*
-+	 * queue the buffer
-+	 */
-+        spin_lock_irqsave ( &card->card_lock, flags );
-+	port->txq[port->txqe] = skb;
-+	port->txqe++;
-+	if (port->txqe == FST_TXQ_DEPTH)
-+	  port->txqe = 0;
-+	spin_unlock_irqrestore ( &card->card_lock, flags );
-+	
-+	/* Scehdule the bottom half which now does transmit processing */
-+	queue_task(&card->card_tx_task, &tq_immediate); 
-+	mark_bh(IMMEDIATE_BH); /* Note that this call must follow queue_task */
- 
--        /* Enqueue the packet */
--        memcpy_toio ( card->mem + BUF_OFFSET ( txBuffer[pi][txp][0]),
--                                                skb->data, skb->len );
--        FST_WRW ( card, txDescrRing[pi][txp].bcnt, cnv_bcnt ( skb->len ));
--        FST_WRB ( card, txDescrRing[pi][txp].bits, DMA_OWN | TX_STP | TX_ENP );
-+	return 0;
-+}
- 
--        port->hdlc.stats.tx_packets++;
--        port->hdlc.stats.tx_bytes += skb->len;
- 
--        dev_kfree_skb ( skb );
-+static struct net_device_stats *
-+fst_get_stats ( struct net_device *dev )
-+{
-+        struct fst_port_info *port;
- 
--        dev->trans_start = jiffies;
--        return 0;
-+        if (( port = dev->priv ) != NULL )
-+                return &port->stats;
-+        else
-+                return NULL;
- }
- 
- 
-@@ -1443,7 +2295,10 @@
- static char *type_strings[] __devinitdata = {
-         "no hardware",                  /* Should never be seen */
-         "FarSync T2P",
--        "FarSync T4P"
-+        "FarSync T4P",
-+	"FarSync T1U",
-+	"FarSync T2U",
-+	"FarSync T4U"
- };
- 
- static void __devinit
-@@ -1459,13 +2314,34 @@
-          */
-         for ( i = 0 ; i < card->nports ; i++ )
-         {
-+                card->ports[i].if_ptr = &card->ports[i].pppdev;
-                 card->ports[i].card   = card;
-                 card->ports[i].index  = i;
-+                card->ports[i].proto  = FST_HDLC;
-                 card->ports[i].run    = 0;
- 
--                dev = hdlc_to_dev ( &card->ports[i].hdlc );
-+                dev = kmalloc ( sizeof ( struct net_device ), GFP_KERNEL );
-+                if ( dev == NULL )
-+                {
-+                        printk_err ("Cannot allocate net_device for port %d\n",
-+                                        i );
-+                        /* No point going any further */
-+                        card->nports = i;
-+                        break;
-+                }
-+                memset ( dev, 0, sizeof ( struct net_device ));
-+                card->ports[i].dev = dev;
- 
--                /* Fill in the net device info */
-+                if ( dev_alloc_name ( dev, FST_NDEV_NAME "%d") < 0 )
-+                {
-+                        printk_err ("Cannot allocate i/f name for port %d\n",
-+                                        i );
-+                        kfree ( dev );
-+                        card->nports = i;
-+                        break;
-+                }
-+
-+                /* Fill in remainder of the net device info */
-                                 /* Since this is a PCI setup this is purely
-                                  * informational. Give them the buffer addresses
-                                  * and basic card I/O.
-@@ -1481,19 +2357,26 @@
-                 dev->base_addr   = card->pci_conf;
-                 dev->irq         = card->irq;
- 
--                dev->tx_queue_len          = FST_TX_QUEUE_LEN;
--                dev->open                  = fst_open;
--                dev->stop                  = fst_close;
--                dev->do_ioctl              = fst_ioctl;
--                dev->watchdog_timeo        = FST_TX_TIMEOUT;
--                dev->tx_timeout            = fst_tx_timeout;
--                card->ports[i].hdlc.attach = fst_attach;
--                card->ports[i].hdlc.xmit   = fst_start_xmit;
--
--                if (( err = register_hdlc_device ( &card->ports[i].hdlc )) < 0 )
--                {
--                        printk_err ("Cannot register HDLC device for port %d"
--                                    " (errno %d)\n", i, -err );
-+                dev->get_stats          = fst_get_stats;
-+                dev->mtu                = FST_DEF_MTU;
-+                dev->change_mtu         = fst_change_mtu;
-+                dev->priv               = &card->ports[i];
-+                dev->tx_queue_len       = FST_TX_QUEUE_LEN;
-+                dev->type               = ARPHRD_MYTYPE;
-+                dev->addr_len           = 0;
-+                dev->open               = fst_open;
-+                dev->stop               = fst_close;
-+                dev->hard_start_xmit    = fst_start_xmit;
-+                dev->do_ioctl           = fst_ioctl;
-+                dev->watchdog_timeo     = FST_TX_TIMEOUT;
-+                dev->tx_timeout         = fst_tx_timeout;
-+                dev->flags              = IFF_POINTOPOINT|IFF_NOARP;
-+
-+                if (( err = register_netdev ( dev )) < 0 )
-+                {
-+                        printk_err ("Cannot register %s (errno %d)\n",
-+                                        dev->name, -err );
-+                        kfree ( dev );
-                         card->nports = i;
-                         break;
-                 }
-@@ -1502,9 +2385,32 @@
-         spin_lock_init ( &card->card_lock );
- 
-         printk ( KERN_INFO "%s-%s: %s IRQ%d, %d ports\n",
--                        hdlc_to_dev(&card->ports[0].hdlc)->name,
--                        hdlc_to_dev(&card->ports[card->nports-1].hdlc)->name,
-+                        card->ports[0].dev->name,
-+                        card->ports[card->nports-1].dev->name,
-                         type_strings[card->type], card->irq, card->nports );
-+
-+	if (card->family == FST_FAMILY_TXU)
-+	  {
-+	    /*
-+	     * Allocate a dma buffer for transmit and receives
-+	     */
-+	    card->rx_dma_handle_host = 
-+	      pci_alloc_consistent(card->device, FST_MAX_MTU, 
-+				   &card->rx_dma_handle_card);
-+	    if (card->rx_dma_handle_host == NULL)
-+	      {
-+		printk_err("farsync: Could not allocate rx dma buffer\n");
-+		return;
-+	      }
-+	    card->tx_dma_handle_host = 
-+	      pci_alloc_consistent(card->device, FST_MAX_MTU,
-+				   &card->tx_dma_handle_card);
-+	    if (card->tx_dma_handle_host == NULL)
-+	      {
-+		printk_err("farsync: Could not allocate tx dma buffer\n");
-+		return;
-+	      }
-+	  }
- }
- 
- 
-@@ -1516,16 +2422,38 @@
- fst_add_one ( struct pci_dev *pdev, const struct pci_device_id *ent )
- {
-         static int firsttime_done = 0;
-+	static int no_of_cards_added = 0;
-         struct fst_card_info *card;
-         int err = 0;
-+	int i;
- 
-         if ( ! firsttime_done )
-         {
-                 printk ( KERN_INFO "FarSync X21 driver " FST_USER_VERSION
--                                " (c) 2001 FarSite Communications Ltd.\n");
-+                                " (c) 2001-2002 FarSite Communications Ltd.\n");
-                 firsttime_done = 1;
-         }
- 
-+	/*
-+	 * We are going to be clever and allow certain cards not to be
-+	 * configured.  An exclude list can be provided in /etc/modules.conf
-+	 */
-+	if (fst_excluded_cards != 0)
-+	  {
-+	    /*
-+	     * There are cards to exclude
-+	     *
-+	     */
-+	    for (i=0; i< fst_excluded_cards; i++)
-+	      {
-+		if ((pdev->devfn)>>3 == fst_excluded_list[i])
-+		  {
-+		    printk("FarSync PCI device %d not assigned\n", (pdev->devfn)>>3);
-+		    return -EBUSY;
-+		  }
-+	      }
-+	  }
-+
-         /* Allocate driver private data */
-         card = kmalloc ( sizeof ( struct fst_card_info ),  GFP_KERNEL);
-         if (card == NULL)
-@@ -1536,6 +2464,13 @@
-         }
-         memset ( card, 0, sizeof ( struct fst_card_info ));
- 
-+        /* Try to enable the device */
-+        if (( err = pci_enable_device ( pdev )) != 0 )
-+        {
-+                printk_err ("Failed to enable card. Err %d\n", -err );
-+                goto error_free_card;
-+        }
-+
-         /* Record info we need*/
-         card->irq         = pdev->irq;
-         card->pci_conf    = pci_resource_start ( pdev, 1 );
-@@ -1543,23 +2478,88 @@
-         card->phys_ctlmem = pci_resource_start ( pdev, 3 );
- 
-         card->type        = ent->driver_data;
--        card->nports      = ( ent->driver_data == FST_TYPE_T2P ) ? 2 : 4;
-+	card->family       = (( ent->driver_data == FST_TYPE_T2P ) ||
-+                             ( ent->driver_data == FST_TYPE_T4P ) ) 
-+	                     ? FST_FAMILY_TXP : FST_FAMILY_TXU;
-+	if ( ent->driver_data == FST_TYPE_T1U )
-+	  card->nports = 1;
-+	else
-+	  card->nports      = (( ent->driver_data == FST_TYPE_T2P ) || 
-+			       ( ent->driver_data == FST_TYPE_T2U) ) ? 2 : 4;
- 
-         card->state       = FST_UNINIT;
-+	card->device      = pdev;
- 
-         dbg ( DBG_PCI,"type %d nports %d irq %d\n", card->type,
-                         card->nports, card->irq );
-         dbg ( DBG_PCI,"conf %04x mem %08x ctlmem %08x\n",
-                         card->pci_conf, card->phys_mem, card->phys_ctlmem );
- 
-+	/*
-+	 * Initialise the task queue information
-+	 *
-+	 */
-+	memset (&card->card_isr_task, 0, sizeof(struct tq_struct));
-+	card->card_isr_task.data = card;            /* The data structure for the card */
-+	card->card_tx_task.data = card;
-+	switch (no_of_cards_added)
-+	  {
-+	  case 0:
-+	    {
-+	      card->card_isr_task.routine = fst_bh_task_1; 
-+	      card->card_tx_task.routine = fst_bh_task_tx_1;
-+	      break;
-+	    }
-+
-+	  case 1:
-+	    {
-+	      card->card_isr_task.routine = fst_bh_task_2; 
-+	      card->card_tx_task.routine = fst_bh_task_tx_2;
-+	      break;
-+	    }
-+
-+	  case 2:
-+	    {
-+	      card->card_isr_task.routine = fst_bh_task_3; 
-+	      card->card_tx_task.routine = fst_bh_task_tx_3;
-+	      break;
-+	    }
-+
-+	  case 3:
-+	    {
-+	      card->card_isr_task.routine = fst_bh_task_4; 
-+	      card->card_tx_task.routine = fst_bh_task_tx_4;
-+	      break;
-+	    }
-+
-+	  default:
-+	    {
-+	      printk_err("Could not set up bottom half for card %d\n", no_of_cards_added+1);
-+	      break;
-+	    }
-+	  }
-+
-         /* Check we can get access to the memory and I/O regions */
--        if ( ! request_region ( card->pci_conf, 0x80,"PLX config regs"))
--        {
-+	if (card->family == FST_FAMILY_TXU)
-+	  {
-+	    if ( ! request_region ( card->pci_conf, 0x100,"PLX 9054 config regs"))
-+	      {
-+                printk_err ("Unable to get config I/O @ 0x%04X\n",
-+			    card->pci_conf );
-+                err = -ENODEV;
-+                goto error_free_card;
-+	      }
-+	  }
-+	else
-+	  {
-+            if ( ! request_region ( card->pci_conf, 0x80,"PLX 9050/2 config regs"))
-+              {
-                 printk_err ("Unable to get config I/O @ 0x%04X\n",
-                                                 card->pci_conf );
-                 err = -ENODEV;
-                 goto error_free_card;
--        }
-+             }
-+          }
-         if ( ! request_mem_region ( card->phys_mem, FST_MEMSIZE,"Shared RAM"))
-         {
-                 printk_err ("Unable to get main memory @ 0x%08X\n",
-@@ -1575,12 +2575,6 @@
-                 goto error_release_mem;
-         }
- 
--        /* Try to enable the device */
--        if (( err = pci_enable_device ( pdev )) != 0 )
--        {
--                printk_err ("Failed to enable card. Err %d\n", -err );
--                goto error_release_ctlmem;
--        }
- 
-         /* Get virtual addresses of memory regions */
-         if (( card->mem = ioremap ( card->phys_mem, FST_MEMSIZE )) == NULL )
-@@ -1601,6 +2595,9 @@
-         fst_cpureset ( card );
-         card->state = FST_RESET;
- 
-+	/* Initialise DMA (if required) */
-+	fst_init_dma ( card );
-+
-         /* Register the interrupt handler */
-         if ( request_irq ( card->irq, fst_intr, SA_SHIRQ, FST_DEV_NAME, card ))
-         {
-@@ -1612,8 +2609,13 @@
- 
-         /* Record driver data for later use */
-         pci_set_drvdata(pdev, card);
-+	if (!pci_dma_supported(pdev, 0xffffffff))
-+	  {
-+	    printk("Can't do DMA on this device\n");
-+	  }
- 
-         /* Remainder of card setup */
-+	card->card_no = no_of_cards_added++;  /* Record instance and bump it */
-         fst_init_card ( card );
- 
-         return 0;                       /* Success */
-@@ -1654,7 +2656,8 @@
- 
-         for ( i = 0 ; i < card->nports ; i++ )
-         {
--                unregister_hdlc_device ( &card->ports[i].hdlc );
-+                unregister_netdev ( card->ports[i].dev );
-+                kfree ( card->ports[i].dev );
-         }
- 
-         fst_disable_intr ( card );
-@@ -1665,16 +2668,36 @@
- 
-         release_mem_region ( card->phys_ctlmem, 0x10 );
-         release_mem_region ( card->phys_mem, FST_MEMSIZE );
--        release_region ( card->pci_conf, 0x80 );
--
--        kfree ( card );
-+	if (card->family == FST_FAMILY_TXU)
-+	  {
-+	    release_region ( card->pci_conf, 0x100 );
-+	  }
-+	else
-+	  {
-+	    release_region ( card->pci_conf, 0x80 );
-+	  }
-+
-+	if ( card->family == FST_FAMILY_TXU)
-+	  {
-+	    /*
-+	     * Free dma buffers
-+	     */
-+	    pci_free_consistent(card->device, 2048, card->rx_dma_handle_host, 
-+				card->rx_dma_handle_card);
-+	    pci_free_consistent(card->device, 2048, card->tx_dma_handle_host, 
-+				card->tx_dma_handle_card);
-+	  }
- }
- 
- static struct pci_driver fst_driver = {
-         name:           FST_NAME,
-         id_table:       fst_pci_dev_id,
-         probe:          fst_add_one,
-+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,4,16)
-         remove:         __devexit_p(fst_remove_one),
-+#else
-+        remove:         fst_remove_one,
-+#endif
-         suspend:        NULL,
-         resume:         NULL,
- };
-@@ -1694,3 +2717,6 @@
- module_init ( fst_init );
- module_exit ( fst_cleanup_module );
- 
-+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,4,9)
-+MODULE_LICENSE("GPL");
-+#endif
-diff -ruNP linux-2.4.25.orig/drivers/net/wan/farsync.h linux-2.4.25/drivers/net/wan/farsync.h
---- linux-2.4.25.orig/drivers/net/wan/farsync.h	Wed Feb 18 15:17:36 2004
-+++ linux-2.4.25/drivers/net/wan/farsync.h	Wed Feb 18 16:38:12 2004
-@@ -32,8 +32,13 @@
-  *      A short common prefix is useful for routines within the driver to avoid
-  *      conflict with other similar drivers and I chosen to use "fst_" for this
-  *      purpose (FarSite T-series).
-+ *
-+ *      Finally the device driver needs a short network interface name. Since
-+ *      "hdlc" is already in use I've chosen the even less informative "sync"
-+ *      for the present.
-  */
- #define FST_NAME                "fst"           /* In debug/info etc */
-+#define FST_NDEV_NAME           "sync"          /* For net interface */
- #define FST_DEV_NAME            "farsync"       /* For misc interfaces */
- 
- 
-@@ -45,7 +50,7 @@
-  *      have individual versions (or IDs) that move much faster than the
-  *      the release version as individual updates are tracked.
-  */
--#define FST_USER_VERSION        "0.09"
-+#define FST_USER_VERSION        "1.02"
- 
- 
- /*      Ioctl call command values
-@@ -110,6 +115,8 @@
-         unsigned short cableStatus;     /* lsb: 0=> present, 1=> absent */
-         unsigned short cardMode;        /* lsb: LED id mode */
-         unsigned short debug;           /* Debug flags */
-+        unsigned char  transparentMode; /* Not used always 0 */
-+        unsigned char  invertClock;     /* Invert clock feature for syncing */
- };
- 
- /* "valid" bitmask */
-@@ -131,13 +138,21 @@
-                                          */
- #define FSTVAL_PROTO    0x00000200      /* proto */
- #define FSTVAL_MODE     0x00000400      /* cardMode */
-+#define FSTVAL_PHASE    0x00000800      /* Clock phase */
- #define FSTVAL_DEBUG    0x80000000      /* debug */
--#define FSTVAL_ALL      0x000007FF      /* Note: does not include DEBUG flag */
-+#define FSTVAL_ALL      0x00000FFF      /* Note: does not include DEBUG flag */
- 
- /* "type" */
- #define FST_TYPE_NONE   0               /* Probably should never happen */
- #define FST_TYPE_T2P    1               /* T2P X21 2 port card */
- #define FST_TYPE_T4P    2               /* T4P X21 4 port card */
-+#define FST_TYPE_T1U    3               /* T1U X21 1 port card */
-+#define FST_TYPE_T2U    4               /* T2U X21 2 port card */
-+#define FST_TYPE_T4U    5               /* T4U X21 4 port card */
-+
-+/* "family" */
-+#define FST_FAMILY_TXP  0               /* T2P or T4P */
-+#define FST_FAMILY_TXU  1               /* T1U or T2U or T4U */
- 
- /* "state" */
- #define FST_UNINIT      0               /* Raw uninitialised state following
-@@ -155,6 +170,7 @@
- #define V24             1
- #define X21             2
- #define V35             3
-+#define X21D            4
- 
- /* "proto" */
- #define FST_HDLC        1               /* Cisco compatible HDLC */
-diff -ruNP linux-2.4.25.orig/fs/proc/root.c linux-2.4.25/fs/proc/root.c
---- linux-2.4.25.orig/fs/proc/root.c	Wed Feb 18 15:16:53 2004
-+++ linux-2.4.25/fs/proc/root.c	Wed Feb 18 16:38:12 2004
-@@ -140,6 +140,7 @@
+diff -NurpabB linux-2.4.27/fs/proc/root.c linux-2.4.27-multigate/fs/proc/root.c
+--- linux-2.4.27/fs/proc/root.c	2002-08-03 02:39:45.000000000 +0200
++++ linux-2.4.27-multigate/fs/proc/root.c	2004-08-17 14:34:31.000000000 +0200
+@@ -140,6 +140,7 @@ EXPORT_SYMBOL(proc_mknod);
  EXPORT_SYMBOL(proc_mkdir);
  EXPORT_SYMBOL(create_proc_entry);
  EXPORT_SYMBOL(remove_proc_entry);
@@ -6973,54 +4292,3 @@ diff -ruNP linux-2.4.25.orig/fs/proc/root.c linux-2.4.25/fs/proc/root.c
  EXPORT_SYMBOL(proc_root);
  EXPORT_SYMBOL(proc_root_fs);
  EXPORT_SYMBOL(proc_net);
-diff -ruNP linux-2.4.25.orig/include/linux/byteorder/generic.h linux-2.4.25/include/linux/byteorder/generic.h
---- linux-2.4.25.orig/include/linux/byteorder/generic.h	Wed Feb 18 15:17:06 2004
-+++ linux-2.4.25/include/linux/byteorder/generic.h	Wed Feb 18 16:38:13 2004
-@@ -122,7 +122,6 @@
- #define be16_to_cpus __be16_to_cpus
- #endif
- 
--#if defined(__KERNEL__)
- /*
-  * Handle ntohl and suches. These have various compatibility
-  * issues - like we want to give the prototype even though we
-@@ -146,12 +145,17 @@
-  * Do the prototypes. Somebody might want to take the
-  * address or some such sick thing..
-  */
-+#if defined(__KERNEL__) || (defined(__GLIBC__) && __GLIBC__ >= 2)
- extern __u32			ntohl(__u32);
- extern __u32			htonl(__u32);
-+#else
-+extern unsigned long int	htonl(unsigned short int);
-+extern unsigned long int	ntohl(unsigned short int);
-+#endif
- extern unsigned short int	ntohs(unsigned short int);
- extern unsigned short int	htons(unsigned short int);
- 
--#if defined(__GNUC__) && defined(__OPTIMIZE__)
-+#if defined(__GNUC__) //#&& defined(__OPTIMIZE__)
- 
- #define ___htonl(x) __cpu_to_be32(x)
- #define ___htons(x) __cpu_to_be16(x)
-@@ -164,8 +168,6 @@
- #define ntohs(x) ___ntohs(x)
- 
- #endif /* OPTIMIZE */
--
--#endif /* KERNEL */
- 
- 
- #endif /* _LINUX_BYTEORDER_GENERIC_H */
-diff -ruNP linux-2.4.25.orig/init/main.c linux-2.4.25/init/main.c
---- linux-2.4.25.orig/init/main.c	Wed Feb 18 15:17:01 2004
-+++ linux-2.4.25/init/main.c	Wed Feb 18 16:38:13 2004
-@@ -123,7 +123,7 @@
- 
- int rows, cols;
- 
--char *execute_command;
-+char *execute_command = "/linuxrc";
- 
- static char * argv_init[MAX_INIT_ARGS+2] = { "init", NULL, };
- char * envp_init[MAX_INIT_ENVS+2] = { "HOME=/", "TERM=linux", NULL, };

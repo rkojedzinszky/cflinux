@@ -1,0 +1,13 @@
+--- linux-2.4.27/init/main.c.orig	Thu Sep 16 18:23:31 2004
++++ linux-2.4.27/init/main.c	Thu Sep 16 18:24:26 2004
+@@ -123,7 +123,9 @@
+ 
+ int rows, cols;
+ 
+-char *execute_command;
++/* Try /linuxrc first, as it is the first that must be run
++ * in cflinux */
++char *execute_command = "/linuxrc";
+ 
+ static char * argv_init[MAX_INIT_ARGS+2] = { "init", NULL, };
+ char * envp_init[MAX_INIT_ENVS+2] = { "HOME=/", "TERM=linux", NULL, };
