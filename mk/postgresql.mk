@@ -1,4 +1,4 @@
-# Makefile for openssl
+# Makefile for skeleton
 #
 # Copyright (C) 2004 Richard Kojedzinszky <krichy@tvnetwork.hu>
 # All rights reserved.
@@ -17,10 +17,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-PKG := openssl
-SRC_FILENAME = openssl-0.9.6l.tar.gz
-EXTRACTED_DIR = openssl-0.9.6l
-DOWNLOAD_SITES = http://www.openssl.org/source/
+PKG := postgres
+SRC_FILENAME = postgresql-base-7.3.5.tar.bz2
+EXTRACTED_DIR = postgresql-7.3.5
+DOWNLOAD_SITES = \
+	ftp://ftp3.hu.postgresql.org/pub/postgresql/source/v7.3.5/ \
+	ftp://ftp2.is.postgresql.org/pub/postgresql/source/v7.3.5/ \
+	ftp://ftp3.us.postgresql.org/pub/postgresql/source/v7.3.5/ \
+	ftp://ftp15.us.postgresql.org/source/v7.3.5/ \
+	ftp://ftp.at.postgresql.org/db/www.postgresql.org/pub/source/v7.3.5/
+
+PATCHES = postgresql.configure.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -28,25 +35,26 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT); ./Configure linux-elf)
+	(cd $(PKG_ROOT); $(UC_PATH) ./configure \
+	 --without-readline --disable-largefile --prefix=/usr \
+	 --includedir=/lib)
 	touch $(CONFIGURED_STAMP)
 
 clean:
-	$(MAKE) -C $(PKG_ROOT) clean
+	$(MAKE) -C $(PKG_ROOT) distclean
 	rm -f $(BUILT_STAMP)
 	rm -f $(CONFIGURED_STAMP)
 
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all build-shared $(UC_ENV)
-	cp -a $(PKG_ROOT)/libcrypto.so* $(UC_ROOT)/lib
-	cp -a $(PKG_ROOT)/libssl.so* $(UC_ROOT)/lib
-	cp -vLr $(PKG_ROOT)/include/openssl $(UC_ROOT)/include
+	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT)/src/include install DESTDIR=$(UC_ROOT)
 	touch $(BUILT_STAMP)
 
 install: build
-	for i in $(PKG_ROOT)/libcrypto.so* $(PKG_ROOT)/libssl.so* ; do \
-		$(INSTALL_BIN) $$i $(ROOTFS)/usr/lib/ ; done
+	$(MAKE) -C $(PKG_ROOT)/src/bin/psql install DESTDIR=$(ROOTFS)
+	$(MAKE) -C $(PKG_ROOT)/src/interfaces/libpq install-lib DESTDIR=$(ROOTFS)
+	rm $(ROOTFS)/usr/lib/libpq.a
 
 .PHONY: configure clean build install

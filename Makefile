@@ -51,6 +51,7 @@ DO_MK += wireless_tools
 DO_MK += madwifi
 DO_MK += fwdg
 DO_MK += bridge
+DO_MK += postgresql
 
 # Finish target is last
 DO_MK += finish
