@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := busybox
-SRC_FILENAME = busybox-1.00-pre8.tar.bz2
-EXTRACTED_DIR = busybox-1.00-pre8
+SRC_FILENAME = busybox-1.00-pre9.tar.bz2
+EXTRACTED_DIR = busybox-1.00-pre9
 DOWNLOAD_SITES = http://busybox.net/downloads/
 PATCHES = busybox.init.patch
 

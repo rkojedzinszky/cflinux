@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := libpcap
-SRC_FILENAME = libpcap-0.8.1.tar.gz
-EXTRACTED_DIR = libpcap-0.8.1
+SRC_FILENAME = libpcap-0.8.3.tar.gz
+EXTRACTED_DIR = libpcap-0.8.3
 DOWNLOAD_SITES = http://www.tcpdump.org/release/
 PATCHES = libpcap.patch
 
