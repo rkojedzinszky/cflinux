@@ -16,8 +16,21 @@ export PATH=/bin:/sbin:/usr/bin:/usr/sbin
 # if it is set through the kernel command line, accept that
 if [ -z "$__system_device" ]; then
 	# else try to guess it
-	__system_device=$(dmesg | \
-		sed -n 's/^Kernel command line:.*root=\([\/a-zA-Z]\+\)[0-9].*$/\1/p')
+	mount -n proc -t proc /proc
+	if [ $? -ne 0 ]; then
+		echo "Unable to mount proc, this is a big-big problem!"
+		echo "Starting an emergency shell anyway..."
+		exec /bin/sh
+	fi
+	if [ -f /proc/cmdline ]; then
+		__system_device=$(sed -n \
+			's/^.*root=\([\/a-zA-Z]\+\)[0-9].*$/\1/p' /proc/cmdline)
+	else
+		echo "/proc/cmdline does not exist. Why???"
+		echo "Starting an emergency shell anyway..."
+		exec /bin/sh
+	fi
+	umount -n /proc &>/dev/null
 fi
 if [ -z "$__system_device" ]; then
 	# if it is still undefined, set it to the default /dev/hdc
