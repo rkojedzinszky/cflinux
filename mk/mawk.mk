@@ -21,6 +21,7 @@ PKG := mawk
 SRC_FILENAME = mawk-1.3.3.tar.gz
 EXTRACTED_DIR = mawk-1.3.3
 DOWNLOAD_SITES = ftp://ftp.fu-berlin.de/pub/unix/languages/mawk/
+PATCHES = mawk.configure.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
