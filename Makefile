@@ -112,7 +112,7 @@ image:
 dist: scratch
 	rm -rf $(PACKAGE)-$(RELEASE_STRING)
 	mkdir $(PACKAGE)-$(RELEASE_STRING)
-	cp -dR $(DISTFILES) $(PACKAGE)-$(RELEASE_STRING)
+	cp -R $(DISTFILES) $(PACKAGE)-$(RELEASE_STRING)
 	find $(PACKAGE)-$(RELEASE_STRING) -type d -name CVS -print0 | xargs -0 rm -rf
 	tar czf $(PACKAGE)-$(RELEASE_STRING).tar.gz $(PACKAGE)-$(RELEASE_STRING)
 	rm -rf $(PACKAGE)-$(RELEASE_STRING)
