@@ -1,0 +1,4 @@
+root:x:0:
+quagga:x:10:
+sshd:x:20:
+www:x:21:

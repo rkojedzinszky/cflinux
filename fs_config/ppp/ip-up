@@ -1,0 +1,13 @@
+#!/bin/sh
+
+downstream=
+upstream=
+if="$1"
+
+file="/var/run/radattr.$if"
+if [ -f "$file" ] ; then
+	downstream=`sed -n 's/^USR-Initial-Rx-Link-Data-Rate \(.*\)$/\1/p' "$file"`
+	upstream=`sed -n 's/^USR-Initial-Tx-Link-Data-Rate \(.*\)$/\1/p' "$file"`
+fi
+
+/etc/ppp/set_qos.sh "$if" "$downstream" "$upstream"

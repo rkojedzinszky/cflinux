@@ -1,0 +1,24 @@
+diff -ruNP libpcap-0.8.1/Makefile.in libpcap-0.8.1-shared/Makefile.in
+--- libpcap-0.8.1/Makefile.in	Mon Dec 15 02:42:23 2003
++++ libpcap-0.8.1-shared/Makefile.in	Sun Jan  4 18:33:17 2004
+@@ -94,14 +94,18 @@
+ TAGFILES = \
+ 	$(SRC) $(HDR) $(TAGHDR)
+ 
+-CLEANFILES = $(OBJ) libpcap.a $(GENSRC) $(GENHDR) lex.yy.c
++CLEANFILES = $(OBJ) libpcap.a libpcap.so $(GENSRC) $(GENHDR) lex.yy.c
+ 
+-all: libpcap.a
++all: libpcap.a libpcap.so
+ 
+ libpcap.a: $(OBJ)
+ 	@rm -f $@
+ 	ar rc $@ $(OBJ) $(LIBS)
+ 	$(RANLIB) $@
++
++libpcap.so: $(OBJ)
++	@rm -f $@
++	$(LD) -o $@ -shared $(OBJ)
+ 
+ scanner.c: $(srcdir)/scanner.l
+ 	@rm -f $@

@@ -1,0 +1,31 @@
+#
+# dictionary.usr	USR Robotics dictionary.
+#
+#		Taken from the dictionary included with the USR RADIUS server,
+#		and adjusted a bit.
+#
+# Version:	$Id$
+#
+
+#
+#	USR Extensions: USR Vendor-Specific stuff.
+#
+#	For now in NMC format (whatever that stands for), though the
+#	normal vendor-specific format would work just as well.
+#
+#
+VENDOR		USR		429
+
+ATTRIBUTE	USR-Last-Number-Dialed-Out		0x0066	string	USR
+ATTRIBUTE	USR-Last-Number-Dialed-In-DNIS		0x00E8	string	USR
+ATTRIBUTE	USR-Last-Callers-Number-ANI		0x00E9	string	USR
+ATTRIBUTE	USR-Channel				0xBF38	integer USR
+ATTRIBUTE	USR-Event-Id				0xBFBE	integer	USR
+ATTRIBUTE	USR-Event-Date-Time			0xBF2F	date	USR
+ATTRIBUTE	USR-Call-Start-Date-Time		0xBFF7	date	USR
+ATTRIBUTE	USR-Call-End-Date-Time			0xBFF6	date	USR
+ATTRIBUTE	USR-Default-DTE-Data-Rate		0x005E	integer	USR
+ATTRIBUTE	USR-Initial-Rx-Link-Data-Rate		48941	integer	USR
+ATTRIBUTE	USR-Final-Rx-Link-Data-Rate		0xBF2C	integer	USR
+ATTRIBUTE	USR-Initial-Tx-Link-Data-Rate		106	integer	USR
+ATTRIBUTE	USR-Final-Tx-Link-Data-Rate		0x006B	integer	USR

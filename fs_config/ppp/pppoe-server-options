@@ -1,0 +1,14 @@
+# PPP options for the PPPoE server
+auth
+require-pap
+lcp-echo-interval 10
+lcp-echo-failure 5
+plugin radius.so
+plugin radattr.so
+mtu 1412
+mru 1412
+ms-dns 80.95.64.2
+ms-dns 80.95.64.65
+#nodeflate
+#nobsdcomp
+#novj

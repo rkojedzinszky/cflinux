@@ -1,0 +1,291 @@
+diff -ruNP openssh-3.7.1p2/Makefile.in openssh/Makefile.in
+--- openssh-3.7.1p2/Makefile.in	Mon Sep 22 03:00:12 2003
++++ openssh/Makefile.in	Tue Oct 14 08:23:07 2003
+@@ -126,45 +126,44 @@
+ 	(cd openbsd-compat && $(MAKE))
+ always:
+ 
+-libssh.a: $(LIBSSH_OBJS)
+-	$(AR) rv $@ $(LIBSSH_OBJS)
+-	$(RANLIB) $@
++libssh.so: $(LIBSSH_OBJS)
++	$(LD) -o $@ -shared $(LIBSSH_OBJS)
+ 
+-ssh$(EXEEXT): $(LIBCOMPAT) libssh.a $(SSHOBJS)
++ssh$(EXEEXT): $(LIBCOMPAT) libssh.so $(SSHOBJS)
+ 	$(LD) -o $@ $(SSHOBJS) $(LDFLAGS) -lssh -lopenbsd-compat $(LIBS)
+ 
+-sshd$(EXEEXT): libssh.a	$(LIBCOMPAT) $(SSHDOBJS)
++sshd$(EXEEXT): libssh.so	$(LIBCOMPAT) $(SSHDOBJS)
+ 	$(LD) -o $@ $(SSHDOBJS) $(LDFLAGS) -lssh -lopenbsd-compat $(LIBWRAP) $(LIBPAM) $(LIBS)
+ 
+-scp$(EXEEXT): $(LIBCOMPAT) libssh.a scp.o progressmeter.o
++scp$(EXEEXT): $(LIBCOMPAT) libssh.so scp.o progressmeter.o
+ 	$(LD) -o $@ scp.o progressmeter.o $(LDFLAGS) -lssh -lopenbsd-compat $(LIBS)
+ 
+-ssh-add$(EXEEXT): $(LIBCOMPAT) libssh.a ssh-add.o
++ssh-add$(EXEEXT): $(LIBCOMPAT) libssh.so ssh-add.o
+ 	$(LD) -o $@ ssh-add.o $(LDFLAGS) -lssh -lopenbsd-compat $(LIBS) 
+ 
+-ssh-agent$(EXEEXT): $(LIBCOMPAT) libssh.a ssh-agent.o
++ssh-agent$(EXEEXT): $(LIBCOMPAT) libssh.so ssh-agent.o
+ 	$(LD) -o $@ ssh-agent.o $(LDFLAGS) -lssh -lopenbsd-compat $(LIBS) 
+ 
+-ssh-keygen$(EXEEXT): $(LIBCOMPAT) libssh.a ssh-keygen.o
++ssh-keygen$(EXEEXT): $(LIBCOMPAT) libssh.so ssh-keygen.o
+ 	$(LD) -o $@ ssh-keygen.o $(LDFLAGS) -lssh -lopenbsd-compat $(LIBS) 
+ 
+-ssh-keysign$(EXEEXT): $(LIBCOMPAT) libssh.a ssh-keysign.o
++ssh-keysign$(EXEEXT): $(LIBCOMPAT) libssh.so ssh-keysign.o
+ 	$(LD) -o $@ ssh-keysign.o readconf.o $(LDFLAGS) -lssh -lopenbsd-compat $(LIBS) 
+ 
+-ssh-keyscan$(EXEEXT): $(LIBCOMPAT) libssh.a ssh-keyscan.o
++ssh-keyscan$(EXEEXT): $(LIBCOMPAT) libssh.so ssh-keyscan.o
+ 	$(LD) -o $@ ssh-keyscan.o $(LDFLAGS) -lssh -lopenbsd-compat -lssh $(LIBS) 
+ 
+-sftp-server$(EXEEXT): $(LIBCOMPAT) libssh.a sftp.o sftp-common.o sftp-server.o
++sftp-server$(EXEEXT): $(LIBCOMPAT) libssh.so sftp.o sftp-common.o sftp-server.o
+ 	$(LD) -o $@ sftp-server.o sftp-common.o $(LDFLAGS) -lssh -lopenbsd-compat $(LIBS) 
+ 
+-sftp$(EXEEXT): $(LIBCOMPAT) libssh.a sftp.o sftp-client.o sftp-int.o sftp-common.o sftp-glob.o progressmeter.o
++sftp$(EXEEXT): $(LIBCOMPAT) libssh.so sftp.o sftp-client.o sftp-int.o sftp-common.o sftp-glob.o progressmeter.o
+ 	$(LD) -o $@ progressmeter.o sftp.o sftp-client.o sftp-common.o sftp-int.o sftp-glob.o $(LDFLAGS) -lssh -lopenbsd-compat $(LIBS)
+ 
+-ssh-rand-helper${EXEEXT}: $(LIBCOMPAT) libssh.a ssh-rand-helper.o
++ssh-rand-helper${EXEEXT}: $(LIBCOMPAT) libssh.so ssh-rand-helper.o
+ 	$(LD) -o $@ ssh-rand-helper.o $(LDFLAGS) -lssh -lopenbsd-compat $(LIBS)
+ 
+ # test driver for the loginrec code - not built by default
+-logintest: logintest.o $(LIBCOMPAT) libssh.a loginrec.o
++logintest: logintest.o $(LIBCOMPAT) libssh.so loginrec.o
+ 	$(LD) -o $@ logintest.o $(LDFLAGS) loginrec.o -lopenbsd-compat -lssh $(LIBS)
+ 
+ $(MANPAGES): $(MANPAGES_IN)
+diff -ruNP openssh-3.7.1p2/configure openssh/configure
+--- openssh-3.7.1p2/configure	Tue Sep 23 11:55:43 2003
++++ openssh/configure	Mon Oct 13 23:41:43 2003
+@@ -1388,7 +1388,7 @@
+ # FIXME: These cross compiler hacks should be removed for Autoconf 3.0
+ # If not cross compiling, check that we can run a simple program.
+ if test "$cross_compiling" != yes; then
+-  if { ac_try='./$ac_file'
++  if { ac_try='LD_LIBRARY_PATH=${UC_ROOT}/lib ./$ac_file'
+   { (eval echo "$as_me:1392: \"$ac_try\"") >&5
+   (eval $ac_try) 2>&5
+   ac_status=$?
+@@ -1891,7 +1891,7 @@
+   (eval $ac_link) 2>&5
+   ac_status=$?
+   echo "$as_me:1893: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
++  (exit $ac_status); } && { ac_try='LD_LIBRARY_PATH=${UC_ROOT}/lib ./conftest$ac_exeext'
+   { (eval echo "$as_me:1895: \"$ac_try\"") >&5
+   (eval $ac_try) 2>&5
+   ac_status=$?
+@@ -3530,7 +3530,7 @@
+   (eval $ac_link) 2>&5
+   ac_status=$?
+   echo "$as_me:3532: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
++  (exit $ac_status); } && { ac_try='LD_LIBRARY_PATH=${UC_ROOT}/lib ./conftest$ac_exeext'
+   { (eval echo "$as_me:3534: \"$ac_try\"") >&5
+   (eval $ac_try) 2>&5
+   ac_status=$?
+@@ -4708,7 +4708,7 @@
+   (eval $ac_link) 2>&5
+   ac_status=$?
+   echo "$as_me:4710: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
++  (exit $ac_status); } && { ac_try='LD_LIBRARY_PATH=${UC_ROOT}/lib ./conftest$ac_exeext'
+   { (eval echo "$as_me:4712: \"$ac_try\"") >&5
+   (eval $ac_try) 2>&5
+   ac_status=$?
+@@ -5298,7 +5298,7 @@
+   (eval $ac_link) 2>&5
+   ac_status=$?
+   echo "$as_me:5300: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
++  (exit $ac_status); } && { ac_try='LD_LIBRARY_PATH=${UC_ROOT}/lib ./conftest$ac_exeext'
+   { (eval echo "$as_me:5302: \"$ac_try\"") >&5
+   (eval $ac_try) 2>&5
+   ac_status=$?
+@@ -6361,7 +6361,7 @@
+   (eval $ac_link) 2>&5
+   ac_status=$?
+   echo "$as_me:6363: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
++  (exit $ac_status); } && { ac_try='LD_LIBRARY_PATH=${UC_ROOT}/lib ./conftest$ac_exeext'
+   { (eval echo "$as_me:6365: \"$ac_try\"") >&5
+   (eval $ac_try) 2>&5
+   ac_status=$?
+@@ -6426,7 +6426,7 @@
+   (eval $ac_link) 2>&5
+   ac_status=$?
+   echo "$as_me:6428: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
++  (exit $ac_status); } && { ac_try='LD_LIBRARY_PATH=${UC_ROOT}/lib ./conftest$ac_exeext'
+   { (eval echo "$as_me:6430: \"$ac_try\"") >&5
+   (eval $ac_try) 2>&5
+   ac_status=$?
+@@ -6947,7 +6947,7 @@
+   (eval $ac_link) 2>&5
+   ac_status=$?
+   echo "$as_me:6949: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
++  (exit $ac_status); } && { ac_try='LD_LIBRARY_PATH=${UC_ROOT}/lib ./conftest$ac_exeext'
+   { (eval echo "$as_me:6951: \"$ac_try\"") >&5
+   (eval $ac_try) 2>&5
+   ac_status=$?
+@@ -7983,7 +7983,7 @@
+   (eval $ac_link) 2>&5
+   ac_status=$?
+   echo "$as_me:7985: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
++  (exit $ac_status); } && { ac_try='LD_LIBRARY_PATH=${UC_ROOT}/lib ./conftest$ac_exeext'
+   { (eval echo "$as_me:7987: \"$ac_try\"") >&5
+   (eval $ac_try) 2>&5
+   ac_status=$?
+@@ -8039,7 +8039,7 @@
+   (eval $ac_link) 2>&5
+   ac_status=$?
+   echo "$as_me:8041: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
++  (exit $ac_status); } && { ac_try='LD_LIBRARY_PATH=${UC_ROOT}/lib ./conftest$ac_exeext'
+   { (eval echo "$as_me:8043: \"$ac_try\"") >&5
+   (eval $ac_try) 2>&5
+   ac_status=$?
+@@ -8115,7 +8115,7 @@
+   (eval $ac_link) 2>&5
+   ac_status=$?
+   echo "$as_me:8117: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
++  (exit $ac_status); } && { ac_try='LD_LIBRARY_PATH=${UC_ROOT}/lib ./conftest$ac_exeext'
+   { (eval echo "$as_me:8119: \"$ac_try\"") >&5
+   (eval $ac_try) 2>&5
+   ac_status=$?
+@@ -8278,7 +8278,7 @@
+   (eval $ac_link) 2>&5
+   ac_status=$?
+   echo "$as_me:8280: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
++  (exit $ac_status); } && { ac_try='LD_LIBRARY_PATH=${UC_ROOT}/lib ./conftest$ac_exeext'
+   { (eval echo "$as_me:8282: \"$ac_try\"") >&5
+   (eval $ac_try) 2>&5
+   ac_status=$?
+@@ -8870,7 +8870,7 @@
+   (eval $ac_link) 2>&5
+   ac_status=$?
+   echo "$as_me:8872: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
++  (exit $ac_status); } && { ac_try='LD_LIBRARY_PATH=${UC_ROOT}/lib ./conftest$ac_exeext'
+   { (eval echo "$as_me:8874: \"$ac_try\"") >&5
+   (eval $ac_try) 2>&5
+   ac_status=$?
+@@ -8933,7 +8933,7 @@
+   (eval $ac_link) 2>&5
+   ac_status=$?
+   echo "$as_me:8935: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
++  (exit $ac_status); } && { ac_try='LD_LIBRARY_PATH=${UC_ROOT}/lib ./conftest$ac_exeext'
+   { (eval echo "$as_me:8937: \"$ac_try\"") >&5
+   (eval $ac_try) 2>&5
+   ac_status=$?
+@@ -8981,7 +8981,7 @@
+   (eval $ac_link) 2>&5
+   ac_status=$?
+   echo "$as_me:8983: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
++  (exit $ac_status); } && { ac_try='LD_LIBRARY_PATH=${UC_ROOT}/lib ./conftest$ac_exeext'
+   { (eval echo "$as_me:8985: \"$ac_try\"") >&5
+   (eval $ac_try) 2>&5
+   ac_status=$?
+@@ -9092,7 +9092,7 @@
+   (eval $ac_link) 2>&5
+   ac_status=$?
+   echo "$as_me:9094: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
++  (exit $ac_status); } && { ac_try='LD_LIBRARY_PATH=${UC_ROOT}/lib ./conftest$ac_exeext'
+   { (eval echo "$as_me:9096: \"$ac_try\"") >&5
+   (eval $ac_try) 2>&5
+   ac_status=$?
+@@ -10188,7 +10188,7 @@
+   (eval $ac_link) 2>&5
+   ac_status=$?
+   echo "$as_me:10190: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
++  (exit $ac_status); } && { ac_try='LD_LIBRARY_PATH=${UC_ROOT}/lib ./conftest$ac_exeext'
+   { (eval echo "$as_me:10192: \"$ac_try\"") >&5
+   (eval $ac_try) 2>&5
+   ac_status=$?
+@@ -10425,7 +10425,7 @@
+   (eval $ac_link) 2>&5
+   ac_status=$?
+   echo "$as_me:10427: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
++  (exit $ac_status); } && { ac_try='LD_LIBRARY_PATH=${UC_ROOT}/lib ./conftest$ac_exeext'
+   { (eval echo "$as_me:10429: \"$ac_try\"") >&5
+   (eval $ac_try) 2>&5
+   ac_status=$?
+@@ -10662,7 +10662,7 @@
+   (eval $ac_link) 2>&5
+   ac_status=$?
+   echo "$as_me:10664: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
++  (exit $ac_status); } && { ac_try='LD_LIBRARY_PATH=${UC_ROOT}/lib ./conftest$ac_exeext'
+   { (eval echo "$as_me:10666: \"$ac_try\"") >&5
+   (eval $ac_try) 2>&5
+   ac_status=$?
+@@ -10899,7 +10899,7 @@
+   (eval $ac_link) 2>&5
+   ac_status=$?
+   echo "$as_me:10901: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
++  (exit $ac_status); } && { ac_try='LD_LIBRARY_PATH=${UC_ROOT}/lib ./conftest$ac_exeext'
+   { (eval echo "$as_me:10903: \"$ac_try\"") >&5
+   (eval $ac_try) 2>&5
+   ac_status=$?
+@@ -11136,7 +11136,7 @@
+   (eval $ac_link) 2>&5
+   ac_status=$?
+   echo "$as_me:11138: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
++  (exit $ac_status); } && { ac_try='LD_LIBRARY_PATH=${UC_ROOT}/lib ./conftest$ac_exeext'
+   { (eval echo "$as_me:11140: \"$ac_try\"") >&5
+   (eval $ac_try) 2>&5
+   ac_status=$?
+@@ -12638,7 +12638,7 @@
+   (eval $ac_link) 2>&5
+   ac_status=$?
+   echo "$as_me:12640: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
++  (exit $ac_status); } && { ac_try='LD_LIBRARY_PATH=${UC_ROOT}/lib ./conftest$ac_exeext'
+   { (eval echo "$as_me:12642: \"$ac_try\"") >&5
+   (eval $ac_try) 2>&5
+   ac_status=$?
+@@ -13676,7 +13676,7 @@
+   (eval $ac_link) 2>&5
+   ac_status=$?
+   echo "$as_me:13678: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
++  (exit $ac_status); } && { ac_try='LD_LIBRARY_PATH=${UC_ROOT}/lib ./conftest$ac_exeext'
+   { (eval echo "$as_me:13680: \"$ac_try\"") >&5
+   (eval $ac_try) 2>&5
+   ac_status=$?
+@@ -13736,7 +13736,7 @@
+   (eval $ac_link) 2>&5
+   ac_status=$?
+   echo "$as_me:13738: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
++  (exit $ac_status); } && { ac_try='LD_LIBRARY_PATH=${UC_ROOT}/lib ./conftest$ac_exeext'
+   { (eval echo "$as_me:13740: \"$ac_try\"") >&5
+   (eval $ac_try) 2>&5
+   ac_status=$?
+@@ -15616,7 +15616,7 @@
+   (eval $ac_link) 2>&5
+   ac_status=$?
+   echo "$as_me:15618: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
++  (exit $ac_status); } && { ac_try='LD_LIBRARY_PATH=${UC_ROOT}/lib ./conftest$ac_exeext'
+   { (eval echo "$as_me:15620: \"$ac_try\"") >&5
+   (eval $ac_try) 2>&5
+   ac_status=$?

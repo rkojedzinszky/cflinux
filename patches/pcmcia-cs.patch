@@ -1,0 +1,353 @@
+diff -ruNP pcmcia-cs-3.2.5/etc/Makefile ../oldsource/pcmcia-cs/etc/Makefile
+--- pcmcia-cs-3.2.5/etc/Makefile	Wed Feb  7 01:41:40 2001
++++ ../oldsource/pcmcia-cs/etc/Makefile	Sat Oct 18 14:22:13 2003
+@@ -15,4 +15,4 @@
+ 
+ install:
+ 	@set -e ; $(MAKE) -C cis install
+-	@./install-etc $(PREFIX)
++	@./install-etc $(ETC_PREFIX)
+diff -ruNP pcmcia-cs-3.2.5/etc/install-etc ../oldsource/pcmcia-cs/etc/install-etc
+--- pcmcia-cs-3.2.5/etc/install-etc	Wed Jul 17 08:41:49 2002
++++ ../oldsource/pcmcia-cs/etc/install-etc	Fri Oct 24 23:19:39 2003
+@@ -12,7 +12,7 @@
+ if [ $1 ] ; then PREFIX=$1 ; fi
+ PROBE=../cardmgr/pcic_probe
+ if [ "CONFIG_PCMCIA" = "y" ] ; then PK=-k ; else PK= ; fi
+-ETC=$PREFIX/etc/pcmcia
++ETC=$PREFIX/pcmcia
+ 
+ install_clients ()
+ {
+@@ -22,7 +22,7 @@
+     if [ "$CONF" != "*.conf" ] ; then
+ 	cp *.conf $ETC
+     fi
+-    for f in *.opts ; do
++    for f in *.opts *.sock* ; do
+ 	[ -r $ETC/$f ] || cp $f $ETC/$f
+ 	b=`basename $f .opts`
+ 	cmp -s $b $ETC/$b && continue
+@@ -34,18 +34,6 @@
+ 	[ -r $ETC/$f ] && mv $ETC/$f $ETC/$f.O
+ 	cp $f $ETC/$f
+     done
+-    # Tweak network.opts for Red Hat
+-    if [ -f /etc/redhat-release ] && \
+-	cmp -s network.opts $ETC/network.opts ; then
+-	echo "->   Configuring /etc/pcmcia/network.opts for Red Hat"
+-	cat network.rh >> $ETC/network.opts
+-    fi
+-    # Tweak network.opts for Debian
+-    if [ -f /etc/debian_version ] && \
+-	cmp -s network.opts $ETC/network.opts ; then
+-	echo "->   Configuring /etc/pcmcia/network.opts for Debian"
+-	cat network.deb >> $ETC/network.opts
+-    fi
+ }
+ 
+ install_sysv ()
+@@ -103,11 +91,11 @@
+ 
+ install_bsd ()
+ {
+-    BSD=$PREFIX/etc/rc.d/rc.pcmcia
++    BSD=$PREFIX/rc.d/pcmcia
+     if [ -e $BSD ] ; then BSD=$BSD.N ; fi
+ 
+     echo "-> Installing PCMCIA startup script as $BSD"
+-    mkdir -p $PREFIX/etc/rc.d
++    mkdir -p $PREFIX/rc.d
+     if [ -x $PROBE ] ; then
+ 	PCIC=`$PROBE -m $PK`
+ 	sed -e "s/=i82365/=$PCIC/" rc.pcmcia > $BSD
+@@ -119,9 +107,9 @@
+ 
+ install_depmod ()
+ {
+-    CONF=$PREFIX/etc/modules.conf
+-    if [ ! -r $CONF -a -r $PREFIX/etc/conf.modules ] ; then
+-	CONF=$PREFIX/etc/conf.modules
++    CONF=$PREFIX/modules.conf
++    if [ ! -r $CONF -a -r $PREFIX/conf.modules ] ; then
++	CONF=$PREFIX/conf.modules
+     fi
+     /sbin/modprobe -c | grep 'path\[pcmcia\]' >/dev/null
+     if [ $? -ne 0 ] ; then
+@@ -138,14 +126,5 @@
+     fi
+ }
+ 
+-if [ "$SYSV_INIT" = "y" ] ; then
+-    install_sysv
+-else
+-    install_bsd
+-fi
+-
+ install_clients
+ install_depmod
+-
+-# Directory to receive cardmgr's 'stab' socket status file
+-mkdir -p $PREFIX/var/lib/pcmcia
+diff -ruNP pcmcia-cs-3.2.5/etc/network ../oldsource/pcmcia-cs/etc/network
+--- pcmcia-cs-3.2.5/etc/network	Wed Jul  3 08:44:01 2002
++++ ../oldsource/pcmcia-cs/etc/network	Fri Oct 24 23:10:22 2003
+@@ -27,7 +27,13 @@
+ ADDRESS="$SCHEME,$SOCKET,$INSTANCE,$HWADDR"
+ start_fn () { return; }
+ stop_fn () { return; }
+-. $0.opts
++if [ -r /etc/pcmcia/network.sock$SOCKET ]; then
++    . /etc/pcmcia/network.sock$SOCKET
++elif [ -r /etc/pcmcia/network.$DEVICE ]; then
++    . /etc/pcmcia/network.$DEVICE
++else
++    . $0.opts
++fi
+ 
+ RESOLV=/etc/resolv.conf
+ 
+@@ -45,7 +51,7 @@
+ bootp_setup ()
+ {
+     if match `uname -r` "2.[2-9].*" ; then
+-	log /sbin/ifconfig $DEVICE up
++	log /sbin/ip link set $DEVICE up
+     else
+ 	log /sbin/ifconfig $DEVICE up 0.0.0.0
+ 	log /sbin/route add default dev $DEVICE netmask 0.0.0.0
+@@ -59,92 +65,11 @@
+ 
+     [ -n "$IF_PORT" ] && /sbin/ifport $DEVICE $IF_PORT
+ 
+-    if is_true $PUMP ; then
+-	log "/sbin/pump -i $DEVICE > /dev/null" || exit 1
+-    elif is_true $BOOTP ; then
+-	bootp_setup
+-	if [ -x /sbin/bootpc ] ; then
+-	    eval `/sbin/bootpc --bootfile '' --returniffail \
+-		--timeoutwait 10 --dev $DEVICE`
+-	    log /sbin/ifconfig $DEVICE down
+-	    if [ -n "$GATEWAYS" ] ; then
+-		set - $GATEWAYS ; GATEWAY=$1
+-	    fi
+-	elif [ -x /sbin/pump ] ; then
+-	    log "/sbin/pump -i $DEVICE > /dev/null" || exit 1
+-	else
+-	    exit 1
+-	fi
+-    elif is_true $DHCP ; then
+-	bootp_setup
+-	HN=${DHCP_HOSTNAME:+-h $DHCP_HOSTNAME}
+-	if [ -x /sbin/dhcpcd ] ; then
+-	    # This is a version check: I know it looks weird
+-	    if /sbin/dhcpcd -XYZZY 2>&1 | grep -q DHCP ; then
+-		log "/sbin/dhcpcd -d $HN $DEVICE >/dev/null 2>&1" || exit 1
+-	    else
+-		# Jump through hoops for lame 0.70-era dhcpcd
+-		L=/var/run/dhcp-lock-$DEVICE
+-		/bin/echo "#!/bin/sh\nrm $L" > $L ; chmod +x $L
+-		log "/sbin/dhcpcd $HN -c $L $DEVICE >/dev/null 2>&1"
+-		for t in 0 1 2 3 4 5 6 7 8 9 ; do
+-		    sleep 2 ; if [ ! -e $L ] ; then break ; fi
+-		done
+-		rm -f $L
+-		if [ -e /etc/dhcpc/resolv.conf ] ; then
+-		    echo "# $DEVICE begin" > $RESOLV.N
+-		    chmod og+r $RESOLV.N
+-		    cat /etc/dhcpc/resolv.conf >> $RESOLV.N
+-		    echo "# $DEVICE end" >> $RESOLV.N
+-		    cat $RESOLV >> $RESOLV.N ; mv $RESOLV.N $RESOLV
+-		fi
+-	    fi
+-	elif [ -x /sbin/dhclient ] ; then
+-	    log "/sbin/dhclient $DEVICE >/dev/null 2>&1" || exit 1
+-	elif [ -x /sbin/pump ] ; then
+-	    log "/sbin/pump $HN -i $DEVICE > /dev/null" || exit 1
+-	else
+-	    exit 1
+-	fi
+-    fi
+-
+     if [ -n "$IPADDR" ] ; then
+ 	# Basic network setup
+-	NM=${NETMASK:+netmask $NETMASK}
+-	BC=${BROADCAST:+broadcast $BROADCAST}
+-	MTU=${MTU:+mtu $MTU}
+-	log /sbin/ifconfig $DEVICE up $IPADDR $NM $BC $MTU
+-	if [ -n "$NETWORK" ] ; then
+-	    /sbin/ifuser $DEVICE $NETWORK || \
+-		log /sbin/route add -net $NETWORK $NM dev $DEVICE
+-	elif [ -n "$GATEWAY" ] ; then
+-	    /sbin/ifuser $DEVICE $GATEWAY || \
+-		log /sbin/route add $GATEWAY $DEVICE
+-	fi
+-	[ -n "$GATEWAY" ] && /sbin/route add default gw $GATEWAY metric 1
+-    fi
+-    
+-    # Update DNS stuff
+-    if [ -n "$DOMAIN$SEARCH$DNSSRVS$DNS_1$DNS_2$DNS_3" ] ; then
+-	echo "# $DEVICE begin" > $RESOLV.N
+-	chmod og+r $RESOLV.N
+-	[ -n "$DOMAIN" ] && echo "domain $DOMAIN" >> $RESOLV.N
+-	[ -n "$SEARCH" ] && echo "search $SEARCH" >> $RESOLV.N
+-	for DNS in $DNSSRVS $DNS_1 $DNS_2 $DNS_3 ; do
+-	    echo "nameserver $DNS" >> $RESOLV.N
+-	done
+-	echo "# $DEVICE end" >> $RESOLV.N
+-	sed -e "/# $DEVICE begin/,/# $DEVICE end/d" $RESOLV >> $RESOLV.N
+-	mv $RESOLV.N $RESOLV
+-    fi
+-
+-    # Handle NFS mounts
+-    if [ -n "$MOUNTS" ] ; then
+-	for MT in $MOUNTS ; do log mount -v $MT ; done
+-    fi
+-
+-    if [ -n "$IPX_NETNUM" ] ; then
+-	log ipx_interface add $DEVICE $IPX_FRAME $IPX_NETNUM
++    	log /sbin/ip link set $DEVICE up
++	log /sbin/ip addr add $IPADDR dev $DEVICE
++	[ -n "$GATEWAY" ] && /sbin/ip route add default via $GATEWAY
+     fi
+ 
+     start_fn $DEVICE
+@@ -154,52 +79,11 @@
+ 
+     stop_fn $DEVICE
+ 
+-    if is_true $PUMP || is_true $BOOTP || is_true $DHCP || \
+-    	[ -n "$IPADDR" ] ; then
+-
+-	# Shut down all NFS mounts on this interface
+-	nfsstop ()
+-	{
+-	    local HOST MT
+-	    if read HOST MT ; then
+-		nfsstop
+-		if /sbin/ifuser $DEVICE $HOST ; then
+-		    do_fuser -k -m $MT > /dev/null
+-		    log umount -f -v $MT
+-		fi
+-	    fi
+-	}
+-	mount -t nfs | sed -e 's/:.* on \(.*\) type .*/ \1/' | nfsstop
+-
+-	[ -n "$IPX_NETNUM" ] && ipx_interface del $DEVICE $IPX_FRAME
+-
+-	if is_true $PUMP ; then
+-	    log pump -r -i $DEVICE
+-	elif is_true $DHCP ; then
+-	    if [ -x /sbin/dhcpcd ] ; then
+-		PID=`cat /var/run/dhcpcd-$DEVICE.pid 2>/dev/null`
+-		if [ -n "$PID" ] ; then
+-		    kill -TERM $PID
+-		    sleep 2
+-		fi
+-		/sbin/dhcpcd -XYZZY 2>&1 | grep -q DHCP || \
+-		    rm -f /var/run/dhcpcd-$DEVICE.pid
+-	    elif [ -x /sbin/dhclient ] ; then
+-		PID=`cat /var/run/dhclient.pid 2>/dev/null`
+-		if [ -n "$PID" ] ; then kill -TERM $PID ; fi
+-	    elif [ -x /sbin/pump ] ; then
+-		log /sbin/pump -r -i $DEVICE
+-	    fi
+-	fi
+-    fi
+-
+-    # Remove nameservers
+-    if grep -q "# $DEVICE begin" $RESOLV ; then
+-	sed -e "/# $DEVICE begin/,/# $DEVICE end/d"	$RESOLV > $RESOLV.N
+-	mv $RESOLV.N $RESOLV
++    if [ -n "$IPADDR" ] ; then
++    	log /sbin/ip addr flush dev $DEVICE
+     fi
+ 
+-    log /sbin/ifconfig $DEVICE down
++    log /sbin/ip link set $DEVICE down
+     ;;
+ 
+ 'check')
+diff -ruNP pcmcia-cs-3.2.5/etc/network.sock0 ../oldsource/pcmcia-cs/etc/network.sock0
+--- pcmcia-cs-3.2.5/etc/network.sock0	Thu Jan  1 01:00:00 1970
++++ ../oldsource/pcmcia-cs/etc/network.sock0	Fri Oct 24 23:03:36 2003
+@@ -0,0 +1,33 @@
++INFO="network"
++# Transceiver selection, for some cards -- see 'man ifport'
++IF_PORT=""
++# Use BOOTP (via /sbin/bootpc, or /sbin/pump)? [y/n]
++BOOTP="n"
++# Use DHCP (via /sbin/dhcpcd, /sbin/dhclient, or /sbin/pump)? [y/n]
++DHCP="n"
++# If you need to explicitly specify a hostname for DHCP requests
++DHCP_HOSTNAME=""
++# Host's IP address, in CIDR
++IPADDR="10.1.1.2/24"
++# Gateway address for static routing
++GATEWAY="10.1.1.1"
++# Things to add to /etc/resolv.conf for this interface
++DOMAIN=""
++SEARCH=""
++DNS_1=""
++DNS_2=""
++DNS_3=""
++# NFS mounts, should be listed in /etc/fstab
++MOUNTS=""
++# If you need to override the interface's MTU...
++MTU=""
++# For IPX interfaces, the frame type and network number
++IPX_FRAME=""
++IPX_NETNUM=""
++# Extra stuff to do after setting up the interface
++start_fn () { return; }
++# Extra stuff to do before shutting down the interface
++stop_fn () { return; }
++# Card eject policy options
++NO_CHECK=n
++NO_FUSER=n
+diff -ruNP pcmcia-cs-3.2.5/etc/wireless ../oldsource/pcmcia-cs/etc/wireless
+--- pcmcia-cs-3.2.5/etc/wireless	Wed Jul  3 08:22:56 2002
++++ ../oldsource/pcmcia-cs/etc/wireless	Fri Oct 24 22:52:19 2003
+@@ -17,7 +17,11 @@
+ fi
+ 
+ # Load site-specific settings
+-if [ -r ./wireless.opts ] ; then
++if [ -r /etc/pcmcia/wireless.sock$SOCKET ]; then
++    . /etc/pcmcia/wireless.sock$SOCKET
++elif [ -r /etc/pcmcia/wireless.$DEVICE ]; then
++    . /etc/pcmcia/wireless.$DEVICE
++elif [ -r ./wireless.opts ] ; then
+     . ./wireless.opts
+ else
+     . /etc/pcmcia/wireless.opts
+diff -ruNP pcmcia-cs-3.2.5/etc/wireless.sock0 ../oldsource/pcmcia-cs/etc/wireless.sock0
+--- pcmcia-cs-3.2.5/etc/wireless.sock0	Thu Jan  1 01:00:00 1970
++++ ../oldsource/pcmcia-cs/etc/wireless.sock0	Fri Oct 24 23:02:02 2003
+@@ -0,0 +1,26 @@
++INFO="info"
++# ESSID (extended network name) : My Network, any
++ESSID="sid"
++# NWID/Domain (cell identifier) : 89AB, 100, off
++NWID=""
++# Operation mode : Ad-Hoc, Managed, Master, Repeater, Secondary, auto
++MODE="Managed"
++# Frequency or channel : 1, 2, 3 (channel) ; 2.422G, 2.46G (frequency)
++FREQ=""
++CHANNEL=""
++# Sensitivity (cell size + roaming speed) : 1, 2, 3 ; -70 (dBm)
++SENS=""
++# Bit rate : auto, 1M, 11M
++RATE=""
++# Encryption key : 4567-89AB-CD, s:password
++KEY=""
++# RTS threshold : off, 500
++RTS=""
++# Fragmentation threshold : off, 1000
++FRAG=""
++# Other iwconfig parameters : power off, ap 01:23:45:67:89:AB
++IWCONFIG=""
++# iwspy parameters : + 01:23:45:67:89:AB
++IWSPY=""
++# iwpriv parameters : set_port 2, set_histo 50 60
++IWPRIV=""
