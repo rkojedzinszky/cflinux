@@ -7,3 +7,6 @@ PS1="\h \w # "
 export PS1
 
 trap ":" INT QUIT TERM
+echo -n "+ Software version: "
+cat /.release
+echo ""
