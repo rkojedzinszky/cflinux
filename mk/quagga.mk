@@ -37,8 +37,7 @@ $(CONFIGURED_STAMP):
 		--disable-ospfapi \
 		--enable-user=quagga --enable-group=quagga \
 		--enable-multipath=64 \
-		--localstatedir=/var/quagga \
-		--disable-static )
+		--localstatedir=/var/quagga )
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -53,10 +52,10 @@ $(BUILT_STAMP):
 	touch $(BUILT_STAMP)
 
 install: build
-	$(MAKE) -C $(PKG_ROOT)/lib install-exec-am \
-		DESTDIR=$(ROOTFS) INSTALL_STRIP_FLAG=-s
+	for i in $(PKG_ROOT)/lib/.libs/libzebra.so* ; do \
+		$(INSTALL_BIN) $$i $(ROOTFS)/usr/lib/ ; done
 	for i in zebra ospfd ripd ; do \
-		$(MAKE) -C $(PKG_ROOT)/$$i install-exec-am \
+		$(MAKE) -C $(PKG_ROOT)/$$i install-sbinPROGRAMS \
 		DESTDIR=$(ROOTFS) INSTALL_STRIP_FLAG=-s ; \
 		strip -s $(ROOTFS)/usr/sbin/$$i ; done
 
