@@ -1,7 +1,18 @@
-diff -ruNP busybox-1.00-pre5/editors/vi.c busybox-1.00-pre5.orig/editors/vi.c
+diff -ruNP busybox-1.00-pre5/editors/vi.c busybox-1.00-pre5.vi/editors/vi.c
 --- busybox-1.00-pre5/editors/vi.c	Mon Sep 15 10:33:36 2003
-+++ busybox-1.00-pre5.orig/editors/vi.c	Sat Jan 17 10:32:43 2004
-@@ -3197,7 +3197,7 @@
++++ busybox-1.00-pre5.vi/editors/vi.c	Sat Jan 17 23:09:21 2004
+@@ -1669,7 +1669,9 @@
+ 		q = dot;
+ 	} else if (strchr("wW", c)) {
+ 		do_cmd(c);		// execute movement cmd
+-		if (dot > text)
++		// if we are at the next word's first char
++		// step back one char
++		if (dot > text && isspace(dot[-1]))
+ 			dot--;		// move back off of next word
+ 		if (dot > text && *dot == '\n')
+ 			dot--;		// stay off NL
+@@ -3197,7 +3199,7 @@
  		if (cmdcnt-- > 1) {
  			do_cmd(c);
  		}				// repeat cnt
