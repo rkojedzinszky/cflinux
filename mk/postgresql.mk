@@ -47,7 +47,8 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT)/src/bin/psql all $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT)/src/interfaces/libpq all $(UC_PATH)
 	$(MAKE) -C $(PKG_ROOT)/src/include install DESTDIR=$(UC_ROOT)
 	$(MAKE) -C $(PKG_ROOT)/src/interfaces/libpq install-lib DESTDIR=$(UC_ROOT)
 	touch $(BUILT_STAMP)
