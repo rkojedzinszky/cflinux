@@ -22,13 +22,8 @@ Overview
 
 To build, cross your fingers and try:
 
-./configure
 make
 make install
 
 Read the ``INSTALL'' file for generic detailed information on installing
 this program.
-
-=============================== NASTY DETAILS ==================================
-
-FIXME: lot's of paragraphs and ramblings

@@ -1,7 +1,7 @@
 Upgrade notes
 -------------
 
-As usually, the upgrade follows the procedure:
+As usually, the upgrade should follow the procedure:
 1. You download the newer version of this package, and make a rootfs.bin.
 
 2. Then you copy your rootfs.bin  to the target device's /tmp/rootfs.bin
