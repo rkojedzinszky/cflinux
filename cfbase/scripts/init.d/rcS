@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# $Id$
+
 set +e
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin
 
@@ -105,8 +107,7 @@ case "$spoofprotect_enable" in
 esac
 
 case "$farsync_init" in
-	[nN][oO])	;;
-	*)
+	[Yy][Ee][Ss])
 		export farsync_media
 		export farsync_proto
 		/usr/share/farsync/farsync.init
@@ -114,29 +115,25 @@ case "$farsync_init" in
 esac
 echo -n "Starting standard daemons:"
 case "$syslogd_enable" in
-	[nN][oO])	;;
-	*)
+	[Yy][Ee][Ss])
 		/sbin/syslogd $syslogd_flags
 		echo -n " syslogd"
 		;;
 esac
 case "$klogd_enable" in
-	[nN][oO])	;;
-	*)
+	[Yy][Ee][Ss])
 		/sbin/klogd
 		echo -n " klogd"
 		;;
 esac
 case "$inetd_enable" in
-	[nN][oO])	;;
-	*)
+	[Yy][Ee][Ss])
 		/usr/sbin/inetd $inetd_flags
 		echo -n " inetd"
 		;;
 esac
 case "$crond_enable" in
-	[nN][oO])	;;
-	*)
+	[Yy][Ee][Ss])
 		mkdir -p /var/spool/cron
 		ln -s /etc/crontabs /var/spool/cron/
 		/usr/sbin/crond $crond_flags
@@ -144,14 +141,12 @@ case "$crond_enable" in
 		;;
 esac
 case "$cardmgr_enable" in
-	[nN][oO])	;;
-	*)
+	[Yy][Ee][Ss])
 		/sbin/cardmgr $cardmgr_flags && echo -n " cardmgr"
 		;;
 esac
 case "$sshd_enable" in
-	[nN][oO])	;;
-	*)
+	[Yy][Ee][Ss])
 		if ! [ -f /etc/ssh/ssh_host_rsa_key ]; then
 			echo -n " [generating 2048 bits rsa key"
 			ssh-keygen -t rsa -b 2048 -N "" \
@@ -168,35 +163,30 @@ if [ ! -d /var/quagga ]; then
 	chown quagga:quagga /var/quagga
 fi
 case "$zebra_enable" in
-	[nN][oO])	;;
-	*)
+	[Yy][Ee][Ss])
 		[ -r /etc/zebra/zebra.conf ] && \
 			/usr/sbin/zebra -d $zebra_flags && echo -n " zebra"
 		;;
 esac
 case "$ospfd_enable" in
-	[nN][oO])	;;
-	*)
+	[Yy][Ee][Ss])
 		[ -r /etc/zebra/ospfd.conf ] && \
 			/usr/sbin/ospfd -d $ospfd_flags && echo -n " ospfd"
 		;;
 esac
 case "$ripd_enable" in
-	[nN][oO])	;;
-	*)
+	[Yy][Ee][Ss])
 		[ -r /etc/zebra/ripd.conf ] && \
 			/usr/sbin/ripd -d $ripd_flags && echo -n " ripd"
 		;;
 esac
 case "$httpd_enable" in
-	[nN][oO])	;;
-	*)
+	[Yy][Ee][Ss])
 		/usr/sbin/httpd $httpd_flags && echo -n " httpd"
 		;;
 esac
 case "$snmpd_enable" in
-	[nN][oO])	;;
-	*)
+	[Yy][Ee][Ss])
 		/usr/sbin/snmpd $snmpd_flags && echo -n " snmpd"
 		;;
 esac
