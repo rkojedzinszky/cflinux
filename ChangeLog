@@ -8,6 +8,7 @@ Changes from 0.1.5-pre1 to 0.1.5-pre2:
 	- added libnet-1.0.2a
 	- added nemesis
 	- upgraded from freeswan 2.06 to openswan 2.2.0
+	- upgraded the linux kernel to 2.4.29
 
 Changes from 0.1.4 to 0.1.5-pre1:
 	- added the vtun package
