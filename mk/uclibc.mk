@@ -22,7 +22,8 @@ SRC_FILENAME = uClibc-0.9.26.tar.bz2
 EXTRACTED_DIR = uClibc-0.9.26
 DOWNLOAD_SITES = http://www.uclibc.org/downloads/ \
 		$(CFLINUX_PACKAGES)
-PATCHES = uClibc-0.9.26.patch
+PATCHES = uClibc-0.9.26.patch \
+	  uClibc.resolv_c.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
