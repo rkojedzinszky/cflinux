@@ -21,6 +21,7 @@
 # $Id$
 
 RELEASE = 0.1.2
+PACKAGE = cflinux
 
 ifndef DO_MK
 DO_MK = base
@@ -54,6 +55,10 @@ DO_MK += bridge
 # Finish target is last
 DO_MK += finish
 endif
+
+DISTFILES = AUTHOR BUILD LICENSE Makefile README UPGRADE bzpadder cfbase \
+	    config.mk configs fs_config fs_root install_bin.sh md5sums mk \
+	    packages.mk part_init.sh patches
 
 export TOP_DIR := $(shell pwd)
 include $(TOP_DIR)/config.mk
@@ -94,5 +99,13 @@ image:
 		count=2047 >/dev/null 2>&1
 	mkcramfs -i topad $(ROOTFS) rootfs.bin
 	rm -f topad
+
+dist: scratch
+	rm -rf $(PACKAGE)-$(RELEASE)
+	mkdir $(PACKAGE)-$(RELEASE)
+	cp -dR $(DISTFILES) $(PACKAGE)-$(RELEASE)
+	find $(PACKAGE)-$(RELEASE) -type d -name CVS -print0 | xargs -0 rm -rf
+	tar czf $(PACKAGE)-$(RELEASE).tar.gz $(PACKAGE)-$(RELEASE)
+	rm -rf $(PACKAGE)-$(RELEASE)
 
 .PHONY: all distclean clean install image scratch

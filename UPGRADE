@@ -1,57 +1,15 @@
 Upgrade notes
 -------------
 
-Read this, if your flash contains the inittab at /sbin/inittab, and
-you are upgrading it (from remote).
+As usually, the upgrade follows the procedure:
+1. You download the newer version of this package, and make a rootfs.bin.
 
-Before this version (2004-01-19) the linux kernel started /sbin/init
-as default. You must change it to start /linuxrc as init, and if you
-dont, you may get unpredictable results. Probably your system just won't
-run the initial scripts, but it is enough if upgrading from remote.
+2. Then you copy your rootfs.bin  to the target device's /tmp/rootfs.bin
 
-Short
------
-In short, you must tell your boot loader to pass the init=/linuxrc option
-to the kernel.
+3. Issue the command reflash on the target system. But i suggest you to
+  try it first on a test-router or what, because if something goes wrong,
+  you can detect it before you destroy your router... If an error is
+  found, you can report it to me, and I'll try to fix it.
 
-Detailed
---------
-In details, i tried to write down each step.
-
-So what you should do is the following.
-1. Mount /boot read-write:
-	$ mount -o remount,rw /boot
-
-2. Then edit /boot/grub/menu.lst
-	$ vi /boot/grub/menu.lst
-
-3. Find the line something like this:
-	kernel (hd0)...
-
-4. Append to this line the following text: "init=/linuxrc", of course
-separated by space. Be sure, that the entry you are editing is the first
-or this will not do anything, and your system wont boot.
-
-5. After all, exit vi, and check everything. So you should find
-something like this:
----
-timeout 5
-
-title cf
-kernel (hd0,4)1+2048 root=/dev/hdc5 console=ttyS0,115200 ... init=/linuxrc
----
-
-6. If that is what you see, then make the changes permanent by remounting
-/boot to read-only:
-	$ mount -o remount,ro /boot
-
-7. After this you should reflash your device, by copying the image file to
-/tmp (i usually put it there), and issue the command
-	$ reflash
-This tries to find the root-dev, and finds the image in /tmp, so it will
-burn the new image to the flash in 5 seconds. You have the chance to cancel
-it and check everything from the beginning. :) If you are brave, you let it
-go, and hope your system boots up in the usual way.
-
-Good luck,
+Anyway, good luck.
 krichy

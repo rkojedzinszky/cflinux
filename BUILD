@@ -15,7 +15,7 @@ Then you issue 'make install' and 'make image'. The latter needs
 ramdisk and minix support on your running system, without them
 it won't work.
 
-If it succeeds, you'll get a rootfs.bin at your cflinux-s root.
+If it succeeds, you'll get a rootfs.bin at your cflinux's root.
 
 To make the CF work, please insert it at /dev/hdc, and make sure
 no program uses it (eg smartsuite, or alikes), then issue
@@ -36,4 +36,5 @@ CF.
 
 Have fun with it!
 
-Richard Kojedzinszky
+Richard Kojedzinszky <krichy@tvnetwork.hu>
+2004. Jan. 25.
