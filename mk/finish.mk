@@ -45,6 +45,6 @@ install:
 	rm -rf $(ROOTFS)/etc/*
 	rm -rf $(ROOTFS)/sbin/rc?.d
 	find $(ROOTFS)/lib/modules/$(KERNEL_VERSION)/ -name '*.o' -print0 | \
-		xargs -0 strip -g --strip-unneeded
+		xargs -0 strip -g
 
 .PHONY: configure clean build install
