@@ -1,0 +1,24 @@
+--- busybox-1.00/modutils/modprobe.c.orig	2004-12-04 18:08:56.000000000 +0100
++++ busybox-1.00/modutils/modprobe.c	2004-12-04 18:10:05.000000000 +0100
+@@ -470,10 +470,10 @@
+ 			return;
+ 	}
+ 
+-	if ( !path ) {
++	/* if ( !path ) {
+ 		bb_error_msg ("module %s not found.", mod);
+ 		return;
+-	}
++	} */
+ 
+ 	// search for duplicates
+ 	for ( find = *head; find; find = find-> m_next ) {
+@@ -497,7 +497,7 @@
+ 	if ( !find ) { // did not find a duplicate
+ 		find = (struct mod_list_t *) xmalloc ( sizeof(struct mod_list_t));
+ 		find-> m_name = mod;
+-		find-> m_path = path;
++		find-> m_path = path ? path : mod;
+ 		find-> m_options = opt;
+ 	}
+ 
