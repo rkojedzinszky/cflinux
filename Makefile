@@ -20,7 +20,7 @@
 #
 # $Id$
 
-RELEASE_STRING = 0.1.4-pre3
+RELEASE_STRING = 0.1.4-pre2
 PACKAGE = cflinux
 
 ifndef DO_MK
@@ -93,7 +93,7 @@ scratch: distclean
 
 install: all
 	for i in $(DO_MK) ; do make -f $(MK)/$$i.mk install || exit ; done
-	echo "$(RELEASE_STRING)" > $(ROOTFS)/.release
+	echo "$(RELEASE_STRING) ($(shell date "+%Y/%m/%d-%H.%M.%S"))" > $(ROOTFS)/.release
 
 image:
 	cat bzpadder $(BUILD_DIR)/kernel/arch/i386/boot/bzImage > topad

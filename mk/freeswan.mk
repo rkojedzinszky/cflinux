@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := freeswan
-SRC_FILENAME = freeswan-2.05.tar.gz
-EXTRACTED_DIR = freeswan-2.05
+SRC_FILENAME = freeswan-2.06.tar.gz
+EXTRACTED_DIR = freeswan-2.06
 DOWNLOAD_SITES = ftp://ftp.xs4all.nl/pub/crypto/freeswan/
 PATCHES = freeswan.patch
 
