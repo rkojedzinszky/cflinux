@@ -44,5 +44,7 @@ install:
 	chmod 700 $(FDEVEL_DIR)/fs_config/zebra
 	rm -rf $(ROOTFS)/etc/*
 	rm -rf $(ROOTFS)/sbin/rc?.d
+	find $(ROOTFS)/lib/modules/$(KERNEL_VERSION)/ -name '*.o' -print0 | \
+		xargs -0 strip -g --strip-unneeded
 
 .PHONY: configure clean build install
