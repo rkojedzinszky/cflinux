@@ -41,7 +41,7 @@ download: $(SOURCES_DIR)/$(SRC_FILENAME)
 $(SOURCES_DIR)/$(SRC_FILENAME):
 	@for i in $(DOWNLOAD_SITES); do \
 		echo "Downloading $(SRC_FILENAME)" ; \
-		wget -P $(SOURCES_DIR) "$$i/$(SRC_FILENAME)" && break ; \
+		wget -t 1 -P $(SOURCES_DIR) "$$i/$(SRC_FILENAME)" && break ; \
 	done
 
 extract: download $(EXTRACTED_STAMP)
