@@ -30,7 +30,7 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT); $(UC_PATH) ./configure --prefix=/usr \
+	(cd $(PKG_ROOT); $(UC_PATH) UC_ROOT=$(UC_ROOT) ./configure --prefix=/usr \
 		--sysconfdir=/etc/zebra \
 		--disable-ipv6 --enable-netlink --enable-nssa \
 		--enable-ospf-te --enable-opaque-lsa \
