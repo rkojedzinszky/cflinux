@@ -22,7 +22,7 @@ SRC_FILENAME = net-tools-1.60.tar.bz2
 EXTRACTED_DIR = net-tools-1.60
 DOWNLOAD_SITES = http://www.tazenda.demon.co.uk/phil/net-tools/ \
 		$(CFLINUX_PACKAGES)
-PATCHES = net-tools.patch
+PATCHES = net-tools.mii_tool.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

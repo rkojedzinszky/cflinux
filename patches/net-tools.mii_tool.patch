@@ -1,6 +1,14 @@
---- net-tools-1.60/mii-tool.c	2000-05-21 16:31:17.000000000 +0200
-+++ net-tools-1.60-p/mii-tool.c	2004-02-22 20:11:02.000000000 +0100
-@@ -379,17 +379,17 @@
+--- net-tools/mii-tool.c.orig	Sun May 21 16:31:17 2000
++++ net-tools/mii-tool.c	Mon Sep 13 08:32:38 2004
+@@ -302,6 +302,7 @@
+ 	    printf("\n  link partner:%s", media_list(lkpar, 0));
+ 	printf("\n");
+     }
++    fflush(stdout);
+     return 0;
+ }
+ 
+@@ -379,17 +380,17 @@
  /*--------------------------------------------------------------------*/
  
  const char *usage =
