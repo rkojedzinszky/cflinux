@@ -35,6 +35,9 @@ UC_ENV += $(UC_PATH)
 export UC_ENV
 export UC_PATH
 
+# The version of the used kernel
+KERNEL_VERSION := 2.4.24
+
 # the downloads dir, where the sources will reside
 SOURCES_DIR = $(TOP_DIR)/sources
 

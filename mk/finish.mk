@@ -36,5 +36,9 @@ build:
 install:
 	rm -rf $(ROOTFS)/usr/share/man
 	rm -rf $(ROOTFS)/usr/info
+	chown -R 0:0 $(FDEVEL_DIR)/fs_config
+	chown -R 0:0 $(ROOTFS)
+	chown -R 10:10 $(FDEVEL_DIR)/fs_config/zebra
+	chmod 700 $(FDEVEL_DIR)/fs_config/zebra
 
 .PHONY: configure clean build install

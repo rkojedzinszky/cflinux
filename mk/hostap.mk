@@ -43,7 +43,9 @@ $(BUILT_STAMP):
 	touch $(BUILT_STAMP)
 
 install: build
-	cp $(PKG_ROOT)/driver/modules/*.o $(ROOTFS)/lib/modules/2.4.23/pcmcia
-	cp $(PKG_ROOT)/driver/etc/hostap_cs.conf $(FDEVEL_DIR)/fs_config/pcmcia/
+	cp $(PKG_ROOT)/driver/modules/*.o \
+		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
+	cp $(PKG_ROOT)/driver/etc/hostap_cs.conf \
+		$(FDEVEL_DIR)/fs_config/pcmcia/
 
 .PHONY: configure clean build install
