@@ -1,3 +1,7 @@
+2004.02.22. Changes from 0.1.3 to 0.1.4-pre1:
+	- upgraded to the linux kernel 2.4.25
+	- finally it compiles with gcc3, on debian/testing
+
 2004.02.06. Changes from 0.1.2 to 0.1.3:
 	- added a postgresql client
 	- some scripts were rewritten with flexibility kept in mind
