@@ -23,7 +23,8 @@ EXTRACTED_DIR = busybox-1.00-pre7
 DOWNLOAD_SITES = http://busybox.net/downloads/
 PATCHES = busybox.init.patch \
 	busybox.vi.patch \
-	busybox.ash.patch
+	busybox.ash.patch \
+	busybox.ls.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

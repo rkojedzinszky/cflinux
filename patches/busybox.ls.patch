@@ -1,0 +1,11 @@
+--- busybox-1.00-pre7/coreutils/ls.c.orig	Sat Feb  7 22:40:17 2004
++++ busybox-1.00-pre7/coreutils/ls.c	Sat Feb  7 22:42:33 2004
+@@ -1001,7 +1001,7 @@
+ 	opt = bb_getopt_ulflags(argc, argv, ls_options);
+ #endif
+ 	/* 16 = maximum options minus tabsize and screewn width */
+-	for (i = 0; i < 16; i++) {
++	for (i = 0; i < sizeof(opt_flags)/sizeof(unsigned); i++) {
+ 		if (opt & (1 << i)) {
+ 			unsigned int flags = opt_flags[i];
+ 			if (flags & LIST_MASK_TRIGGER) {
