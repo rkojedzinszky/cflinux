@@ -1,10 +1,9 @@
-# /etc/crontab: system-wide crontab
-# Unlike any other crontab you don't have to run the `crontab'
-# command to install the new version when you edit this file.
-# This file also has a username field, that none of the other crontabs do.
+# The system wide crontab is in the root's crontab
+# but as this system is not multiuser, it is not a
+# big problem (i hope)
 
-# m h dom mon dow user	command
-25 6	* * *	run-parts /etc/cron.daily
-47 6	* * 6	run-parts /etc/cron.weekly
-52 6	1 * *	run-parts /etc/cron.monthly
+# m h dom mon dow	command
+25 6	* * *		run-parts /etc/cron.daily
+47 6	* * 6		run-parts /etc/cron.weekly
+52 6	1 * *		run-parts /etc/cron.monthly
 #
