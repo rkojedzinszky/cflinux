@@ -1,4 +1,4 @@
-#	$OpenBSD: sshd_config,v 1.65 2003/08/28 12:54:34 markus Exp $
+#	$OpenBSD: sshd_config,v 1.68 2003/12/29 16:39:50 millert Exp $
 
 # This is the sshd server system-wide configuration file.  See
 # sshd_config(5) for more information.
@@ -15,8 +15,11 @@ Protocol 2
 #ListenAddress 0.0.0.0
 #ListenAddress ::
 
+# HostKey for protocol version 1
+#HostKey /etc/ssh/ssh_host_key
 # HostKeys for protocol version 2
-HostKey /etc/ssh/ssh_host_rsa_key
+#HostKey /etc/ssh/ssh_host_rsa_key
+#HostKey /etc/ssh/ssh_host_dsa_key
 
 # Lifetime and size of ephemeral version 1 server key
 #KeyRegenerationInterval 1h
@@ -58,14 +61,15 @@ ChallengeResponseAuthentication no
 #KerberosAuthentication no
 #KerberosOrLocalPasswd yes
 #KerberosTicketCleanup yes
+#KerberosGetAFSToken no
 
 # GSSAPI options
 #GSSAPIAuthentication no
-#GSSAPICleanupCreds yes
+#GSSAPICleanupCredentials yes
 
 # Set this to 'yes' to enable PAM authentication (via challenge-response)
 # and session processing. Depending on your PAM configuration, this may
-# bypass the setting of 'PasswordAuthentication'
+# bypass the setting of 'PasswordAuthentication' and 'PermitEmptyPasswords'
 #UsePAM no
 
 #AllowTcpForwarding yes
@@ -75,7 +79,7 @@ ChallengeResponseAuthentication no
 #X11UseLocalhost yes
 #PrintMotd yes
 #PrintLastLog yes
-#KeepAlive yes
+#TCPKeepAlive yes
 #UseLogin no
 #UsePrivilegeSeparation yes
 #PermitUserEnvironment no
