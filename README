@@ -25,5 +25,5 @@ To build, cross your fingers and try:
 make
 make install
 
-Read the ``INSTALL'' file for generic detailed information on installing
+Read the ``BUILD'' file for generic detailed information on installing
 this program.
