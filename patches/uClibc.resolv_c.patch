@@ -1,5 +1,5 @@
---- uClibc-0.9.26/libc/inet/resolv.c.orig	2004-10-02 13:13:05.000000000 +0200
-+++ uClibc-0.9.26/libc/inet/resolv.c	2004-10-02 13:13:18.000000000 +0200
+--- uClibc-0.9.26/libc/inet/resolv.c.orig	2004-10-02 16:31:36.000000000 +0200
++++ uClibc-0.9.26/libc/inet/resolv.c	2004-10-02 16:33:23.000000000 +0200
 @@ -111,8 +111,8 @@
   *   and read_etc_hosts; getnameinfo() port from glibc; defined
   *   defined ip6addr_any and in6addr_loopback)
@@ -30,7 +30,49 @@
  
  #ifdef DEBUG
  #define DPRINTF(X,args...) fprintf(stderr, X, ##args)
-@@ -687,7 +690,7 @@
+@@ -240,7 +243,8 @@
+ 			    struct hostent ** result,
+ 			    int * h_errnop);
+ extern int __dns_lookup(const char * name, int type, int nscount, 
+-	char ** nsip, unsigned char ** outpacket, struct resolv_answer * a);
++	char ** nsip, unsigned char ** outpacket, struct resolv_answer * a,
++	int maxlen);
+ 
+ extern int __encode_dotted(const char * dotted, unsigned char * dest, int maxlen);
+ extern int __decode_dotted(const unsigned char * message, int offset, 
+@@ -659,7 +663,8 @@
+ static int ns=0, id=1;
+ 
+ int __dns_lookup(const char *name, int type, int nscount, char **nsip,
+-			   unsigned char **outpacket, struct resolv_answer *a)
++			   unsigned char **outpacket, struct resolv_answer *a,
++			   int maxlen)
+ {
+ 	int i, j, len, fd, pos, rc;
+ 	struct timeval tv;
+@@ -667,10 +672,11 @@
+ 	struct resolv_header h;
+ 	struct resolv_question q;
+ 	int retries = 0;
+-	unsigned char * packet = malloc(PACKETSZ);
++	unsigned char * packet = malloc(maxlen > PACKETSZ ? maxlen : PACKETSZ);
+ 	char *dns, *lookup = malloc(MAXDNAME);
+ 	int variant = 0;
+ 	struct sockaddr_in sa;
++	int use_vc;
+ #ifdef __UCLIBC_HAS_IPV6__
+ 	int v6;
+ 	struct sockaddr_in6 sa6;
+@@ -681,13 +687,16 @@
+ 	if (!packet || !lookup || !nscount)
+ 	    goto fail;
+ 
++	// primitive way to determine whether to use udp or
++	// tcp
++	use_vc = (maxlen > PACKETSZ);
+ 	DPRINTF("Looking up type %d answer for '%s'\n", type, name);
+ 
+ 	LOCK;
  	ns %= nscount;
  	UNLOCK;
  
@@ -39,7 +81,7 @@
  		if (fd != -1)
  			close(fd);
  
-@@ -732,7 +735,7 @@
+@@ -732,15 +741,20 @@
  		len = i + j;
  
  		DPRINTF("On try %d, sending query to port %d of machine %s\n",
@@ -48,15 +90,22 @@
  
  #ifdef __UCLIBC_HAS_IPV6__
  		v6 = inet_pton(AF_INET6, dns, &sa6.sin6_addr) > 0;
-@@ -741,6 +744,7 @@
- 		fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+-		fd = socket(v6 ? AF_INET6 : AF_INET, SOCK_DGRAM, IPPROTO_UDP);
++		fd = socket(v6 ? AF_INET6 : AF_INET,
++			use_vc ? SOCK_STREAM : SOCK_DGRAM,
++			use_vc ? IPPROTO_TCP : IPPROTO_UDP);
+ #else
+-		fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
++		fd = socket(AF_INET,
++			use_vc ? SOCK_STREAM : SOCK_DGRAM,
++			use_vc ? IPPROTO_TCP : IPPROTO_UDP);
  #endif
  		if (fd < 0) {
 +                    retries++;
  		    continue;
  		}
  
-@@ -766,6 +770,7 @@
+@@ -766,12 +780,17 @@
  			goto tryall;
  		    } else
  			/* retry */
@@ -64,7 +113,17 @@
  			continue;
  		}
  
-@@ -783,11 +788,11 @@
+ 		DPRINTF("Transmitting packet of length %d, id=%d, qr=%d\n",
+ 				len, h.id, h.qr);
+ 
++		if ( use_vc ) {
++			unsigned short	nlen=htons(len);
++			send(fd,&nlen,sizeof(short),0);
++		}
+ 		send(fd, packet, len, 0);
+ 
+ 		FD_ZERO(&fds);
+@@ -783,11 +802,34 @@
  
  			/* timed out, so retry send and receive, 
  			 * to next nameserver on queue */
@@ -74,12 +133,35 @@
  
 -		i = recv(fd, packet, 512, 0);
 -		if (i < HFIXEDSZ) {
-+		len = recv(fd, packet, 512, 0);
++		if ( use_vc ) {
++			char* p;
++			int   r;
++			unsigned short	nlen;
++			int		rlen;
++
++			if ( recv(fd,&nlen,2,0) != 2 )
++				goto again;
++
++			rlen = ntohs(nlen);
++			if ( rlen > maxlen )
++				rlen=maxlen;
++			p=packet;
++			len=rlen;
++			while( len > 0 && (r=recv(fd,p,len,0)) > 0 ) {
++				p+=r;
++				len-=r;
++			}
++			if ( len > 0 )	// could not read enough data
++				goto again;
++			len=rlen;
++		} else {
++			len = recv(fd, packet, 512, 0);
++		}
 +		if (len < HFIXEDSZ) {
  			/* too short ! */
  			goto again;
  		}
-@@ -855,20 +860,20 @@
+@@ -855,20 +897,20 @@
  		else
  			free(packet);
  		free(lookup);
@@ -108,7 +190,7 @@
  		}
  
  	  again:
-@@ -879,13 +884,16 @@
+@@ -879,13 +921,16 @@
  		    sdomains=__searchdomains;
  		    BIGUNLOCK;
  
@@ -126,7 +208,7 @@
  			UNLOCK;
  			variant = 0;
  		    }
-@@ -899,6 +907,7 @@
+@@ -899,6 +944,7 @@
  	    free(lookup);
  	if (packet)
  	    free(packet);
@@ -134,7 +216,7 @@
  	return -1;
  }
  #endif
-@@ -933,7 +942,8 @@
+@@ -933,7 +979,8 @@
  	}
  
  	if ((fp = fopen("/etc/resolv.conf", "r")) ||
@@ -144,7 +226,7 @@
  
  		while (fgets(szBuffer, sizeof(szBuffer), fp) != NULL) {
  
-@@ -970,12 +980,14 @@
+@@ -970,12 +1017,14 @@
  			}
  		}
  		fclose(fp);
@@ -163,7 +245,7 @@
  }
  #endif
  
-@@ -1033,13 +1045,6 @@
+@@ -1033,13 +1082,6 @@
  }
  #endif
  
@@ -177,7 +259,7 @@
  
  
  #ifdef L_res_init
-@@ -1115,10 +1120,11 @@
+@@ -1115,34 +1157,230 @@
  	char ** __nameserverXX;
  
  	__open_nameservers();
@@ -192,12 +274,13 @@
  	memset((char *) &a, '\0', sizeof(a));
  
  	BIGLOCK;
-@@ -1126,23 +1132,218 @@
+ 	__nameserversXX=__nameservers;
  	__nameserverXX=__nameserver;
  	BIGUNLOCK;
- 	i = __dns_lookup(dname, type, __nameserversXX, __nameserverXX, &packet, &a);
+-	i = __dns_lookup(dname, type, __nameserversXX, __nameserverXX, &packet, &a);
 -	
 -	if (i < 0)
++	i = __dns_lookup(dname, type, __nameserversXX, __nameserverXX, &packet, &a, anslen);
 +
 +	if (i < 0) {
 +		h_errno = TRY_AGAIN;
@@ -359,7 +442,7 @@
 +	else if (got_servfail)
 +		h_errno = TRY_AGAIN;
 +	return (-1);
- }
++}
 +
 +/*
 + * Perform a call on res_query on the concatenation of name and domain,
@@ -410,7 +493,7 @@
 +		snprintf(nbuf, sizeof(nbuf), "%s.%s", name, domain);
 +	}
 +	return (res_query(longname, class, type, answer, anslen));
-+}
+ }
 +
 +/* res_mkquery */
 +/* res_send */
@@ -419,7 +502,7 @@
  #endif
  
  #ifdef L_gethostbyaddr
-@@ -1358,6 +1559,29 @@
+@@ -1358,6 +1596,29 @@
      UNLOCK;
  }
  
@@ -449,7 +532,7 @@
  
  struct hostent *gethostent (void)
  {
-@@ -1373,19 +1597,7 @@
+@@ -1373,19 +1634,7 @@
      struct hostent *host;
  
      LOCK;
@@ -470,7 +553,7 @@
      UNLOCK;
      return(host);
  }
-@@ -1643,6 +1855,7 @@
+@@ -1643,6 +1892,7 @@
  {
  	struct in_addr *in;
  	struct in_addr **addr_list;
@@ -478,7 +561,7 @@
  	unsigned char *packet;
  	struct resolv_answer a;
  	int i;
-@@ -1651,26 +1864,31 @@
+@@ -1651,26 +1901,31 @@
  	char ** __nameserverXX;
  
  	__open_nameservers();
@@ -524,7 +607,7 @@
  	}
  
  	DPRINTF("Nothing found in /etc/hosts\n");
-@@ -1690,17 +1908,27 @@
+@@ -1690,17 +1945,27 @@
  
  	addr_list[0] = in;
  	addr_list[1] = 0;
@@ -553,7 +636,16 @@
  	    *result=result_buf;
  	    *h_errnop = NETDB_SUCCESS;
  	    return NETDB_SUCCESS;
-@@ -1745,6 +1973,10 @@
+@@ -1712,7 +1977,7 @@
+ 	__nameserversXX=__nameservers;
+ 	__nameserverXX=__nameserver;
+ 	BIGUNLOCK;
+-		i = __dns_lookup(buf, T_A, __nameserversXX, __nameserverXX, &packet, &a);
++		i = __dns_lookup(buf, T_A, __nameserversXX, __nameserverXX, &packet, &a, 512);
+ 
+ 		if (i < 0) {
+ 			*h_errnop = HOST_NOT_FOUND;
+@@ -1745,6 +2010,10 @@
  			result_buf->h_addrtype = AF_INET;
  			result_buf->h_length = sizeof(*in);
  			result_buf->h_addr_list = (char **) addr_list;
@@ -564,7 +656,7 @@
  			free(packet);
  			break;
  		} else {
-@@ -1782,26 +2014,36 @@
+@@ -1782,26 +2051,36 @@
  
  	if (family == AF_INET)
  		return gethostbyname_r(name, result_buf, buf, buflen, result, h_errnop);
@@ -612,3 +704,21 @@
  	}
  
  	DPRINTF("Nothing found in /etc/hosts\n");
+@@ -1843,7 +2122,7 @@
+ 	__nameserverXX=__nameserver;
+ 	BIGUNLOCK;
+ 
+-		i = __dns_lookup(buf, T_AAAA, __nameserversXX, __nameserverXX, &packet, &a);
++		i = __dns_lookup(buf, T_AAAA, __nameserversXX, __nameserverXX, &packet, &a, 512);
+ 
+ 		if (i < 0) {
+ 			*h_errnop = HOST_NOT_FOUND;
+@@ -2017,7 +2296,7 @@
+ 	__nameserversXX=__nameservers;
+ 	__nameserverXX=__nameserver;
+ 	BIGUNLOCK;
+-		i = __dns_lookup(buf, T_PTR, __nameserversXX, __nameserverXX, &packet, &a);
++		i = __dns_lookup(buf, T_PTR, __nameserversXX, __nameserverXX, &packet, &a, 512);
+ 
+ 		if (i < 0) {
+ 			*h_errnop = HOST_NOT_FOUND;
