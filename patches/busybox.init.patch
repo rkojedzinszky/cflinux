@@ -4,7 +4,7 @@
  #define KERNEL_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))
  
  #define INITTAB      "/etc/inittab"	/* inittab file location */
-+#define INITTAB_FB	 "/usr/share/defaults/inittab" /* fallback inittab */
++#define INITTAB_FB	 "/usr/share/defaults/etc/inittab" /* fallback inittab */
  #ifndef INIT_SCRIPT
  #define INIT_SCRIPT  "/etc/init.d/rcS"	/* Default sysinit script. */
  #endif

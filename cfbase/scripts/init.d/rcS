@@ -25,7 +25,7 @@ echo "done"
 
 # processing modules
 modules_file="/etc/modules"
-[ -f "$modules_file" ] || modules_file="/usr/share/defaults/modules"
+[ -f "$modules_file" ] || modules_file="/usr/share/defaults/etc/modules"
 if [ -f "$modules_file" ]
 then
     echo "Loading modules"
@@ -39,7 +39,7 @@ fi
 dmesg > /var/log/dmesg
 
 # read system wide defaults
-. /usr/share/defaults/rc.conf
+. /usr/share/defaults/etc/rc.conf
 
 # if available, read local configuration
 [ -r /etc/rc.conf ] && . /etc/rc.conf

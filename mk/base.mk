@@ -46,7 +46,7 @@ install: $(INSTALL_STAMP)
 $(INSTALL_STAMP):
 	for i in bin boot dev etc lib mnt proc sbin usr var \
 		usr/bin usr/lib usr/sbin usr/local dev/pts \
-		usr/lib/cfmaint usr/share/defaults ; do \
+		usr/lib/cfmaint usr/share/defaults/etc ; do \
 			mkdir -p $(ROOTFS)/$$i ; done
 	ln -s var/tmp $(ROOTFS)/tmp
 	ln -s etc/root $(ROOTFS)/root
@@ -61,12 +61,12 @@ $(INSTALL_STAMP):
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/linuxrc \
 		$(ROOTFS)/linuxrc
 	cp -v $(PKG_ROOT)/defaults/inittab \
-		$(ROOTFS)/usr/share/defaults/inittab
+		$(ROOTFS)/usr/share/defaults/etc/inittab
 	cp -v $(PKG_ROOT)/scripts/common.sh $(ROOTFS)/usr/lib/cfmaint/
 	cp -v $(PKG_ROOT)/defaults/modules \
-		$(ROOTFS)/usr/share/defaults/modules
+		$(ROOTFS)/usr/share/defaults/etc/modules
 	cp -v $(PKG_ROOT)/scripts/rc.conf.defaults \
-		$(ROOTFS)/usr/share/defaults/rc.conf
+		$(ROOTFS)/usr/share/defaults/etc/rc.conf
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/savedata $(ROOTFS)/sbin/
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/eraseconf.sh $(ROOTFS)/sbin/
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/reflash $(ROOTFS)/sbin/
