@@ -5,9 +5,6 @@ Changes from 0.1.4 to 0.1.5-pre1:
 	- upgraded to the linux kernel 2.4.27
 	- rewritten some main scripts that allow
 	  booting from other device than /dev/hdc (read BUILD, section Notes)
-	- now write_helper reboots the system directly
-	  instead of killing init (and thus going through the normal
-	  shutdown procedure)
 	- upgraded the farsync driver to 1.04.0
 
 Changes from 0.1.4-pre3 to 0.1.4:

@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := extra
-SRC_FILENAME = extra-0.1.tar.bz2
+SRC_FILENAME = extra-0.1a.tar.bz2
 EXTRACTED_DIR = extra
 DOWNLOAD_SITES = http://web.tvnetwork.hu/~krichy/cfdev/downloads/package_src/ \
 		$(CFLINUX_PACKAGES)
