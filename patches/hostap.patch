@@ -1,0 +1,14 @@
+--- hostap-driver-0.1.3/driver/modules/hostap_ioctl.c.orig	Sat Apr 17 18:24:39 2004
++++ hostap-driver-0.1.3/driver/modules/hostap_ioctl.c	Sat Apr 17 18:26:44 2004
+@@ -3671,6 +3671,11 @@
+ 		else ret = prism2_ioctl_priv_hostapd(local, &wrq->u.data);
+ 		break;
+ 
++	case SIOCGMIIPHY:
++	case 0x89F0:
++		ret = -EOPNOTSUPP;
++		break;
++
+ 	default:
+ #if WIRELESS_EXT > 12
+ 		if (cmd >= SIOCSIWCOMMIT && cmd <= SIOCGIWPOWER) {

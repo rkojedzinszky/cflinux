@@ -21,6 +21,7 @@ PKG := hostap
 SRC_FILENAME = hostap-driver-0.1.3.tar.gz
 EXTRACTED_DIR = hostap-driver-0.1.3
 DOWNLOAD_SITES = http://hostap.epitest.fi/releases/
+PATCHES = hostap.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
