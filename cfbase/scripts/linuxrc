@@ -30,7 +30,7 @@ if [ -z "$__system_device" ]; then
 		echo "Starting an emergency shell anyway..."
 		exec /bin/sh
 	fi
-	umount -n /proc &>/dev/null
+	umount -n /proc >/dev/null 2>&1
 fi
 if [ -z "$__system_device" ]; then
 	# if it is still undefined, set it to the default /dev/hdc

@@ -1,0 +1,17 @@
+--- busybox-1.00/libbb/pwd2spwd.c.orig	2002-07-03 06:47:42.000000000 +0200
++++ busybox-1.00/libbb/pwd2spwd.c	2004-11-28 16:54:23.000000000 +0100
+@@ -31,6 +31,8 @@
+ #include <time.h>
+ #include <sys/types.h>
+ #include "libbb.h"
++
++#ifdef CONFIG_FEATURE_SHADOWPASSWORDS
+ #include "shadow_.h"
+ 
+ /*
+@@ -71,4 +73,4 @@
+ 
+ 	return &sp;
+ }
+-
++#endif

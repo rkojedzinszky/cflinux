@@ -18,15 +18,15 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := busybox
-SRC_FILENAME = busybox-1.00-pre9.tar.bz2
-EXTRACTED_DIR = busybox-1.00-pre9
+SRC_FILENAME = busybox-1.00.tar.bz2
+EXTRACTED_DIR = busybox-1.00
 DOWNLOAD_SITES = http://busybox.net/downloads/ \
 		$(CFLINUX_PACKAGES)
 
 PATCHES = busybox.init.patch \
 	busybox.crond.patch \
-	busybox.wget.patch \
-	busybox.rdate.patch
+	busybox.rdate.patch \
+	busybox.pwd2spwd.c.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
