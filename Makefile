@@ -56,6 +56,7 @@ DO_MK += bridge
 DO_MK += postgresql
 DO_MK += libgmp
 DO_MK += freeswan
+DO_MK += mcom
 
 # Finish target is last
 DO_MK += finish

@@ -1,0 +1,67 @@
+--- busybox-1.00-pre9/include/usage.h.orig	Wed May  5 15:15:02 2004
++++ busybox-1.00-pre9/include/usage.h	Wed May  5 15:15:47 2004
+@@ -1987,12 +1987,13 @@
+ 	"Example: raid_start /dev/md0 /dev/sdb"
+ 
+ #define rdate_trivial_usage \
+-	"[-sp] HOST"
++	"[-spa] HOST"
+ #define rdate_full_usage \
+ 	"Get and possibly set the system date and time from a remote HOST.\n\n" \
+ 	"Options:\n" \
+ 	"\t-s\tSet the system date and time (default).\n" \
+-	"\t-p\tPrint the date and time."
++	"\t-p\tPrint the date and time." \
++	"\t-a\tSkew the time instead of just hopping it."
+ 
+ #define readlink_trivial_usage \
+ 	""
+--- busybox-1.00-pre9/util-linux/rdate.c.orig	Wed May  5 15:21:01 2004
++++ busybox-1.00-pre9/util-linux/rdate.c	Wed May  5 15:21:59 2004
+@@ -81,9 +81,10 @@
+ 	int opt;
+ 	int setdate = 1;
+ 	int printdate = 1;
++	int slidetime = 0;
+ 
+ 	/* Interpret command line args */
+-	while ((opt = getopt(argc, argv, "sp")) > 0) {
++	while ((opt = getopt(argc, argv, "spa")) > 0) {
+ 		switch (opt) {
+ 			case 's':
+ 				printdate = 0;
+@@ -93,6 +94,9 @@
+ 				printdate = 1;
+ 				setdate = 0;
+ 				break;
++			case 'a':
++				slidetime++;
++				break;
+ 			default:
+ 				bb_show_usage();
+ 		}
+@@ -109,9 +113,21 @@
+ 		time(&current_time);
+ 		if (current_time == remote_time)
+ 			bb_error_msg("Current time matches remote time.");
+-		else
+-			if (stime(&remote_time) < 0)
+-				bb_perror_msg_and_die("Could not set time of day");
++		else {
++			const char time_errmsg[]="Could not adjust time of day";
++
++			if (!slidetime) {
++				if (stime(&remote_time) < 0)
++					bb_perror_msg_and_die(time_errmsg);
++			} else {
++				struct timeval tv;
++
++				tv.tv_sec = remote_time - current_time;
++				tv.tv_usec = 0;
++				if (adjtime(&tv,NULL) == -1)
++					bb_perror_msg_and_die(time_errmsg);
++			}
++		}
+ 	}
+ 
+ 	if (printdate)

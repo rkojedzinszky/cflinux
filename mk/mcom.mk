@@ -1,4 +1,4 @@
-# Makefile for busybox
+# Makefile for mcom
 #
 # Copyright (C) 2004 Richard Kojedzinszky <krichy@tvnetwork.hu>
 # All rights reserved.
@@ -17,14 +17,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-PKG := busybox
-SRC_FILENAME = busybox-1.00-pre9.tar.bz2
-EXTRACTED_DIR = busybox-1.00-pre9
-DOWNLOAD_SITES = http://busybox.net/downloads/
-PATCHES = busybox.init.patch \
-	busybox.crond.patch \
-	busybox.wget.patch \
-	busybox.rdate.patch
+PKG := mcom
+SRC_FILENAME = mcom-0.2.tgz
+EXTRACTED_DIR = mcom-0.2
+DOWNLOAD_SITES = ftp://ftp.cflinux.hu/pub/mcom/
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -32,11 +28,10 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	cp $(CONFIGS)/$(PKG).config $(PKG_ROOT)/.config
 	touch $(CONFIGURED_STAMP)
 
 clean:
-	$(MAKE) -C $(PKG_ROOT) distclean
+	$(MAKE) -C $(PKG_ROOT) clean
 	rm -f $(BUILT_STAMP)
 	rm -f $(CONFIGURED_STAMP)
 
@@ -47,8 +42,6 @@ $(BUILT_STAMP):
 	touch $(BUILT_STAMP)
 
 install: build
-	find $(ROOTFS) -lname '*busybox' -print0 | xargs -0 rm -f
-	-mkdir -p $(ROOTFS)/usr/share/udhcpc
-	$(MAKE) -C $(PKG_ROOT) install PREFIX=$(ROOTFS)
+	$(INSTALL_BIN) $(PKG_ROOT)/mcom $(ROOTFS)/usr/bin/
 
 .PHONY: configure clean build install
