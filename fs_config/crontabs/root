@@ -4,7 +4,7 @@
 # This file also has a username field, that none of the other crontabs do.
 
 # m h dom mon dow user	command
-25 6	* * *	root	run-parts /etc/cron.daily
-47 6	* * 6	root	run-parts /etc/cron.weekly
-52 6	1 * *	root	run-parts /etc/cron.monthly
+25 6	* * *	run-parts /etc/cron.daily
+47 6	* * 6	run-parts /etc/cron.weekly
+52 6	1 * *	run-parts /etc/cron.monthly
 #
