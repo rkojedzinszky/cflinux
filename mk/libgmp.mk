@@ -34,7 +34,7 @@ configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
 	(cd $(PKG_ROOT); $(UC_PATH) ./configure --prefix=/ \
-	 --disable-static --with-pic --with-gnu-ld)
+	 --disable-static --with-pic --with-gnu-ld --host=i386-linux)
 	touch $(CONFIGURED_STAMP)
 
 clean:

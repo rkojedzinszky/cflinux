@@ -21,7 +21,7 @@ PKG := freeswan
 SRC_FILENAME = freeswan-2.05.tar.gz
 EXTRACTED_DIR = freeswan-2.05
 DOWNLOAD_SITES = ftp://ftp.xs4all.nl/pub/crypto/freeswan/
-#PATCHES = skel.patch
+PATCHES = freeswan.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
