@@ -1,25 +1,20 @@
---- busybox-1.00-pre5/editors/vi.c.orig	Sat Jan 24 11:35:47 2004
-+++ busybox-1.00-pre5/editors/vi.c	Sat Jan 24 11:37:34 2004
-@@ -1669,7 +1669,12 @@
+--- busybox-1.00-pre6/editors/vi.c	Wed Jan 21 11:59:45 2004
++++ busybox-1.00-pre6-p/editors/vi.c	Sat Jan 31 09:54:26 2004
+@@ -1669,10 +1669,13 @@
  		q = dot;
  	} else if (strchr("wW", c)) {
  		do_cmd(c);		// execute movement cmd
--		if (dot > text)
-+		// if we are at the next word's first char
-+		// step back one char
-+		// but check the possibilities when it is true
-+		if (dot > text && ((isspace(dot[-1]) && !isspace(dot[0]))
-+				|| (ispunct(dot[-1]) && !ispunct(dot[0]))
-+				|| (isalnum(dot[-1]) && !isalnum(dot[0]))))
- 			dot--;		// move back off of next word
+-		// if we are at the next word's first char
+-		// step back one char
+-		if (dot > text && isspace(dot[-1]))
+-			dot--;		// move back off of next word
++ 		// if we are at the next word's first char
++ 		// step back one char
++ 		// but check the possibilities when it is true
++ 		if (dot > text && ((isspace(dot[0]) && !isspace(dot[0]))
++ 				|| (ispunct(dot[-1]) && !ispunct(dot[0]))
++ 				|| (isalnum(dot[-1]) && !isalnum(dot[0]))))
++  			dot--;		// move back off of next word
  		if (dot > text && *dot == '\n')
  			dot--;		// stay off NL
-@@ -3197,7 +3202,7 @@
- 		if (cmdcnt-- > 1) {
- 			do_cmd(c);
- 		}				// repeat cnt
--		dot = end_line(dot + 1);
-+		dot = end_line(dot);
- 		break;
- 	case '%':			// %- find matching char of pair () [] {}
- 		for (q = dot; q < end && *q != '\n'; q++) {
+ 		q = dot;
