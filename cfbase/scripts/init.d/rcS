@@ -197,8 +197,8 @@ case "$httpd_enable" in
 esac
 case "$snmpd_enable" in
 	[Yy][Ee][Ss])
-		if ! grep "^snmp:" /etc/passwd ; then
-			echo -n " [adding user for snmp"
+		if ! grep -q "^snmpd:" /etc/passwd ; then
+			echo -n " [adding user snmpd"
 			adduser -h /var/lib/net-snmp -g "SNMP daemon user" -s /bin/false -D -H snmpd && echo -n "]"
 		fi
 		if [ ! -d /var/lib/net-snmp ]; then

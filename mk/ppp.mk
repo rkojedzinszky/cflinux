@@ -18,9 +18,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := ppp
-SRC_FILENAME = ppp-2.4.2b3-p2.tar.bz2
-EXTRACTED_DIR = ppp
-DOWNLOAD_SITES = http://web.tvnetwork.hu/~krichy/cfdev/downloads/package_src/
+SRC_FILENAME = ppp-cvs20040729.tar.bz2
+EXTRACTED_DIR = ppp-cvs20040729
+DOWNLOAD_SITES = ftp://ftp.cflinux.hu/pub/cflinux/packages/
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

@@ -35,6 +35,7 @@ $(CONFIGURED_STAMP):
 		--enable-ospf-te --enable-opaque-lsa \
 		--disable-ospfapi \
 		--enable-user=quagga --enable-group=quagga \
+		--enable-multipath=64 \
 		--localstatedir=/var/quagga )
 	touch $(CONFIGURED_STAMP)
 
