@@ -59,6 +59,10 @@ DO_MK += freeswan
 DO_MK += mcom
 DO_MK += poptop
 
+ifeq (local.mk,$(wildcard local.mk))
+include local.mk
+endif
+
 # Finish target is last
 DO_MK += finish
 endif
