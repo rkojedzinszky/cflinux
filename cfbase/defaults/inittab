@@ -4,7 +4,7 @@
 ::sysinit:/sbin/init.d/rcS
 
 # Uncomment the following for login on serial line
-#ttyS0::respawn:/sbin/getty 38400 ttyS0
+ttyS0::respawn:/sbin/getty 38400 ttyS0
 
 # These are standard terminals on vty[1-4]
 tty1::respawn:/sbin/getty 38400 tty1
