@@ -1,0 +1,40 @@
+diff -ruNP busybox-1.00-pre5/networking/udhcp/common.c busybox-1.00-pre5-k/networking/udhcp/common.c
+--- busybox-1.00-pre5/networking/udhcp/common.c	Thu Dec 18 23:25:38 2003
++++ busybox-1.00-pre5-k/networking/udhcp/common.c	Thu Jan 22 22:55:43 2004
+@@ -59,15 +59,15 @@
+ #else /* __uClinux__ */
+ 	int pid_fd;
+ 
+-	if (!pidfile) return;
+-
+-	pid_fd = pidfile_acquire(pidfile); /* hold lock during fork. */
++	if (pidfile)
++		pid_fd = pidfile_acquire(pidfile); /* hold lock during fork. */
+ 	if (daemon(0, 0) == -1) {
+ 		perror("fork");
+ 		exit(1);
+ 	}
+ 	daemonized++;
+-	pidfile_write_release(pid_fd);
++	if (pidfile)
++		pidfile_write_release(pid_fd);
+ #endif /* __uClinux__ */
+ }
+ 
+diff -ruNP busybox-1.00-pre5/networking/udhcp/script.c busybox-1.00-pre5-k/networking/udhcp/script.c
+--- busybox-1.00-pre5/networking/udhcp/script.c	Thu Dec 18 23:25:38 2003
++++ busybox-1.00-pre5-k/networking/udhcp/script.c	Thu Jan 22 22:21:44 2004
+@@ -145,9 +145,12 @@
+ 	if (packet == NULL)
+ 		num_options = 0;
+ 	else {
+-		for (i = 0; dhcp_options[i].code; i++)
++		for (i = 0; dhcp_options[i].code; i++) {
+ 			if (get_option(packet, dhcp_options[i].code))
+ 				num_options++;
++			if (dhcp_options[i].code == DHCP_SUBNET)
++				num_options++;
++		}
+ 		if (packet->siaddr) num_options++;
+ 		if ((temp = get_option(packet, DHCP_OPTION_OVER)))
+ 			over = *temp;
