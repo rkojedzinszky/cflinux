@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := farsync
-SRC_FILENAME = farsync.tar.bz2
-EXTRACTED_DIR = farsync
+SRC_FILENAME = farsync-1.04.0.tar.gz
+EXTRACTED_DIR = farsync-1.04.0
 DOWNLOAD_SITES = $(CFLINUX_PACKAGES)
 
 # include the common package targets 
@@ -32,6 +32,7 @@ $(CONFIGURED_STAMP):
 
 clean:
 	$(MAKE) -C $(PKG_ROOT)/common clean
+	$(MAKE) -C $(PKG_ROOT)/kernel2.4 clean
 	rm -f $(BUILT_STAMP)
 	rm -f $(CONFIGURED_STAMP)
 
@@ -39,6 +40,7 @@ build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT)/common farutil fartest $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT)/kernel2.4 all KERNEL_SOURCE=$(BUILD_DIR)/kernel
 	touch $(BUILT_STAMP)
 
 install: build
@@ -51,5 +53,7 @@ install: build
 	cp -R $(PKG_ROOT)/common/downloads $(ROOTFS)/usr/share/farsync/
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/common/farsync.init \
 		$(ROOTFS)/usr/share/farsync/
+	cp $(PKG_ROOT)/kernel2.4/farsync.o \
+		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/kernel/drivers/net/wan/
 
 .PHONY: configure clean build install
