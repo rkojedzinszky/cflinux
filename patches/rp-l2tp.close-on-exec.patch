@@ -1,0 +1,15 @@
+--- rp-l2tp-0.4/handlers/sync-pppd.c.orig	Mon Jan  3 20:30:48 2005
++++ rp-l2tp-0.4/handlers/sync-pppd.c	Mon Jan  3 20:31:40 2005
+@@ -289,6 +289,12 @@
+ 	free(sl);
+ 	return -1;
+     }
++    if ( fcntl(m_pty,F_SETFD,1) == -1 ) {
++	close(m_pty);
++	close(s_pty);
++	free(sl);
++	return -1;
++    }
+ 
+     /* Fork */
+     pid = fork();

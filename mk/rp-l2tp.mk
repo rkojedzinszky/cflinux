@@ -28,6 +28,7 @@ DOWNLOAD_SITES = \
 		http://umn.dl.sourceforge.net/sourceforge/rp-l2tp/ \
 		http://keihanna.dl.sourceforge.net/sourceforge/rp-l2tp/ \
 		$(CFLINUX_PACKAGES)
+PATCHES = rp-l2tp.close-on-exec.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
