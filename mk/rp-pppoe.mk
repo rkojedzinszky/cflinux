@@ -23,7 +23,8 @@ EXTRACTED_DIR = rp-pppoe-3.5
 DOWNLOAD_SITES = \
 		http://www.roaringpenguin.com/penguin/pppoe/ \
 		$(CFLINUX_PACKAGES)
-PATCHES = rp-pppoe.patch
+PATCHES = rp-pppoe.patch \
+	rp-pppoe.configure.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -31,7 +32,7 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT)/src ; ./configure)
+	(cd $(PKG_ROOT)/src ; ./configure --enable-plugin=$(BUILD_DIR)/ppp)
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -42,12 +43,13 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT)/src all $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT)/src all $(UC_PATH) PLUGIN_DIR=/usr/lib/pppd
 	touch $(BUILT_STAMP)
 
 install: build
 	for i in pppoe pppoe-server pppoe-sniff pppoe-relay ; do \
 		$(INSTALL_BIN) $(PKG_ROOT)/src/$$i $(ROOTFS)/usr/sbin/ ; \
 	done
+	$(INSTALL_BIN) $(PKG_ROOT)/src/rp-pppoe.so $(ROOTFS)/usr/lib/pppd/
 
 .PHONY: configure clean build install

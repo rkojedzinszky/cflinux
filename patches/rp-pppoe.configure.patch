@@ -1,0 +1,11 @@
+--- rp-pppoe-3.5/src/configure.orig	Tue Dec 28 13:30:01 2004
++++ rp-pppoe-3.5/src/configure	Tue Dec 28 13:30:15 2004
+@@ -1973,7 +1973,7 @@
+ fi
+ 
+ if test "$GCC" = yes; then
+-	CFLAGS="$CFLAGS -Wall -Wstrict-prototypes -ansi -pedantic"
++	CFLAGS="$CFLAGS -Wall -Wstrict-prototypes"
+ fi
+ 
+ if test "$PPPD" = "NOTFOUND"; then

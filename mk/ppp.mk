@@ -21,6 +21,7 @@ PKG := ppp
 SRC_FILENAME = ppp-cvs20040729.tar.bz2
 EXTRACTED_DIR = ppp-cvs20040729
 DOWNLOAD_SITES = $(CFLINUX_PACKAGES)
+PATCHES = ppp.lcp.c.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
