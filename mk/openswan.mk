@@ -43,7 +43,7 @@ build: configure $(BUILT_STAMP)
 $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) programs $(UC_PATH) \
 		KERNELSRC=$(BUILD_DIR)/kernel \
-		INC_USRLOCAL=/usr
+		INC_USRLOCAL=/usr WERROR=
 	touch $(BUILT_STAMP)
 
 install: build
