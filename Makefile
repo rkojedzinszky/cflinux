@@ -20,6 +20,8 @@
 #
 # $Id$
 
+RELEASE = 0.1.1
+
 ifndef DO_MK
 DO_MK = base
 DO_MK += kernel
