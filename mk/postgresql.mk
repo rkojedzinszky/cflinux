@@ -1,4 +1,4 @@
-# Makefile for skeleton
+# Makefile for postgresql
 #
 # Copyright (C) 2004 Richard Kojedzinszky <krichy@tvnetwork.hu>
 # All rights reserved.
@@ -37,7 +37,7 @@ configure: patch $(CONFIGURED_STAMP)
 $(CONFIGURED_STAMP):
 	(cd $(PKG_ROOT); $(UC_PATH) ./configure \
 	 --without-readline --disable-largefile --prefix=/usr \
-	 --includedir=/lib)
+	 --libdir=/lib --includedir=/include --disable-static)
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -50,11 +50,11 @@ build: configure $(BUILT_STAMP)
 $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH)
 	$(MAKE) -C $(PKG_ROOT)/src/include install DESTDIR=$(UC_ROOT)
+	$(MAKE) -C $(PKG_ROOT)/src/interfaces/libpq install-lib DESTDIR=$(UC_ROOT)
 	touch $(BUILT_STAMP)
 
 install: build
-	$(MAKE) -C $(PKG_ROOT)/src/bin/psql install DESTDIR=$(ROOTFS)
-	$(MAKE) -C $(PKG_ROOT)/src/interfaces/libpq install-lib DESTDIR=$(ROOTFS)
-	rm $(ROOTFS)/usr/lib/libpq.a
+	$(MAKE) -C $(PKG_ROOT)/src/bin/psql install DESTDIR=$(ROOTFS)/usr
+	$(MAKE) -C $(PKG_ROOT)/src/interfaces/libpq install-lib DESTDIR=$(ROOTFS)/usr
 
 .PHONY: configure clean build install
