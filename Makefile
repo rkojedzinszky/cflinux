@@ -20,7 +20,7 @@
 #
 # $Id$
 
-RELEASE = 0.1.1
+RELEASE = 0.1.2
 
 ifndef DO_MK
 DO_MK = base
@@ -49,6 +49,7 @@ DO_MK += e2fsprogs
 DO_MK += wireless_tools
 DO_MK += madwifi
 DO_MK += fwdg
+DO_MK += bridge
 
 # Finish target is last
 DO_MK += finish

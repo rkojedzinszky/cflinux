@@ -113,7 +113,7 @@ cat > menu.lst <<EOF
 timeout 5
 
 title cf
-kernel (hd0,4)1+2048 init=/linuxrc root=/dev/hdc5 console=ttyS0,115200
+kernel (hd0,4)1+2048 root=/dev/hdc5 console=ttyS0,115200
 EOF
 cat <<EOF | grub --batch
 device (hd0) $maindev
