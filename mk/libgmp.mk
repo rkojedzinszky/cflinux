@@ -34,8 +34,8 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT); $(UC_PATH) ./configure --prefix=/ \
-	 --disable-static --with-pic --with-gnu-ld --host=i386-linux)
+	(cd $(PKG_ROOT); $(UC_PATH) CC=gcc ./configure --prefix=/ \
+	 --disable-static --enable-shared --with-pic --with-gnu-ld --host=i386-linux)
 	touch $(CONFIGURED_STAMP)
 
 clean:
