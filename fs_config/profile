@@ -2,6 +2,8 @@
 
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 export PATH
-trap ":" INT QUIT TERM
 
-export PS1="\h \w # "
+PS1="\h \w # "
+export PS1
+
+trap ":" INT QUIT TERM

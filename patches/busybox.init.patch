@@ -1,5 +1,5 @@
---- busybox-1.00-pre5/init/init.c	Fri Sep 26 12:45:55 2003
-+++ busybox-1.00-pre5-p/init/init.c	Wed Feb  4 11:15:46 2004
+--- busybox-1.00-pre7/init/init.c	Fri Sep 26 12:45:55 2003
++++ busybox-1.00-pre7-p/init/init.c	Fri Feb  6 09:41:23 2004
 @@ -110,6 +110,7 @@
  #define KERNEL_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))
  

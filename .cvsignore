@@ -1,0 +1,5 @@
+build
+fs_root
+sources
+rootfs.bin
+i386-linux-uclibc
