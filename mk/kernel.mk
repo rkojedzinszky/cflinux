@@ -28,12 +28,24 @@ DOWNLOAD_SITES = \
 		ftp://ftp.se.kernel.org/pub/linux/kernel/v2.4/ \
 		ftp://ftp.sm.kernel.org/pub/linux/kernel/v2.4/ \
 		ftp://ftp.kernel.org/pub/linux/kernel/v2.4/
-PATCHES = kernel.patch kernel.freeswan.patch
+PATCHES = kernel.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
 
-configure: patch $(CONFIGURED_STAMP)
+FREESWAN_STAMP=$(PKG_ROOT)/.freeswan_applied
+
+configure: patch freeswanpatch $(CONFIGURED_STAMP)
+
+freeswanpatch: $(FREESWAN_STAMP)
+
+$(FREESWAN_STAMP): $(BUILD_DIR)/freeswan/.freeswan.patched
+	(cd $(PKG_ROOT); \
+	$(MAKE) -C $(BUILD_DIR)/freeswan kernelpatch2.4 | patch -p1)
+	touch $@
+
+$(BUILD_DIR)/freeswan/.freeswan.patched:
+	$(MAKE) -f mk/freeswan.mk patch
 
 $(CONFIGURED_STAMP):
 	cp $(CONFIGS)/$(PKG).config $(PKG_ROOT)/.config
