@@ -41,6 +41,7 @@ DO_MK += quagga
 DO_MK += iputils
 DO_MK += pcmcia-cs
 DO_MK += hostap
+DO_MK += hostapd
 DO_MK += ppp
 DO_MK += rp-pppoe
 DO_MK += net-snmp
