@@ -51,8 +51,8 @@ $(INSTALL_STAMP):
 	ln -s var/tmp $(ROOTFS)/tmp
 	ln -s etc/root $(ROOTFS)/root
 	(cd $(ROOTFS)/dev ; MAKEDEV std hda hdb hdc hdd \
-		console ptmx rtc ttyS0 ttyS1 ttyS2 ttyS3 ppp \
-		watchdog)
+		console ptmx rtc ttyS0 ttyS1 ttyS2 ttyS3 ppp; \
+		mknod watchdog c 10 130)
 	cp -av $(PKG_ROOT)/scripts/init.d $(ROOTFS)/sbin/
 	cp -v $(PKG_ROOT)/defaults/inittab $(ROOTFS)/sbin/inittab
 	cp -v $(PKG_ROOT)/scripts/common.sh $(ROOTFS)/usr/lib/cfmaint/
