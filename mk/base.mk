@@ -44,6 +44,8 @@ build:
 install: $(INSTALL_STAMP)
 
 $(INSTALL_STAMP):
+	-mkdir $(ROOTFS)
+	-chmod 755 $(ROOTFS)
 	for i in bin boot dev etc lib mnt proc sbin usr var \
 		usr/bin usr/lib usr/sbin usr/local dev/pts \
 		usr/lib/cfmaint ; do \
