@@ -65,6 +65,14 @@ if ! grep -q "^nobody:" /etc/passwd ; then
 	echo " done"
 fi
 
+case "$farsync_init" in
+	[Yy][Ee][Ss])
+		export farsync_media
+		export farsync_proto
+		/usr/share/farsync/farsync.init
+		;;
+esac
+
 if [ -r /etc/rc.network ]; then
 	echo -n "Network initialization: "
 	sh /etc/rc.network
@@ -120,13 +128,6 @@ fi
 echo -ne "\033[9;$console_blank]" > /dev/tty1 2>/dev/null
 echo " done"
 
-case "$farsync_init" in
-	[Yy][Ee][Ss])
-		export farsync_media
-		export farsync_proto
-		/usr/share/farsync/farsync.init
-		;;
-esac
 echo -n "Starting standard daemons:"
 case "$syslogd_enable" in
 	[Yy][Ee][Ss])
