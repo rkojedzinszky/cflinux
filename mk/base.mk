@@ -55,7 +55,7 @@ $(INSTALL_STAMP):
 	ln -s var/tmp $(ROOTFS)/tmp
 	ln -s etc/root $(ROOTFS)/root
 	(cd $(ROOTFS)/dev ; MAKEDEV std hda hdb hdc hdd \
-		console ptmx rtc ttyS0 ttyS1 ttyS2 ttyS3 ppp; \
+		console ptmx rtc ttyS0 ttyS1 ttyS2 ttyS3 ppp sda sdb; \
 		mknod watchdog c 10 130; \
 		mknod net/tun c 10 200)
 	$(INSTALL) -d -m 555 $(ROOTFS)/sbin/init.d
