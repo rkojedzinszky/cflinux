@@ -21,7 +21,7 @@ PKG := busybox
 SRC_FILENAME = busybox-1.00-pre5.tar.bz2
 EXTRACTED_DIR = busybox-1.00-pre5
 DOWNLOAD_SITES = http://busybox.net/downloads/
-PATCHES = busybox.init.patch busybox.vi.patch
+PATCHES = busybox.init.patch busybox.vi.patch busybox.udhcpc.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
