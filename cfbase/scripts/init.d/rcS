@@ -85,6 +85,23 @@ if [ -f /proc/sys/net/ipv4/conf/all/arp_announce -a "$arp_announce" -gt 0 ]; the
 	echo "$arp_announce" > /proc/sys/net/ipv4/conf/all/arp_announce
 	echo " done."
 fi
+case "$console_blank" in
+	[Nn][Oo])
+		console_blank=0
+		;;
+	[0-9]+)
+		;;
+	*)
+		console_blank=10
+		;;
+esac
+if [ $console_blank -eq 0 ]; then
+	echo -n "Disabling console blanking:"
+else
+	echo -n "Enabling console blanking ($console_blank minutes):"
+fi
+echo -ne "\033[9;$console_blank]" > /dev/tty1 2>/dev/null
+echo " done"
 
 case "$farsync_init" in
 	[Yy][Ee][Ss])
