@@ -93,4 +93,4 @@ image:
 	mkcramfs -i topad $(ROOTFS) rootfs.bin
 	rm -f topad
 
-.PHONY: all distclean clean install image
+.PHONY: all distclean clean install image scratch
