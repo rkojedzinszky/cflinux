@@ -7,6 +7,9 @@ Changes from 0.1.4 to 0.1.5-pre1:
 	  booting from other device than /dev/hdc (read BUILD, section Notes)
 	- upgraded the farsync driver to 1.04.0
 	- added support for usb flash devices (aka usblinux :))
+	- updated the resolver to support tcp queries and
+	  thus enables the ability of extraction TXT records
+	  from dns, and this enables OE with freeswan
 
 Changes from 0.1.4-pre3 to 0.1.4:
 	- version rename
