@@ -51,6 +51,5 @@ install: build
 	for i in pppoe pppoe-server pppoe-sniff pppoe-relay ; do \
 		$(INSTALL_BIN) $(PKG_ROOT)/src/$$i $(ROOTFS)/usr/sbin/ ; \
 	done
-	$(INSTALL_BIN) $(PKG_ROOT)/src/rp-pppoe.so $(ROOTFS)/usr/lib/pppd/
 
 .PHONY: configure clean build install

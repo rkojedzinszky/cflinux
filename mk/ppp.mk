@@ -18,10 +18,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := ppp
-SRC_FILENAME = ppp-cvs20040729.tar.bz2
-EXTRACTED_DIR = ppp-cvs20040729
+SRC_FILENAME = ppp-cvs20040729-p2.tar.bz2
+EXTRACTED_DIR = ppp-cvs20040729-p2
 DOWNLOAD_SITES = $(CFLINUX_PACKAGES)
-PATCHES = ppp.lcp.c.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -49,6 +48,8 @@ install: build
 	$(INSTALL_BIN) $(PKG_ROOT)/pppd/plugins/radius/radius.so \
 		$(ROOTFS)/usr/lib/pppd/
 	$(INSTALL_BIN) $(PKG_ROOT)/pppd/plugins/radius/radattr.so \
+		$(ROOTFS)/usr/lib/pppd/
+	$(INSTALL_BIN) $(PKG_ROOT)/pppd/plugins/rp-pppoe/rp-pppoe.so \
 		$(ROOTFS)/usr/lib/pppd/
 
 .PHONY: configure clean build install

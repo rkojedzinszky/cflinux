@@ -1,56 +1,3 @@
---- rp-pppoe-3.5/src/plugin.c.orig	2004-12-30 18:42:10.000000000 +0100
-+++ rp-pppoe-3.5/src/plugin.c	2004-12-30 19:21:28.000000000 +0100
-@@ -277,10 +277,22 @@
-     int r = 1;
-     int fd;
-     struct ifreq ifr;
-+    static char rp_dev_prefix[]="rp_pppoe_interface-";
-+    char* dev;
- 
-     /* Only do it if name is "ethXXX" */
-     /* Thanks to Russ Couturier for this fix */
--    if (strlen(cmd) < 4 || strncmp(cmd, "eth", 3)) {
-+
-+    /* or accept it if it begins with rp_pppoe_interface-
-+     * it is very-very hackish I know, but at least it still
-+     * remains compatible, and no new option is introduced
-+     * krichy */
-+    if (strlen(cmd) >= sizeof(rp_dev_prefix) &&
-+	strncmp(cmd,rp_dev_prefix,sizeof(rp_dev_prefix)-1) == 0) {
-+	    dev=cmd+sizeof(rp_dev_prefix)-1;
-+    } else if (strlen(cmd) >= 4 && strncmp(cmd, "eth", 3) == 0) {
-+	    dev=cmd;
-+    } else {
- 	if (OldDevnameHook) return OldDevnameHook(cmd, argv, doit);
- 	return 0;
-     }
-@@ -292,7 +304,7 @@
- 
-     /* Try getting interface index */
-     if (r) {
--	strncpy(ifr.ifr_name, cmd, sizeof(ifr.ifr_name));
-+	strncpy(ifr.ifr_name, dev, sizeof(ifr.ifr_name));
- 	if (ioctl(fd, SIOCGIFINDEX, &ifr) < 0) {
- 	    r = 0;
- 	} else {
-@@ -300,7 +312,7 @@
- 		r = 0;
- 	    } else {
- 		if (ifr.ifr_hwaddr.sa_family != ARPHRD_ETHER) {
--		    error("Interface %s not Ethernet", cmd);
-+		    error("Interface %s not Ethernet", dev);
- 		    r=0;
- 		}
- 	    }
-@@ -310,7 +322,7 @@
-     /* Close socket */
-     close(fd);
-     if (r) {
--	strncpy(devnam, cmd, sizeof(devnam));
-+	strncpy(devnam, dev, sizeof(devnam));
- 	if (the_channel != &pppoe_channel) {
- 
- 	    the_channel = &pppoe_channel;
 --- rp-pppoe-3.5/src/pppoe-server.c.orig	2004-12-30 19:23:23.000000000 +0100
 +++ rp-pppoe-3.5/src/pppoe-server.c	2004-12-30 19:25:02.000000000 +0100
 @@ -1706,7 +1706,13 @@
@@ -58,7 +5,7 @@
      argv[c++] = "plugin";
      argv[c++] = PLUGIN_PATH;
 -    argv[c++] = session->ethif->name;
-+    snprintf(buffer, SMALLBUF, "rp_pppoe_interface-%s",
++    snprintf(buffer, SMALLBUF, "nic-%s",
 +	     session->ethif->name);
 +    argv[c++] = strdup(buffer);
 +    if (!argv[c-1]) {
