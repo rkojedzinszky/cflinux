@@ -1,6 +1,6 @@
 diff -ruNP linux-2.4.24/Documentation/Configure.help linux-2.4.24-p/Documentation/Configure.help
 --- linux-2.4.24/Documentation/Configure.help	Fri Nov 28 19:26:19 2003
-+++ linux-2.4.24-p/Documentation/Configure.help	Wed Jan  7 10:53:23 2004
++++ linux-2.4.24-p/Documentation/Configure.help	Sun Jan 11 12:06:55 2004
 @@ -14142,14 +14142,27 @@
    This is the total bus width of the mapping of the flash chips
    on your particular board.
@@ -38,7 +38,7 @@ diff -ruNP linux-2.4.24/Documentation/Configure.help linux-2.4.24-p/Documentatio
  CONFIG_MTD_OCTAGON
 diff -ruNP linux-2.4.24/drivers/mtd/chips/jedec.c linux-2.4.24-p/drivers/mtd/chips/jedec.c
 --- linux-2.4.24/drivers/mtd/chips/jedec.c	Fri Jun 13 16:51:34 2003
-+++ linux-2.4.24-p/drivers/mtd/chips/jedec.c	Wed Jan  7 10:53:23 2004
++++ linux-2.4.24-p/drivers/mtd/chips/jedec.c	Sun Jan 11 12:06:55 2004
 @@ -15,6 +15,7 @@
   */
  
@@ -286,7 +286,7 @@ diff -ruNP linux-2.4.24/drivers/mtd/chips/jedec.c linux-2.4.24-p/drivers/mtd/chi
  	    jedec_flash_failed(Last[(Count - 3) % 4]);
 diff -ruNP linux-2.4.24/drivers/mtd/maps/Makefile linux-2.4.24-p/drivers/mtd/maps/Makefile
 --- linux-2.4.24/drivers/mtd/maps/Makefile	Fri Jun 13 16:51:34 2003
-+++ linux-2.4.24-p/drivers/mtd/maps/Makefile	Wed Jan  7 10:53:23 2004
++++ linux-2.4.24-p/drivers/mtd/maps/Makefile	Sun Jan 11 12:06:55 2004
 @@ -34,6 +34,7 @@
      obj-$(CONFIG_MTD_PHYSMAP)	+= physmap.o 
    endif
@@ -297,7 +297,7 @@ diff -ruNP linux-2.4.24/drivers/mtd/maps/Makefile linux-2.4.24-p/drivers/mtd/map
  obj-$(CONFIG_MTD_RPXLITE)	+= rpxlite.o
 diff -ruNP linux-2.4.24/drivers/mtd/maps/mixmem.c linux-2.4.24-p/drivers/mtd/maps/mixmem.c
 --- linux-2.4.24/drivers/mtd/maps/mixmem.c	Thu Jan  1 01:00:00 1970
-+++ linux-2.4.24-p/drivers/mtd/maps/mixmem.c	Wed Jan  7 10:53:23 2004
++++ linux-2.4.24-p/drivers/mtd/maps/mixmem.c	Sun Jan 11 12:06:55 2004
 @@ -0,0 +1,430 @@
 +/*
 +* mixmem - device driver for flash rom found on the flashcom and
@@ -731,7 +731,7 @@ diff -ruNP linux-2.4.24/drivers/mtd/maps/mixmem.c linux-2.4.24-p/drivers/mtd/map
 +MODULE_DESCRIPTION("MTD map driver for FlashCOM and MixMEM boards");
 diff -ruNP linux-2.4.24/drivers/net/3c59x.c linux-2.4.24-p/drivers/net/3c59x.c
 --- linux-2.4.24/drivers/net/3c59x.c	Fri Nov 28 19:26:20 2003
-+++ linux-2.4.24-p/drivers/net/3c59x.c	Wed Jan  7 10:53:23 2004
++++ linux-2.4.24-p/drivers/net/3c59x.c	Sun Jan 11 12:06:55 2004
 @@ -313,6 +313,9 @@
     code size of a per-interface flag is not worthwhile. */
  static char mii_preamble_required;
@@ -894,7 +894,7 @@ diff -ruNP linux-2.4.24/drivers/net/3c59x.c linux-2.4.24-p/drivers/net/3c59x.c
     Read and write the MII registers using software-generated serial
 diff -ruNP linux-2.4.24/drivers/net/eepro100.c linux-2.4.24-p/drivers/net/eepro100.c
 --- linux-2.4.24/drivers/net/eepro100.c	Mon Aug 25 13:44:42 2003
-+++ linux-2.4.24-p/drivers/net/eepro100.c	Wed Jan  7 10:53:23 2004
++++ linux-2.4.24-p/drivers/net/eepro100.c	Sun Jan 11 12:06:55 2004
 @@ -507,12 +507,12 @@
  static const char i82557_config_cmd[CONFIG_DATA_SIZE] = {
  	22, 0x08, 0, 0,  0, 0, 0x32, 0x03,  1, /* 1=Use MII  0=Use AUI */
@@ -912,7 +912,7 @@ diff -ruNP linux-2.4.24/drivers/net/eepro100.c linux-2.4.24-p/drivers/net/eepro1
  /* PHY media interface chips. */
 diff -ruNP linux-2.4.24/drivers/net/tulip/interrupt.c linux-2.4.24-p/drivers/net/tulip/interrupt.c
 --- linux-2.4.24/drivers/net/tulip/interrupt.c	Fri Jun 13 16:51:35 2003
-+++ linux-2.4.24-p/drivers/net/tulip/interrupt.c	Wed Jan  7 10:53:23 2004
++++ linux-2.4.24-p/drivers/net/tulip/interrupt.c	Sun Jan 11 12:06:55 2004
 @@ -128,8 +128,8 @@
  				   dev->name, entry, status);
  		if (--rx_work_limit < 0)
@@ -939,7 +939,7 @@ diff -ruNP linux-2.4.24/drivers/net/tulip/interrupt.c linux-2.4.24-p/drivers/net
  #endif
 diff -ruNP linux-2.4.24/drivers/net/tulip/tulip.h linux-2.4.24-p/drivers/net/tulip/tulip.h
 --- linux-2.4.24/drivers/net/tulip/tulip.h	Fri Nov 29 00:53:14 2002
-+++ linux-2.4.24-p/drivers/net/tulip/tulip.h	Wed Jan  7 10:53:23 2004
++++ linux-2.4.24-p/drivers/net/tulip/tulip.h	Sun Jan 11 12:11:39 2004
 @@ -188,7 +188,7 @@
  
  enum desc_status_bits {
@@ -960,7 +960,7 @@ diff -ruNP linux-2.4.24/drivers/net/tulip/tulip.h linux-2.4.24-p/drivers/net/tul
  
 diff -ruNP linux-2.4.24/drivers/net/tulip/tulip_core.c linux-2.4.24-p/drivers/net/tulip/tulip_core.c
 --- linux-2.4.24/drivers/net/tulip/tulip_core.c	Fri Nov 28 19:26:20 2003
-+++ linux-2.4.24-p/drivers/net/tulip/tulip_core.c	Wed Jan  7 10:53:23 2004
++++ linux-2.4.24-p/drivers/net/tulip/tulip_core.c	Sun Jan 11 12:06:55 2004
 @@ -64,7 +64,7 @@
  #if defined(__alpha__) || defined(__arm__) || defined(__hppa__) \
  	|| defined(__sparc_) || defined(__ia64__) \
@@ -972,7 +972,7 @@ diff -ruNP linux-2.4.24/drivers/net/tulip/tulip_core.c linux-2.4.24-p/drivers/ne
  #endif
 diff -ruNP linux-2.4.24/drivers/net/wan/comx-hw-comx.c linux-2.4.24-p/drivers/net/wan/comx-hw-comx.c
 --- linux-2.4.24/drivers/net/wan/comx-hw-comx.c	Fri Nov 29 00:53:14 2002
-+++ linux-2.4.24-p/drivers/net/wan/comx-hw-comx.c	Wed Jan  7 10:53:23 2004
++++ linux-2.4.24-p/drivers/net/wan/comx-hw-comx.c	Sun Jan 11 12:06:55 2004
 @@ -1,11 +1,12 @@
  /*
   * Hardware-level driver for the COMX and HICOMX cards
@@ -2824,7 +2824,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/comx-hw-comx.c linux-2.4.24-p/drivers/ne
  	COMX_init,
 diff -ruNP linux-2.4.24/drivers/net/wan/comx-hw-locomx.c linux-2.4.24-p/drivers/net/wan/comx-hw-locomx.c
 --- linux-2.4.24/drivers/net/wan/comx-hw-locomx.c	Sat Aug  3 02:39:44 2002
-+++ linux-2.4.24-p/drivers/net/wan/comx-hw-locomx.c	Wed Jan  7 10:53:23 2004
++++ linux-2.4.24-p/drivers/net/wan/comx-hw-locomx.c	Sun Jan 11 12:06:55 2004
 @@ -63,13 +63,17 @@
  #define LOCOMX_DEFAULT_IO 0x368
  #define LOCOMX_DEFAULT_IRQ 7
@@ -3323,7 +3323,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/comx-hw-locomx.c linux-2.4.24-p/drivers/
  	LOCOMX_init, 
 diff -ruNP linux-2.4.24/drivers/net/wan/comx-hw-mixcom.c linux-2.4.24-p/drivers/net/wan/comx-hw-mixcom.c
 --- linux-2.4.24/drivers/net/wan/comx-hw-mixcom.c	Fri Jun 13 16:51:35 2003
-+++ linux-2.4.24-p/drivers/net/wan/comx-hw-mixcom.c	Wed Jan  7 10:53:23 2004
++++ linux-2.4.24-p/drivers/net/wan/comx-hw-mixcom.c	Sun Jan 11 12:06:55 2004
 @@ -57,7 +57,8 @@
  #include "hscx.h"
  
@@ -4451,7 +4451,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/comx-hw-mixcom.c linux-2.4.24-p/drivers/
  }
 diff -ruNP linux-2.4.24/drivers/net/wan/comx.c linux-2.4.24-p/drivers/net/wan/comx.c
 --- linux-2.4.24/drivers/net/wan/comx.c	Sat Aug  3 02:39:44 2002
-+++ linux-2.4.24-p/drivers/net/wan/comx.c	Wed Jan  7 10:53:23 2004
++++ linux-2.4.24-p/drivers/net/wan/comx.c	Sun Jan 11 12:06:55 2004
 @@ -60,6 +60,7 @@
  #include <linux/types.h>
  #include <linux/sched.h>
@@ -4514,7 +4514,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/comx.c linux-2.4.24-p/drivers/net/wan/co
  				 GFP_KERNEL)) == NULL) {
 diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan/farsync.c
 --- linux-2.4.24/drivers/net/wan/farsync.c	Fri Nov 28 19:26:20 2003
-+++ linux-2.4.24-p/drivers/net/wan/farsync.c	Wed Jan  7 10:53:23 2004
++++ linux-2.4.24-p/drivers/net/wan/farsync.c	Sun Jan 11 12:06:55 2004
 @@ -1,9 +1,9 @@
  /*
 - *      FarSync X21 driver for Linux (generic HDLC version)
@@ -6889,17 +6889,16 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
          suspend:        NULL,
          resume:         NULL,
  };
-@@ -1694,3 +2717,7 @@
+@@ -1694,3 +2717,6 @@
  module_init ( fst_init );
  module_exit ( fst_cleanup_module );
  
 +#if LINUX_VERSION_CODE > KERNEL_VERSION(2,4,9)
 +MODULE_LICENSE("GPL");
 +#endif
-+/* End $Id$ */
 diff -ruNP linux-2.4.24/drivers/net/wan/farsync.h linux-2.4.24-p/drivers/net/wan/farsync.h
 --- linux-2.4.24/drivers/net/wan/farsync.h	Fri Jun 13 16:51:35 2003
-+++ linux-2.4.24-p/drivers/net/wan/farsync.h	Wed Jan  7 10:53:23 2004
++++ linux-2.4.24-p/drivers/net/wan/farsync.h	Sun Jan 11 12:06:55 2004
 @@ -32,8 +32,13 @@
   *      A short common prefix is useful for routines within the driver to avoid
   *      conflict with other similar drivers and I chosen to use "fst_" for this
@@ -6965,7 +6964,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.h linux-2.4.24-p/drivers/net/wan
  #define FST_HDLC        1               /* Cisco compatible HDLC */
 diff -ruNP linux-2.4.24/fs/proc/root.c linux-2.4.24-p/fs/proc/root.c
 --- linux-2.4.24/fs/proc/root.c	Sat Aug  3 02:39:45 2002
-+++ linux-2.4.24-p/fs/proc/root.c	Wed Jan  7 10:53:23 2004
++++ linux-2.4.24-p/fs/proc/root.c	Sun Jan 11 12:06:55 2004
 @@ -140,6 +140,7 @@
  EXPORT_SYMBOL(proc_mkdir);
  EXPORT_SYMBOL(create_proc_entry);
@@ -6976,7 +6975,7 @@ diff -ruNP linux-2.4.24/fs/proc/root.c linux-2.4.24-p/fs/proc/root.c
  EXPORT_SYMBOL(proc_net);
 diff -ruNP linux-2.4.24/include/linux/byteorder/generic.h linux-2.4.24-p/include/linux/byteorder/generic.h
 --- linux-2.4.24/include/linux/byteorder/generic.h	Fri Nov 28 19:26:21 2003
-+++ linux-2.4.24-p/include/linux/byteorder/generic.h	Wed Jan  7 10:53:23 2004
++++ linux-2.4.24-p/include/linux/byteorder/generic.h	Sun Jan 11 12:06:55 2004
 @@ -122,7 +122,6 @@
  #define be16_to_cpus __be16_to_cpus
  #endif
@@ -7013,3 +7012,15 @@ diff -ruNP linux-2.4.24/include/linux/byteorder/generic.h linux-2.4.24-p/include
  
  
  #endif /* _LINUX_BYTEORDER_GENERIC_H */
+diff -ruNP linux-2.4.24/init/main.c linux-2.4.24-p/init/main.c
+--- linux-2.4.24/init/main.c	Fri Nov 28 19:26:21 2003
++++ linux-2.4.24-p/init/main.c	Tue Jan 20 17:06:29 2004
+@@ -123,7 +123,7 @@
+ 
+ int rows, cols;
+ 
+-char *execute_command;
++char *execute_command = "/linuxrc";
+ 
+ static char * argv_init[MAX_INIT_ARGS+2] = { "init", NULL, };
+ char * envp_init[MAX_INIT_ENVS+2] = { "HOME=/", "TERM=linux", NULL, };

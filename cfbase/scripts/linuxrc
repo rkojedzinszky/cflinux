@@ -33,6 +33,9 @@ then
     exit 0
 fi
 
+# place a \n at the end of the line
+echo -ne "\n"
+
 # Do the real mount
 mount -nt minix /dev/ram0 /etc
 
