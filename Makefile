@@ -20,7 +20,7 @@
 #
 # $Id$
 
-RELEASE_STRING = 0.1.5
+RELEASE_STRING = 0.2-pre1
 PACKAGE = cflinux
 
 ifndef DO_MK
@@ -64,6 +64,7 @@ DO_MK += vtun
 DO_MK += ltraf
 DO_MK += libnet
 DO_MK += nemesis
+DO_MK += ethtool
 
 ifeq (local.mk,$(wildcard local.mk))
 include local.mk
