@@ -55,6 +55,6 @@ $(BUILT_STAMP):
 
 install: build
 	$(MAKE) -C $(PKG_ROOT)/src/bin/psql install DESTDIR=$(ROOTFS)
-	$(MAKE) -C $(PKG_ROOT)/src/interfaces/libpq install-lib DESTDIR=$(ROOTFS)/usr
+	$(MAKE) -C $(PKG_ROOT)/src/interfaces/libpq install-lib-shared DESTDIR=$(ROOTFS)/usr
 
 .PHONY: configure clean build install
