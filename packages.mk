@@ -67,8 +67,8 @@ $(PATCHED_STAMP):
 	@echo -n "Patching $(PKG): "
 	@(cd $(PKG_ROOT); for i in $(PATCHES); do \
 		patch -p1 < "$(PATCHES_DIR)/$$i" >/dev/null || exit 1 ; \
-		done)
-	@echo "done"
+		echo -n " [$$i]" ; done)
+	@echo " done"
 	@touch $@
 
 distclean:

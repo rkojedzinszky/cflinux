@@ -1,0 +1,12 @@
+diff -ruNP busybox-1.00-pre5/editors/vi.c busybox-1.00-pre5.orig/editors/vi.c
+--- busybox-1.00-pre5/editors/vi.c	Mon Sep 15 10:33:36 2003
++++ busybox-1.00-pre5.orig/editors/vi.c	Sat Jan 17 10:32:43 2004
+@@ -3197,7 +3197,7 @@
+ 		if (cmdcnt-- > 1) {
+ 			do_cmd(c);
+ 		}				// repeat cnt
+-		dot = end_line(dot + 1);
++		dot = end_line(dot);
+ 		break;
+ 	case '%':			// %- find matching char of pair () [] {}
+ 		for (q = dot; q < end && *q != '\n'; q++) {

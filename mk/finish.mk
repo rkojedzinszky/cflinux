@@ -36,6 +36,8 @@ build:
 install:
 	rm -rf $(ROOTFS)/usr/share/man
 	rm -rf $(ROOTFS)/usr/info
+	rm -rf $(ROOTFS)/man
+	rm -rf $(ROOTFS)/include
 	chown -R 0:0 $(FDEVEL_DIR)/fs_config
 	chown -R 0:0 $(ROOTFS)
 	chown -R 10:10 $(FDEVEL_DIR)/fs_config/zebra
