@@ -56,6 +56,8 @@ $(INSTALL_STAMP):
 	$(INSTALL) -d -m 555 $(ROOTFS)/sbin/init.d
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/init.d/rcS \
 		$(ROOTFS)/sbin/init.d/
+	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/shutdown \
+		$(ROOTFS)/sbin/init.d/
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/linuxrc \
 		$(ROOTFS)/linuxrc
 	cp -v $(PKG_ROOT)/defaults/inittab \

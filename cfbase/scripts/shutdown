@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# this file is intended to run as a shutdown script
+# when the system is rebooted.
+# Currently it only unmounts the filesystems
+
+echo -n "Unmounting filesystems... "
+umount -a -r
+echo "done"
