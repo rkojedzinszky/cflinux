@@ -98,6 +98,7 @@ image:
 	mount -t minix /dev/ram0 /mnt
 	cp -a $(FDEVEL_DIR)/fs_config/* /mnt
 	find /mnt -type d -name CVS -print0 | xargs rm -rf
+	-mkdir /mnt/root /mnt/crontabs
 	umount /mnt
 	dd if=/dev/ram0 bs=1k of=$(ROOTFS)/usr/share/defaults/etc.img \
 		count=2047 >/dev/null 2>&1
