@@ -45,7 +45,8 @@ build: configure $(BUILT_STAMP)
 $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH) \
 		KERNEL_PATH=$(BUILD_DIR)/kernel \
-		KERNEL_VERSION=$(KERNEL_VERSION)
+		KERNEL_VERSION=$(KERNEL_VERSION) \
+		LINUX_VERSION=204
 	touch $(BUILT_STAMP)
 
 install: build
