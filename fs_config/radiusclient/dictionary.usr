@@ -29,3 +29,8 @@ ATTRIBUTE	USR-Initial-Rx-Link-Data-Rate		48941	integer	USR
 ATTRIBUTE	USR-Final-Rx-Link-Data-Rate		0xBF2C	integer	USR
 ATTRIBUTE	USR-Initial-Tx-Link-Data-Rate		106	integer	USR
 ATTRIBUTE	USR-Final-Tx-Link-Data-Rate		0x006B	integer	USR
+
+ATTRIBUTE	Acct-Input-Octets-64			8738	string	USR
+ATTRIBUTE	Acct-Output-Octets-64			8739	string	USR
+ATTRIBUTE	Acct-Input-Packets-64			8740	string	USR
+ATTRIBUTE	Acct-Output-Packets-64			8741	string	USR

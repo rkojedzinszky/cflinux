@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := ppp
-SRC_FILENAME = ppp-2.4.2b3.tar.bz2
+SRC_FILENAME = ppp-2.4.2b3-p1.tar.bz2
 EXTRACTED_DIR = ppp
 DOWNLOAD_SITES = http://web.tvnetwork.hu/~krichy/cfdev/downloads/package_src/
 
