@@ -8,3 +8,14 @@
  until (
  	if test -s $info
  	then
+--- freeswan-2.05/programs/showhostkey/showhostkey.in.orig	Tue Apr 13 16:31:32 2004
++++ freeswan-2.05/programs/showhostkey/showhostkey.in	Tue Apr 13 16:31:48 2004
+@@ -70,7 +70,7 @@
+ 	exit 1
+ fi
+ 
+-host="`hostname --fqdn`"
++host="`hostname -f`"
+ 
+ awk '	BEGIN {
+ 		inkey = 0
