@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := hostap
-SRC_FILENAME = hostap-driver-0.1.3.tar.gz
-EXTRACTED_DIR = hostap-driver-0.1.3
+SRC_FILENAME = hostap-driver-0.2.4.tar.gz
+EXTRACTED_DIR = hostap-driver-0.2.4
 DOWNLOAD_SITES = http://hostap.epitest.fi/releases/ \
 		$(CFLINUX_PACKAGES)
 PATCHES = hostap.patch
@@ -40,7 +40,7 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) pccard $(UC_PATH) \
+	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH) \
 		KERNEL_PATH=$(BUILD_DIR)/kernel
 	touch $(BUILT_STAMP)
 

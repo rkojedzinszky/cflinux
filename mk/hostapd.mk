@@ -20,8 +20,8 @@
 # $Id$
 
 PKG := hostapd
-SRC_FILENAME = hostapd-0.1.3.tar.gz
-EXTRACTED_DIR = hostapd-0.1.3
+SRC_FILENAME = hostapd-0.2.4.tar.gz
+EXTRACTED_DIR = hostapd-0.2.4
 DOWNLOAD_SITES = http://hostap.epitest.fi/releases/ \
 		$(CFLINUX_PACKAGES)
 PATCHES =
@@ -47,5 +47,7 @@ $(BUILT_STAMP):
 
 install: build
 	$(INSTALL_BIN) $(PKG_ROOT)/hostapd $(ROOTFS)/usr/sbin/
+	$(INSTALL) -o 0 -g 0 -m 444 $(PKG_ROOT)/hostapd.conf \
+		$(DEFAULTS_DIR)/etc/
 
 .PHONY: configure clean build install
