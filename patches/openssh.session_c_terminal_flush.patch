@@ -1,0 +1,14 @@
+--- openssh-3.9p1/session.c.orig	Wed Sep  1 16:36:39 2004
++++ openssh-3.9p1/session.c	Wed Sep  1 16:50:16 2004
+@@ -1521,6 +1521,11 @@
+ 	else
+ 		shell0 = shell;
+ 
++	/* flush all output streams to get
++	 * everything written on the terminal
++	 * like motd, and etc */
++	fflush(NULL);
++
+ 	/*
+ 	 * If we have no command, execute the shell.  In this case, the shell
+ 	 * name to be passed in argv[0] is preceded by '-' to indicate that

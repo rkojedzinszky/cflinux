@@ -18,15 +18,16 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := openssh
-SRC_FILENAME = openssh-3.8.1p1.tar.gz
-EXTRACTED_DIR = openssh-3.8.1p1
+SRC_FILENAME = openssh-3.9p1.tar.gz
+EXTRACTED_DIR = openssh-3.9p1
 DOWNLOAD_SITES = \
 		ftp://ftp.fsn.hu/pub/OpenBSD/OpenSSH/portable/ \
 		ftp://ftp.ca.openbsd.org/pub/OpenBSD/OpenSSH/portable/ \
 		ftp://ftp.iij.ad.jp/pub/OpenBSD/OpenSSH/portable/ \
 		ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/ \
 		$(CFLINUX_PACKAGES)
-PATCHES = openssh.patch
+PATCHES = openssh.patch \
+	openssh.session_c_terminal_flush.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
