@@ -45,8 +45,5 @@ echo -n "" > /etc/mtab
 # make /etc appear in the mtab
 mount -o remount /etc
 
-# install a default /etc/inittab if not found
-[ -f /etc/inittab ] || cp /usr/share/defaults/inittab /etc/inittab
-
 # Invoke /sbin/init
 exec /sbin/init
