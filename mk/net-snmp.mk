@@ -42,7 +42,7 @@ $(CONFIGURED_STAMP):
 	 --with-openssl=../openssl \
 	 --without-root-access \
 	 --with-sys-contact="net-admin@" \
-	 --with-mib-modules="host" \
+	 --with-mib-modules="host smux" \
 	 --with-default-snmp-version=3 \
 	 --with-sys-location="default" \
 	 --with-logfile=/var/log/snmpd.log \
