@@ -1,4 +1,4 @@
-# Makefile for kernel
+# Makefile for freeswan
 #
 # Copyright (C) 2004 Richard Kojedzinszky <krichy@tvnetwork.hu>
 # All rights reserved.
@@ -16,19 +16,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-#
-# $Id$
 
-PKG := kernel
-SRC_FILENAME = linux-$(KERNEL_VERSION).tar.bz2
-EXTRACTED_DIR = linux-$(KERNEL_VERSION)
-DOWNLOAD_SITES = \
-		ftp://ftp.hu.kernel.org/pub/linux/kernel/v2.4/ \
-		ftp://ftp.nl.kernel.org/pub/linux/kernel/v2.4/ \
-		ftp://ftp.se.kernel.org/pub/linux/kernel/v2.4/ \
-		ftp://ftp.sm.kernel.org/pub/linux/kernel/v2.4/ \
-		ftp://ftp.kernel.org/pub/linux/kernel/v2.4/
-PATCHES = kernel.patch kernel.arp.patch kernel.freeswan.patch
+PKG := freeswan
+SRC_FILENAME = freeswan-2.05.tar.gz
+EXTRACTED_DIR = freeswan-2.05
+DOWNLOAD_SITES = ftp://ftp.xs4all.nl/pub/crypto/freeswan/
+#PATCHES = skel.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -36,24 +29,30 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	cp $(CONFIGS)/$(PKG).config $(PKG_ROOT)/.config
-	$(MAKE) -C $(PKG_ROOT) oldconfig
-	touch $@
+	touch $(CONFIGURED_STAMP)
 
 clean:
-	$(MAKE) -C $(PKG_ROOT) clean
-	rm -f $(CONFIGURED_STAMP) $(BUILT_STAMP)
+	$(MAKE) -C $(PKG_ROOT) distclean
+	rm -f $(BUILT_STAMP)
+	rm -f $(CONFIGURED_STAMP)
 
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) bzImage modules
+	$(MAKE) -C $(PKG_ROOT) programs $(UC_PATH) \
+		KERNELSRC=$(BUILD_DIR)/kernel \
+		INC_USRLOCAL=/usr
 	touch $(BUILT_STAMP)
 
 install: build
-	$(MAKE) -C $(PKG_ROOT) modules_install INSTALL_MOD_PATH=$(ROOTFS)
-	(cd $(ROOTFS)/lib/modules/$(KERNEL_VERSION)/kernel/net/sched && \
-	 for i in 0 1 2 3 4 5 6 7; do ln -sf sch_teql.o teql$$i.o ; done)
+	rm -rf $(ROOTFS)/usr/lib/ipsec $(ROOTFS)/usr/sbin/ipsec \
+		$(ROOTFS)/usr/libexec/ipsec
+	$(MAKE) -C $(PKG_ROOT) install DESTDIR=$(ROOTFS) \
+		INC_USRLOCAL=/usr
+	for i in eroute klipsdebug pf_key pluto ranbits rsasigkey \
+		spi spigrp tncfg whack; do \
+		strip -s $(ROOTFS)/usr/libexec/ipsec/$$i ; done
+	for i in _copyright _pluto_adns ; do \
+		strip -s $(ROOTFS)/usr/lib/ipsec/$$i ; done
 
 .PHONY: configure clean build install
-

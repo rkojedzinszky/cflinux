@@ -1,4 +1,4 @@
-# Makefile for kernel
+# Makefile for tools
 #
 # Copyright (C) 2004 Richard Kojedzinszky <krichy@tvnetwork.hu>
 # All rights reserved.
@@ -16,44 +16,28 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-#
-# $Id$
 
-PKG := kernel
-SRC_FILENAME = linux-$(KERNEL_VERSION).tar.bz2
-EXTRACTED_DIR = linux-$(KERNEL_VERSION)
-DOWNLOAD_SITES = \
-		ftp://ftp.hu.kernel.org/pub/linux/kernel/v2.4/ \
-		ftp://ftp.nl.kernel.org/pub/linux/kernel/v2.4/ \
-		ftp://ftp.se.kernel.org/pub/linux/kernel/v2.4/ \
-		ftp://ftp.sm.kernel.org/pub/linux/kernel/v2.4/ \
-		ftp://ftp.kernel.org/pub/linux/kernel/v2.4/
-PATCHES = kernel.patch kernel.arp.patch kernel.freeswan.patch
+PKG := tools
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
 
-configure: patch $(CONFIGURED_STAMP)
+PKG_ROOT := $(TOP_DIR)/tools
+BUILT_STAMP := $(PKG_ROOT)/.built
 
-$(CONFIGURED_STAMP):
-	cp $(CONFIGS)/$(PKG).config $(PKG_ROOT)/.config
-	$(MAKE) -C $(PKG_ROOT) oldconfig
-	touch $@
+configure:
 
 clean:
-	$(MAKE) -C $(PKG_ROOT) clean
-	rm -f $(CONFIGURED_STAMP) $(BUILT_STAMP)
+	$(MAKE) -C $(PKG_ROOT) distclean
+	rm -f $(BUILT_STAMP)
 
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) bzImage modules
+	$(MAKE) -C $(PKG_ROOT) all \
+		KERNEL_INCLUDE=$(BUILD_DIR)/kernel/include
 	touch $(BUILT_STAMP)
 
 install: build
-	$(MAKE) -C $(PKG_ROOT) modules_install INSTALL_MOD_PATH=$(ROOTFS)
-	(cd $(ROOTFS)/lib/modules/$(KERNEL_VERSION)/kernel/net/sched && \
-	 for i in 0 1 2 3 4 5 6 7; do ln -sf sch_teql.o teql$$i.o ; done)
 
 .PHONY: configure clean build install
-

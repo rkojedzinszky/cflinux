@@ -18,13 +18,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := busybox
-SRC_FILENAME = busybox-1.00-pre7.tar.bz2
-EXTRACTED_DIR = busybox-1.00-pre7
+SRC_FILENAME = busybox-1.00-pre8.tar.bz2
+EXTRACTED_DIR = busybox-1.00-pre8
 DOWNLOAD_SITES = http://busybox.net/downloads/
-PATCHES = busybox.init.patch \
-	busybox.vi.patch \
-	busybox.ash.patch \
-	busybox.ls.patch
+PATCHES = busybox.init.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

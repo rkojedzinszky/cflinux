@@ -55,3 +55,5 @@ export INSTALL_BIN_NS := install -s -o 0 -g 0 -m 555
 export INSTALL_SCRIPT := install -o 0 -g 0 -m 555
 
 INSTALL := install -o 0 -g 0
+
+MKCRAMFS := $(TOP_DIR)/tools/mkcramfs

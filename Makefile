@@ -20,14 +20,16 @@
 #
 # $Id$
 
-RELEASE_STRING = 0.1.4-pre1
+RELEASE_STRING = 0.1.4-pre2
 PACKAGE = cflinux
 
 ifndef DO_MK
 DO_MK = base
 DO_MK += kernel
+DO_MK += tools
 DO_MK += uclibc
 DO_MK += busybox
+DO_MK += mawk
 DO_MK += farsync
 DO_MK += zlib
 DO_MK += openssl
@@ -52,6 +54,8 @@ DO_MK += madwifi
 DO_MK += fwdg
 DO_MK += bridge
 DO_MK += postgresql
+DO_MK += libgmp
+DO_MK += freeswan
 
 # Finish target is last
 DO_MK += finish
@@ -59,7 +63,7 @@ endif
 
 DISTFILES = AUTHOR BUILD LICENSE ChangeLog Makefile README UPGRADE bzpadder cfbase \
 	    config.mk configs fs_config install_bin.sh md5sums mk \
-	    packages.mk part_init.sh patches
+	    packages.mk part_init.sh patches tools
 
 export TOP_DIR := $(shell pwd)
 include $(TOP_DIR)/config.mk
@@ -102,7 +106,7 @@ image:
 	umount /mnt
 	dd if=/dev/ram0 bs=1k of=$(ROOTFS)/usr/share/defaults/etc.img \
 		count=2047 >/dev/null 2>&1
-	mkcramfs -i topad $(ROOTFS) rootfs.bin
+	$(MKCRAMFS) -i topad $(ROOTFS) rootfs.bin
 	rm -f topad
 
 dist: scratch
