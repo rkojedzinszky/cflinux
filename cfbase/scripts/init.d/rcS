@@ -89,7 +89,8 @@ case "$console_blank" in
 	[Nn][Oo])
 		console_blank=0
 		;;
-	[0-9]+)
+	[0-9]|[0-9][0-9]|[0-9][0-9][0-9]|[0-9][0-9][0-9][0-9])
+	# a bit hackish, but I had no other idea how to match numbers
 		;;
 	*)
 		console_blank=10
