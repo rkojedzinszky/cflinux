@@ -46,5 +46,11 @@ $(BUILT_STAMP):
 	touch $(BUILT_STAMP)
 
 install: build
+#	Install binary executable (strips the file)
+#	$(INSTALL_BIN) $(PKG_ROOT)/skeleton $(ROOTFS)/usr/sbin/
+
+#	Install Default configuration file
+#	$(INSTALL) -o 0 -g 0 -m 444 $(PKG_ROOT)/skeleton.conf \
+#		$(DEFAULTS_DIR)/etc/
 
 .PHONY: configure clean build install
