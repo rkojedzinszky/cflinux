@@ -1,4 +1,4 @@
-# Makefile for skeleton
+# Makefile for fwdg
 #
 # Copyright (C) 2004 Richard Kojedzinszky <krichy@tvnetwork.hu>
 # All rights reserved.
@@ -18,10 +18,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := fwdg
-SRC_FILENAME = fwdg-0.1.tar.gz
-EXTRACTED_DIR = fwdg-0.1
+SRC_FILENAME = fwdg-0.2.tar.gz
+EXTRACTED_DIR = fwdg-0.2
 DOWNLOAD_SITES = http://web.tvnetwork.hu/~krichy/cfdev/downloads/package_src/
-#PATCHES = skel.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
