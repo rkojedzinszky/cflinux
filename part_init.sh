@@ -22,6 +22,8 @@
 # it partitions /dev/hdc, and assumes that the target system will be on
 # /dev/hdc (eg the cf card is at secondary/master)
 
+# $Id$
+
 maindev="/dev/hdc"
 backup="part.$$"
 
