@@ -20,7 +20,7 @@
 PKG := gmp
 SRC_FILENAME = gmp-4.1.2.tar.gz
 EXTRACTED_DIR = gmp-4.1.2
-DOWNLOAD_SITES = ftp://mirrors.kernel.org/gnu/gmp/ \
+DOWNLOAD_SITES = \
 		ftp://ftp.sunet.se/pub/gnu/gmp/ \
 		ftp://ftp.funet.fi/pub/gnu/prep/gmp/ \
 		ftp://ftp.informatik.rwth-aachen.de/pub/gnu/gmp/ \
