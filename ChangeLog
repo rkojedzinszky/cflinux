@@ -4,6 +4,7 @@
 	- added the libgmp library
 	- added freeswan package
 	- an mkcramfs tool is now included in the package
+	- added the host mibgroup to the snmpd agent
 
 2004.02.22. Changes from 0.1.3 to 0.1.4-pre1:
 	- upgraded to the linux kernel 2.4.25

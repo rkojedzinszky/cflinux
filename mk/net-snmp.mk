@@ -23,6 +23,7 @@ EXTRACTED_DIR = net-snmp-5.1
 DOWNLOAD_SITES = \
 		http://heanet.dl.sourceforge.net/sourceforge/net-snmp/ \
 		http://unc.dl.sourceforge.net/sourceforge/net-snmp/
+PATCHES = net-snmp.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -35,9 +36,9 @@ $(CONFIGURED_STAMP):
 	 --disable-applications --disable-scripts \
 	 --disable-debugging --enable-shared \
 	 --with-openssl=../openssl --without-root-access \
-	 --with-sys-contact="net-admin@tvnetwork.hu" \
-	 --with-mibs="host" \
-	 --with-default-snmp-version=3 --with-sys-location=tvnetwork \
+	 --with-sys-contact="net-admin@" \
+	 --with-mib-modules="host" \
+	 --with-default-snmp-version=3 --with-sys-location="default" \
 	 --with-logfile=/var/log/snmpd.log \
 	 --with-persistent-directory=/var/lib/net-snmp \
 	 --localstatedir=/var/run )
