@@ -107,7 +107,7 @@ image:
 	mkfs.minix -v /dev/ram0 2047 >/dev/null 2>&1
 	mount -t minix /dev/ram0 /mnt
 	cp -a $(FDEVEL_DIR)/fs_config/* /mnt
-	find /mnt -type d -name CVS -print0 | xargs rm -rf
+	find /mnt -type d -name CVS -print0 | xargs -0 rm -rf
 	-mkdir /mnt/root /mnt/rc.d
 	umount /mnt
 	dd if=/dev/ram0 bs=1k of=$(ROOTFS)/usr/share/defaults/etc.img \
