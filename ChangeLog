@@ -1,6 +1,7 @@
 Changes from 0.1.4-pre2 to 0.1.4-pre3:
 	- Added the small mcom serial communications program
 	- Patched rdate to support the -a option
+	- Upgraded to the quagga 0.96.5
 
 Changes from 0.1.4-pre1 to 0.1.4-pre2:
 	- Upgraded to the busybox 1.00-pre9
