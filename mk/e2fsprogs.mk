@@ -24,7 +24,8 @@ DOWNLOAD_SITES = \
 		http://heanet.dl.sourceforge.net/sourceforge/e2fsprogs/ \
 		http://keihanna.dl.sourceforge.net/sourceforge/e2fsprogs/ \
 		http://flow.dl.sourceforge.net/sourceforge/e2fsprogs/ \
-		http://aleron.dl.sourceforge.net/sourceforge/e2fsprogs/
+		http://aleron.dl.sourceforge.net/sourceforge/e2fsprogs/ \
+		$(CFLINUX_PACKAGES)
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

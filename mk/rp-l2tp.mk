@@ -21,12 +21,13 @@ PKG := rp-l2tp
 SRC_FILENAME = rp-l2tp-0.4.tar.gz
 EXTRACTED_DIR = rp-l2tp-0.4
 DOWNLOAD_SITES = \
-	http://belnet.dl.sourceforge.net/sourceforge/rp-l2tp/ \
-	http://ovh.dl.sourceforge.net/sourceforge/rp-l2tp/ \
-	http://optusnet.dl.sourceforge.net/sourceforge/rp-l2tp/ \
-	http://voxel.dl.sourceforge.net/sourceforge/rp-l2tp/ \
-	http://umn.dl.sourceforge.net/sourceforge/rp-l2tp/ \
-	http://keihanna.dl.sourceforge.net/sourceforge/rp-l2tp/
+		http://belnet.dl.sourceforge.net/sourceforge/rp-l2tp/ \
+		http://ovh.dl.sourceforge.net/sourceforge/rp-l2tp/ \
+		http://optusnet.dl.sourceforge.net/sourceforge/rp-l2tp/ \
+		http://voxel.dl.sourceforge.net/sourceforge/rp-l2tp/ \
+		http://umn.dl.sourceforge.net/sourceforge/rp-l2tp/ \
+		http://keihanna.dl.sourceforge.net/sourceforge/rp-l2tp/ \
+		$(CFLINUX_PACKAGES)
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

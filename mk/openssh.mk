@@ -21,10 +21,11 @@ PKG := openssh
 SRC_FILENAME = openssh-3.8.1p1.tar.gz
 EXTRACTED_DIR = openssh-3.8.1p1
 DOWNLOAD_SITES = \
-	ftp://ftp.fsn.hu/pub/OpenBSD/OpenSSH/portable/ \
-	ftp://ftp.ca.openbsd.org/pub/OpenBSD/OpenSSH/portable/ \
-	ftp://ftp.iij.ad.jp/pub/OpenBSD/OpenSSH/portable/ \
-	ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/
+		ftp://ftp.fsn.hu/pub/OpenBSD/OpenSSH/portable/ \
+		ftp://ftp.ca.openbsd.org/pub/OpenBSD/OpenSSH/portable/ \
+		ftp://ftp.iij.ad.jp/pub/OpenBSD/OpenSSH/portable/ \
+		ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/ \
+		$(CFLINUX_PACKAGES)
 PATCHES = openssh.patch
 
 # include the common package targets 

@@ -20,7 +20,8 @@
 PKG := net-tools
 SRC_FILENAME = net-tools-1.60.tar.bz2
 EXTRACTED_DIR = net-tools-1.60
-DOWNLOAD_SITES = http://www.tazenda.demon.co.uk/phil/net-tools/
+DOWNLOAD_SITES = http://www.tazenda.demon.co.uk/phil/net-tools/ \
+		$(CFLINUX_PACKAGES)
 PATCHES = net-tools.patch
 
 # include the common package targets 

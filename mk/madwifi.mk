@@ -24,7 +24,8 @@ DOWNLOAD_SITES = \
 		http://heanet.dl.sourceforge.net/sourceforge/madwifi/ \
 		http://easynews.dl.sourceforge.net/sourceforge/madwifi/ \
 		http://aleron.dl.sourceforge.net/sourceforge/madwifi/ \
-		http://cesnet.dl.sourceforge.net/sourceforge/madwifi/
+		http://cesnet.dl.sourceforge.net/sourceforge/madwifi/ \
+		$(CFLINUX_PACKAGES)
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

@@ -20,7 +20,7 @@
 PKG := ppp
 SRC_FILENAME = ppp-cvs20040729.tar.bz2
 EXTRACTED_DIR = ppp-cvs20040729
-DOWNLOAD_SITES = ftp://ftp.cflinux.hu/pub/cflinux/packages/
+DOWNLOAD_SITES = $(CFLINUX_PACKAGES)
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

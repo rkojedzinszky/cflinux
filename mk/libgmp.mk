@@ -21,11 +21,12 @@ PKG := gmp
 SRC_FILENAME = gmp-4.1.2.tar.gz
 EXTRACTED_DIR = gmp-4.1.2
 DOWNLOAD_SITES = ftp://mirrors.kernel.org/gnu/gmp/ \
-	ftp://ftp.sunet.se/pub/gnu/gmp/ \
-	ftp://ftp.funet.fi/pub/gnu/prep/gmp/ \
-	ftp://ftp.informatik.rwth-aachen.de/pub/gnu/gmp/ \
-	ftp://ftp.nectec.or.th/pub/mirrors/gnu/gmp/gmp/ \
-	ftp://ftp.gnu.org/gnu/gmp/
+		ftp://ftp.sunet.se/pub/gnu/gmp/ \
+		ftp://ftp.funet.fi/pub/gnu/prep/gmp/ \
+		ftp://ftp.informatik.rwth-aachen.de/pub/gnu/gmp/ \
+		ftp://ftp.nectec.or.th/pub/mirrors/gnu/gmp/gmp/ \
+		ftp://ftp.gnu.org/gnu/gmp/ \
+		$(CFLINUX_PACKAGES)
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

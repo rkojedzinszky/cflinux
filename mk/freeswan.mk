@@ -20,7 +20,8 @@
 PKG := freeswan
 SRC_FILENAME = freeswan-2.06.tar.gz
 EXTRACTED_DIR = freeswan-2.06
-DOWNLOAD_SITES = ftp://ftp.xs4all.nl/pub/crypto/freeswan/
+DOWNLOAD_SITES = ftp://ftp.xs4all.nl/pub/crypto/freeswan/ \
+		$(CFLINUX_PACKAGES)
 PATCHES = freeswan.patch
 
 # include the common package targets 

@@ -27,7 +27,8 @@ DOWNLOAD_SITES = \
 		ftp://ftp.nl.kernel.org/pub/linux/kernel/v2.4/ \
 		ftp://ftp.se.kernel.org/pub/linux/kernel/v2.4/ \
 		ftp://ftp.sm.kernel.org/pub/linux/kernel/v2.4/ \
-		ftp://ftp.kernel.org/pub/linux/kernel/v2.4/
+		ftp://ftp.kernel.org/pub/linux/kernel/v2.4/ \
+		$(CFLINUX_PACKAGES)
 PATCHES = kernel.patch kernel.mppe.patch
 
 # include the common package targets 

@@ -23,7 +23,8 @@ EXTRACTED_DIR = pcmcia-cs-3.2.7
 DOWNLOAD_SITES = \
 		http://cesnet.dl.sourceforge.net/sourceforge/pcmcia-cs/ \
 		http://keihanna.dl.sourceforge.net/sourceforge/pcmcia-cs/ \
-		http://aleron.dl.sourceforge.net/sourceforge/pcmcia-cs/
+		http://aleron.dl.sourceforge.net/sourceforge/pcmcia-cs/ \
+		$(CFLINUX_PACKAGES)
 PATCHES = pcmcia-cs.patch
 
 # include the common package targets 

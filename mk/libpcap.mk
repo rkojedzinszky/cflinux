@@ -20,7 +20,8 @@
 PKG := libpcap
 SRC_FILENAME = libpcap-0.8.3.tar.gz
 EXTRACTED_DIR = libpcap-0.8.3
-DOWNLOAD_SITES = http://www.tcpdump.org/release/
+DOWNLOAD_SITES = http://www.tcpdump.org/release/ \
+		$(CFLINUX_PACKAGES)
 PATCHES = libpcap.patch
 
 # include the common package targets 

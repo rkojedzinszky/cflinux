@@ -21,9 +21,10 @@ PKG := poptop
 SRC_FILENAME = pptpd-1.1.3-20030409.tar.gz
 EXTRACTED_DIR = poptop
 DOWNLOAD_SITES = \
-	http://heanet.dl.sourceforge.net/sourceforge/poptop/ \
-	http://aleron.dl.sourceforge.net/sourceforge/poptop/ \
-	http://umn.dl.sourceforge.net/sourceforge/poptop/
+		http://heanet.dl.sourceforge.net/sourceforge/poptop/ \
+		http://aleron.dl.sourceforge.net/sourceforge/poptop/ \
+		http://umn.dl.sourceforge.net/sourceforge/poptop/ \
+		$(CFLINUX_PACKAGES)
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

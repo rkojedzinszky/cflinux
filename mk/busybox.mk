@@ -20,7 +20,9 @@
 PKG := busybox
 SRC_FILENAME = busybox-1.00-pre9.tar.bz2
 EXTRACTED_DIR = busybox-1.00-pre9
-DOWNLOAD_SITES = http://busybox.net/downloads/
+DOWNLOAD_SITES = http://busybox.net/downloads/ \
+		$(CFLINUX_PACKAGES)
+
 PATCHES = busybox.init.patch \
 	busybox.crond.patch \
 	busybox.wget.patch \

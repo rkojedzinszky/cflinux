@@ -20,7 +20,8 @@
 PKG := iptables
 SRC_FILENAME = iptables-1.2.9.tar.bz2
 EXTRACTED_DIR = iptables-1.2.9
-DOWNLOAD_SITES = http://www.netfilter.org/files/
+DOWNLOAD_SITES = http://www.netfilter.org/files/ \
+		$(CFLINUX_PACKAGES)
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

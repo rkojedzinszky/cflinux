@@ -21,11 +21,12 @@ PKG := postgres
 SRC_FILENAME = postgresql-base-7.3.5.tar.bz2
 EXTRACTED_DIR = postgresql-7.3.5
 DOWNLOAD_SITES = \
-	ftp://ftp3.hu.postgresql.org/pub/postgresql/source/v7.3.5/ \
-	ftp://ftp2.is.postgresql.org/pub/postgresql/source/v7.3.5/ \
-	ftp://ftp3.us.postgresql.org/pub/postgresql/source/v7.3.5/ \
-	ftp://ftp15.us.postgresql.org/source/v7.3.5/ \
-	ftp://ftp.at.postgresql.org/db/www.postgresql.org/pub/source/v7.3.5/
+		ftp://ftp3.hu.postgresql.org/pub/postgresql/source/v7.3.5/ \
+		ftp://ftp2.is.postgresql.org/pub/postgresql/source/v7.3.5/ \
+		ftp://ftp3.us.postgresql.org/pub/postgresql/source/v7.3.5/ \
+		ftp://ftp15.us.postgresql.org/source/v7.3.5/ \
+		ftp://ftp.at.postgresql.org/db/www.postgresql.org/pub/source/v7.3.5/ \
+		$(CFLINUX_PACKAGES)
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

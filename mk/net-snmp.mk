@@ -22,7 +22,8 @@ SRC_FILENAME = net-snmp-5.1.tar.gz
 EXTRACTED_DIR = net-snmp-5.1
 DOWNLOAD_SITES = \
 		http://heanet.dl.sourceforge.net/sourceforge/net-snmp/ \
-		http://unc.dl.sourceforge.net/sourceforge/net-snmp/
+		http://unc.dl.sourceforge.net/sourceforge/net-snmp/ \
+		$(CFLINUX_PACKAGES)
 PATCHES = net-snmp.patch
 
 # include the common package targets 

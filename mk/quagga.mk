@@ -20,7 +20,8 @@
 PKG := quagga
 SRC_FILENAME = quagga-0.96.5.tar.gz
 EXTRACTED_DIR = quagga-0.96.5
-DOWNLOAD_SITES = http://www.quagga.net/download/
+DOWNLOAD_SITES = http://www.quagga.net/download/ \
+		$(CFLINUX_PACKAGES)
 PATCHES = quagga.patch
 
 # include the common package targets 

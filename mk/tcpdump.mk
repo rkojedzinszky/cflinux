@@ -20,7 +20,8 @@
 PKG := tcpdump
 SRC_FILENAME = tcpdump-3.8.3.tar.gz
 EXTRACTED_DIR = tcpdump-3.8.3
-DOWNLOAD_SITES = http://www.tcpdump.org/release/
+DOWNLOAD_SITES = http://www.tcpdump.org/release/ \
+		$(CFLINUX_PACKAGES)
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

@@ -20,7 +20,8 @@
 PKG := openssl
 SRC_FILENAME = openssl-0.9.6m.tar.gz
 EXTRACTED_DIR = openssl-0.9.6m
-DOWNLOAD_SITES = http://www.openssl.org/source/
+DOWNLOAD_SITES = http://www.openssl.org/source/ \
+		$(CFLINUX_PACKAGES)
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

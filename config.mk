@@ -50,6 +50,9 @@ BUILD_DIR = $(TOP_DIR)/build
 # the default's dir
 DEFAULTS_DIR = $(ROOTFS)/usr/share/defaults
 
+# the cflinux's package site as a last resort for packages
+CFLINUX_PACKAGES = ftp://ftp.cflinux.hu/pub/cflinux/packages/
+
 export TOP_DIR := $(shell pwd)
 export MK := $(FDEVEL_DIR)/mk
 export CONFIGS := $(FDEVEL_DIR)/configs

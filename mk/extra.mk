@@ -20,7 +20,8 @@
 PKG := extra
 SRC_FILENAME = extra.tar.bz2
 EXTRACTED_DIR = extra
-DOWNLOAD_SITES = http://web.tvnetwork.hu/~krichy/cfdev/downloads/package_src/
+DOWNLOAD_SITES = http://web.tvnetwork.hu/~krichy/cfdev/downloads/package_src/ \
+		$(CFLINUX_PACKAGES)
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

@@ -20,7 +20,8 @@
 PKG := mcom
 SRC_FILENAME = mcom-0.3.tar.gz
 EXTRACTED_DIR = mcom-0.3
-DOWNLOAD_SITES = ftp://ftp.cflinux.hu/pub/mcom/
+DOWNLOAD_SITES = ftp://ftp.cflinux.hu/pub/mcom/ \
+		$(CFLINUX_PACKAGES)
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

@@ -20,7 +20,8 @@
 PKG := wireless_tools
 SRC_FILENAME = wireless_tools.26.tar.gz
 EXTRACTED_DIR = wireless_tools.26
-DOWNLOAD_SITES = http://pcmcia-cs.sourceforge.net/ftp/contrib/
+DOWNLOAD_SITES = http://pcmcia-cs.sourceforge.net/ftp/contrib/ \
+		$(CFLINUX_PACKAGES)
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

@@ -22,7 +22,8 @@ SRC_FILENAME = zlib-1.2.1.tar.gz
 EXTRACTED_DIR = zlib-1.2.1
 DOWNLOAD_SITES = \
 		http://www.gzip.org/zlib/ \
-		http://www.zlib.net/
+		http://www.zlib.net/ \
+		$(CFLINUX_PACKAGES)
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

@@ -20,7 +20,7 @@
 PKG := fwdg
 SRC_FILENAME = fwdg-0.2.tar.gz
 EXTRACTED_DIR = fwdg-0.2
-DOWNLOAD_SITES = http://web.tvnetwork.hu/~krichy/cfdev/downloads/package_src/
+DOWNLOAD_SITES = $(CFLINUX_PACKAGES)
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

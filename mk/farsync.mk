@@ -20,7 +20,7 @@
 PKG := farsync
 SRC_FILENAME = farsync.tar.bz2
 EXTRACTED_DIR = farsync
-DOWNLOAD_SITES = http://web.tvnetwork.hu/~krichy/cfdev/downloads/package_src/
+DOWNLOAD_SITES = $(CFLINUX_PACKAGES)
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

@@ -20,7 +20,8 @@
 PKG := uclibc
 SRC_FILENAME = uClibc-0.9.26.tar.bz2
 EXTRACTED_DIR = uClibc-0.9.26
-DOWNLOAD_SITES = http://www.uclibc.org/downloads/
+DOWNLOAD_SITES = http://www.uclibc.org/downloads/ \
+		$(CFLINUX_PACKAGES)
 PATCHES = uClibc-0.9.26.patch
 
 # include the common package targets 
