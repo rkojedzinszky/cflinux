@@ -80,6 +80,11 @@ case "$spoofprotect_enable" in
 		fi
 		;;
 esac
+if [ -f /proc/sys/net/ipv4/conf/all/arp_announce -a "$arp_announce" -gt 0 ]; then
+	echo -n "Setting default ARP announce method($arp_announce) on all interfaces:"
+	echo "$arp_announce" > /proc/sys/net/ipv4/conf/all/arp_announce
+	echo " done."
+fi
 
 case "$farsync_init" in
 	[Yy][Ee][Ss])

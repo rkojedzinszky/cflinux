@@ -37,3 +37,4 @@ farsync_proto="ppp"
 syncookies_enable="YES"		# enable syncookies by default
 ecn_enable="NO"			# disable ECN by default
 spoofprotect_enable="YES"	# enable spoof protection by default
+arp_announce="1"		# ARP announce method. This is recommended.
