@@ -58,5 +58,13 @@ install: build
 	$(INSTALL_BIN) $(PKG_ROOT)/ssh-keygen $(ROOTFS)/usr/sbin
 	$(INSTALL_BIN) $(PKG_ROOT)/scp $(ROOTFS)/usr/bin
 	$(INSTALL_BIN) $(PKG_ROOT)/libssh.so $(ROOTFS)/usr/lib
+	mkdir -p $(DEFAULTS_DIR)/etc/ssh
+	for i in ssh_config moduli; do \
+		cp $(PKG_ROOT)/$$i $(DEFAULTS_DIR)/etc/ssh/ ; done
+	sed -e 's/^#Protocol.*$$/Protocol 2/g' \
+		-e 's/^Subsystem/#Subsystem/' \
+		-e 's/^#\?ChallengeResponseAuthentication.*$$/ChallengeResponseAuthentication no/' \
+		$(PKG_ROOT)/sshd_config \
+		> $(DEFAULTS_DIR)/etc/ssh/sshd_config
 
 .PHONY: configure clean build install

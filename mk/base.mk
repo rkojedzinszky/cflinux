@@ -46,8 +46,9 @@ install: $(INSTALL_STAMP)
 $(INSTALL_STAMP):
 	for i in bin boot dev etc lib mnt proc sbin usr var \
 		usr/bin usr/lib usr/sbin usr/local dev/pts \
-		usr/lib/cfmaint usr/share/defaults/etc ; do \
+		usr/lib/cfmaint ; do \
 			mkdir -p $(ROOTFS)/$$i ; done
+	mkdir -p $(DEFAULTS_DIR)/etc
 	ln -s var/tmp $(ROOTFS)/tmp
 	ln -s etc/root $(ROOTFS)/root
 	(cd $(ROOTFS)/dev ; MAKEDEV std hda hdb hdc hdd \
@@ -61,12 +62,12 @@ $(INSTALL_STAMP):
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/linuxrc \
 		$(ROOTFS)/linuxrc
 	cp -v $(PKG_ROOT)/defaults/inittab \
-		$(ROOTFS)/usr/share/defaults/etc/inittab
+		$(DEFAULTS_DIR)/etc/inittab
 	cp -v $(PKG_ROOT)/scripts/common.sh $(ROOTFS)/usr/lib/cfmaint/
 	cp -v $(PKG_ROOT)/defaults/modules \
-		$(ROOTFS)/usr/share/defaults/etc/modules
+		$(DEFAULTS_DIR)/etc/modules
 	cp -v $(PKG_ROOT)/scripts/rc.conf.defaults \
-		$(ROOTFS)/usr/share/defaults/etc/rc.conf
+		$(DEFAULTS_DIR)/etc/rc.conf
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/savedata $(ROOTFS)/sbin/
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/eraseconf.sh $(ROOTFS)/sbin/
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/reflash $(ROOTFS)/sbin/
