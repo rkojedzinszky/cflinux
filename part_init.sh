@@ -66,7 +66,7 @@ echo -n "Clearing partition table"
 dd if=/dev/zero of="$maindev" bs=1k count=16 2>/dev/null
 echo " done"
 
-geometry=`sed -n 's/^logical[^0-9]*\([0-9]\+\)\/\([0-9]\+\)\/\([0-9]\+\)[^0-9]*$/cyl=\1 head=\2 track=\3/p' /proc/ide/${maindev##*/}/geometry`
+geometry=`sfdisk -g "$maindev" | sed -n 's/^.*: \([0-9]\+\) cylinders, \([0-9]\+\) heads, \([0-9]\+\) sectors.*$/cyl=\1 head=\2 track=\3/p'`
 if [ $? -ne 0 ]; then
 	echo "Error getting disk geometry."
 	exit
@@ -75,7 +75,7 @@ eval "$geometry"
 
 cylsects=`expr $head \* $track`
 
-div () # returns $1/$2
+div () # returns ceil($1/$2)
 {
 	expr \( $1 + $2 - 1 \) / $2
 }
@@ -113,7 +113,7 @@ cat > menu.lst <<EOF
 timeout 5
 
 title cf
-kernel (hd0,4)1+2048 root=/dev/hdc5 console=ttyS0,115200
+kernel (hd0,4)1+2048 root=${maindev}5 #console=ttyS0,115200
 EOF
 cat <<EOF | grub --batch
 device (hd0) $maindev
