@@ -5,9 +5,10 @@ I built it on a stable debian woody system. I recommend you to
 remove all devel packages (*-dev in debian), to make sure the
 packages in cflinux uses the right libs. Some package may need
 flex and bison. Also grub is needed to make the CF bootable.
+For the madwifi package sharutils must be installed.
 
 Uncompress the contents of the tar to a directory:
-	$ tar xzf cflinux-0.1.tar.gz
+	$ tar xzf cflinux-x.x.x.tar.gz
 
 After it's done, cd to the dir, and issue 'make all'. If everything
 goes the right way, at the end you will get no errors.
@@ -34,7 +35,22 @@ editing /etc/rc.conf. After making changes, dont forget to
 issue 'savedata', as it will write the current /etc to the
 CF.
 
+Notes:
+ - the root filesystem is a read-only cramfs filesystem,
+so no modifications can be made on it.
+ - All the configuration files reside on /etc, and that
+data is written redundantly to the cf with each
+'savedata' command. If by accident during a 'savedata' 
+your system crashes, the old config still remains for you.
+ - the unused space left on your cf can be accessed at
+/dev/hdc6. First you'll have to mke2fs it (i suggest),
+and comment out the last line in /etc/fstab. After done
+it will be available on /usr/local. I suggest you to
+store other binaries there as well as any content, but
+it should be also in read-only state at all to prevent
+loss of data.
+
 Have fun with it!
 
 Richard Kojedzinszky <krichy@tvnetwork.hu>
-2004. Jan. 25.
+2004. Feb. 06.
