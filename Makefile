@@ -57,6 +57,7 @@ DO_MK += postgresql
 DO_MK += libgmp
 DO_MK += freeswan
 DO_MK += mcom
+DO_MK += poptop
 
 # Finish target is last
 DO_MK += finish
