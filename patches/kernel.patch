@@ -1,6 +1,6 @@
 diff -ruNP linux-2.4.24/Documentation/Configure.help linux-2.4.24-p/Documentation/Configure.help
 --- linux-2.4.24/Documentation/Configure.help	Fri Nov 28 19:26:19 2003
-+++ linux-2.4.24-p/Documentation/Configure.help	Tue Jan  6 19:59:48 2004
++++ linux-2.4.24-p/Documentation/Configure.help	Wed Jan  7 10:53:23 2004
 @@ -14142,14 +14142,27 @@
    This is the total bus width of the mapping of the flash chips
    on your particular board.
@@ -38,7 +38,7 @@ diff -ruNP linux-2.4.24/Documentation/Configure.help linux-2.4.24-p/Documentatio
  CONFIG_MTD_OCTAGON
 diff -ruNP linux-2.4.24/drivers/mtd/chips/jedec.c linux-2.4.24-p/drivers/mtd/chips/jedec.c
 --- linux-2.4.24/drivers/mtd/chips/jedec.c	Fri Jun 13 16:51:34 2003
-+++ linux-2.4.24-p/drivers/mtd/chips/jedec.c	Tue Jan  6 19:59:48 2004
++++ linux-2.4.24-p/drivers/mtd/chips/jedec.c	Wed Jan  7 10:53:23 2004
 @@ -15,6 +15,7 @@
   */
  
@@ -286,7 +286,7 @@ diff -ruNP linux-2.4.24/drivers/mtd/chips/jedec.c linux-2.4.24-p/drivers/mtd/chi
  	    jedec_flash_failed(Last[(Count - 3) % 4]);
 diff -ruNP linux-2.4.24/drivers/mtd/maps/Makefile linux-2.4.24-p/drivers/mtd/maps/Makefile
 --- linux-2.4.24/drivers/mtd/maps/Makefile	Fri Jun 13 16:51:34 2003
-+++ linux-2.4.24-p/drivers/mtd/maps/Makefile	Tue Jan  6 19:59:48 2004
++++ linux-2.4.24-p/drivers/mtd/maps/Makefile	Wed Jan  7 10:53:23 2004
 @@ -34,6 +34,7 @@
      obj-$(CONFIG_MTD_PHYSMAP)	+= physmap.o 
    endif
@@ -297,7 +297,7 @@ diff -ruNP linux-2.4.24/drivers/mtd/maps/Makefile linux-2.4.24-p/drivers/mtd/map
  obj-$(CONFIG_MTD_RPXLITE)	+= rpxlite.o
 diff -ruNP linux-2.4.24/drivers/mtd/maps/mixmem.c linux-2.4.24-p/drivers/mtd/maps/mixmem.c
 --- linux-2.4.24/drivers/mtd/maps/mixmem.c	Thu Jan  1 01:00:00 1970
-+++ linux-2.4.24-p/drivers/mtd/maps/mixmem.c	Tue Jan  6 19:59:48 2004
++++ linux-2.4.24-p/drivers/mtd/maps/mixmem.c	Wed Jan  7 10:53:23 2004
 @@ -0,0 +1,430 @@
 +/*
 +* mixmem - device driver for flash rom found on the flashcom and
@@ -731,7 +731,7 @@ diff -ruNP linux-2.4.24/drivers/mtd/maps/mixmem.c linux-2.4.24-p/drivers/mtd/map
 +MODULE_DESCRIPTION("MTD map driver for FlashCOM and MixMEM boards");
 diff -ruNP linux-2.4.24/drivers/net/3c59x.c linux-2.4.24-p/drivers/net/3c59x.c
 --- linux-2.4.24/drivers/net/3c59x.c	Fri Nov 28 19:26:20 2003
-+++ linux-2.4.24-p/drivers/net/3c59x.c	Tue Jan  6 19:59:48 2004
++++ linux-2.4.24-p/drivers/net/3c59x.c	Wed Jan  7 10:53:23 2004
 @@ -313,6 +313,9 @@
     code size of a per-interface flag is not worthwhile. */
  static char mii_preamble_required;
@@ -894,7 +894,7 @@ diff -ruNP linux-2.4.24/drivers/net/3c59x.c linux-2.4.24-p/drivers/net/3c59x.c
     Read and write the MII registers using software-generated serial
 diff -ruNP linux-2.4.24/drivers/net/eepro100.c linux-2.4.24-p/drivers/net/eepro100.c
 --- linux-2.4.24/drivers/net/eepro100.c	Mon Aug 25 13:44:42 2003
-+++ linux-2.4.24-p/drivers/net/eepro100.c	Tue Jan  6 19:59:48 2004
++++ linux-2.4.24-p/drivers/net/eepro100.c	Wed Jan  7 10:53:23 2004
 @@ -507,12 +507,12 @@
  static const char i82557_config_cmd[CONFIG_DATA_SIZE] = {
  	22, 0x08, 0, 0,  0, 0, 0x32, 0x03,  1, /* 1=Use MII  0=Use AUI */
@@ -912,7 +912,7 @@ diff -ruNP linux-2.4.24/drivers/net/eepro100.c linux-2.4.24-p/drivers/net/eepro1
  /* PHY media interface chips. */
 diff -ruNP linux-2.4.24/drivers/net/tulip/interrupt.c linux-2.4.24-p/drivers/net/tulip/interrupt.c
 --- linux-2.4.24/drivers/net/tulip/interrupt.c	Fri Jun 13 16:51:35 2003
-+++ linux-2.4.24-p/drivers/net/tulip/interrupt.c	Tue Jan  6 19:59:48 2004
++++ linux-2.4.24-p/drivers/net/tulip/interrupt.c	Wed Jan  7 10:53:23 2004
 @@ -128,8 +128,8 @@
  				   dev->name, entry, status);
  		if (--rx_work_limit < 0)
@@ -939,7 +939,7 @@ diff -ruNP linux-2.4.24/drivers/net/tulip/interrupt.c linux-2.4.24-p/drivers/net
  #endif
 diff -ruNP linux-2.4.24/drivers/net/tulip/tulip.h linux-2.4.24-p/drivers/net/tulip/tulip.h
 --- linux-2.4.24/drivers/net/tulip/tulip.h	Fri Nov 29 00:53:14 2002
-+++ linux-2.4.24-p/drivers/net/tulip/tulip.h	Tue Jan  6 19:59:48 2004
++++ linux-2.4.24-p/drivers/net/tulip/tulip.h	Wed Jan  7 10:53:23 2004
 @@ -188,7 +188,7 @@
  
  enum desc_status_bits {
@@ -960,7 +960,7 @@ diff -ruNP linux-2.4.24/drivers/net/tulip/tulip.h linux-2.4.24-p/drivers/net/tul
  
 diff -ruNP linux-2.4.24/drivers/net/tulip/tulip_core.c linux-2.4.24-p/drivers/net/tulip/tulip_core.c
 --- linux-2.4.24/drivers/net/tulip/tulip_core.c	Fri Nov 28 19:26:20 2003
-+++ linux-2.4.24-p/drivers/net/tulip/tulip_core.c	Tue Jan  6 19:59:48 2004
++++ linux-2.4.24-p/drivers/net/tulip/tulip_core.c	Wed Jan  7 10:53:23 2004
 @@ -64,7 +64,7 @@
  #if defined(__alpha__) || defined(__arm__) || defined(__hppa__) \
  	|| defined(__sparc_) || defined(__ia64__) \
@@ -972,7 +972,7 @@ diff -ruNP linux-2.4.24/drivers/net/tulip/tulip_core.c linux-2.4.24-p/drivers/ne
  #endif
 diff -ruNP linux-2.4.24/drivers/net/wan/comx-hw-comx.c linux-2.4.24-p/drivers/net/wan/comx-hw-comx.c
 --- linux-2.4.24/drivers/net/wan/comx-hw-comx.c	Fri Nov 29 00:53:14 2002
-+++ linux-2.4.24-p/drivers/net/wan/comx-hw-comx.c	Tue Jan  6 19:59:48 2004
++++ linux-2.4.24-p/drivers/net/wan/comx-hw-comx.c	Wed Jan  7 10:53:23 2004
 @@ -1,11 +1,12 @@
  /*
   * Hardware-level driver for the COMX and HICOMX cards
@@ -2824,7 +2824,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/comx-hw-comx.c linux-2.4.24-p/drivers/ne
  	COMX_init,
 diff -ruNP linux-2.4.24/drivers/net/wan/comx-hw-locomx.c linux-2.4.24-p/drivers/net/wan/comx-hw-locomx.c
 --- linux-2.4.24/drivers/net/wan/comx-hw-locomx.c	Sat Aug  3 02:39:44 2002
-+++ linux-2.4.24-p/drivers/net/wan/comx-hw-locomx.c	Tue Jan  6 19:59:48 2004
++++ linux-2.4.24-p/drivers/net/wan/comx-hw-locomx.c	Wed Jan  7 10:53:23 2004
 @@ -63,13 +63,17 @@
  #define LOCOMX_DEFAULT_IO 0x368
  #define LOCOMX_DEFAULT_IRQ 7
@@ -3323,7 +3323,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/comx-hw-locomx.c linux-2.4.24-p/drivers/
  	LOCOMX_init, 
 diff -ruNP linux-2.4.24/drivers/net/wan/comx-hw-mixcom.c linux-2.4.24-p/drivers/net/wan/comx-hw-mixcom.c
 --- linux-2.4.24/drivers/net/wan/comx-hw-mixcom.c	Fri Jun 13 16:51:35 2003
-+++ linux-2.4.24-p/drivers/net/wan/comx-hw-mixcom.c	Tue Jan  6 19:59:48 2004
++++ linux-2.4.24-p/drivers/net/wan/comx-hw-mixcom.c	Wed Jan  7 10:53:23 2004
 @@ -57,7 +57,8 @@
  #include "hscx.h"
  
@@ -4451,7 +4451,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/comx-hw-mixcom.c linux-2.4.24-p/drivers/
  }
 diff -ruNP linux-2.4.24/drivers/net/wan/comx.c linux-2.4.24-p/drivers/net/wan/comx.c
 --- linux-2.4.24/drivers/net/wan/comx.c	Sat Aug  3 02:39:44 2002
-+++ linux-2.4.24-p/drivers/net/wan/comx.c	Tue Jan  6 19:59:48 2004
++++ linux-2.4.24-p/drivers/net/wan/comx.c	Wed Jan  7 10:53:23 2004
 @@ -60,6 +60,7 @@
  #include <linux/types.h>
  #include <linux/sched.h>
@@ -4514,7 +4514,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/comx.c linux-2.4.24-p/drivers/net/wan/co
  				 GFP_KERNEL)) == NULL) {
 diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan/farsync.c
 --- linux-2.4.24/drivers/net/wan/farsync.c	Fri Nov 28 19:26:20 2003
-+++ linux-2.4.24-p/drivers/net/wan/farsync.c	Tue Jan  6 19:59:48 2004
++++ linux-2.4.24-p/drivers/net/wan/farsync.c	Wed Jan  7 10:53:23 2004
 @@ -1,9 +1,9 @@
  /*
 - *      FarSync X21 driver for Linux (generic HDLC version)
@@ -4527,7 +4527,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
   *      www.farsite.co.uk
   *
   *      This program is free software; you can redistribute it and/or
-@@ -11,17 +11,83 @@
+@@ -11,17 +11,74 @@
   *      as published by the Free Software Foundation; either version
   *      2 of the License, or (at your option) any later version.
   *
@@ -4536,18 +4536,6 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
 + *      Maintainer:  Kevin Curtis  <kevin.curtis@farsite.co.uk>
 + */
 +/*      Revision History
-+ *      $Log$
-+ *      Revision 1.2  2004/01/06 20:54:32  krichy
-+ *      Modified because of a diff's bug?. Don't know, but now it works. :)
-+ *
-+ *      Revision 1.1  2004/01/06 20:31:30  krichy
-+ *
-+ *      Now uses the linux kernel 2.4.24.
-+ *      Made more easier to upgrade the kernel versions.
-+ *
-+ *      Revision 1.1.1.1  2004/01/06 18:44:04  krichy
-+ *
-+ *      The first working release of cflinux. Now imported to CVS.
 + *
 + *      Revision 1.14  2003/01/10 14:21:58  kevinc
 + *      Final changes
@@ -4617,7 +4605,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  
  #include "farsync.h"
  
-@@ -31,7 +92,11 @@
+@@ -31,7 +88,11 @@
   */
  MODULE_AUTHOR("R.J.Dunlop <bob.dunlop@farsite.co.uk>");
  MODULE_DESCRIPTION("FarSync T-Series X21 driver. FarSite Communications Ltd.");
@@ -4630,7 +4618,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  
  EXPORT_NO_SYMBOLS;
  
-@@ -40,16 +105,19 @@
+@@ -40,16 +101,19 @@
   *      ==========================================
   */
  
@@ -4652,7 +4640,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  
  
  /*      Default parameters for the link
-@@ -59,6 +127,15 @@
+@@ -59,6 +123,15 @@
                                           * this down assuming a slower line I
                                           * guess.
                                           */
@@ -4668,7 +4656,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  #define FST_MAX_MTU             8000    /* Huge but possible */
  #define FST_DEF_MTU             1500    /* Common sane value */
  
-@@ -72,6 +149,15 @@
+@@ -72,6 +145,15 @@
  #endif
  
  
@@ -4684,7 +4672,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  /*      Card shared memory layout
   *      =========================
   */
-@@ -87,7 +173,7 @@
+@@ -87,7 +169,7 @@
   *      be used to check that we have not got out of step with the firmware
   *      contained in the .CDE files.
   */
@@ -4693,7 +4681,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  
  #define FST_MEMSIZE 0x100000    /* Size of card memory (1Mb) */
  
-@@ -161,7 +247,7 @@
+@@ -161,7 +243,7 @@
  #define RX_ENP          0x01            /* Rx: end of packet */
  
  
@@ -4702,7 +4690,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
   * in a circular buffer as several events may be processed on one physical int
   */
  #define MAX_CIRBUFF     32
-@@ -199,6 +285,9 @@
+@@ -199,6 +281,9 @@
          u16  lineInterface;     /* Physical interface type */
          u8   x25op;             /* Unused at present */
          u8   internalClock;     /* 1 => internal clock, 0 => external */
@@ -4712,7 +4700,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
          u32  lineSpeed;         /* Speed in bps */
  };
  
-@@ -259,14 +348,14 @@
+@@ -259,14 +344,14 @@
          u16 portMailbox[FST_MAX_PORTS][2];      /* command, modifier */
          u16 cardMailbox[4];                     /* Not used */
  
@@ -4729,7 +4717,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
                                   * in main memory rather than on the PCI bus
                                   */
          u32 portHandle[FST_MAX_PORTS];
-@@ -294,8 +383,8 @@
+@@ -294,8 +379,8 @@
          u16 portScheduleOffset;
  
          u32 endOfSmcSignature;  /* endOfSmcSignature MUST be the last member of
@@ -4740,7 +4728,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
                                   * END_SIG.
                                   */
  };
-@@ -312,6 +401,42 @@
+@@ -312,6 +397,42 @@
  #define ABORTTX         5       /* Abort the transmitter for a port */
  #define SETV24O         6       /* Set V24 outputs */
  
@@ -4783,7 +4771,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  
  /* Larger buffers are positioned in memory at offset BFM_BASE */
  struct buf_window {
-@@ -331,15 +456,33 @@
+@@ -331,15 +452,33 @@
  /*      Per port (line or channel) information
   */
  struct fst_port_info {
@@ -4819,7 +4807,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  };
  
  /*      Per card information
-@@ -357,13 +500,35 @@
+@@ -357,13 +496,35 @@
          unsigned short pci_conf;        /* PCI card config in I/O space */
                                          /* Per port info */
          struct fst_port_info ports[ FST_MAX_PORTS ];
@@ -4860,7 +4848,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  
  /*
   *      Shared memory window access macros
-@@ -403,7 +568,7 @@
+@@ -403,7 +564,7 @@
                                  printk ( KERN_DEBUG FST_NAME ": " fmt, ## A )
  
  #else
@@ -4869,7 +4857,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  #endif
  
  
-@@ -422,6 +587,12 @@
+@@ -422,6 +583,12 @@
                                          FST_TYPE_T2P },
          { FSC_PCI_VENDOR_ID, T4P_PCI_DEVICE_ID, PCI_ANY_ID, PCI_ANY_ID, 0, 0,
                                          FST_TYPE_T4P },
@@ -4882,7 +4870,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
          { 0, }                          /* End */
  };
  
-@@ -436,17 +607,55 @@
+@@ -436,17 +603,55 @@
   * Used to be a simple write to card control space but a glitch in the latest
   * AMD Am186CH processor means that we now have to do it by asserting and de-
   * asserting the PLX chip PCI Adapter Software Reset. Bit 30 in CNTRL register
@@ -4943,7 +4931,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  }
  
  /*      Release the processor from reset
-@@ -454,7 +663,24 @@
+@@ -454,7 +659,24 @@
  static inline void
  fst_cpurelease ( struct fst_card_info *card )
  {
@@ -4969,7 +4957,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  }
  
  /*      Clear the cards interrupt flag
-@@ -462,9 +688,31 @@
+@@ -462,9 +684,31 @@
  static inline void
  fst_clear_intr ( struct fst_card_info *card )
  {
@@ -5004,7 +4992,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  }
  
  /*      Disable card interrupts
-@@ -472,7 +720,151 @@
+@@ -472,7 +716,151 @@
  static inline void
  fst_disable_intr ( struct fst_card_info *card )
  {
@@ -5157,7 +5145,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  }
  
  
-@@ -496,11 +888,11 @@
+@@ -496,11 +884,11 @@
          /* Wait for any previous command to complete */
          while ( mbval > NAK )
          {
@@ -5171,7 +5159,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
                  {
                          printk_err ("Mailbox safety timeout\n");
                          break;
-@@ -523,7 +915,7 @@
+@@ -523,7 +911,7 @@
          {
                  port->txpos  = 0;
                  port->txipos = 0;
@@ -5180,7 +5168,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
          }
  
          spin_unlock_irqrestore ( &card->card_lock, flags );
-@@ -576,7 +968,7 @@
+@@ -576,7 +964,7 @@
                  FST_WRB ( card, rxDescrRing[pi][i].hadr, (u8)( offset >> 16 ));
                  FST_WRW ( card, rxDescrRing[pi][i].bcnt,
                                          cnv_bcnt ( LEN_RX_BUFFER ));
@@ -5189,7 +5177,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
                  FST_WRB ( card, rxDescrRing[pi][i].bits, DMA_OWN );
          }
          port->rxpos  = 0;
-@@ -610,7 +1002,7 @@
+@@ -610,7 +998,7 @@
          }
          port->txpos  = 0;
          port->txipos = 0;
@@ -5198,7 +5186,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
          spin_unlock_irqrestore ( &card->card_lock, flags );
  }
  
-@@ -624,25 +1016,34 @@
+@@ -624,25 +1012,34 @@
  
          signals = FST_RDL ( card, v24DebouncedSts[port->index]);
  
@@ -5238,7 +5226,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  /*      Rx complete interrupt
   */
  static void
-@@ -651,10 +1052,10 @@
+@@ -651,10 +1048,10 @@
          unsigned char dmabits;
          int pi;
          int rxp;
@@ -5251,7 +5239,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  
          /* Check we have a buffer to process */
          pi  = port->index;
-@@ -666,6 +1067,10 @@
+@@ -666,6 +1063,10 @@
                                          pi, rxp );
                  return;
          }
@@ -5262,7 +5250,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  
          /* Get buffer length */
          len = FST_RDW ( card, rxDescrRing[pi][rxp].mcnt );
-@@ -680,24 +1085,32 @@
+@@ -680,24 +1081,32 @@
                                          len );
          if ( dmabits != ( RX_STP | RX_ENP ) || len > LEN_RX_BUFFER - 2 )
          {
@@ -5300,7 +5288,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
                  }
  
                  /* Discard buffer descriptors until we see the end of packet
-@@ -734,7 +1147,7 @@
+@@ -734,7 +1143,7 @@
          {
                  dbg ( DBG_RX,"intr_rx: can't allocate buffer\n");
  
@@ -5309,7 +5297,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  
                  /* Return descriptor to card */
                  FST_WRB ( card, rxDescrRing[pi][rxp].bits, DMA_OWN );
-@@ -746,28 +1159,260 @@
+@@ -746,28 +1155,260 @@
                  return;
          }
  
@@ -5567,14 +5555,14 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
 +{
 +  do_bottom_half_tx(card_ptr);
 +}
-+
+ 
+-        port_to_dev ( port )->last_rx = jiffies;
 +static void
 +fst_bh_task_tx_2 ( void *card_ptr)
 +{
 +  do_bottom_half_tx(card_ptr);
 +}
- 
--        port_to_dev ( port )->last_rx = jiffies;
++
 +static void
 +fst_bh_task_tx_3 ( void *card_ptr)
 +{
@@ -5588,7 +5576,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  }
  
  
-@@ -783,7 +1428,9 @@
+@@ -783,7 +1424,9 @@
          int rdidx;                      /* Event buffer indices */
          int wridx;
          int event;                      /* Actual event for processing */
@@ -5599,7 +5587,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  
          if (( card = dev_id ) == NULL )
          {
-@@ -791,100 +1438,151 @@
+@@ -791,100 +1434,151 @@
                  return;
          }
  
@@ -5832,7 +5820,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  }
  
  
-@@ -942,28 +1640,165 @@
+@@ -942,28 +1636,165 @@
  
  
  static int
@@ -6006,7 +5994,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  #endif
  
          return err;
-@@ -981,7 +1816,7 @@
+@@ -981,7 +1812,7 @@
          info->nports = card->nports;
          info->type   = card->type;
          info->state  = card->state;
@@ -6015,7 +6003,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
          info->index  = i;
  #if FST_DEBUG
          info->debug  = fst_debug_mask;
-@@ -1000,113 +1835,37 @@
+@@ -1000,113 +1831,37 @@
          info->lineInterface = FST_RDW ( card, portConfig[i].lineInterface );
          info->internalClock = FST_RDB ( card, portConfig[i].internalClock );
          info->lineSpeed     = FST_RDL ( card, portConfig[i].lineSpeed );
@@ -6042,7 +6030,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
 -
 -        if ( sync.loopback )
 -                return -EINVAL;
--
+ 
 -        i = port->index;
 -
 -        switch (ifr->ifr_settings.type)
@@ -6064,7 +6052,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
 -
 -        case IF_IFACE_SYNC_SERIAL:
 -                break;
- 
+-
 -        default:
 -                return -EINVAL;
 -        }
@@ -6153,7 +6141,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  }
  
  
-@@ -1121,7 +1880,7 @@
+@@ -1121,7 +1876,7 @@
  
          dbg ( DBG_IOCTL,"ioctl: %x, %p\n", cmd, ifr->ifr_data );
  
@@ -6162,7 +6150,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
          card = port->card;
  
          if ( !capable ( CAP_NET_ADMIN ))
-@@ -1158,7 +1917,7 @@
+@@ -1158,7 +1913,7 @@
                   * when going over the top
                   */
                  if ( wrthdr.size > FST_MEMSIZE || wrthdr.offset > FST_MEMSIZE
@@ -6171,7 +6159,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
                  {
                          return -ENXIO;
                  }
-@@ -1196,7 +1955,7 @@
+@@ -1196,7 +1951,7 @@
                          if ( card->state == FST_RUNNING )
                          {
                                  spin_lock_irqsave ( &card->card_lock, flags );
@@ -6180,7 +6168,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
                                  FST_WRB ( card, interruptHandshake, 0xEE );
                                  spin_unlock_irqrestore ( &card->card_lock,
                                                                  flags );
-@@ -1218,9 +1977,11 @@
+@@ -1218,9 +1973,11 @@
  
          case FSTSETCONF:
  
@@ -6195,7 +6183,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
                  if ( copy_from_user ( &info,  ifr->ifr_data, sizeof ( info )))
                  {
                          return -EFAULT;
-@@ -1228,25 +1989,12 @@
+@@ -1228,25 +1985,12 @@
  
                  return set_conf_from_info ( card, port, &info );
  
@@ -6226,7 +6214,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
          }
  }
  
-@@ -1277,12 +2025,13 @@
+@@ -1277,12 +2021,13 @@
                  port->run = 1;
  
                  signals = FST_RDL ( port->card, v24DebouncedSts[port->index]);
@@ -6244,7 +6232,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  }
  
  static void
-@@ -1308,15 +2057,64 @@
+@@ -1308,15 +2053,64 @@
  static int
  fst_open ( struct net_device *dev )
  {
@@ -6314,7 +6302,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
          netif_wake_queue ( dev );
          return 0;
  }
-@@ -1324,19 +2122,42 @@
+@@ -1324,19 +2118,42 @@
  static int
  fst_close ( struct net_device *dev )
  {
@@ -6369,7 +6357,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
          return 0;
  }
  
-@@ -1345,19 +2166,20 @@
+@@ -1345,19 +2162,20 @@
  fst_tx_timeout ( struct net_device *dev )
  {
          struct fst_port_info *port;
@@ -6398,7 +6386,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  }
  
  
-@@ -1366,70 +2188,104 @@
+@@ -1366,70 +2184,104 @@
  {
          struct fst_card_info *card;
          struct fst_port_info *port;
@@ -6543,7 +6531,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  }
  
  
-@@ -1443,7 +2299,10 @@
+@@ -1443,7 +2295,10 @@
  static char *type_strings[] __devinitdata = {
          "no hardware",                  /* Should never be seen */
          "FarSync T2P",
@@ -6555,7 +6543,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  };
  
  static void __devinit
-@@ -1459,13 +2318,34 @@
+@@ -1459,13 +2314,34 @@
           */
          for ( i = 0 ; i < card->nports ; i++ )
          {
@@ -6592,7 +6580,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
                                  /* Since this is a PCI setup this is purely
                                   * informational. Give them the buffer addresses
                                   * and basic card I/O.
-@@ -1481,19 +2361,26 @@
+@@ -1481,19 +2357,26 @@
                  dev->base_addr   = card->pci_conf;
                  dev->irq         = card->irq;
  
@@ -6632,7 +6620,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
                          card->nports = i;
                          break;
                  }
-@@ -1502,9 +2389,32 @@
+@@ -1502,9 +2385,32 @@
          spin_lock_init ( &card->card_lock );
  
          printk ( KERN_INFO "%s-%s: %s IRQ%d, %d ports\n",
@@ -6667,7 +6655,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  }
  
  
-@@ -1516,16 +2426,38 @@
+@@ -1516,16 +2422,38 @@
  fst_add_one ( struct pci_dev *pdev, const struct pci_device_id *ent )
  {
          static int firsttime_done = 0;
@@ -6707,7 +6695,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
          /* Allocate driver private data */
          card = kmalloc ( sizeof ( struct fst_card_info ),  GFP_KERNEL);
          if (card == NULL)
-@@ -1536,6 +2468,13 @@
+@@ -1536,6 +2464,13 @@
          }
          memset ( card, 0, sizeof ( struct fst_card_info ));
  
@@ -6721,7 +6709,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
          /* Record info we need*/
          card->irq         = pdev->irq;
          card->pci_conf    = pci_resource_start ( pdev, 1 );
-@@ -1543,23 +2482,88 @@
+@@ -1543,23 +2478,88 @@
          card->phys_ctlmem = pci_resource_start ( pdev, 3 );
  
          card->type        = ent->driver_data;
@@ -6814,7 +6802,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
          if ( ! request_mem_region ( card->phys_mem, FST_MEMSIZE,"Shared RAM"))
          {
                  printk_err ("Unable to get main memory @ 0x%08X\n",
-@@ -1575,12 +2579,6 @@
+@@ -1575,12 +2575,6 @@
                  goto error_release_mem;
          }
  
@@ -6827,7 +6815,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
  
          /* Get virtual addresses of memory regions */
          if (( card->mem = ioremap ( card->phys_mem, FST_MEMSIZE )) == NULL )
-@@ -1601,6 +2599,9 @@
+@@ -1601,6 +2595,9 @@
          fst_cpureset ( card );
          card->state = FST_RESET;
  
@@ -6837,7 +6825,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
          /* Register the interrupt handler */
          if ( request_irq ( card->irq, fst_intr, SA_SHIRQ, FST_DEV_NAME, card ))
          {
-@@ -1612,8 +2613,13 @@
+@@ -1612,8 +2609,13 @@
  
          /* Record driver data for later use */
          pci_set_drvdata(pdev, card);
@@ -6851,7 +6839,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
          fst_init_card ( card );
  
          return 0;                       /* Success */
-@@ -1654,7 +2660,8 @@
+@@ -1654,7 +2656,8 @@
  
          for ( i = 0 ; i < card->nports ; i++ )
          {
@@ -6861,7 +6849,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
          }
  
          fst_disable_intr ( card );
-@@ -1665,16 +2672,36 @@
+@@ -1665,16 +2668,36 @@
  
          release_mem_region ( card->phys_ctlmem, 0x10 );
          release_mem_region ( card->phys_mem, FST_MEMSIZE );
@@ -6901,7 +6889,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
          suspend:        NULL,
          resume:         NULL,
  };
-@@ -1694,3 +2721,7 @@
+@@ -1694,3 +2717,7 @@
  module_init ( fst_init );
  module_exit ( fst_cleanup_module );
  
@@ -6911,7 +6899,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
 +/* End $Id$ */
 diff -ruNP linux-2.4.24/drivers/net/wan/farsync.h linux-2.4.24-p/drivers/net/wan/farsync.h
 --- linux-2.4.24/drivers/net/wan/farsync.h	Fri Jun 13 16:51:35 2003
-+++ linux-2.4.24-p/drivers/net/wan/farsync.h	Tue Jan  6 19:59:48 2004
++++ linux-2.4.24-p/drivers/net/wan/farsync.h	Wed Jan  7 10:53:23 2004
 @@ -32,8 +32,13 @@
   *      A short common prefix is useful for routines within the driver to avoid
   *      conflict with other similar drivers and I chosen to use "fst_" for this
@@ -6977,7 +6965,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.h linux-2.4.24-p/drivers/net/wan
  #define FST_HDLC        1               /* Cisco compatible HDLC */
 diff -ruNP linux-2.4.24/fs/proc/root.c linux-2.4.24-p/fs/proc/root.c
 --- linux-2.4.24/fs/proc/root.c	Sat Aug  3 02:39:45 2002
-+++ linux-2.4.24-p/fs/proc/root.c	Tue Jan  6 19:59:48 2004
++++ linux-2.4.24-p/fs/proc/root.c	Wed Jan  7 10:53:23 2004
 @@ -140,6 +140,7 @@
  EXPORT_SYMBOL(proc_mkdir);
  EXPORT_SYMBOL(create_proc_entry);
@@ -6988,7 +6976,7 @@ diff -ruNP linux-2.4.24/fs/proc/root.c linux-2.4.24-p/fs/proc/root.c
  EXPORT_SYMBOL(proc_net);
 diff -ruNP linux-2.4.24/include/linux/byteorder/generic.h linux-2.4.24-p/include/linux/byteorder/generic.h
 --- linux-2.4.24/include/linux/byteorder/generic.h	Fri Nov 28 19:26:21 2003
-+++ linux-2.4.24-p/include/linux/byteorder/generic.h	Tue Jan  6 19:59:48 2004
++++ linux-2.4.24-p/include/linux/byteorder/generic.h	Wed Jan  7 10:53:23 2004
 @@ -122,7 +122,6 @@
  #define be16_to_cpus __be16_to_cpus
  #endif
