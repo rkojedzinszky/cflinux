@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := openssl
-SRC_FILENAME = openssl-0.9.6l.tar.gz
-EXTRACTED_DIR = openssl-0.9.6l
+SRC_FILENAME = openssl-0.9.6m.tar.gz
+EXTRACTED_DIR = openssl-0.9.6m
 DOWNLOAD_SITES = http://www.openssl.org/source/
 
 # include the common package targets 
