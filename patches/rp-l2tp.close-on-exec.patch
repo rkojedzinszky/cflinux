@@ -4,7 +4,7 @@
  	free(sl);
  	return -1;
      }
-+    if ( fcntl(m_pty,F_SETFD,1) == -1 ) {
++    if ( fcntl(m_pty,F_SETFD,FD_CLOEXEC) == -1 ) {
 +	close(m_pty);
 +	close(s_pty);
 +	free(sl);
