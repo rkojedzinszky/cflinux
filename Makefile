@@ -48,6 +48,7 @@ DO_MK += net-snmp
 DO_MK += e2fsprogs
 DO_MK += wireless_tools
 DO_MK += madwifi
+DO_MK += fwdg
 
 # Finish target is last
 DO_MK += finish
