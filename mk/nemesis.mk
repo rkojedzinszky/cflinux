@@ -1,4 +1,4 @@
-# Makefile for libnet
+# Makefile for nemesis
 #
 # Copyright (C) 2004 Richard Kojedzinszky <krichy@tvnetwork.hu>
 # All rights reserved.
@@ -17,10 +17,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-PKG := libnet
-SRC_FILENAME = libnet-1.0.2a.tar.gz
-EXTRACTED_DIR = Libnet-1.0.2a
-DOWNLOAD_SITES = http://www.packetfactory.net/libnet/dist/deprecated/ \
+PKG := nemesis
+SRC_FILENAME = nemesis-1.4beta3.tar.gz
+EXTRACTED_DIR = nemesis-1.4beta3
+DOWNLOAD_SITES = http://www.packetfactory.net/projects/nemesis/ \
 		$(CFLINUX_PACKAGES)
 #PATCHES = skel.patch
 
@@ -31,7 +31,8 @@ configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
 	(cd $(PKG_ROOT) && $(UC_PATH) ./configure --prefix=/usr \
-	--enable-shared --disable-static)
+	--with-libnet-includes=$(UC_ROOT)/include \
+	--with-libnet-libraries=$(UC_ROOT)/lib)
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -43,19 +44,11 @@ build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH)
-	cp $(PKG_ROOT)/lib/libnet.a $(UC_ROOT)/lib/
-	cp -R $(PKG_ROOT)/include/libnet.h $(PKG_ROOT)/include/libnet \
-		$(UC_ROOT)/include/
-	$(INSTALL_SCRIPT) $(PKG_ROOT)/libnet-config $(UC_ROOT)/usr/bin/
 	touch $(BUILT_STAMP)
 
 install: build
-#	Install binary executable (strips the file)
-#	$(INSTALL_BIN) $(PKG_ROOT)/skeleton $(ROOTFS)/usr/sbin/
-
-#	Install Default configuration file
-#	$(INSTALL) -o 0 -g 0 -m 444 $(PKG_ROOT)/skeleton.conf \
-#		$(DEFAULTS_DIR)/etc/
+	$(MAKE) -C $(PKG_ROOT)/src install-exec-am DESTDIR=$(ROOTFS) \
+		AM_INSTALL_PROGRAM_FLAGS=-s
 
 .PHONY: configure clean build install
 
