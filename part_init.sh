@@ -27,6 +27,19 @@
 maindev="/dev/hdc"
 backup="part.$$"
 
+# determine whether grub is installed
+for src in "/lib" "/usr/lib" ; do
+	if test -f ${src}/grub/i386*/stage1 ; then
+		grubsrc=`echo ${src}/grub/i386*`
+		break
+	fi
+done
+if [ -z "$grubsrc" ]; then
+	echo "Could not find grub installed on your system"
+	echo "Please install it, and after try again."
+	exit 1
+fi
+
 size=`sfdisk -s "$maindev"`
 minreq=14544
 if [ "$size" -lt "$minreq" ]; then
@@ -51,7 +64,7 @@ if [ "$do_backup" -eq 1 ]; then
 fi
 sfdisk -R "$maindev"
 
-echo -n "This will destroy the partition table of $maindev. Are you sure (yes/no) [no] ? "
+echo -en "This will destroy the partition table of $maindev.\nAre you sure (yes/no) [no] ? "
 read answer
 case $answer in
 	[yY][eE][sS])
@@ -106,9 +119,9 @@ mke2fs "${bootdev}"
 mount "${bootdev}" /mnt
 mkdir /mnt/grub
 cd /mnt/grub
-cp /usr/lib/grub/i386-pc/stage1 .
-cp /usr/lib/grub/i386-pc/stage2 .
-cp /usr/lib/grub/i386-pc/e2fs_stage1_5 .
+cp ${grubsrc}/stage1 .
+cp ${grubsrc}/stage2 .
+cp ${grubsrc}/e2fs_stage1_5 .
 cat > menu.lst <<EOF
 timeout 5
 
