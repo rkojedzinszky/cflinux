@@ -62,6 +62,7 @@ DO_MK += mcom
 DO_MK += poptop
 DO_MK += vtun
 DO_MK += ltraf
+DO_MK += libnet
 
 ifeq (local.mk,$(wildcard local.mk))
 include local.mk

@@ -5,6 +5,7 @@ Changes from 0.1.5-pre1 to 0.1.5-pre2:
 	- added {tcp,udp}_blackhole at /proc/sys/net/ipv4
 	  to disable RST-s and ICMP errors on unbound ports
 	- upgraded busybox to version 1.00
+	- added libnet-1.0.2a
 
 Changes from 0.1.4 to 0.1.5-pre1:
 	- added the vtun package
