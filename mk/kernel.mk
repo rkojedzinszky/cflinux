@@ -38,15 +38,26 @@ PATCHES = kernel.vlan_mtu.patch \
 include $(TOP_DIR)/packages.mk 
 
 FREESWAN_STAMP=$(PKG_ROOT)/.freeswan_applied
+GRSEC_STAMP=$(PKG_ROOT)/.grsec_applied
 
-configure: patch freeswanpatch $(CONFIGURED_STAMP)
+configure: patch freeswanpatch grsecpatch $(CONFIGURED_STAMP)
 
 freeswanpatch: $(FREESWAN_STAMP)
+grsecpatch: $(GRSEC_STAMP)
 
 $(FREESWAN_STAMP): $(BUILD_DIR)/freeswan/.freeswan.patched
 	(cd $(PKG_ROOT); \
 	$(MAKE) -C $(BUILD_DIR)/freeswan kernelpatch2.4 | patch -p1)
 	touch $@
+
+$(GRSEC_STAMP): $(BUILD_DIR)/grsec/.grsec.patched
+	(cd $(PKG_ROOT) && find $(BUILD_DIR)/grsec/ \
+	 -type f -name '*.patch' | xargs cat | \
+	 patch -p1)
+	touch $@
+
+$(BUILD_DIR)/grsec/.grsec.patched:
+	$(MAKE) -f mk/grsec.mk patch
 
 $(BUILD_DIR)/freeswan/.freeswan.patched:
 	$(MAKE) -f mk/freeswan.mk patch

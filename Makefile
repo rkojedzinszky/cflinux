@@ -25,6 +25,7 @@ PACKAGE = cflinux
 
 ifndef DO_MK
 DO_MK = base
+DO_MK += grsec
 DO_MK += kernel
 DO_MK += tools
 DO_MK += uclibc
