@@ -21,6 +21,7 @@ PKG := rp-pppoe
 SRC_FILENAME = rp-pppoe-3.5.tar.gz
 EXTRACTED_DIR = rp-pppoe-3.5
 DOWNLOAD_SITES = http://www.roaringpenguin.com/products/rp-pppoe/
+PATCHES = rp-pppoe.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

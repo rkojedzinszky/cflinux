@@ -1,0 +1,13 @@
+--- rp-pppoe-3.5/src/pppoe-server.c.orig	Fri Mar 26 15:13:56 2004
++++ rp-pppoe-3.5/src/pppoe-server.c	Fri Mar 26 15:43:56 2004
+@@ -1632,8 +1632,8 @@
+ 	     ntohs(session->sess),
+ 	     session->eth[0], session->eth[1], session->eth[2],
+ 	     session->eth[3], session->eth[4], session->eth[5],
+-	     session->serviceName,
+-	     PppoeOptions);
++	     PppoeOptions,
++	     session->serviceName);
+     argv[c++] = strdup(buffer);
+     if (!argv[c-1]) {
+ 	/* TODO: Send a PADT */
