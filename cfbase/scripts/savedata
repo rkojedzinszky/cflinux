@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo -n "Saving data"
+echo -n "Saving data "
 . /usr/lib/cfmaint/common.sh
 
 rd=`sed -n 's/^\(.*\) \/etc.*$/\1/p' /proc/mounts`
@@ -10,13 +10,21 @@ if [ -z "$rd" ]; then
 	exit
 fi
 tempd=/tmp/config.bin
-mount -no remount,ro "$rd"
-dd if="$rd" of="$tempd" bs=1k count=$conf_size 2>/dev/null
+if ! mount -no remount,ro "$rd" >/dev/null 2>&1 ; then
+	echo "FATAL: Failed to remount /etc read-only!" >&2
+	exit 1
+fi
+if ! dd if="$rd" of="$tempd" bs=1k count=$conf_size >/dev/null 2>&1; then
+	echo "FATAL: Failed to save image to $tempd. Is disk full?" >&2
+	mount -no remount,rw "$rd"
+	rm -f "$tempd"
+	exit 2
+fi
 mount -no remount,rw "$rd"
 md5sum=`md5sum < $tempd`
 
 fresh=`get_fresh_and_valid`
-echo -n " [fresher is $fresh,"
+echo -n "[fresher is $fresh,"
 older=`other_dev $fresh`
 echo -n " to $older]"
 ts=0
