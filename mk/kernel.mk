@@ -26,6 +26,7 @@ DOWNLOAD_SITES = \
 		ftp://ftp.hu.kernel.org/pub/linux/kernel/v2.4/ \
 		ftp://ftp.nl.kernel.org/pub/linux/kernel/v2.4/ \
 		ftp://ftp.se.kernel.org/pub/linux/kernel/v2.4/ \
+		ftp://ftp.sm.kernel.org/pub/linux/kernel/v2.4/ \
 		ftp://ftp.kernel.org/pub/linux/kernel/v2.4/
 PATCHES = kernel.patch kernel.arp.patch
 
