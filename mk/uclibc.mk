@@ -46,9 +46,11 @@ $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) all BUILD_DIR=$(BUILD_DIR)
 	$(MAKE) -C $(PKG_ROOT) install
 	cp -a $(PKG_ROOT)/lib/ld-uC* /lib/
+	$(MAKE) -C $(PKG_ROOT)/utils ldd $(UC_PATH)
 	touch $(BUILT_STAMP)
 
 install: build
 	cp -av $(PKG_ROOT)/lib/*.so* $(ROOTFS)/lib/
+	$(INSTALL_BIN) $(PKG_ROOT)/utils/ldd $(ROOTFS)/usr/bin/
 
 .PHONY: configure clean build install

@@ -38,11 +38,10 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH) BUILD_DIR=$(BUILD_DIR)
+	$(MAKE) -C $(PKG_ROOT) write_helper $(UC_PATH)
 	touch $(BUILT_STAMP)
 
 install: build
-	$(INSTALL_BIN) $(PKG_ROOT)/ldd $(ROOTFS)/usr/sbin/
 	$(INSTALL_BIN) $(PKG_ROOT)/write_helper $(ROOTFS)/usr/lib/cfmaint/
 
 .PHONY: configure clean build install
