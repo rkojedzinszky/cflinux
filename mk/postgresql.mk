@@ -27,8 +27,6 @@ DOWNLOAD_SITES = \
 	ftp://ftp15.us.postgresql.org/source/v7.3.5/ \
 	ftp://ftp.at.postgresql.org/db/www.postgresql.org/pub/source/v7.3.5/
 
-PATCHES = postgresql.configure.patch
-
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
 
