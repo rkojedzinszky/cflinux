@@ -2,6 +2,8 @@ Changes from 0.1.5-pre1 to 0.1.5-pre2:
 	- Version rename
 	- Added some extensions from grsecurity.
 	  http://www.grsecurity.net/
+	- added {tcp,udp}_blackhole at /proc/sys/net/ipv4
+	  to disable RST-s and ICMP errors on unbound ports
 
 Changes from 0.1.4 to 0.1.5-pre1:
 	- added the vtun package

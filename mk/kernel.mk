@@ -32,7 +32,8 @@ DOWNLOAD_SITES = \
 PATCHES = kernel.vlan_mtu.patch \
 	kernel.mppe.patch \
 	kernel.multigate.patch \
-	kernel.init.patch
+	kernel.init.patch \
+	kernel.blackhole.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

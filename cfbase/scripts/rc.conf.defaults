@@ -35,6 +35,8 @@ farsync_media="x21"
 farsync_proto="ppp"
 
 # network options
+tcp_blackhole="NO"		# enable 'RST's
+udp_blackhole="NO"		# enable 'ICMP port unreach's
 syncookies_enable="YES"		# enable syncookies by default
 ecn_enable="NO"			# disable ECN by default
 spoofprotect_enable="YES"	# enable spoof protection by default

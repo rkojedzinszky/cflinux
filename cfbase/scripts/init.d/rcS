@@ -79,6 +79,16 @@ if [ -r /etc/rc.network ]; then
 	echo "done"
 fi
 
+case "$tcp_blackhole" in
+	[Yy][Ee][Ss])
+		echo 1 > /proc/sys/net/ipv4/tcp_blackhole
+		;;
+esac
+case "$udp_blackhole" in
+	[Yy][Ee][Ss])
+		echo 1 > /proc/sys/net/ipv4/udp_blackhole
+		;;
+esac
 case "$syncookies_enable" in
 	[Yy][Ee][Ss])
 		echo -n "Enabling TCP/IP SYN cookies: "
