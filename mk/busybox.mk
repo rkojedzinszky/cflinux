@@ -27,7 +27,8 @@ PATCHES = busybox.init.patch \
 	busybox.crond.patch \
 	busybox.rdate.patch \
 	busybox.pwd2spwd.c.patch \
-	busybox.modprobe.c.patch
+	busybox.modprobe.c.patch \
+	busybox.uclibc_mmu.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

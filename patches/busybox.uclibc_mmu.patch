@@ -1,0 +1,12 @@
+--- busybox-1.00/include/busybox.h.orig	2005-01-15 12:41:54.000000000 +0100
++++ busybox-1.00/include/busybox.h	2005-01-15 12:43:58.000000000 +0100
+@@ -118,4 +118,9 @@
+ #define  PATH_MAX         256
+ #endif
+ 
++#if !defined(__ARCH_HAS_MMU__) && defined(__UCLIBC__) && \
++	defined (__UCLIBC_HAS_MMU__)
++#define __ARCH_HAS_MMU__ 1
++#endif
++
+ #endif							/* _BB_INTERNAL_H_ */
