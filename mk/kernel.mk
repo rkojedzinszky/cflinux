@@ -38,17 +38,17 @@ PATCHES = kernel.vlan_mtu.patch \
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
 
-FREESWAN_STAMP=$(PKG_ROOT)/.freeswan_applied
+OPENSWAN_STAMP=$(PKG_ROOT)/.openswan_applied
 GRSEC_STAMP=$(PKG_ROOT)/.grsec_applied
 
-configure: patch freeswanpatch grsecpatch $(CONFIGURED_STAMP)
+configure: patch openswanpatch grsecpatch $(CONFIGURED_STAMP)
 
-freeswanpatch: $(FREESWAN_STAMP)
+openswanpatch: $(OPENSWAN_STAMP)
 grsecpatch: $(GRSEC_STAMP)
 
-$(FREESWAN_STAMP): $(BUILD_DIR)/freeswan/.freeswan.patched
+$(OPENSWAN_STAMP): $(BUILD_DIR)/openswan/.openswan.patched
 	(cd $(PKG_ROOT); \
-	$(MAKE) -C $(BUILD_DIR)/freeswan kernelpatch2.4 | patch -p1)
+	$(MAKE) -C $(BUILD_DIR)/openswan kernelpatch2.4 | patch -p1)
 	touch $@
 
 $(GRSEC_STAMP): $(BUILD_DIR)/grsec/.grsec.patched
@@ -60,8 +60,8 @@ $(GRSEC_STAMP): $(BUILD_DIR)/grsec/.grsec.patched
 $(BUILD_DIR)/grsec/.grsec.patched:
 	$(MAKE) -f mk/grsec.mk patch
 
-$(BUILD_DIR)/freeswan/.freeswan.patched:
-	$(MAKE) -f mk/freeswan.mk patch
+$(BUILD_DIR)/openswan/.openswan.patched:
+	$(MAKE) -f mk/openswan.mk patch
 
 ifeq ($(wildcard $(CONFIGS)/$(PKG).config.patch),$(CONFIGS)/$(PKG).config.patch)
 CFGPATCH = $(CONFIGS)/$(PKG).config.patch

@@ -1,4 +1,4 @@
-# Makefile for freeswan
+# Makefile for openswan
 #
 # Copyright (C) 2004 Richard Kojedzinszky <krichy@tvnetwork.hu>
 # All rights reserved.
@@ -17,12 +17,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-PKG := freeswan
-SRC_FILENAME = freeswan-2.06.tar.gz
-EXTRACTED_DIR = freeswan-2.06
-DOWNLOAD_SITES = ftp://ftp.xs4all.nl/pub/crypto/freeswan/ \
+PKG := openswan
+SRC_FILENAME = openswan-2.2.0.tar.gz
+EXTRACTED_DIR = openswan-2.2.0
+DOWNLOAD_SITES = http://www.openswan.org/download/ \
 		$(CFLINUX_PACKAGES)
-PATCHES = freeswan.patch
+PATCHES = openswan.patch \
+	  openswan.nodebug.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -50,10 +51,13 @@ install: build
 		$(ROOTFS)/usr/libexec/ipsec
 	$(MAKE) -C $(PKG_ROOT) install DESTDIR=$(ROOTFS) \
 		INC_USRLOCAL=/usr
-	for i in eroute klipsdebug pf_key pluto ranbits rsasigkey \
-		spi spigrp tncfg whack; do \
+	for i in calcgoo verify ; do \
+		rm -f $(ROOTFS)/usr/libexec/$$i ; done
+	for i in eroute klipsdebug pf_key pluto _pluto_adns \
+		ranbits rsasigkey \
+		spi spigrp starter tncfg whack; do \
 		strip -s $(ROOTFS)/usr/libexec/ipsec/$$i ; done
-	for i in _copyright _pluto_adns ; do \
+	for i in _copyright ; do \
 		strip -s $(ROOTFS)/usr/lib/ipsec/$$i ; done
 
 .PHONY: configure clean build install

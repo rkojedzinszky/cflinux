@@ -1,0 +1,31 @@
+--- openswan-2.2.0/linux/include/openswan/ipsec_rcv.h.orig	2004-04-06 04:49:08.000000000 +0200
++++ openswan-2.2.0/linux/include/openswan/ipsec_rcv.h	2005-01-03 22:29:12.000000000 +0100
+@@ -135,8 +135,10 @@
+ 
+ #ifdef CONFIG_IPSEC_DEBUG
+ extern int debug_rcv;
+-#endif /* CONFIG_IPSEC_DEBUG */
+ #define ipsec_rcv_dmp(_x,_y, _z) if (debug_rcv && sysctl_ipsec_debug_verbose) ipsec_dmp(_x,_y,_z)
++#else /* CONFIG_IPSEC_DEBUG */
++#define ipsec_rcv_dmp(_x,_y, _z) do ; while(0)
++#endif /* CONFIG_IPSEC_DEBUG */
+ 
+ extern int sysctl_ipsec_inbound_policy_check;
+ #endif /* __KERNEL__ */
+--- openswan-2.2.0/linux/include/openswan/ipsec_xmit.h.orig	2004-04-06 04:49:08.000000000 +0200
++++ openswan-2.2.0/linux/include/openswan/ipsec_xmit.h	2005-01-03 22:28:28.000000000 +0100
+@@ -127,11 +127,13 @@
+ #ifdef CONFIG_IPSEC_DEBUG
+ extern int debug_tunnel;
+ extern int sysctl_ipsec_debug_verbose;
++#define ipsec_xmit_dmp(_x,_y, _z) if (debug_xmit && sysctl_ipsec_debug_verbose) ipsec_dmp(_x,_y,_z)
++#else /* CONFIG_IPSEC_DEBUG */
++#define ipsec_xmit_dmp(_x,_y, _z) do ; while(0)
+ #endif /* CONFIG_IPSEC_DEBUG */
+ 
+ #define debug_xmit debug_tunnel
+ 
+-#define ipsec_xmit_dmp(_x,_y, _z) if (debug_xmit && sysctl_ipsec_debug_verbose) ipsec_dmp(_x,_y,_z)
+ 
+ extern int sysctl_ipsec_icmp;
+ extern int sysctl_ipsec_tos;
