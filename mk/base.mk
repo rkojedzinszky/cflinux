@@ -47,7 +47,7 @@ $(INSTALL_STAMP):
 	-mkdir $(ROOTFS)
 	-chmod 755 $(ROOTFS)
 	-chown 0:0 $(ROOTFS)
-	for i in bin boot dev etc lib mnt proc sbin usr var \
+	for i in bin boot dev/net etc lib mnt proc sbin usr var \
 		usr/bin usr/lib usr/sbin usr/local dev/pts \
 		usr/lib/cfmaint ; do \
 			mkdir -p $(ROOTFS)/$$i ; done
@@ -56,7 +56,8 @@ $(INSTALL_STAMP):
 	ln -s etc/root $(ROOTFS)/root
 	(cd $(ROOTFS)/dev ; MAKEDEV std hda hdb hdc hdd \
 		console ptmx rtc ttyS0 ttyS1 ttyS2 ttyS3 ppp; \
-		mknod watchdog c 10 130)
+		mknod watchdog c 10 130; \
+		mknod net/tun c 10 200)
 	$(INSTALL) -d -m 555 $(ROOTFS)/sbin/init.d
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/init.d/rcS \
 		$(ROOTFS)/sbin/init.d/

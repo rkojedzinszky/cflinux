@@ -59,6 +59,7 @@ DO_MK += libgmp
 DO_MK += freeswan
 DO_MK += mcom
 DO_MK += poptop
+DO_MK += vtun
 
 ifeq (local.mk,$(wildcard local.mk))
 include local.mk
