@@ -11,7 +11,7 @@
  	"Options:\n" \
  	"\t-s\tSet the system date and time (default).\n" \
 -	"\t-p\tPrint the date and time."
-+	"\t-p\tPrint the date and time." \
++	"\t-p\tPrint the date and time.\n" \
 +	"\t-a\tSkew the time instead of just hopping it."
  
  #define readlink_trivial_usage \
