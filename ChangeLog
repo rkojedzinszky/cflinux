@@ -11,6 +11,7 @@ Changes from 0.1.4 to 0.1.5-pre1:
 	  thus enables the ability of extraction TXT records
 	  from dns, and this enables OE with freeswan
 	- updated net-snmp to version 5.1.2
+	- updated the linux kernel to 2.4.28
 
 Changes from 0.1.4-pre3 to 0.1.4:
 	- version rename
