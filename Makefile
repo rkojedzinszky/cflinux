@@ -54,7 +54,7 @@ DO_MK += finish
 endif
 
 export TOP_DIR := $(shell pwd)
-include config.mk
+include $(TOP_DIR)/config.mk
 
 all:
 	test -d $(BUILD_DIR) || mkdir $(BUILD_DIR)
