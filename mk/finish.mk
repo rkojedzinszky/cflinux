@@ -46,6 +46,6 @@ install:
 	rm -rf $(ROOTFS)/sbin/rc?.d
 	find $(ROOTFS)/lib/modules/$(KERNEL_VERSION)/ -name '*.o' -print0 | \
 		xargs -0 strip -g
-	depmod -aeb $(ROOTFS) -F $(BUILD_DIR)/kernel/System.map -r $(KERNEL_VERSION)
+	depmod -raeb $(ROOTFS) -F $(BUILD_DIR)/kernel/System.map $(KERNEL_VERSION)
 
 .PHONY: configure clean build install
