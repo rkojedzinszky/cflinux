@@ -28,7 +28,7 @@ DOWNLOAD_SITES = \
 		ftp://ftp.se.kernel.org/pub/linux/kernel/v2.4/ \
 		ftp://ftp.sm.kernel.org/pub/linux/kernel/v2.4/ \
 		ftp://ftp.kernel.org/pub/linux/kernel/v2.4/
-PATCHES = kernel.patch kernel.arp.patch kernel.freeswan.patch
+PATCHES = kernel.patch kernel.freeswan.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
