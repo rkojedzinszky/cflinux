@@ -49,6 +49,18 @@ if [ -n "$hostname" ]; then
 	hostname "$hostname"
 fi
 
+if ! grep -q "^nogroup:" /etc/group ; then
+	echo -n "Adding system group nogroup:"
+	addgroup -g 65534 nogroup
+	echo " done"
+fi
+
+if ! grep -q "^nobody:" /etc/passwd ; then
+	echo -n "Adding system user nobody:"
+	adduser -DH -h /var/run -g "Nobody" -s /bin/false -G nogroup nobody
+	echo " done"
+fi
+
 if [ -r /etc/rc.network ]; then
 	echo -n "Network initialization: "
 	sh /etc/rc.network
@@ -185,6 +197,14 @@ case "$httpd_enable" in
 esac
 case "$snmpd_enable" in
 	[Yy][Ee][Ss])
+		if ! grep "^snmp:" /etc/passwd ; then
+			echo -n " [adding user for snmp"
+			adduser -h /var/lib/net-snmp -g "SNMP daemon user" -s /bin/false -D -H snmpd && echo -n "]"
+		fi
+		if [ ! -d /var/lib/net-snmp ]; then
+			mkdir /var/lib/net-snmp
+			chown snmpd:snmpd /var/lib/net-snmp
+		fi
 		/usr/sbin/snmpd $snmpd_flags && echo -n " snmpd"
 		;;
 esac

@@ -41,7 +41,8 @@ $(CONFIGURED_STAMP):
 	 --with-default-snmp-version=3 --with-sys-location="default" \
 	 --with-logfile=/var/log/snmpd.log \
 	 --with-persistent-directory=/var/lib/net-snmp \
-	 --localstatedir=/var/run )
+	 --localstatedir=/var/run \
+	 --without-rpm )
 	touch $(CONFIGURED_STAMP)
 
 clean:
