@@ -51,7 +51,7 @@ export TOP_DIR := $(shell pwd)
 export MK := $(FDEVEL_DIR)/mk
 export CONFIGS := $(FDEVEL_DIR)/configs
 export INSTALL_BIN := $(TOP_DIR)/install_bin.sh
-export INSTALL_BIN_NS := install -s -o 0 -g 0 -m 755
-export INSTALL_SCRIPT := install -o 0 -g 0 -m 755
+export INSTALL_BIN_NS := install -s -o 0 -g 0 -m 555
+export INSTALL_SCRIPT := install -o 0 -g 0 -m 555
 
 INSTALL := install -o 0 -g 0
