@@ -1,30 +1,51 @@
-diff -ruNP quagga-0.96.4/bgpd/Makefile.in ../oldsource/quagga/bgpd/Makefile.in
---- quagga-0.96.4/bgpd/Makefile.in	Sun Nov  2 06:19:28 2003
-+++ ../oldsource/quagga/bgpd/Makefile.in	Fri Nov 28 16:20:48 2003
-@@ -130,7 +130,7 @@
+diff -ruNP quagga-0.96.5/bgpd/Makefile.in quagga-0.96.5-patched/bgpd/Makefile.in
+--- quagga-0.96.5/bgpd/Makefile.in	Mon May  3 15:03:32 2004
++++ quagga-0.96.5-patched/bgpd/Makefile.in	Wed May  5 16:07:00 2004
+@@ -168,7 +168,7 @@
  	bgp_main.c $(libbgp_a_SOURCES)
  
  
 -bgpd_LDADD = ../lib/libzebra.a @LIBCAP@
 +bgpd_LDADD = -L../lib -lzebra @LIBCAP@
  
- dist_sysconf_DATA = bgpd.conf.sample bgpd.conf.sample2
- 
-@@ -167,7 +167,7 @@
+ examplesdir = $(exampledir)
+ dist_examples_DATA = bgpd.conf.sample bgpd.conf.sample2
+@@ -207,7 +207,7 @@
  	bgp_advertise.$(OBJEXT) bgp_vty.$(OBJEXT)
  am_bgpd_OBJECTS = bgp_main.$(OBJEXT) $(am__objects_1)
  bgpd_OBJECTS = $(am_bgpd_OBJECTS)
 -bgpd_DEPENDENCIES = ../lib/libzebra.a
 +bgpd_DEPENDENCIES =
  bgpd_LDFLAGS =
+ 
  DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
- CPPFLAGS = @CPPFLAGS@
-diff -ruNP quagga-0.96.4/lib/Makefile.in ../oldsource/quagga/lib/Makefile.in
---- quagga-0.96.4/lib/Makefile.in	Sun Nov  2 06:17:10 2003
-+++ ../oldsource/quagga/lib/Makefile.in	Fri Nov 28 16:14:13 2003
-@@ -106,9 +106,9 @@
- install_sh = @install_sh@
- DEFS = @DEFS@ -DSYSCONFDIR=\"$(sysconfdir)/\"
+diff -ruNP quagga-0.96.5/isisd/Makefile.in quagga-0.96.5-patched/isisd/Makefile.in
+--- quagga-0.96.5/isisd/Makefile.in	Mon May  3 15:07:05 2004
++++ quagga-0.96.5-patched/isisd/Makefile.in	Wed May  5 16:08:49 2004
+@@ -167,7 +167,7 @@
+ 	isis_main.c $(libisis_a_SOURCES)
+ 
+ 
+-isisd_LDADD = ../lib/libzebra.a @LIBCAP@
++isisd_LDADD = -L../lib -lzebra @LIBCAP@
+ 
+ examplesdir = $(exampledir)
+ dist_examples_DATA = isisd.conf.sample
+@@ -200,7 +200,7 @@
+ 	isis_spf.$(OBJEXT) isis_route.$(OBJEXT) isis_routemap.$(OBJEXT)
+ am_isisd_OBJECTS = isis_main.$(OBJEXT) $(am__objects_1)
+ isisd_OBJECTS = $(am_isisd_OBJECTS)
+-isisd_DEPENDENCIES = ../lib/libzebra.a
++isisd_DEPENDENCIES =
+ isisd_LDFLAGS =
+ 
+ DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
+diff -ruNP quagga-0.96.5/lib/Makefile.in quagga-0.96.5-patched/lib/Makefile.in
+--- quagga-0.96.5/lib/Makefile.in	Mon May  3 15:02:36 2004
++++ quagga-0.96.5-patched/lib/Makefile.in	Wed May  5 16:07:00 2004
+@@ -144,9 +144,9 @@
+ sysconfdir = @sysconfdir@
+ target_alias = @target_alias@
  
 -lib_LIBRARIES = libzebra.a
 +lib_LIBRARIES = libzebra.so
@@ -34,8 +55,8 @@ diff -ruNP quagga-0.96.4/lib/Makefile.in ../oldsource/quagga/lib/Makefile.in
  	version.c network.c pid_output.c getopt.c getopt1.c daemon.c \
  	print_version.c checksum.c vector.c linklist.c vty.c command.c \
  	sockunion.c prefix.c thread.c if.c memory.c buffer.c table.c hash.c \
-@@ -116,9 +116,9 @@
- 	zclient.c sockopt.c smux.c md5.c if_rmap.c keychain.c privs.c debug.c
+@@ -155,9 +155,9 @@
+ 	debug.c sigevent.c
  
  
 -libzebra_a_DEPENDENCIES = @LIB_REGEX@
@@ -44,9 +65,9 @@ diff -ruNP quagga-0.96.4/lib/Makefile.in ../oldsource/quagga/lib/Makefile.in
 -libzebra_a_LIBADD = @LIB_REGEX@
 +libzebra_so_LIBADD = @LIB_REGEX@
  
- include_HEADERS = \
+ pkginclude_HEADERS = \
  	buffer.h command.h filter.h getopt.h hash.h if.h linklist.h log.h \
-@@ -135,8 +135,8 @@
+@@ -175,8 +175,8 @@
  CONFIG_CLEAN_FILES = version.h
  LIBRARIES = $(lib_LIBRARIES)
  
@@ -57,36 +78,33 @@ diff -ruNP quagga-0.96.4/lib/Makefile.in ../oldsource/quagga/lib/Makefile.in
  	pid_output.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
  	daemon.$(OBJEXT) print_version.$(OBJEXT) checksum.$(OBJEXT) \
  	vector.$(OBJEXT) linklist.$(OBJEXT) vty.$(OBJEXT) \
-@@ -146,9 +146,10 @@
- 	routemap.$(OBJEXT) distribute.$(OBJEXT) stream.$(OBJEXT) \
+@@ -187,8 +187,8 @@
  	str.$(OBJEXT) log.$(OBJEXT) plist.$(OBJEXT) zclient.$(OBJEXT) \
  	sockopt.$(OBJEXT) smux.$(OBJEXT) md5.$(OBJEXT) \
--	if_rmap.$(OBJEXT) keychain.$(OBJEXT) privs.$(OBJEXT) \
--	debug.$(OBJEXT)
+ 	if_rmap.$(OBJEXT) keychain.$(OBJEXT) privs.$(OBJEXT) \
+-	debug.$(OBJEXT) sigevent.$(OBJEXT)
 -libzebra_a_OBJECTS = $(am_libzebra_a_OBJECTS)
-+	if_rmap.$(OBJEXT) keychain.$(OBJEXT) privs.$(OBJEXT)
-+	#debug.$(OBJEXT)
-+
++	sigevent.$(OBJEXT)
 +libzebra_so_OBJECTS = $(am_libzebra_so_OBJECTS)
+ 
  DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
- CPPFLAGS = @CPPFLAGS@
- LDFLAGS = @LDFLAGS@
-@@ -178,12 +179,12 @@
+ depcomp = $(SHELL) $(top_srcdir)/depcomp
+@@ -215,12 +215,12 @@
+ 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
  CCLD = $(CC)
  LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
- CFLAGS = @CFLAGS@
 -DIST_SOURCES = $(libzebra_a_SOURCES)
 +DIST_SOURCES = $(libzebra_so_SOURCES)
- HEADERS = $(include_HEADERS)
+ HEADERS = $(pkginclude_HEADERS)
  
- DIST_COMMON = $(include_HEADERS) ChangeLog Makefile.am Makefile.in \
- 	version.h.in
+ DIST_COMMON = $(pkginclude_HEADERS) $(srcdir)/Makefile.in ChangeLog \
+ 	Makefile.am version.h.in
 -SOURCES = $(libzebra_a_SOURCES)
 +SOURCES = $(libzebra_so_SOURCES)
  
  all: all-am
  
-@@ -226,10 +227,9 @@
+@@ -263,10 +263,9 @@
  
  clean-libLIBRARIES:
  	-test -z "$(lib_LIBRARIES)" || rm -f $(lib_LIBRARIES)
@@ -100,10 +118,10 @@ diff -ruNP quagga-0.96.4/lib/Makefile.in ../oldsource/quagga/lib/Makefile.in
  
  mostlyclean-compile:
  	-rm -f *.$(OBJEXT) core *.core
-diff -ruNP quagga-0.96.4/lib/vty.c ../oldsource/quagga/lib/vty.c
---- quagga-0.96.4/lib/vty.c	Sun Oct 26 01:17:13 2003
-+++ ../oldsource/quagga/lib/vty.c	Fri Nov 28 16:19:37 2003
-@@ -2347,7 +2347,8 @@
+diff -ruNP quagga-0.96.5/lib/vty.c quagga-0.96.5-patched/lib/vty.c
+--- quagga-0.96.5/lib/vty.c	Fri Apr 30 15:53:23 2004
++++ quagga-0.96.5-patched/lib/vty.c	Wed May  5 16:07:00 2004
+@@ -2357,7 +2357,8 @@
  }
  
  /* Master of the threads. */
@@ -113,10 +131,10 @@ diff -ruNP quagga-0.96.4/lib/vty.c ../oldsource/quagga/lib/vty.c
  
  static void
  vty_event (enum event event, int sock, struct vty *vty)
-diff -ruNP quagga-0.96.4/zebra/Makefile.in ../oldsource/quagga/zebra/Makefile.in
---- quagga-0.96.4/zebra/Makefile.in	Sun Nov  2 06:18:43 2003
-+++ ../oldsource/quagga/zebra/Makefile.in	Fri Nov 28 16:11:05 2003
-@@ -132,7 +132,7 @@
+diff -ruNP quagga-0.96.5/zebra/Makefile.in quagga-0.96.5-patched/zebra/Makefile.in
+--- quagga-0.96.5/zebra/Makefile.in	Mon May  3 15:03:09 2004
++++ quagga-0.96.5-patched/zebra/Makefile.in	Wed May  5 16:07:00 2004
+@@ -170,7 +170,7 @@
  	interface.h ipforward.h
  
  
