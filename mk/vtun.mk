@@ -26,6 +26,7 @@ DOWNLOAD_SITES = \
 	http://belnet.dl.sourceforge.net/sourceforge/vtun/ \
 	http://cesnet.dl.sourceforge.net/sourceforge/vtun/ \
 	http://aleron.dl.sourceforge.net/sourceforge/vtun/
+PATCHES = vtun.configure.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -35,7 +36,7 @@ configure: patch $(CONFIGURED_STAMP)
 $(CONFIGURED_STAMP):
 	(cd $(PKG_ROOT) && $(UC_PATH) ./configure --prefix=/usr \
 	--sysconfdir=/etc --disable-lzo \
-	--disable-ssl)
+	--with-ssl-headers=../openssl/include/openssl --with-ssl-libs=../openssl)
 	touch $(CONFIGURED_STAMP)
 
 clean:
