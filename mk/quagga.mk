@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := quagga
-SRC_FILENAME = quagga-0.96.5.tar.gz
-EXTRACTED_DIR = quagga-0.96.5
+SRC_FILENAME = quagga-0.97.3.tar.gz
+EXTRACTED_DIR = quagga-0.97.3
 DOWNLOAD_SITES = http://www.quagga.net/download/ \
 		$(CFLINUX_PACKAGES)
 PATCHES = quagga.patch
@@ -37,7 +37,8 @@ $(CONFIGURED_STAMP):
 		--disable-ospfapi \
 		--enable-user=quagga --enable-group=quagga \
 		--enable-multipath=64 \
-		--localstatedir=/var/quagga )
+		--localstatedir=/var/quagga \
+		--disable-static )
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -52,8 +53,11 @@ $(BUILT_STAMP):
 	touch $(BUILT_STAMP)
 
 install: build
+	$(MAKE) -C $(PKG_ROOT)/lib install-exec-am \
+		DESTDIR=$(ROOTFS) INSTALL_STRIP_FLAG=-s
 	for i in zebra ospfd ripd ; do \
-		$(INSTALL_BIN) $(PKG_ROOT)/$$i/$$i $(ROOTFS)/usr/sbin/ ; done
-	$(INSTALL_BIN) $(PKG_ROOT)/lib/libzebra.so $(ROOTFS)/usr/lib/
+		$(MAKE) -C $(PKG_ROOT)/$$i install-exec-am \
+		DESTDIR=$(ROOTFS) INSTALL_STRIP_FLAG=-s ; \
+		strip -s $(ROOTFS)/usr/sbin/$$i ; done
 
 .PHONY: configure clean build install
