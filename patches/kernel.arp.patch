@@ -1,0 +1,15 @@
+--- linux-2.4.24/net/ipv4/arp.c.orig	Tue Feb  3 11:58:07 2004
++++ linux-2.4.24/net/ipv4/arp.c	Tue Feb  3 11:45:24 2004
+@@ -323,9 +323,9 @@
+ 	u32 target = *(u32*)neigh->primary_key;
+ 	int probes = atomic_read(&neigh->probes);
+ 
+-	if (skb && inet_addr_type(skb->nh.iph->saddr) == RTN_LOCAL)
+-		saddr = skb->nh.iph->saddr;
+-	else
++	//if (skb && inet_addr_type(skb->nh.iph->saddr) == RTN_LOCAL)
++	//	saddr = skb->nh.iph->saddr;
++	//else
+ 		saddr = inet_select_addr(dev, target, RT_SCOPE_LINK);
+ 
+ 	if ((probes -= neigh->parms->ucast_probes) < 0) {

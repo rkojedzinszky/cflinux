@@ -20,7 +20,7 @@
 #
 # $Id$
 
-RELEASE = 0.1.3-pre1
+RELEASE_STRING = 0.1.3-pre2
 PACKAGE = cflinux
 
 ifndef DO_MK
@@ -89,7 +89,7 @@ scratch: distclean
 
 install: all
 	for i in $(DO_MK) ; do make -f $(MK)/$$i.mk install || exit ; done
-	echo "$(RELEASE)" > $(ROOTFS)/.release
+	echo "$(RELEASE_STRING)" > $(ROOTFS)/.release
 
 image:
 	cat bzpadder $(BUILD_DIR)/kernel/arch/i386/boot/bzImage > topad
@@ -97,6 +97,7 @@ image:
 	mkfs.minix -v /dev/ram0 2047 >/dev/null 2>&1
 	mount -t minix /dev/ram0 /mnt
 	cp -a $(FDEVEL_DIR)/fs_config/* /mnt
+	find /mnt -type d -name CVS -print0 | xargs rm -rf
 	umount /mnt
 	dd if=/dev/ram0 bs=1k of=$(ROOTFS)/usr/share/defaults/etc.img \
 		count=2047 >/dev/null 2>&1
@@ -104,11 +105,11 @@ image:
 	rm -f topad
 
 dist: scratch
-	rm -rf $(PACKAGE)-$(RELEASE)
-	mkdir $(PACKAGE)-$(RELEASE)
-	cp -dR $(DISTFILES) $(PACKAGE)-$(RELEASE)
-	find $(PACKAGE)-$(RELEASE) -type d -name CVS -print0 | xargs -0 rm -rf
-	tar czf $(PACKAGE)-$(RELEASE).tar.gz $(PACKAGE)-$(RELEASE)
-	rm -rf $(PACKAGE)-$(RELEASE)
+	rm -rf $(PACKAGE)-$(RELEASE_STRING)
+	mkdir $(PACKAGE)-$(RELEASE_STRING)
+	cp -dR $(DISTFILES) $(PACKAGE)-$(RELEASE_STRING)
+	find $(PACKAGE)-$(RELEASE_STRING) -type d -name CVS -print0 | xargs -0 rm -rf
+	tar czf $(PACKAGE)-$(RELEASE_STRING).tar.gz $(PACKAGE)-$(RELEASE_STRING)
+	rm -rf $(PACKAGE)-$(RELEASE_STRING)
 
 .PHONY: all distclean clean install image scratch
