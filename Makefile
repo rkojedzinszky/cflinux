@@ -60,6 +60,7 @@ DO_MK += freeswan
 DO_MK += mcom
 DO_MK += poptop
 DO_MK += vtun
+DO_MK += ltraf
 
 ifeq (local.mk,$(wildcard local.mk))
 include local.mk
