@@ -56,7 +56,10 @@ $(INSTALL_STAMP):
 	$(INSTALL) -d -m 555 $(ROOTFS)/sbin/init.d
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/init.d/rcS \
 		$(ROOTFS)/sbin/init.d/
-	cp -v $(PKG_ROOT)/defaults/inittab $(ROOTFS)/sbin/inittab
+	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/linuxrc \
+		$(ROOTFS)/linuxrc
+	cp -v $(PKG_ROOT)/defaults/inittab \
+		$(ROOTFS)/usr/share/defaults/inittab
 	cp -v $(PKG_ROOT)/scripts/common.sh $(ROOTFS)/usr/lib/cfmaint/
 	cp -v $(PKG_ROOT)/defaults/modules \
 		$(ROOTFS)/usr/share/defaults/modules

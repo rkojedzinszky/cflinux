@@ -1,15 +1,6 @@
 diff -ruNP busybox-1.00-pre5/init/init.c busybox-1.00-pre5-p/init/init.c
 --- busybox-1.00-pre5/init/init.c	Fri Sep 26 12:45:55 2003
 +++ busybox-1.00-pre5-p/init/init.c	Thu Jan  8 11:46:46 2004
-@@ -109,7 +109,7 @@
- 
- #define KERNEL_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))
- 
--#define INITTAB      "/etc/inittab"	/* inittab file location */
-+#define INITTAB      "/sbin/inittab"	/* inittab file location */
- #ifndef INIT_SCRIPT
- #define INIT_SCRIPT  "/etc/init.d/rcS"	/* Default sysinit script. */
- #endif
 @@ -936,7 +936,7 @@
   * then parse_inittab() simply adds in some default
   * actions(i.e., runs INIT_SCRIPT and then starts a pair 

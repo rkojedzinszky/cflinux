@@ -1,7 +1,14 @@
+# System startup
 ::sysinit:/sbin/init.d/rcS
-ttyS0::respawn:/sbin/getty 38400 ttyS0
+
+# Enable the following for login on serial line
+#ttyS0::respawn:/sbin/getty 38400 ttyS0
+
+# These are standard terminals on vty[1-4]
 tty1::respawn:/sbin/getty 38400 tty1
 tty2::respawn:/sbin/getty 38400 tty2
 tty3::respawn:/sbin/getty 38400 tty3
 tty4::respawn:/sbin/getty 38400 tty4
+
+# System shutdown
 ::shutdown:/sbin/init.d/shutdown

@@ -1,0 +1,45 @@
+#!/bin/sh
+
+# This script is intended to run very first on the system
+# to mount /etc, after it is done it invokes /sbin/init
+# with this, one can edit his own /etc/inittab file
+# and to the system it is transparent that /etc is not
+# on the root filesystem
+
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+
+. /usr/lib/cfmaint/common.sh
+echo -n "Reading configuration: "
+device=`get_fresh_and_valid`
+if [ -z "$device" ]; then
+	echo "no valid configuration found, using builtin defaults"
+	device=/usr/share/defaults/etc.img
+else
+	echo -n "[found on $device] "
+fi
+dd if=$device of=/dev/ram0 bs=1k count=$conf_size 2>/dev/null
+fsck.minix -a /dev/ram0 >/dev/null 2>&1
+if [ $? -gt 2 ]
+then
+    echo -e "\n#"
+    echo "# Check failed - should not happen, good luck!"
+    echo "#"
+    /bin/sh
+    kill 1
+    exit 0
+fi
+
+# Do the real mount
+mount -nt minix /dev/ram0 /etc
+
+# Make an empty mtab file
+echo -n "" > /etc/mtab
+
+# make /etc appear in the mtab
+mount -o remount /etc
+
+# install a default /etc/inittab if not found
+[ -f /etc/inittab ] || cp /usr/share/defaults/inittab /etc/inittab
+
+# Invoke /sbin/init
+exec /sbin/init

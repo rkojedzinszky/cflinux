@@ -113,10 +113,10 @@ cat > menu.lst <<EOF
 timeout 5
 
 title cf
-kernel (hd0,4)1+2048 root=/dev/hdc5 console=ttyS0,115200
+kernel (hd0,4)1+2048 init=/linuxrc root=/dev/hdc5 console=ttyS0,115200
 EOF
 cat <<EOF | grub --batch
-device (hd0) /dev/hdc
+device (hd0) $maindev
 root (hd0,2)
 embed /grub/e2fs_stage1_5 (hd0)
 install /grub/stage1 (hd0) (hd0)1+16 p (hd0,2)/grub/stage2 /grub/menu.lst
