@@ -23,6 +23,10 @@ echo -n "" > /var/log/wtmp
 echo -n "" > /var/run/utmp
 echo "done"
 
+# save the __system_device file
+echo "$__system_device" > /var/run/__system_device
+chmod 444 /var/run/__system_device
+
 # processing modules
 modules_file="/etc/modules"
 [ -f "$modules_file" ] || modules_file="/usr/share/defaults/etc/modules"

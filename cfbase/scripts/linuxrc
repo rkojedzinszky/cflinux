@@ -12,6 +12,18 @@ set +e
 # set the default path
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin
 
+# try to guess the real system device
+# if it is set through the kernel command line, accept that
+if [ -z "$__system_device" ]; then
+	# else try to guess it
+	__system_device=$(dmesg | \
+		sed -n 's/^Kernel command line:.*root=\([\/a-zA-Z]\+\)[0-9].*$/\1/p')
+fi
+if [ -z "$__system_device" ]; then
+	# if it is still undefined, set it to the default /dev/hdc
+	__system_device="/dev/hdc"
+fi
+
 . /usr/lib/cfmaint/common.sh
 echo -n "Reading configuration: "
 device=`get_fresh_and_valid`
@@ -46,4 +58,7 @@ echo -n "" > /etc/mtab
 mount -o remount /etc
 
 # Invoke /sbin/init
+export __system_device
 exec /sbin/init
+
+# vim: ts=2 sw=2

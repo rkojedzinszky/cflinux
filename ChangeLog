@@ -2,6 +2,9 @@ Changes from 0.1.4 to 0.1.5-pre1:
 	- added the vtun package
 	- added the ltraf package
 	- all sources are stored locally at ftp.cflinux.hu for a last resort
+	- upgraded to the linux kernel 2.4.27
+	- rewritten some main scripts that allow
+	  booting from other device than /dev/hdc (read BUILD, section Notes)
 
 Changes from 0.1.4-pre3 to 0.1.4:
 	- version rename

@@ -1,8 +1,18 @@
 # Common functions related to the configuration
 #
 
-conf_dev1=/dev/hdc1		# first configuration space
-conf_dev2=/dev/hdc2		# second configuration space
+if [ -z "$__system_device" ]; then
+	if ! [ -f "/var/run/__system_device" ] ; then
+		echo "Cannot determine the system device!"
+		echo "This is an error, which should not happen."
+		echo "Exiting."
+		exit 1
+	fi
+	__system_device=$(cat /var/run/__system_device)
+fi
+
+conf_dev1=${__system_device}1	# first configuration space
+conf_dev2=${__system_device}2	# second configuration space
 conf_size=2047			# in k
 
 # the checksum and the timestamp's offset in bytes

@@ -65,8 +65,27 @@ it will be available on /usr/local. I suggest you to
 store other binaries there as well as any content, but
 it should be also in read-only state at all to prevent
 loss of data.
+ - if you want cflinux to boot from other device than
+/dev/hdc, you must ensure you pass the 'root' parameter
+to the kernel. Of course, this is not a big deal, but you
+must do it. So, for example, if you plan to use it on /dev/hda,
+just install it the usual way, and at the first boot time,
+you should edit grub to pass root=/dev/hda5 to the kernel
+(you should be familiar with grub). Then boot the kernel,
+and once cflinux started, you must edit /etc/fstab to match
+your needs (e.g. replacing /dev/hdc with /dev/hda everywhere).
+And dont forget to edit /boot/grub/menu.lst also. If everything
+is right, just restart the system, and it should boot up,
+using /dev/hda as the system device. After it you dont have
+to worry when upgrading the system.
 
 Have fun with it!
 
+Questions and criticism are welcome at cflinux@mail.cflinux.hu
+list, but it is closed, so you must subscribe to it before sending
+mails.
+
 Richard Kojedzinszky <krichy@tvnetwork.hu>
-2004. Jul. 23
+2004. Sep. 17
+http://www.cflinux.hu/
+
