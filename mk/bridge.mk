@@ -29,7 +29,7 @@ configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
 	(cd $(PKG_ROOT); $(UC_PATH) ./configure \
-	 	--with-linux-headers=$(BUILD_DIR)/kernel/include)
+	 	--with-linux=$(BUILD_DIR)/kernel/include)
 	touch $(CONFIGURED_STAMP)
 
 clean:
