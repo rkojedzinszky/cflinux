@@ -1,4 +1,5 @@
-#!/bin/sh
+# Common functions related to the configuration
+#
 
 conf_dev1=/dev/hdc1		# first configuration space
 conf_dev2=/dev/hdc2		# second configuration space

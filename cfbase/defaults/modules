@@ -1,4 +1,4 @@
-# /mnt/etc/modules file
+# /etc/modules file
 # the list of modules to be loaded at startup
 3c59x
 tulip
@@ -17,7 +17,7 @@ teql0
 #teql6
 #teql7
 
-# for qos/cbq (pppoe scripts)
+# for qos/cbq (pppoe-server scripts)
 #sch_ingress
 #sch_tbf
 #cls_u32

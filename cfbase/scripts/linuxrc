@@ -1,9 +1,9 @@
 #!/bin/sh
 
 # This script is intended to run very first on the system
-# to mount /etc, after it is done it invokes /sbin/init
-# with this, one can edit his own /etc/inittab file
-# and to the system it is transparent that /etc is not
+# to mount /etc, after it is done it invokes /sbin/init.
+# With this, one can edit his own /etc/inittab file.
+# And also to the system it is transparent that /etc is not
 # on the root filesystem
 
 # Make sure the shell does not exit on any error

@@ -88,6 +88,7 @@ scratch: distclean
 
 install: all
 	for i in $(DO_MK) ; do make -f $(MK)/$$i.mk install || exit ; done
+	echo "$(RELEASE)" > $(ROOTFS)/.release
 
 image:
 	cat bzpadder $(BUILD_DIR)/kernel/arch/i386/boot/bzImage > topad

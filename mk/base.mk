@@ -66,6 +66,7 @@ $(INSTALL_STAMP):
 	cp -v $(PKG_ROOT)/scripts/rc.conf.defaults \
 		$(ROOTFS)/usr/share/defaults/rc.conf
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/savedata $(ROOTFS)/sbin/
+	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/eraseconf.sh $(ROOTFS)/sbin/
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/reflash $(ROOTFS)/sbin/
 	$(INSTALL) -d $(ROOTFS)/usr/share/udhcpc
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/udhcpc.events \

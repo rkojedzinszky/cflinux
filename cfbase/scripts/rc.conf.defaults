@@ -1,3 +1,8 @@
+# default settings
+# override settings in this file in /etc/rc.conf
+# it's style is based on freebsd's init,
+# and it seems to be faster than having an
+# /etc/init.d/* for each application
 
 cardmgr_enable="NO"		# pcmcia support
 cardmgr_flags=""
@@ -10,7 +15,7 @@ inetd_enable="NO"		# inetd
 crond_enable="YES"		# crond
 
 zebra_enable="NO"		# zebra (quagga)
-zebra_flags="-A 127.0.0.1"
+zebra_flags="-A 127.0.0.1"	# to bind on lo
 
 ospfd_enable="NO"		# ospfd
 ospfd_flags="-A 127.0.0.1"
@@ -21,7 +26,7 @@ ripd_flags="-A 127.0.0.1"
 snmpd_enable="NO"		# snmp daemon
 snmpd_flags="-Lsd"		# default flags, log to syslog using facility daemon
 
-httpd_enable="NO"
+httpd_enable="NO"		# httpd came with busybox
 httpd_flags="-u www -h /etc/www"
 
 farsync_init="NO"		# enable farsync cards initialization
