@@ -20,7 +20,7 @@
 #
 # $Id$
 
-RELEASE_STRING = 0.1.4-beta
+RELEASE_STRING = 0.1.4-pre1
 PACKAGE = cflinux
 
 ifndef DO_MK
