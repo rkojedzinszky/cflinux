@@ -71,17 +71,17 @@ include $(TOP_DIR)/config.mk
 all:
 	test -d $(BUILD_DIR) || mkdir $(BUILD_DIR)
 	for i in $(DO_MK) ; do \
-		make -f $(MK)/$$i.mk build || exit ; done
+		$(MAKE) -f $(MK)/$$i.mk build || exit ; done
 
 download:
 	test -d $(SOURCES_DIR) || mkdir $(SOURCES_DIR)
-	for i in $(DO_MK) ; do make -f $(MK)/$$i.mk download || exit 1 ; done
+	for i in $(DO_MK) ; do $(MAKE) -f $(MK)/$$i.mk download || exit 1 ; done
 
 patch:
-	for i in $(DO_MK) ; do make -f $(MK)/$$i.mk patch || exit 1 ; done
+	for i in $(DO_MK) ; do $(MAKE) -f $(MK)/$$i.mk patch || exit 1 ; done
 
 clean:
-	for i in $(DO_MK) ; do make -f $(MK)/$$i.mk clean ; done
+	for i in $(DO_MK) ; do $(MAKE) -f $(MK)/$$i.mk clean ; done
 	rm -f rootfs.bin
 
 distclean: clean
@@ -92,7 +92,7 @@ scratch: distclean
 	rm -rf $(ROOTFS)
 
 install: all
-	for i in $(DO_MK) ; do make -f $(MK)/$$i.mk install || exit ; done
+	for i in $(DO_MK) ; do $(MAKE) -f $(MK)/$$i.mk install || exit ; done
 	echo "$(RELEASE_STRING) ($(shell date "+%Y/%m/%d-%H.%M.%S"))" > $(ROOTFS)/.release
 
 image:
