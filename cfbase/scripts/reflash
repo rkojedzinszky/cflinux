@@ -1,0 +1,58 @@
+#!/bin/sh
+
+rootdev=`mount | sed -n 's/^\(.*\) on \/ .*$/\1/p'`
+
+if [ "$1" ]
+then
+    file="$1"
+else
+    file="/tmp/rootfs.bin"
+    echo "No filename given, using \"$file\""
+fi
+if [ "$2" ]; then
+    rootdev="$2"
+fi
+if [ ! -e "$rootdev" ]; then
+    echo "ERR: Rootdev is invalid (maybe could not be guessed, or you"
+    echo "     specified it wrong)"
+    exit 1
+fi
+
+if [ -f "$file" ]
+then
+    tfile="$file"
+else
+    cd /tmp
+    pre="${file%//*}"
+    if [ "$pre" = "ftp:" -o "$pre" = "http:" ]
+    then
+	echo "Retrieving file..."
+	wget "$file"
+	if [ ! "$?" = 0 ]
+	then
+	    exit 1
+	fi
+	wget "${file}.md5"
+	if [ ! "$?" = 0 ]
+	then
+	    exit 1
+	fi
+	tfile="${file##*/}"
+	if [ ! `md5sum "$tfile" | sed -n 's/^\([0-9a-fA-F]\+\)\ .*$/\1/p'` = `cat "${tfile}.md5"` ]
+	then
+	    echo "md5 checksum failure"
+	    exit 1
+	fi	
+    else
+	echo "File not found, or unsupported protocol"
+	echo "Please, give a valid filename or a [http://|ftp://] URL"
+	exit 1
+    fi
+fi
+
+for i in 5 4 3 2 1 ; do
+	echo -ne "\rWriting $tfile to $rootdev in $i secs..."
+	sleep 1
+done
+echo ""
+/usr/lib/cfmaint/write_helper "$tfile" "$rootdev"

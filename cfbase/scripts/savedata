@@ -1,0 +1,33 @@
+#!/bin/sh
+
+echo -n "Saving data"
+. /usr/lib/cfmaint/common.sh
+
+rd=`sed -n 's/^\(.*\) \/etc.*$/\1/p' /proc/mounts`
+
+if [ -z "$rd" ]; then
+	echo "Cannot determine which ramdisk to save"
+	exit
+fi
+tempd=/tmp/config.bin
+mount -no remount,ro "$rd"
+dd if="$rd" of="$tempd" bs=1k count=$conf_size 2>/dev/null
+mount -no remount,rw "$rd"
+md5sum=`md5sum < $tempd`
+
+fresh=`get_fresh_and_valid`
+echo -n " [fresher is $fresh,"
+older=`other_dev $fresh`
+echo -n " to $older]"
+ts=0
+[ -n "$fresh" ] && ts=`get_timestamp $fresh`
+ts=`expr $ts + 1`
+timestamp=`printf "%011d" $ts`
+echo -n " [ts: $timestamp]"
+
+dd if=$tempd of=$older bs=1k count=$conf_size 2>/dev/null
+echo -n "$md5sum" | dd of=$older bs=1 seek=$md5_offset count=32 2>/dev/null
+echo -n "$timestamp" | dd of=$older bs=1 seek=$time_offset \
+	count=$time_length 2>/dev/null
+rm $tempd
+echo " done"

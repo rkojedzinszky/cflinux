@@ -1,0 +1,23 @@
+# /mnt/etc/modules file
+# the list of modules to be loaded at startup
+3c59x
+tulip
+eepro100
+sundance
+via-rhine
+ne2k-pci
+8139cp
+8139too
+teql0
+#teql1
+#teql2
+#teql3
+#teql4
+#teql5
+#teql6
+#teql7
+
+# for qos/cbq (pppoe scripts)
+#sch_ingress
+#sch_tbf
+#cls_u32

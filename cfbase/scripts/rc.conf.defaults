@@ -1,0 +1,34 @@
+
+cardmgr_enable="NO"		# pcmcia support
+cardmgr_flags=""
+
+syslogd_enable="YES"		# system log daemon
+syslogd_flags="-C"		# flags
+klogd_enable="YES"		# kernel log daemon
+sshd_enable="YES"		# ssh daemon
+inetd_enable="NO"		# inetd
+crond_enable="YES"		# crond
+
+zebra_enable="NO"		# zebra (quagga)
+zebra_flags="-A 127.0.0.1"
+
+ospfd_enable="NO"		# ospfd
+ospfd_flags="-A 127.0.0.1"
+
+ripd_enable="NO"		# ripd
+ripd_flags="-A 127.0.0.1"
+
+snmpd_enable="NO"		# snmp daemon
+snmpd_flags="-Lsd"		# default flags, log to syslog using facility daemon
+
+httpd_enable="NO"
+httpd_flags="-u www -h /etc/www"
+
+farsync_init="NO"		# enable farsync cards initialization
+farsync_media="x21"
+farsync_proto="ppp"
+
+# network options
+syncookies_enable="YES"		# enable syncookies by default
+ecn_enable="NO"			# disable ECN by default
+spoofprotect_enable="YES"	# enable spoof protection by default

@@ -80,11 +80,12 @@ install: all
 
 image:
 	cat bzpadder $(BUILD_DIR)/kernel/arch/i386/boot/bzImage > topad
+	dd if=/dev/zero of=/dev/ram0 bs=1k count=2k
 	mkfs.minix -v /dev/ram0 2047 >/dev/null 2>&1
 	mount -t minix /dev/ram0 /mnt
 	cp -a $(FDEVEL_DIR)/fs_config/* /mnt
 	umount /mnt
-	dd if=/dev/ram0 bs=1k of=$(ROOTFS)/etc/default \
+	dd if=/dev/ram0 bs=1k of=$(ROOTFS)/usr/share/defaults/etc.img \
 		count=2047 >/dev/null 2>&1
 	mkcramfs -i topad $(ROOTFS) rootfs.bin
 	rm -f topad

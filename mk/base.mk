@@ -17,33 +17,31 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+# $Id$
+
 PKG := base
-SRC_FILENAME = base.tar.bz2
-EXTRACTED_DIR = base
-DOWNLOAD_SITES = http://web.tvnetwork.hu/~krichy/cfdev/downloads/package_src/
 
 # include the common package targets 
-include $(TOP_DIR)/packages.mk 
+include $(TOP_DIR)/config.mk
 
 INSTALL_STAMP = $(PKG_ROOT)/.$(PKG).installed
+PKG_ROOT = $(FDEVEL_DIR)/cfbase
 
-configure: patch $(CONFIGURED_STAMP)
+patch:
 
-$(CONFIGURED_STAMP):
-	touch $(CONFIGURED_STAMP)
+extract:
+
+download:
+
+configure:
 
 clean:
 	rm -rf $(ROOTFS)/*
 	rm -f $(INSTALL_STAMP)
-	rm -f $(BUILT_STAMP)
-	rm -f $(CONFIGURED_STAMP)
 
-build: configure $(BUILT_STAMP)
+build:
 
-$(BUILT_STAMP):
-	touch $(BUILT_STAMP)
-
-install: build $(INSTALL_STAMP)
+install: $(INSTALL_STAMP)
 
 $(INSTALL_STAMP):
 	for i in bin boot dev etc lib mnt proc sbin usr var \
@@ -55,7 +53,7 @@ $(INSTALL_STAMP):
 	(cd $(ROOTFS)/dev ; MAKEDEV std hda hdb hdc hdd \
 		console ptmx rtc ttyS0 ttyS1 ttyS2 ttyS3 ppp)
 	cp -av $(PKG_ROOT)/scripts/init.d $(ROOTFS)/sbin/
-	cp -v $(PKG_ROOT)/defaults/inittab $(ROOTFS)/etc/inittab
+	cp -v $(PKG_ROOT)/defaults/inittab $(ROOTFS)/sbin/inittab
 	cp -v $(PKG_ROOT)/scripts/common.sh $(ROOTFS)/usr/lib/cfmaint/
 	cp -v $(PKG_ROOT)/defaults/modules \
 		$(ROOTFS)/usr/share/defaults/modules

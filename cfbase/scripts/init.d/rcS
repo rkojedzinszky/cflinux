@@ -1,0 +1,210 @@
+#!/bin/sh
+
+set +e
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+
+echo -n "Mounting /proc: "
+mount proc /proc -nt proc
+echo "done"
+
+. /usr/lib/cfmaint/common.sh
+echo -n "Reading configuration: "
+device=`get_fresh_and_valid`
+if [ -z "$device" ]; then
+	echo "no valid configuration found, using builtin defaults"
+	device=/usr/share/defaults/etc.img
+else
+	echo -n "[found on $device] "
+fi
+dd if=$device of=/dev/ram0 bs=1k count=$conf_size 2>/dev/null
+fsck.minix -a /dev/ram0 >/dev/null 2>&1
+if [ $? -gt 2 ]
+then
+    echo -e "\n#"
+    echo "# Check failed - should not happen, good luck!"
+    echo "#"
+    /bin/sh
+    kill 1
+    exit 0
+fi
+mount -nt minix /dev/ram0 /etc
+echo "done"
+
+echo -n "" > /etc/mtab
+mount -o remount,ro /
+mount -o remount /proc
+mount -o remount /etc
+
+echo -n "Mounting /dev/pts: "
+mount devpts /dev/pts -t devpts
+echo "done"
+
+echo -n "Mounting other filesystems: "
+mount -a
+echo "done"
+
+echo -n "Creating /var structure: "
+mkdir /var/lock /var/run /var/lib /var/tmp /var/log /var/empty
+chmod 1777 /var/tmp
+echo -n "" > /var/log/lastlog
+echo -n "" > /var/log/wtmp
+echo -n "" > /var/run/utmp
+echo "done"
+
+modules_file="/etc/modules"
+[ -f "$modules_file" ] || modules_file="/usr/share/defaults/modules"
+if [ -f "$modules_file" ]
+then
+    echo "Loading modules"
+    sed 's/#.*$//g' "$modules_file" | grep "[^[:space:]]" | while read mod options
+    do
+	modprobe "$mod" $options
+    done
+fi
+
+dmesg > /var/log/dmesg
+
+. /usr/share/defaults/rc.conf
+[ -r /etc/rc.conf ] && . /etc/rc.conf
+
+if [ -n "$hostname" ]; then
+	echo "Setting hostname: $hostname."
+	hostname "$hostname"
+fi
+
+if [ -r /etc/rc.network ]; then
+	echo -n "Network initialization: "
+	sh /etc/rc.network
+	echo "done"
+fi
+
+case "$syncookies_enable" in
+	[Yy][Ee][Ss])
+		echo -n "Enabling TCP/IP SYN cookies: "
+		echo 1 > /proc/sys/net/ipv4/tcp_syncookies
+		echo "done."
+		;;
+esac
+case "$ecn_enable" in
+	[Yy][Ee][Ss])
+		echo -n "Enabling ECN: "
+		echo 1 > /proc/sys/net/ipv4/tcp_ecn
+		echo "done."
+		;;
+esac
+case "$spoofprotect_enable" in
+	[Yy][Ee][Ss])
+		if [ -e /proc/sys/net/ipv4/conf/all/rp_filter ]; then
+			echo -n "Enabling spoof protection on all interfaces: "
+			for i in /proc/sys/net/ipv4/conf/*/rp_filter ; do
+				echo 1 > $i
+			done
+			echo "done."
+		fi
+		;;
+esac
+
+case "$farsync_init" in
+	[nN][oO])	;;
+	*)
+		export farsync_media
+		export farsync_proto
+		/usr/share/farsync/farsync.init
+		;;
+esac
+echo -n "Starting standard daemons:"
+case "$syslogd_enable" in
+	[nN][oO])	;;
+	*)
+		/sbin/syslogd $syslogd_flags
+		echo -n " syslogd"
+		;;
+esac
+case "$klogd_enable" in
+	[nN][oO])	;;
+	*)
+		/sbin/klogd
+		echo -n " klogd"
+		;;
+esac
+case "$inetd_enable" in
+	[nN][oO])	;;
+	*)
+		/usr/sbin/inetd $inetd_flags
+		echo -n " inetd"
+		;;
+esac
+case "$crond_enable" in
+	[nN][oO])	;;
+	*)
+		mkdir -p /var/spool/cron
+		ln -s /etc/crontabs /var/spool/cron/
+		/usr/sbin/crond $crond_flags
+		echo -n " crond"
+		;;
+esac
+case "$cardmgr_enable" in
+	[nN][oO])	;;
+	*)
+		/sbin/cardmgr $cardmgr_flags && echo -n " cardmgr"
+		;;
+esac
+case "$sshd_enable" in
+	[nN][oO])	;;
+	*)
+		if ! [ -f /etc/ssh/ssh_host_rsa_key ]; then
+			echo -n " [generating 2048 bits rsa key"
+			ssh-keygen -t rsa -b 2048 -N "" \
+			-f /etc/ssh/ssh_host_rsa_key >/dev/null 2>&1
+			echo -n "]"
+		fi
+		/usr/sbin/sshd $sshd_flags
+		echo -n " sshd"
+		;;
+esac
+
+if [ ! -d /var/quagga ]; then
+	mkdir /var/quagga
+	chown quagga:quagga /var/quagga
+fi
+case "$zebra_enable" in
+	[nN][oO])	;;
+	*)
+		[ -r /etc/zebra/zebra.conf ] && \
+			/usr/sbin/zebra -d $zebra_flags && echo -n " zebra"
+		;;
+esac
+case "$ospfd_enable" in
+	[nN][oO])	;;
+	*)
+		[ -r /etc/zebra/ospfd.conf ] && \
+			/usr/sbin/ospfd -d $ospfd_flags && echo -n " ospfd"
+		;;
+esac
+case "$ripd_enable" in
+	[nN][oO])	;;
+	*)
+		[ -r /etc/zebra/ripd.conf ] && \
+			/usr/sbin/ripd -d $ripd_flags && echo -n " ripd"
+		;;
+esac
+case "$httpd_enable" in
+	[nN][oO])	;;
+	*)
+		/usr/sbin/httpd $httpd_flags && echo -n " httpd"
+		;;
+esac
+case "$snmpd_enable" in
+	[nN][oO])	;;
+	*)
+		/usr/sbin/snmpd $snmpd_flags && echo -n " snmpd"
+		;;
+esac
+echo "."
+
+if [ -d /etc/rc.d ]; then
+	echo -n "Local initialization: "
+	run-parts /etc/rc.d
+	echo "."
+fi
+echo -e "\n"

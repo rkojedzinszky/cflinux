@@ -40,5 +40,6 @@ install:
 	chown -R 0:0 $(ROOTFS)
 	chown -R 10:10 $(FDEVEL_DIR)/fs_config/zebra
 	chmod 700 $(FDEVEL_DIR)/fs_config/zebra
+	rm -rf $(ROOTFS)/etc/*
 
 .PHONY: configure clean build install
