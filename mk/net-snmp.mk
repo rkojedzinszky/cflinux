@@ -35,21 +35,21 @@ $(CONFIGURED_STAMP):
 	(cd $(PKG_ROOT); $(UC_PATH) ./configure \
 	 --prefix=/usr \
 	 --sysconfdir=/etc \
-	 --disable-applications \
 	 --disable-scripts \
 	 --disable-debugging \
 	 --enable-shared \
 	 --with-openssl=../openssl \
 	 --without-root-access \
 	 --with-sys-contact="net-admin@" \
-	 --with-mib-modules="host smux" \
+	 --with-mib-modules="host smux disman/event-mib" \
 	 --with-default-snmp-version=3 \
 	 --with-sys-location="default" \
 	 --with-logfile=/var/log/snmpd.log \
 	 --with-persistent-directory=/var/lib/net-snmp \
 	 --localstatedir=/var/run \
 	 --enable-local-smux \
-	 --without-rpm )
+	 --without-rpm \
+	 --enable-ucd-snmp-compatibility )
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -61,20 +61,25 @@ build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT) installlocalheaders installlibs INSTALL_PREFIX=$(UC_ROOT)
 	touch $(BUILT_STAMP)
 
 install: build
 	for i in agent mibs ; do \
-		$(INSTALL_BIN_NS) $(PKG_ROOT)/agent/.libs/libnetsnmp$${i}.so.5 \
-			$(ROOTFS)/usr/lib/ ; done
+		for j in $(PKG_ROOT)/agent/.libs/libnetsnmp$${i}.so.5* ; do \
+			$(INSTALL_BIN) $${j} \
+				$(ROOTFS)/usr/lib/ ; done ; done
 	for i in helpers ; do \
-		$(INSTALL_BIN_NS) \
-		$(PKG_ROOT)/agent/helpers/.libs/libnetsnmp$${i}.so.5 \
+		for j in $(PKG_ROOT)/agent/helpers/.libs/libnetsnmp$${i}.so.5* ; do \
+			$(INSTALL_BIN) $${j} \
+				$(ROOTFS)/usr/lib/ ; done ; done
+	for i in $(PKG_ROOT)/snmplib/.libs/libnetsnmp.so.5* ; do \
+		$(INSTALL_BIN) $${i} \
 			$(ROOTFS)/usr/lib/ ; done
-	$(INSTALL_BIN_NS) $(PKG_ROOT)/snmplib/.libs/libnetsnmp.so.5 \
-			$(ROOTFS)/usr/lib/
+#	$(INSTALL_BIN) $(PKG_ROOT)/apps/.libs/snmptrap \
+#		$(ROOTFS)/usr/bin/
 	$(INSTALL_BIN) $(PKG_ROOT)/agent/.libs/snmpd \
 		$(ROOTFS)/usr/sbin/
-
+#	$(MAKE) -C $(PKG_ROOT)/mibs mibsinstall INSTALL_PREFIX=$(ROOTFS)
 
 .PHONY: configure clean build install

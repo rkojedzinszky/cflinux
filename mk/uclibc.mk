@@ -49,6 +49,7 @@ $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) install
 	cp -a $(PKG_ROOT)/lib/ld-uC* /lib/
 	$(MAKE) -C $(PKG_ROOT)/utils ldd $(UC_PATH)
+	for i in include lib ; do rmdir $(UC_ROOT)/usr/$$i ; ln -sf ../$$i $(UC_ROOT)/usr/$$i ; done
 	touch $(BUILT_STAMP)
 
 install: build
