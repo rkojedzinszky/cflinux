@@ -22,7 +22,7 @@ SRC_FILENAME = libnet-1.0.2a.tar.gz
 EXTRACTED_DIR = Libnet-1.0.2a
 DOWNLOAD_SITES = http://www.packetfactory.net/libnet/dist/deprecated/ \
 		$(CFLINUX_PACKAGES)
-#PATCHES = skel.patch
+PATCHES = libnet.libnet_h.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
