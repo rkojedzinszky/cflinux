@@ -63,8 +63,15 @@ $(BUILD_DIR)/grsec/.grsec.patched:
 $(BUILD_DIR)/freeswan/.freeswan.patched:
 	$(MAKE) -f mk/freeswan.mk patch
 
+ifeq ($(wildcard $(CONFIGS)/$(PKG).config.patch),$(CONFIGS)/$(PKG).config.patch)
+CFGPATCH = $(CONFIGS)/$(PKG).config.patch
+else
+CFGPATCH =
+endif
+
 $(CONFIGURED_STAMP):
 	cp $(CONFIGS)/$(PKG).config $(PKG_ROOT)/.config
+	(cd $(PKG_ROOT) && for i in $(CFGPATCH) ; do patch < $$i ; done)
 	$(MAKE) -C $(PKG_ROOT) oldconfig
 	touch $@
 
