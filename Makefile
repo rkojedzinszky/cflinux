@@ -57,7 +57,7 @@ DO_MK += finish
 endif
 
 DISTFILES = AUTHOR BUILD LICENSE Makefile README UPGRADE bzpadder cfbase \
-	    config.mk configs fs_config fs_root install_bin.sh md5sums mk \
+	    config.mk configs fs_config install_bin.sh md5sums mk \
 	    packages.mk part_init.sh patches
 
 export TOP_DIR := $(shell pwd)
@@ -84,6 +84,7 @@ distclean: clean
 
 scratch: distclean
 	rm -rf $(SOURCES_DIR)
+	rm -rf $(ROOTFS)
 
 install: all
 	for i in $(DO_MK) ; do make -f $(MK)/$$i.mk install || exit ; done
