@@ -24,7 +24,8 @@ DOWNLOAD_SITES = \
 		http://www.roaringpenguin.com/penguin/pppoe/ \
 		$(CFLINUX_PACKAGES)
 PATCHES = rp-pppoe.patch \
-	rp-pppoe.configure.patch
+	rp-pppoe.configure.patch \
+	rp-pppoe.wild_ifname.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
