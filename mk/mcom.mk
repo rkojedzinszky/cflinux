@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := mcom
-SRC_FILENAME = mcom-0.2.tgz
-EXTRACTED_DIR = mcom-0.2
+SRC_FILENAME = mcom-0.3.tar.gz
+EXTRACTED_DIR = mcom-0.3
 DOWNLOAD_SITES = ftp://ftp.cflinux.hu/pub/mcom/
 
 # include the common package targets 
