@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# make sure the shell won't exit on any error
+set +e
+
 # Make / appear in the mtab and force readonly
 mount -o remount,ro /
 

@@ -6,6 +6,10 @@
 # and to the system it is transparent that /etc is not
 # on the root filesystem
 
+# Make sure the shell does not exit on any error
+set +e
+
+# set the default path
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin
 
 . /usr/lib/cfmaint/common.sh
