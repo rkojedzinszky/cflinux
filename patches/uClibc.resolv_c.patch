@@ -155,7 +155,7 @@
 +				goto again;
 +			len=rlen;
 +		} else {
-+			len = recv(fd, packet, 512, 0);
++			len = recv(fd, packet, PACKETSZ, 0);
 +		}
 +		if (len < HFIXEDSZ) {
  			/* too short ! */
@@ -641,7 +641,7 @@
  	__nameserverXX=__nameserver;
  	BIGUNLOCK;
 -		i = __dns_lookup(buf, T_A, __nameserversXX, __nameserverXX, &packet, &a);
-+		i = __dns_lookup(buf, T_A, __nameserversXX, __nameserverXX, &packet, &a, 512);
++		i = __dns_lookup(buf, T_A, __nameserversXX, __nameserverXX, &packet, &a, PACKETSZ);
  
  		if (i < 0) {
  			*h_errnop = HOST_NOT_FOUND;
@@ -709,7 +709,7 @@
  	BIGUNLOCK;
  
 -		i = __dns_lookup(buf, T_AAAA, __nameserversXX, __nameserverXX, &packet, &a);
-+		i = __dns_lookup(buf, T_AAAA, __nameserversXX, __nameserverXX, &packet, &a, 512);
++		i = __dns_lookup(buf, T_AAAA, __nameserversXX, __nameserverXX, &packet, &a, PACKETSZ);
  
  		if (i < 0) {
  			*h_errnop = HOST_NOT_FOUND;
@@ -718,7 +718,7 @@
  	__nameserverXX=__nameserver;
  	BIGUNLOCK;
 -		i = __dns_lookup(buf, T_PTR, __nameserversXX, __nameserverXX, &packet, &a);
-+		i = __dns_lookup(buf, T_PTR, __nameserversXX, __nameserverXX, &packet, &a, 512);
++		i = __dns_lookup(buf, T_PTR, __nameserversXX, __nameserverXX, &packet, &a, PACKETSZ);
  
  		if (i < 0) {
  			*h_errnop = HOST_NOT_FOUND;
