@@ -20,7 +20,12 @@
 PKG := bridge
 SRC_FILENAME = bridge-utils-0.9.6.tar.gz
 EXTRACTED_DIR = bridge-utils
-DOWNLOAD_SITES = http://bridge.sourceforge.net/bridge-utils/
+DOWNLOAD_SITES = \
+	http://bridge.sourceforge.net/bridge-utils/ \
+	http://cesnet.dl.sourceforge.net/sourceforge/bridge/ \
+	http://umn.dl.sourceforge.net/sourceforge/bridge/ \
+	http://switch.dl.sourceforge.net/sourceforge/bridge/ \
+	http://aleron.dl.sourceforge.net/sourceforge/bridge/
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
