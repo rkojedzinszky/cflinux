@@ -6,10 +6,8 @@ upstream="$3"
 
 [ -z "$downstream" -o "$downstream" = 0 ] && downstream=768
 [ -z "$upstream" -o "$upstream" = 0 ] && upstream=768
-db=`expr $downstream \* 10`
-ub=`expr $upstream \* 20`
-[ "$db" -lt 1500 ] && db=1500
-[ "$ub" -lt 1500 ] && ub=1500
+db=32768
+ub=32768
 
 tc qdisc del dev "$if" root 2>/dev/null
 tc qdisc del dev "$if" ingress 2>/dev/null
