@@ -57,7 +57,7 @@ DO_MK += postgresql
 DO_MK += finish
 endif
 
-DISTFILES = AUTHOR BUILD LICENSE Makefile README UPGRADE bzpadder cfbase \
+DISTFILES = AUTHOR BUILD LICENSE ChangeLog Makefile README UPGRADE bzpadder cfbase \
 	    config.mk configs fs_config install_bin.sh md5sums mk \
 	    packages.mk part_init.sh patches
 
