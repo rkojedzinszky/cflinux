@@ -4527,7 +4527,7 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
   *      www.farsite.co.uk
   *
   *      This program is free software; you can redistribute it and/or
-@@ -11,17 +11,78 @@
+@@ -11,17 +11,83 @@
   *      as published by the Free Software Foundation; either version
   *      2 of the License, or (at your option) any later version.
   *
@@ -4537,7 +4537,11 @@ diff -ruNP linux-2.4.24/drivers/net/wan/farsync.c linux-2.4.24-p/drivers/net/wan
 + */
 +/*      Revision History
 + *      $Log$
++ *      Revision 1.2  2004/01/06 20:54:32  krichy
++ *      Modified because of a diff's bug?. Don't know, but now it works. :)
++ *
 + *      Revision 1.1  2004/01/06 20:31:30  krichy
++ *
 + *      Now uses the linux kernel 2.4.24.
 + *      Made more easier to upgrade the kernel versions.
 + *
