@@ -1,4 +1,4 @@
-# Makefile for rp-pppoe
+# Makefile for rp-l2tp
 #
 # Copyright (C) 2004 Richard Kojedzinszky <krichy@tvnetwork.hu>
 # All rights reserved.
@@ -17,12 +17,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-PKG := rp-pppoe
-SRC_FILENAME = rp-pppoe-3.5.tar.gz
-EXTRACTED_DIR = rp-pppoe-3.5
+PKG := rp-l2tp
+SRC_FILENAME = rp-l2tp-0.4.tar.gz
+EXTRACTED_DIR = rp-l2tp-0.4
 DOWNLOAD_SITES = \
-	http://www.roaringpenguin.com/penguin/pppoe/
-PATCHES = rp-pppoe.patch
+	http://belnet.dl.sourceforge.net/sourceforge/rp-l2tp/ \
+	http://ovh.dl.sourceforge.net/sourceforge/rp-l2tp/ \
+	http://optusnet.dl.sourceforge.net/sourceforge/rp-l2tp/ \
+	http://voxel.dl.sourceforge.net/sourceforge/rp-l2tp/ \
+	http://umn.dl.sourceforge.net/sourceforge/rp-l2tp/ \
+	http://keihanna.dl.sourceforge.net/sourceforge/rp-l2tp/
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -30,23 +34,22 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT)/src ; ./configure)
+	(cd $(PKG_ROOT) && $(UC_PATH) ./configure \
+	 --prefix=/usr)
 	touch $(CONFIGURED_STAMP)
 
 clean:
-	$(MAKE) -C $(PKG_ROOT)/src distclean
+	-$(MAKE) -C $(PKG_ROOT) distclean
 	rm -f $(BUILT_STAMP)
 	rm -f $(CONFIGURED_STAMP)
 
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT)/src all $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH)
 	touch $(BUILT_STAMP)
 
 install: build
-	for i in pppoe pppoe-server pppoe-sniff pppoe-relay ; do \
-		$(INSTALL_BIN) $(PKG_ROOT)/src/$$i $(ROOTFS)/usr/sbin/ ; \
-	done
+	$(MAKE) -C $(PKG_ROOT) install DESTDIR=$(ROOTFS)
 
 .PHONY: configure clean build install
