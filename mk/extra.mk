@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := extra
-SRC_FILENAME = extra.tar.bz2
+SRC_FILENAME = extra-0.1.tar.bz2
 EXTRACTED_DIR = extra
 DOWNLOAD_SITES = http://web.tvnetwork.hu/~krichy/cfdev/downloads/package_src/ \
 		$(CFLINUX_PACKAGES)
@@ -39,7 +39,7 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) write_helper $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH)
 	touch $(BUILT_STAMP)
 
 install: build
