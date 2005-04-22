@@ -1,6 +1,7 @@
 Changes from 0.1.5 to 0.2-pre1:
 	- added the ethtool package
 	- upgraded the quagga package to version 0.98.2
+	- upgraded the madwifi package
 
 Changes from 0.1.5-pre2 to 0.1.5:
 	- version rename
