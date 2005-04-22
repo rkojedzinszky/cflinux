@@ -1,0 +1,23 @@
+--- linux-2.4.29/init/do_mounts.c.orig	2003-08-25 04:44:44.000000000 -0700
++++ linux-2.4.29/init/do_mounts.c	2003-10-28 20:53:29.000000000 -0800
+@@ -366,11 +366,16 @@ retry:
+ 		 * Allow the user to distinguish between failed open
+ 		 * and bad superblock on root device.
+ 		 */
+-		printk ("VFS: Cannot open root device \"%s\" or %s\n",
++		printk ("VFS: Cannot open root device \"%s\" or %s, retrying in 1 second.\n",
+ 			root_device_name, kdevname (ROOT_DEV));
+-		printk ("Please append a correct \"root=\" boot option\n");
+-		panic("VFS: Unable to mount root fs on %s",
+-			kdevname(ROOT_DEV));
++		printk ("You may need to append a correct \"root=\" boot option\n");
++		printk ("or wait for the root device to become ready.\n");
++
++		/* wait 1 second and try again,
++		 * allowing time for hubs/devices to become ready */
++		set_current_state(TASK_INTERRUPTIBLE);
++		schedule_timeout(HZ);
++		goto retry;
+ 	}
+ 	panic("VFS: Unable to mount root fs on %s", kdevname(ROOT_DEV));
+ out:

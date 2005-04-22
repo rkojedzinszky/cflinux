@@ -33,7 +33,8 @@ PATCHES = kernel.vlan_mtu.patch \
 	kernel.mppe.patch \
 	kernel.multigate.patch \
 	kernel.init.patch \
-	kernel.blackhole.patch
+	kernel.blackhole.patch \
+	kernel.usb_root.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
