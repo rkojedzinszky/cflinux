@@ -51,5 +51,7 @@ install: build
 		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
 	cp $(PKG_ROOT)/ath/ath_pci.o \
 		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
+	cp $(PKG_ROOT)/ath_rate/onoe/ath_rate_onoe.o \
+		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
 
 .PHONY: configure clean build install
