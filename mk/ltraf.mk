@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := ltraf
-SRC_FILENAME = ltraf-0.2.1-a1.tgz
-EXTRACTED_DIR = ltraf-0.2.1-a1
+SRC_FILENAME = ltraf-0.2.1-pre1.tgz
+EXTRACTED_DIR = ltraf-0.2.1-pre1
 DOWNLOAD_SITES = $(CFLINUX_PACKAGES)
 #PATCHES = skel.patch
 
