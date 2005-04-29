@@ -1,9 +1,9 @@
---- linux-2.4.28/include/linux/sysctl.h.orig	2004-11-25 19:00:00.000000000 +0100
-+++ linux-2.4.28/include/linux/sysctl.h	2004-11-25 19:01:03.000000000 +0100
-@@ -337,6 +337,8 @@
- 	NET_TCP_BIC_LOW_WINDOW=104,
+--- linux-2.4.30/include/linux/sysctl.h.orig	Mon Apr  4 03:42:20 2005
++++ linux-2.4.30/include/linux/sysctl.h	Fri Apr 29 15:19:55 2005
+@@ -327,6 +327,8 @@
  	NET_TCP_DEFAULT_WIN_SCALE=105,
  	NET_TCP_MODERATE_RCVBUF=106,
+ 	NET_TCP_BIC_BETA=108,
 +	NET_TCP_BLACKHOLE=200,
 +	NET_UDP_BLACKHOLE=201,
  };
