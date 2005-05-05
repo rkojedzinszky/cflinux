@@ -35,9 +35,13 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT) && $(UC_PATH) ./configure --prefix=/usr \
+	(cd $(PKG_ROOT) && $(UC_PATH) \
+	CFLAGS="-O2 -DHAVE_GETPT -DHAVE_GRANTPT \
+	-DHAVE_UNLOCKPT -DHAVE_PTSNAME" \
+	./configure --prefix=/usr \
 	--sysconfdir=/etc --disable-lzo \
-	--with-ssl-headers=../openssl/include/openssl --with-ssl-libs=../openssl)
+	--with-ssl-headers=../openssl/include/openssl \
+	--with-ssl-libs=../openssl --localstatedir=/var)
 	touch $(CONFIGURED_STAMP)
 
 clean:
