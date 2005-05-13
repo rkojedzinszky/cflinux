@@ -90,6 +90,8 @@ install: build
 	$(MAKE) -C $(PKG_ROOT) modules_install INSTALL_MOD_PATH=$(ROOTFS)
 	(cd $(ROOTFS)/lib/modules/$(KERNEL_VERSION)/kernel/net/sched && \
 	 for i in 0 1 2 3 4 5 6 7; do ln -sf sch_teql.o teql$$i.o ; done)
+	(cd $(ROOTFS)/lib/modules/$(KERNEL_VERSION)/kernel/drivers/net && \
+	 for i in 0 1 2 3 4 5 6 7; do ln -sf dummy.o dummy$$i.o ; done)
 
 .PHONY: configure clean build install
 
