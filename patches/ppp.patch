@@ -258,3 +258,60 @@ diff -ru ppp-2.4.3.orig/pppd/sys-linux.c ppp-2.4.3/pppd/sys-linux.c
  	if ((ss->flags & CHALLENGE_VALID) == 0) {
  		ss->challenge_xmits = 0;
  		chap_generate_challenge(ss);
+--- ppp-2.4.3.orig/pppd/plugins/radius/sendserver.c	Sun Nov 14 08:26:26 2004
++++ ppp-2.4.3/pppd/plugins/radius/sendserver.c	Thu May 26 16:30:28 2005
+@@ -56,6 +56,13 @@
+ 		*buf++ = (((unsigned int) vp->vendorcode) >> 8) & 255;
+ 		*buf++ = ((unsigned int) vp->vendorcode) & 255;
+ 
++		/* Stolen from freeradius's source, that USR vendor
++		 * attributes are to handled otherwise */
++		if ( vp->vendorcode == VENDOR_USR ) {
++			*buf++ = (vp->attribute >> 24) & 0xff;
++			*buf++ = (vp->attribute >> 16) & 0xff;
++			*buf++ = (vp->attribute >> 8) & 0xff;
++		}
+ 		/* Insert vendor-type */
+ 		*buf++ = vp->attribute;
+ 
+@@ -64,7 +71,8 @@
+ 		case PW_TYPE_STRING:
+ 		    length = vp->lvalue;
+ 		    *lenptr = length + 8;
+-		    *buf++ = length+2;
++		    if ( vp->vendorcode != VENDOR_USR )
++			*buf++ = length+2;
+ 		    memcpy(buf, vp->strvalue, (size_t) length);
+ 		    buf += length;
+ 		    total_length += length+8;
+@@ -73,7 +81,8 @@
+ 		case PW_TYPE_IPADDR:
+ 		    length = sizeof(UINT4);
+ 		    *lenptr = length + 8;
+-		    *buf++ = length+2;
++		    if ( vp->vendorcode != VENDOR_USR )
++			*buf++ = length+2;
+ 		    lvalue = htonl(vp->lvalue);
+ 		    memcpy(buf, (char *) &lvalue, sizeof(UINT4));
+ 		    buf += length;
+@@ -81,6 +90,10 @@
+ 		    break;
+ 		default:
+ 		    break;
++		}
++		if ( vp->vendorcode == VENDOR_USR ) {
++		    *lenptr += 2;
++		    total_length += 2;
+ 		}
+ 	    } else {
+ 		*buf++ = vp->attribute;
+--- ppp-2.4.3.orig/pppd/plugins/radius/radiusclient.h	Sun Nov 14 08:26:26 2004
++++ ppp-2.4.3/pppd/plugins/radius/radiusclient.h	Thu May 26 16:23:09 2005
+@@ -292,6 +292,7 @@
+ /* Vendor codes */
+ #define VENDOR_NONE     (-1)
+ #define VENDOR_MICROSOFT	311
++#define VENDOR_USR		429
+ 
+ /* Server data structures */
+ 
