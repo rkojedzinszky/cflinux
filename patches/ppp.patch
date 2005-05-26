@@ -1,0 +1,260 @@
+diff -ru ppp-2.4.3.orig/pppd/Makefile.linux ppp-2.4.3/pppd/Makefile.linux
+--- ppp-2.4.3.orig/pppd/Makefile.linux	Sat Nov 13 13:02:22 2004
++++ ppp-2.4.3/pppd/Makefile.linux	Thu May 26 11:39:10 2005
+@@ -48,19 +48,19 @@
+ # Uncomment the next line to include support for PPP packet filtering.
+ # This requires that the libpcap library and headers be installed
+ # and that the kernel driver support PPP packet filtering.
+-FILTER=y
++#FILTER=y
+ 
+ # Uncomment the next line to enable multilink PPP (enabled by default)
+ # Linux distributions: Please leave multilink ENABLED in your builds
+ # of pppd!
+-HAVE_MULTILINK=y
++#HAVE_MULTILINK=y
+ 
+ # Uncomment the next line to enable the TDB database (enabled by default.)
+ # If you enable multilink, then TDB is automatically enabled also.
+ # Linux distributions: Please leave TDB ENABLED in your builds.
+-USE_TDB=y
++#USE_TDB=y
+ 
+-HAS_SHADOW=y
++#HAS_SHADOW=y
+ #USE_PAM=y
+ #HAVE_INET6=y
+ 
+diff -ru ppp-2.4.3.orig/pppd/main.c ppp-2.4.3/pppd/main.c
+--- ppp-2.4.3.orig/pppd/main.c	Sat Nov 13 13:05:48 2004
++++ ppp-2.4.3/pppd/main.c	Thu May 26 11:37:17 2005
+@@ -1176,9 +1176,9 @@
+ 
+     slprintf(numbuf, sizeof(numbuf), "%u", link_connect_time);
+     script_setenv("CONNECT_TIME", numbuf, 0);
+-    slprintf(numbuf, sizeof(numbuf), "%u", link_stats.bytes_out);
++    snprintf(numbuf, sizeof(numbuf), "%llu", link_stats.bytes_out);
+     script_setenv("BYTES_SENT", numbuf, 0);
+-    slprintf(numbuf, sizeof(numbuf), "%u", link_stats.bytes_in);
++    snprintf(numbuf, sizeof(numbuf), "%llu", link_stats.bytes_in);
+     script_setenv("BYTES_RCVD", numbuf, 0);
+ }
+ 
+diff -ru ppp-2.4.3.orig/pppd/pathnames.h ppp-2.4.3/pppd/pathnames.h
+--- ppp-2.4.3.orig/pppd/pathnames.h	Sat Nov 13 13:02:22 2004
++++ ppp-2.4.3/pppd/pathnames.h	Thu May 26 11:37:17 2005
+@@ -55,5 +55,5 @@
+ #endif /* __STDC__ */
+ 
+ #ifdef PLUGIN
+-#define _PATH_PLUGIN	"/usr/lib/pppd/" VERSION
++#define _PATH_PLUGIN	"/usr/lib/pppd"
+ #endif /* PLUGIN */
+diff -ru ppp-2.4.3.orig/pppd/plugins/radius/radius.c ppp-2.4.3/pppd/plugins/radius/radius.c
+--- ppp-2.4.3.orig/pppd/plugins/radius/radius.c	Sun Nov 14 11:27:57 2004
++++ ppp-2.4.3/pppd/plugins/radius/radius.c	Thu May 26 11:37:17 2005
+@@ -494,6 +494,11 @@
+ 
+     rc_avpair_free(received);
+     rc_avpair_free (send);
++
++    if ( message ) {
++	    strncpy(message,radius_msg,message_space);
++	    message[message_space-1]=0;
++    }
+     return (result == OK_RC);
+ }
+ 
+@@ -970,20 +975,43 @@
+ 
+ 
+     if (link_stats_valid) {
++ 	DICT_ATTR*	attr;
++ 	static char	bigint[64];
++ 	
+ 	av_type = link_connect_time;
+ 	rc_avpair_add(&send, PW_ACCT_SESSION_TIME, &av_type, 0, VENDOR_NONE);
+ 
+-	av_type = link_stats.bytes_out;
+-	rc_avpair_add(&send, PW_ACCT_OUTPUT_OCTETS, &av_type, 0, VENDOR_NONE);
+-
+-	av_type = link_stats.bytes_in;
+-	rc_avpair_add(&send, PW_ACCT_INPUT_OCTETS, &av_type, 0, VENDOR_NONE);
+-
+-	av_type = link_stats.pkts_out;
+-	rc_avpair_add(&send, PW_ACCT_OUTPUT_PACKETS, &av_type, 0, VENDOR_NONE);
+-
+-	av_type = link_stats.pkts_in;
+-	rc_avpair_add(&send, PW_ACCT_INPUT_PACKETS, &av_type, 0, VENDOR_NONE);
++ 	if ( (attr=rc_dict_findattr("Acct-Output-Octets-64")) ) {
++ 		snprintf(bigint,sizeof(bigint),"%llu",link_stats.bytes_out);
++ 		rc_avpair_add(&send,attr->value,bigint,0,attr->vendorcode);
++ 	} else {
++ 		av_type = link_stats.bytes_out;
++ 		rc_avpair_add(&send, PW_ACCT_OUTPUT_OCTETS, &av_type, 0, VENDOR_NONE);
++ 	}
++  
++ 	if ( (attr=rc_dict_findattr("Acct-Input-Octets-64")) ) {
++ 		snprintf(bigint,sizeof(bigint),"%llu",link_stats.bytes_in);
++ 		rc_avpair_add(&send,attr->value,bigint,0,attr->vendorcode);
++ 	} else {
++ 		av_type = link_stats.bytes_in;
++ 		rc_avpair_add(&send, PW_ACCT_INPUT_OCTETS, &av_type, 0, VENDOR_NONE);
++ 	}
++  
++ 	if ( (attr=rc_dict_findattr("Acct-Output-Packets-64")) ) {
++ 		snprintf(bigint,sizeof(bigint),"%llu",link_stats.pkts_out);
++ 		rc_avpair_add(&send,attr->value,bigint,0,attr->vendorcode);
++ 	} else {
++ 		av_type = link_stats.pkts_out;
++ 		rc_avpair_add(&send, PW_ACCT_OUTPUT_PACKETS, &av_type, 0, VENDOR_NONE);
++ 	}
++ 
++ 	if ( (attr=rc_dict_findattr("Acct-Input-Packets-64")) ) {
++ 		snprintf(bigint,sizeof(bigint),"%llu",link_stats.pkts_in);
++ 		rc_avpair_add(&send,attr->value,bigint,0,attr->vendorcode);
++ 	} else {
++ 		av_type = link_stats.pkts_in;
++ 		rc_avpair_add(&send, PW_ACCT_INPUT_PACKETS, &av_type, 0, VENDOR_NONE);
++ 	}
+     }
+ 
+     if (*remote_number) {
+@@ -1112,22 +1140,45 @@
+     update_link_stats(0);
+ 
+     if (link_stats_valid) {
++ 	DICT_ATTR*	attr;
++ 	static char	bigint[64];
++ 	
+ 	link_stats_valid = 0; /* Force later code to update */
+ 
+ 	av_type = link_connect_time;
+ 	rc_avpair_add(&send, PW_ACCT_SESSION_TIME, &av_type, 0, VENDOR_NONE);
+ 
+-	av_type = link_stats.bytes_out;
+-	rc_avpair_add(&send, PW_ACCT_OUTPUT_OCTETS, &av_type, 0, VENDOR_NONE);
+-
+-	av_type = link_stats.bytes_in;
+-	rc_avpair_add(&send, PW_ACCT_INPUT_OCTETS, &av_type, 0, VENDOR_NONE);
+-
+-	av_type = link_stats.pkts_out;
+-	rc_avpair_add(&send, PW_ACCT_OUTPUT_PACKETS, &av_type, 0, VENDOR_NONE);
+-
+-	av_type = link_stats.pkts_in;
+-	rc_avpair_add(&send, PW_ACCT_INPUT_PACKETS, &av_type, 0, VENDOR_NONE);
++ 	if ( (attr=rc_dict_findattr("Acct-Output-Octets-64")) ) {
++ 		snprintf(bigint,sizeof(bigint),"%llu",link_stats.bytes_out);
++ 		rc_avpair_add(&send,attr->value,bigint,0,attr->vendorcode);
++ 	} else {
++ 		av_type = link_stats.bytes_out;
++ 		rc_avpair_add(&send, PW_ACCT_OUTPUT_OCTETS, &av_type, 0, VENDOR_NONE);
++ 	}
++  
++ 	if ( (attr=rc_dict_findattr("Acct-Input-Octets-64")) ) {
++ 		snprintf(bigint,sizeof(bigint),"%llu",link_stats.bytes_in);
++ 		rc_avpair_add(&send,attr->value,bigint,0,attr->vendorcode);
++ 	} else {
++ 		av_type = link_stats.bytes_in;
++ 		rc_avpair_add(&send, PW_ACCT_INPUT_OCTETS, &av_type, 0, VENDOR_NONE);
++ 	}
++  
++ 	if ( (attr=rc_dict_findattr("Acct-Output-Packets-64")) ) {
++ 		snprintf(bigint,sizeof(bigint),"%llu",link_stats.pkts_out);
++ 		rc_avpair_add(&send,attr->value,bigint,0,attr->vendorcode);
++ 	} else {
++ 		av_type = link_stats.pkts_out;
++ 		rc_avpair_add(&send, PW_ACCT_OUTPUT_PACKETS, &av_type, 0, VENDOR_NONE);
++ 	}
++  
++ 	if ( (attr=rc_dict_findattr("Acct-Input-Packets-64")) ) {
++ 		snprintf(bigint,sizeof(bigint),"%llu",link_stats.pkts_in);
++ 		rc_avpair_add(&send,attr->value,bigint,0,attr->vendorcode);
++ 	} else {
++ 		av_type = link_stats.pkts_in;
++ 		rc_avpair_add(&send, PW_ACCT_INPUT_PACKETS, &av_type, 0, VENDOR_NONE);
++ 	}
+     }
+ 
+     if (*remote_number) {
+diff -ru ppp-2.4.3.orig/pppd/pppd.h ppp-2.4.3/pppd/pppd.h
+--- ppp-2.4.3.orig/pppd/pppd.h	Sat Nov 13 13:02:22 2004
++++ ppp-2.4.3/pppd/pppd.h	Thu May 26 11:37:17 2005
+@@ -170,10 +170,10 @@
+  * pppd needs.
+  */
+ struct pppd_stats {
+-    unsigned int	bytes_in;
+-    unsigned int	bytes_out;
+-    unsigned int	pkts_in;
+-    unsigned int	pkts_out;
++    unsigned long long	bytes_in;
++    unsigned long long	bytes_out;
++    unsigned long long	pkts_in;
++    unsigned long long	pkts_out;
+ };
+ 
+ /* Used for storing a sequence of words.  Usually malloced. */
+diff -ru ppp-2.4.3.orig/pppd/sys-linux.c ppp-2.4.3/pppd/sys-linux.c
+--- ppp-2.4.3.orig/pppd/sys-linux.c	Fri Nov 12 11:24:43 2004
++++ ppp-2.4.3/pppd/sys-linux.c	Thu May 26 11:37:17 2005
+@@ -1332,6 +1332,10 @@
+  *
+  * get_ppp_stats - return statistics for the link.
+  */
++
++static struct ifpppstatsreq prev_stat_req;
++static struct pppd_stats static_stats;
++
+ int
+ get_ppp_stats(u, stats)
+     int u;
+@@ -1347,10 +1351,21 @@
+ 	error("Couldn't get PPP statistics: %m");
+ 	return 0;
+     }
+-    stats->bytes_in = req.stats.p.ppp_ibytes;
+-    stats->bytes_out = req.stats.p.ppp_obytes;
+-    stats->pkts_in = req.stats.p.ppp_ipackets;
+-    stats->pkts_out = req.stats.p.ppp_opackets;
++    // Calculate the elapsed bytes since the last query
++    static_stats.bytes_in +=
++	    (req.stats.p.ppp_ibytes - prev_stat_req.stats.p.ppp_ibytes);
++    static_stats.bytes_out +=
++	    (req.stats.p.ppp_obytes - prev_stat_req.stats.p.ppp_obytes);
++    static_stats.pkts_in +=
++	    (req.stats.p.ppp_ipackets - prev_stat_req.stats.p.ppp_ipackets);
++    static_stats.pkts_out +=
++	    (req.stats.p.ppp_opackets - prev_stat_req.stats.p.ppp_opackets);
++    // Store the current state
++    memcpy(&prev_stat_req,&req,sizeof(prev_stat_req));
++
++    // Give out the statistics
++    memcpy(stats,&static_stats,sizeof(static_stats));
++
+     return 1;
+ }
+ 
+@@ -2240,6 +2255,11 @@
+ {
+     struct ifreq ifr;
+ 
++    // Initialize the 'previous stats struct'
++    memset(&prev_stat_req,0,sizeof(prev_stat_req));
++    // And the static statistics puffer
++    memset(&static_stats,0,sizeof(static_stats));
++    
+     memset (&ifr, '\0', sizeof (ifr));
+     strlcpy(ifr.ifr_name, ifname, sizeof (ifr.ifr_name));
+     if (ioctl(sock_fd, SIOCGIFFLAGS, (caddr_t) &ifr) < 0) {
+--- ppp-2.4.3.orig/pppd/chap-new.c	Thu Nov  4 11:02:26 2004
++++ ppp-2.4.3/pppd/chap-new.c	Thu May 26 11:46:41 2005
+@@ -251,7 +251,7 @@
+ {
+ 	struct chap_server_state *ss = arg;
+ 
+-	ss->flags &= ~TIMEOUT_PENDING;
++	ss->flags &= ~(TIMEOUT_PENDING|AUTH_DONE);
+ 	if ((ss->flags & CHALLENGE_VALID) == 0) {
+ 		ss->challenge_xmits = 0;
+ 		chap_generate_challenge(ss);
