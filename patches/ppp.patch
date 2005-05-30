@@ -315,3 +315,48 @@ diff -ru ppp-2.4.3.orig/pppd/sys-linux.c ppp-2.4.3/pppd/sys-linux.c
  
  /* Server data structures */
  
+--- ppp-2.4.3.orig/pppd/plugins/radius/avpair.c	Sun Nov 14 08:26:26 2004
++++ ppp-2.4.3/pppd/plugins/radius/avpair.c	Sun May 29 13:37:37 2005
+@@ -291,9 +291,17 @@
+     /* Set attrlen to length of data */
+     attrlen -= 4;
+     for (; attrlen; attrlen -= vlen+2, ptr += vlen) {
+-	vtype = *ptr++;
+-	vlen = *ptr++;
+-	vlen -= 2;
++	if ( vendor_id == VENDOR_USR ) {
++		vlen = attrlen - 4;
++		vtype = (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | ptr[3];
++		ptr += 4;
++		/* fixup */
++		attrlen -= 2;
++	} else {
++		vtype = *ptr++;
++		vlen = *ptr++;
++		vlen -= 2;
++	}
+ 	if (vlen < 0 || vlen > attrlen - 2) {
+ 	    /* Do not log an error.  We are supposed to be able to cope with
+ 	       arbitrary vendor-specific gunk */
+--- ppp-2.4.3.orig/pppd/plugins/rp-pppoe/plugin.c	Thu Nov  4 11:07:37 2004
++++ ppp-2.4.3/pppd/plugins/rp-pppoe/plugin.c	Mon May 30 14:15:38 2005
+@@ -191,7 +191,7 @@
+     struct ifreq ifr;
+ 
+     if (mtu > MAX_PPPOE_MTU) {
+-	warn("Couldn't increase MTU to %d", mtu);
++	/* warn("Couldn't increase MTU to %d", mtu); */
+ 	mtu = MAX_PPPOE_MTU;
+     }
+     sock = socket(AF_INET, SOCK_DGRAM, 0);
+@@ -215,8 +215,8 @@
+ 		int pcomp,
+ 		int accomp)
+ {
+-    if (mru > MAX_PPPOE_MTU)
+-	warn("Couldn't increase MRU to %d", mru);
++    /* if (mru > MAX_PPPOE_MTU)
++	warn("Couldn't increase MRU to %d", mru); */
+ }
+ 
+ /**********************************************************************

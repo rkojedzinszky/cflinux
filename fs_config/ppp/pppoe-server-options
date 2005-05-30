@@ -1,6 +1,7 @@
 # PPP options for the PPPoE server
 auth
 require-chap
+chap-interval 900
 lcp-echo-interval 10
 lcp-echo-failure 5
 plugin radius.so
