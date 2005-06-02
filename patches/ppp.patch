@@ -25,21 +25,6 @@ diff -ru ppp-2.4.3.orig/pppd/Makefile.linux ppp-2.4.3/pppd/Makefile.linux
  #USE_PAM=y
  #HAVE_INET6=y
  
-diff -ru ppp-2.4.3.orig/pppd/main.c ppp-2.4.3/pppd/main.c
---- ppp-2.4.3.orig/pppd/main.c	Sat Nov 13 13:05:48 2004
-+++ ppp-2.4.3/pppd/main.c	Thu May 26 11:37:17 2005
-@@ -1176,9 +1176,9 @@
- 
-     slprintf(numbuf, sizeof(numbuf), "%u", link_connect_time);
-     script_setenv("CONNECT_TIME", numbuf, 0);
--    slprintf(numbuf, sizeof(numbuf), "%u", link_stats.bytes_out);
-+    snprintf(numbuf, sizeof(numbuf), "%llu", link_stats.bytes_out);
-     script_setenv("BYTES_SENT", numbuf, 0);
--    slprintf(numbuf, sizeof(numbuf), "%u", link_stats.bytes_in);
-+    snprintf(numbuf, sizeof(numbuf), "%llu", link_stats.bytes_in);
-     script_setenv("BYTES_RCVD", numbuf, 0);
- }
- 
 diff -ru ppp-2.4.3.orig/pppd/pathnames.h ppp-2.4.3/pppd/pathnames.h
 --- ppp-2.4.3.orig/pppd/pathnames.h	Sat Nov 13 13:02:22 2004
 +++ ppp-2.4.3/pppd/pathnames.h	Thu May 26 11:37:17 2005
@@ -360,3 +345,50 @@ diff -ru ppp-2.4.3.orig/pppd/sys-linux.c ppp-2.4.3/pppd/sys-linux.c
  }
  
  /**********************************************************************
+--- ppp-2.4.3.orig/pppd/main.c	Sat Nov 13 13:05:48 2004
++++ ppp-2.4.3/pppd/main.c	Thu Jun  2 11:03:50 2005
+@@ -1176,9 +1176,9 @@
+ 
+     slprintf(numbuf, sizeof(numbuf), "%u", link_connect_time);
+     script_setenv("CONNECT_TIME", numbuf, 0);
+-    slprintf(numbuf, sizeof(numbuf), "%u", link_stats.bytes_out);
++    snprintf(numbuf, sizeof(numbuf), "%llu", link_stats.bytes_out);
+     script_setenv("BYTES_SENT", numbuf, 0);
+-    slprintf(numbuf, sizeof(numbuf), "%u", link_stats.bytes_in);
++    snprintf(numbuf, sizeof(numbuf), "%llu", link_stats.bytes_in);
+     script_setenv("BYTES_RCVD", numbuf, 0);
+ }
+ 
+@@ -1489,6 +1489,16 @@
+ 	tdb_close(pppdb);
+ #endif
+ 
++	closelog();
++	if (log_to_fd > 2)
++		close(log_to_fd);
++	if (the_channel->close)
++		(*the_channel->close)();
++	else
++		close(devfd);	/* some plugins don't have a close function */
++	close(fd_ppp);
++	close(fd_devnull);
++
+ 	/* make sure infd, outfd and errfd won't get tromped on below */
+ 	if (infd == 1 || infd == 2)
+ 		infd = dup(infd);
+@@ -1505,15 +1515,6 @@
+ 	if (errfd != 2)
+ 		dup2(errfd, 2);
+ 
+-	closelog();
+-	if (log_to_fd > 2)
+-		close(log_to_fd);
+-	if (the_channel->close)
+-		(*the_channel->close)();
+-	else
+-		close(devfd);	/* some plugins don't have a close function */
+-	close(fd_ppp);
+-	close(fd_devnull);
+ 	if (infd != 0)
+ 		close(infd);
+ 	if (outfd != 1)
