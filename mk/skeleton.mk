@@ -21,7 +21,7 @@ PKG := skeleton
 SRC_FILENAME = skeleton-0.1.tar.gz
 EXTRACTED_DIR = skeleton-0.1
 DOWNLOAD_SITES = http://www.skel.eton.org/download/	# look at \
-							# the endig \
+							# the ending \
 							# dash
 PATCHES = skel.patch
 
