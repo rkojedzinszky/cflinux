@@ -84,10 +84,6 @@ build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) bzImage modules
-	cd $(PKG_ROOT) && \
-		$(UC_PATH) gcc -Wall -Wstrict-prototypes \
-		-O -I$(PKG_ROOT)/include \
-		Documentation/networking/ifenslave.c -o ifenslave
 	touch $(BUILT_STAMP)
 
 install: build
@@ -95,8 +91,8 @@ install: build
 	(cd $(ROOTFS)/lib/modules/$(KERNEL_VERSION)/kernel/net/sched && \
 	 for i in 0 1 2 3 4 5 6 7; do ln -sf sch_teql.o teql$$i.o ; done)
 	(cd $(ROOTFS)/lib/modules/$(KERNEL_VERSION)/kernel/drivers/net && \
-	 for i in 0 1 2 3 4 5 6 7; do ln -sf dummy.o dummy$$i.o ; done)
-	$(INSTALL_BIN) $(PKG_ROOT)/ifenslave $(ROOTFS)/sbin/
+	 for i in 0 1 2 3 4 5 6 7; do ln -sf dummy.o dummy$$i.o ; \
+	 ln -sf bonding.o bonding/bond$$i.o ; done)
 
 .PHONY: configure clean build install
 
