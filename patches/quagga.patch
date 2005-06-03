@@ -90,14 +90,14 @@
      esac
      if test "${NEED_CRYPTO}" = "yes"; then
        LIBS="${LIBS} -lcrypto"
---- quagga-0.97.3/ospfd/Makefile.orig	2004-11-25 18:37:26.000000000 +0100
-+++ quagga-0.97.3/ospfd/Makefile.in	2004-11-25 18:37:57.000000000 +0100
-@@ -248,7 +248,7 @@
- 	ospf_flood.h ospf_snmp.h ospf_te.h ospf_vty.h ospf_apiserver.h
+--- quagga-0.98.3/ospfd/Makefile.in.orig	Fri Apr  1 13:43:53 2005
++++ quagga-0.98.3/ospfd/Makefile.in	Fri Jun  3 09:49:45 2005
+@@ -191,7 +191,7 @@
  
  ospfd_SOURCES = ospf_main.c
+ 
 -ospfd_LDADD = libospf.la ../lib/libzebra.la @LIBCAP@
 +ospfd_LDADD = .libs/libospf.a ../lib/libzebra.la @LIBCAP@
+ 
  EXTRA_DIST = OSPF-MIB.txt OSPF-TRAP-MIB.txt ChangeLog.opaque.txt
- examplesdir = $(exampledir)
- dist_examples_DATA = ospfd.conf.sample
+ 

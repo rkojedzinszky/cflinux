@@ -4,6 +4,8 @@ Changes from 0.1.5 to 0.2-pre1:
 	- upgraded the madwifi package
 	- upgraded the ltraf package
 	- upgraded the kernel and grsec
+	- upgraded quagga to 0.98.3
+	- added ifenslave
 
 Changes from 0.1.5-pre2 to 0.1.5:
 	- version rename
