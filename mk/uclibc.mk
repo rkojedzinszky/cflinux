@@ -23,7 +23,8 @@ EXTRACTED_DIR = uClibc-0.9.26
 DOWNLOAD_SITES = http://www.uclibc.org/downloads/ \
 		$(CFLINUX_PACKAGES)
 PATCHES = uClibc-0.9.26.patch \
-	  uClibc.resolv_c.patch
+	  uClibc.resolv_c.patch \
+	  uClibc.syslog_c.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
