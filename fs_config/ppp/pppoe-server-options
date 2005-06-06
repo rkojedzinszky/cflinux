@@ -1,5 +1,4 @@
 # PPP options for the PPPoE server
-logfd -1
 auth
 require-chap
 chap-interval 900
