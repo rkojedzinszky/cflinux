@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := grsec
-SRC_FILENAME = grsecurity-2.1.5-2.4.30.tar.bz2
-EXTRACTED_DIR = grsecurity-2.1.5-2.4.30
+SRC_FILENAME = grsecurity-2.1.6-2.4.31.tar.bz2
+EXTRACTED_DIR = grsecurity-2.1.6-2.4.31
 DOWNLOAD_SITES = $(CFLINUX_PACKAGES)
 
 # include the common package targets 
