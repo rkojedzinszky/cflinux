@@ -1,0 +1,16 @@
+--- pcmcia-cs-3.2.7.orig/cardmgr/cardmgr.c	Thu Nov 27 23:00:14 2003
++++ pcmcia-cs-3.2.7/cardmgr/cardmgr.c	Fri Jun 24 14:04:28 2005
+@@ -641,10 +641,11 @@
+     int ret, first = 1;
+     FILE *f;
+     char line[256];
++    char lcmd[256];
+ 
+     if (verbose) syslog(LOG_INFO, "executing: '%s'", cmd);
+-    strcat(cmd, " 2>&1");
+-    f = popen(cmd, "r");
++    snprintf(lcmd,sizeof(lcmd),"%s </dev/null 2>&1", cmd);
++    f = popen(lcmd, "r");
+     while (fgets(line, 255, f)) {
+ 	if (first && !verbose)
+ 	    syslog(LOG_INFO, "executing: '%s'", cmd);

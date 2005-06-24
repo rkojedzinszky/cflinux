@@ -25,7 +25,8 @@ DOWNLOAD_SITES = \
 		http://keihanna.dl.sourceforge.net/sourceforge/pcmcia-cs/ \
 		http://aleron.dl.sourceforge.net/sourceforge/pcmcia-cs/ \
 		$(CFLINUX_PACKAGES)
-PATCHES = pcmcia-cs.patch
+PATCHES = pcmcia-cs.patch \
+	pcmcia-cs.cardmgr_execute.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
