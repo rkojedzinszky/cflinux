@@ -1,6 +1,55 @@
-diff -ru ppp-2.4.3.orig/pppd/Makefile.linux ppp-2.4.3/pppd/Makefile.linux
---- ppp-2.4.3.orig/pppd/Makefile.linux	Sat Nov 13 13:02:22 2004
-+++ ppp-2.4.3/pppd/Makefile.linux	Thu May 26 11:39:10 2005
+diff -ru ppp.orig/pppd/main.c ppp-cvs-20050725/pppd/main.c
+--- ppp.orig/pppd/main.c	2005-07-12 03:07:59.000000000 +0200
++++ ppp-cvs-20050725/pppd/main.c	2005-07-26 00:02:20.000000000 +0200
+@@ -1245,9 +1245,9 @@
+ 
+     slprintf(numbuf, sizeof(numbuf), "%u", link_connect_time);
+     script_setenv("CONNECT_TIME", numbuf, 0);
+-    slprintf(numbuf, sizeof(numbuf), "%u", link_stats.bytes_out);
++    snprintf(numbuf, sizeof(numbuf), "%llu", link_stats.bytes_out);
+     script_setenv("BYTES_SENT", numbuf, 0);
+-    slprintf(numbuf, sizeof(numbuf), "%u", link_stats.bytes_in);
++    snprintf(numbuf, sizeof(numbuf), "%llu", link_stats.bytes_in);
+     script_setenv("BYTES_RCVD", numbuf, 0);
+ }
+ 
+@@ -1558,6 +1558,16 @@
+ 	tdb_close(pppdb);
+ #endif
+ 
++	closelog();
++	if (log_to_fd > 2)
++		close(log_to_fd);
++	if (the_channel->close)
++		(*the_channel->close)();
++	else
++		close(devfd);	/* some plugins don't have a close function */
++	close(fd_ppp);
++	close(fd_devnull);
++
+ 	/* make sure infd, outfd and errfd won't get tromped on below */
+ 	if (infd == 1 || infd == 2)
+ 		infd = dup(infd);
+@@ -1574,15 +1584,6 @@
+ 	if (errfd != 2)
+ 		dup2(errfd, 2);
+ 
+-	closelog();
+-	if (log_to_fd > 2)
+-		close(log_to_fd);
+-	if (the_channel->close)
+-		(*the_channel->close)();
+-	else
+-		close(devfd);	/* some plugins don't have a close function */
+-	close(fd_ppp);
+-	close(fd_devnull);
+ 	if (infd != 0)
+ 		close(infd);
+ 	if (outfd != 1)
+Only in ppp-cvs-20050725/pppd: main.c.orig
+diff -ru ppp.orig/pppd/Makefile.linux ppp-cvs-20050725/pppd/Makefile.linux
+--- ppp.orig/pppd/Makefile.linux	2005-07-12 03:50:23.000000000 +0200
++++ ppp-cvs-20050725/pppd/Makefile.linux	2005-07-26 00:02:20.000000000 +0200
 @@ -48,19 +48,19 @@
  # Uncomment the next line to include support for PPP packet filtering.
  # This requires that the libpcap library and headers be installed
@@ -25,22 +74,46 @@ diff -ru ppp-2.4.3.orig/pppd/Makefile.linux ppp-2.4.3/pppd/Makefile.linux
  #USE_PAM=y
  #HAVE_INET6=y
  
-diff -ru ppp-2.4.3.orig/pppd/plugins/radius/radius.c ppp-2.4.3/pppd/plugins/radius/radius.c
---- ppp-2.4.3.orig/pppd/plugins/radius/radius.c	Sun Nov 14 11:27:57 2004
-+++ ppp-2.4.3/pppd/plugins/radius/radius.c	Thu May 26 11:37:17 2005
-@@ -494,6 +494,11 @@
+diff -ru ppp.orig/pppd/pathnames.h ppp-cvs-20050725/pppd/pathnames.h
+--- ppp.orig/pppd/pathnames.h	2005-07-10 13:19:10.000000000 +0200
++++ ppp-cvs-20050725/pppd/pathnames.h	2005-07-26 00:02:20.000000000 +0200
+@@ -56,7 +56,7 @@
  
-     rc_avpair_free(received);
-     rc_avpair_free (send);
-+
-+    if ( message ) {
-+	    strncpy(message,radius_msg,message_space);
-+	    message[message_space-1]=0;
-+    }
-     return (result == OK_RC);
- }
- 
-@@ -970,20 +975,43 @@
+ #ifdef PLUGIN
+ #ifdef __STDC__
+-#define _PATH_PLUGIN	DESTDIR "/lib/pppd/" VERSION
++#define _PATH_PLUGIN	DESTDIR "/lib/pppd/"
+ #else /* __STDC__ */
+ #define _PATH_PLUGIN	"/usr/lib/pppd"
+ #endif /* __STDC__ */
+diff -ru ppp.orig/pppd/plugins/radius/avpair.c ppp-cvs-20050725/pppd/plugins/radius/avpair.c
+--- ppp.orig/pppd/plugins/radius/avpair.c	2004-11-14 08:26:26.000000000 +0100
++++ ppp-cvs-20050725/pppd/plugins/radius/avpair.c	2005-07-26 00:02:20.000000000 +0200
+@@ -291,9 +291,17 @@
+     /* Set attrlen to length of data */
+     attrlen -= 4;
+     for (; attrlen; attrlen -= vlen+2, ptr += vlen) {
+-	vtype = *ptr++;
+-	vlen = *ptr++;
+-	vlen -= 2;
++	if ( vendor_id == VENDOR_USR ) {
++		vlen = attrlen - 4;
++		vtype = (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | ptr[3];
++		ptr += 4;
++		/* fixup */
++		attrlen -= 2;
++	} else {
++		vtype = *ptr++;
++		vlen = *ptr++;
++		vlen -= 2;
++	}
+ 	if (vlen < 0 || vlen > attrlen - 2) {
+ 	    /* Do not log an error.  We are supposed to be able to cope with
+ 	       arbitrary vendor-specific gunk */
+diff -ru ppp.orig/pppd/plugins/radius/radius.c ppp-cvs-20050725/pppd/plugins/radius/radius.c
+--- ppp.orig/pppd/plugins/radius/radius.c	2005-07-10 12:28:55.000000000 +0200
++++ ppp-cvs-20050725/pppd/plugins/radius/radius.c	2005-07-26 00:02:20.000000000 +0200
+@@ -963,20 +963,43 @@
  
  
      if (link_stats_valid) {
@@ -95,7 +168,7 @@ diff -ru ppp-2.4.3.orig/pppd/plugins/radius/radius.c ppp-2.4.3/pppd/plugins/radi
      }
  
      if (*remote_number) {
-@@ -1112,22 +1140,45 @@
+@@ -1105,22 +1128,45 @@
      update_link_stats(0);
  
      if (link_stats_valid) {
@@ -152,9 +225,69 @@ diff -ru ppp-2.4.3.orig/pppd/plugins/radius/radius.c ppp-2.4.3/pppd/plugins/radi
      }
  
      if (*remote_number) {
-diff -ru ppp-2.4.3.orig/pppd/pppd.h ppp-2.4.3/pppd/pppd.h
---- ppp-2.4.3.orig/pppd/pppd.h	Sat Nov 13 13:02:22 2004
-+++ ppp-2.4.3/pppd/pppd.h	Thu May 26 11:37:17 2005
+diff -ru ppp.orig/pppd/plugins/radius/radiusclient.h ppp-cvs-20050725/pppd/plugins/radius/radiusclient.h
+--- ppp.orig/pppd/plugins/radius/radiusclient.h	2004-11-14 08:26:26.000000000 +0100
++++ ppp-cvs-20050725/pppd/plugins/radius/radiusclient.h	2005-07-26 00:02:20.000000000 +0200
+@@ -292,6 +292,7 @@
+ /* Vendor codes */
+ #define VENDOR_NONE     (-1)
+ #define VENDOR_MICROSOFT	311
++#define VENDOR_USR		429
+ 
+ /* Server data structures */
+ 
+Only in ppp-cvs-20050725/pppd/plugins/radius: radius.c.orig
+diff -ru ppp.orig/pppd/plugins/radius/sendserver.c ppp-cvs-20050725/pppd/plugins/radius/sendserver.c
+--- ppp.orig/pppd/plugins/radius/sendserver.c	2004-11-14 08:26:26.000000000 +0100
++++ ppp-cvs-20050725/pppd/plugins/radius/sendserver.c	2005-07-26 00:02:20.000000000 +0200
+@@ -56,6 +56,13 @@
+ 		*buf++ = (((unsigned int) vp->vendorcode) >> 8) & 255;
+ 		*buf++ = ((unsigned int) vp->vendorcode) & 255;
+ 
++		/* Stolen from freeradius's source, that USR vendor
++		 * attributes are to handled otherwise */
++		if ( vp->vendorcode == VENDOR_USR ) {
++			*buf++ = (vp->attribute >> 24) & 0xff;
++			*buf++ = (vp->attribute >> 16) & 0xff;
++			*buf++ = (vp->attribute >> 8) & 0xff;
++		}
+ 		/* Insert vendor-type */
+ 		*buf++ = vp->attribute;
+ 
+@@ -64,7 +71,8 @@
+ 		case PW_TYPE_STRING:
+ 		    length = vp->lvalue;
+ 		    *lenptr = length + 8;
+-		    *buf++ = length+2;
++		    if ( vp->vendorcode != VENDOR_USR )
++			*buf++ = length+2;
+ 		    memcpy(buf, vp->strvalue, (size_t) length);
+ 		    buf += length;
+ 		    total_length += length+8;
+@@ -73,7 +81,8 @@
+ 		case PW_TYPE_IPADDR:
+ 		    length = sizeof(UINT4);
+ 		    *lenptr = length + 8;
+-		    *buf++ = length+2;
++		    if ( vp->vendorcode != VENDOR_USR )
++			*buf++ = length+2;
+ 		    lvalue = htonl(vp->lvalue);
+ 		    memcpy(buf, (char *) &lvalue, sizeof(UINT4));
+ 		    buf += length;
+@@ -82,6 +91,10 @@
+ 		default:
+ 		    break;
+ 		}
++		if ( vp->vendorcode == VENDOR_USR ) {
++		    *lenptr += 2;
++		    total_length += 2;
++		}
+ 	    } else {
+ 		*buf++ = vp->attribute;
+ 		switch (vp->attribute) {
+diff -ru ppp.orig/pppd/pppd.h ppp-cvs-20050725/pppd/pppd.h
+--- ppp.orig/pppd/pppd.h	2005-07-12 03:07:59.000000000 +0200
++++ ppp-cvs-20050725/pppd/pppd.h	2005-07-26 00:02:20.000000000 +0200
 @@ -170,10 +170,10 @@
   * pppd needs.
   */
@@ -170,9 +303,9 @@ diff -ru ppp-2.4.3.orig/pppd/pppd.h ppp-2.4.3/pppd/pppd.h
  };
  
  /* Used for storing a sequence of words.  Usually malloced. */
-diff -ru ppp-2.4.3.orig/pppd/sys-linux.c ppp-2.4.3/pppd/sys-linux.c
---- ppp-2.4.3.orig/pppd/sys-linux.c	Fri Nov 12 11:24:43 2004
-+++ ppp-2.4.3/pppd/sys-linux.c	Thu May 26 11:37:17 2005
+diff -ru ppp.orig/pppd/sys-linux.c ppp-cvs-20050725/pppd/sys-linux.c
+--- ppp.orig/pppd/sys-linux.c	2005-03-22 11:27:07.000000000 +0100
++++ ppp-cvs-20050725/pppd/sys-linux.c	2005-07-26 00:02:20.000000000 +0200
 @@ -1332,6 +1332,10 @@
   *
   * get_ppp_stats - return statistics for the link.
@@ -222,141 +355,3 @@ diff -ru ppp-2.4.3.orig/pppd/sys-linux.c ppp-2.4.3/pppd/sys-linux.c
      memset (&ifr, '\0', sizeof (ifr));
      strlcpy(ifr.ifr_name, ifname, sizeof (ifr.ifr_name));
      if (ioctl(sock_fd, SIOCGIFFLAGS, (caddr_t) &ifr) < 0) {
---- ppp-2.4.3.orig/pppd/plugins/radius/sendserver.c	Sun Nov 14 08:26:26 2004
-+++ ppp-2.4.3/pppd/plugins/radius/sendserver.c	Thu May 26 16:30:28 2005
-@@ -56,6 +56,13 @@
- 		*buf++ = (((unsigned int) vp->vendorcode) >> 8) & 255;
- 		*buf++ = ((unsigned int) vp->vendorcode) & 255;
- 
-+		/* Stolen from freeradius's source, that USR vendor
-+		 * attributes are to handled otherwise */
-+		if ( vp->vendorcode == VENDOR_USR ) {
-+			*buf++ = (vp->attribute >> 24) & 0xff;
-+			*buf++ = (vp->attribute >> 16) & 0xff;
-+			*buf++ = (vp->attribute >> 8) & 0xff;
-+		}
- 		/* Insert vendor-type */
- 		*buf++ = vp->attribute;
- 
-@@ -64,7 +71,8 @@
- 		case PW_TYPE_STRING:
- 		    length = vp->lvalue;
- 		    *lenptr = length + 8;
--		    *buf++ = length+2;
-+		    if ( vp->vendorcode != VENDOR_USR )
-+			*buf++ = length+2;
- 		    memcpy(buf, vp->strvalue, (size_t) length);
- 		    buf += length;
- 		    total_length += length+8;
-@@ -73,7 +81,8 @@
- 		case PW_TYPE_IPADDR:
- 		    length = sizeof(UINT4);
- 		    *lenptr = length + 8;
--		    *buf++ = length+2;
-+		    if ( vp->vendorcode != VENDOR_USR )
-+			*buf++ = length+2;
- 		    lvalue = htonl(vp->lvalue);
- 		    memcpy(buf, (char *) &lvalue, sizeof(UINT4));
- 		    buf += length;
-@@ -81,6 +90,10 @@
- 		    break;
- 		default:
- 		    break;
-+		}
-+		if ( vp->vendorcode == VENDOR_USR ) {
-+		    *lenptr += 2;
-+		    total_length += 2;
- 		}
- 	    } else {
- 		*buf++ = vp->attribute;
---- ppp-2.4.3.orig/pppd/plugins/radius/radiusclient.h	Sun Nov 14 08:26:26 2004
-+++ ppp-2.4.3/pppd/plugins/radius/radiusclient.h	Thu May 26 16:23:09 2005
-@@ -292,6 +292,7 @@
- /* Vendor codes */
- #define VENDOR_NONE     (-1)
- #define VENDOR_MICROSOFT	311
-+#define VENDOR_USR		429
- 
- /* Server data structures */
- 
---- ppp-2.4.3.orig/pppd/plugins/radius/avpair.c	Sun Nov 14 08:26:26 2004
-+++ ppp-2.4.3/pppd/plugins/radius/avpair.c	Sun May 29 13:37:37 2005
-@@ -291,9 +291,17 @@
-     /* Set attrlen to length of data */
-     attrlen -= 4;
-     for (; attrlen; attrlen -= vlen+2, ptr += vlen) {
--	vtype = *ptr++;
--	vlen = *ptr++;
--	vlen -= 2;
-+	if ( vendor_id == VENDOR_USR ) {
-+		vlen = attrlen - 4;
-+		vtype = (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | ptr[3];
-+		ptr += 4;
-+		/* fixup */
-+		attrlen -= 2;
-+	} else {
-+		vtype = *ptr++;
-+		vlen = *ptr++;
-+		vlen -= 2;
-+	}
- 	if (vlen < 0 || vlen > attrlen - 2) {
- 	    /* Do not log an error.  We are supposed to be able to cope with
- 	       arbitrary vendor-specific gunk */
---- ppp-2.4.3.orig/pppd/main.c	Sat Nov 13 13:05:48 2004
-+++ ppp-2.4.3/pppd/main.c	Thu Jun  2 11:03:50 2005
-@@ -1176,9 +1176,9 @@
- 
-     slprintf(numbuf, sizeof(numbuf), "%u", link_connect_time);
-     script_setenv("CONNECT_TIME", numbuf, 0);
--    slprintf(numbuf, sizeof(numbuf), "%u", link_stats.bytes_out);
-+    snprintf(numbuf, sizeof(numbuf), "%llu", link_stats.bytes_out);
-     script_setenv("BYTES_SENT", numbuf, 0);
--    slprintf(numbuf, sizeof(numbuf), "%u", link_stats.bytes_in);
-+    snprintf(numbuf, sizeof(numbuf), "%llu", link_stats.bytes_in);
-     script_setenv("BYTES_RCVD", numbuf, 0);
- }
- 
-@@ -1489,6 +1489,16 @@
- 	tdb_close(pppdb);
- #endif
- 
-+	closelog();
-+	if (log_to_fd > 2)
-+		close(log_to_fd);
-+	if (the_channel->close)
-+		(*the_channel->close)();
-+	else
-+		close(devfd);	/* some plugins don't have a close function */
-+	close(fd_ppp);
-+	close(fd_devnull);
-+
- 	/* make sure infd, outfd and errfd won't get tromped on below */
- 	if (infd == 1 || infd == 2)
- 		infd = dup(infd);
-@@ -1505,15 +1515,6 @@
- 	if (errfd != 2)
- 		dup2(errfd, 2);
- 
--	closelog();
--	if (log_to_fd > 2)
--		close(log_to_fd);
--	if (the_channel->close)
--		(*the_channel->close)();
--	else
--		close(devfd);	/* some plugins don't have a close function */
--	close(fd_ppp);
--	close(fd_devnull);
- 	if (infd != 0)
- 		close(infd);
- 	if (outfd != 1)
---- ppp.orig/pppd/pathnames.h	2005-07-10 13:19:10.000000000 +0200
-+++ ppp/pppd/pathnames.h	2005-07-25 23:40:27.000000000 +0200
-@@ -56,7 +56,7 @@
- 
- #ifdef PLUGIN
- #ifdef __STDC__
--#define _PATH_PLUGIN	DESTDIR "/lib/pppd/" VERSION
-+#define _PATH_PLUGIN	DESTDIR "/lib/pppd/"
- #else /* __STDC__ */
- #define _PATH_PLUGIN	"/usr/lib/pppd"
- #endif /* __STDC__ */
