@@ -6,6 +6,7 @@ Changes from 0.1.5 to 0.2-pre1:
 	- upgraded quagga to 0.98.3
 	- added ifenslave
 	- upgraded the kernel to 2.4.31 and grsec to 2.1.6
+	- upgraded ppp to cvs version
 
 Changes from 0.1.5-pre2 to 0.1.5:
 	- version rename

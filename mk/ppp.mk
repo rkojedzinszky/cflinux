@@ -18,11 +18,11 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := ppp
-SRC_FILENAME = ppp-2.4.3.tar.gz
-EXTRACTED_DIR = ppp-2.4.3
+SRC_FILENAME = ppp-cvs-20050725.tar.bz2
+EXTRACTED_DIR = ppp-cvs-20050725
 DOWNLOAD_SITES = \
-	ftp://ftp.samba.org/pub/ppp/ \
 	$(CFLINUX_PACKAGES)
+
 PATCHES = ppp.patch
 
 # include the common package targets 
