@@ -355,3 +355,16 @@ diff -ru ppp.orig/pppd/sys-linux.c ppp-cvs-20050725/pppd/sys-linux.c
      memset (&ifr, '\0', sizeof (ifr));
      strlcpy(ifr.ifr_name, ifname, sizeof (ifr.ifr_name));
      if (ioctl(sock_fd, SIOCGIFFLAGS, (caddr_t) &ifr) < 0) {
+--- ppp-cvs-20050725/pppd/plugins/rp-pppoe/plugin.c.orig	Tue Jul 26 00:36:02 2005
++++ ppp-cvs-20050725/pppd/plugins/rp-pppoe/plugin.c	Tue Jul 26 00:36:38 2005
+@@ -187,8 +187,8 @@
+ 		int pcomp,
+ 		int accomp)
+ {
+-    if (mru > MAX_PPPOE_MTU)
+-	warn("Couldn't increase MRU to %d", mru);
++/*    if (mru > MAX_PPPOE_MTU)
++	warn("Couldn't increase MRU to %d", mru); */
+ }
+ 
+ /**********************************************************************
