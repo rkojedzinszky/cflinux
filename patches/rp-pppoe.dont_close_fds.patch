@@ -1,0 +1,14 @@
+--- rp-pppoe-3.5/src/pppoe-server.c.orig	2005-07-26 13:55:11.000000000 +0200
++++ rp-pppoe-3.5/src/pppoe-server.c	2005-07-26 13:55:45.000000000 +0200
+@@ -894,9 +894,9 @@
+ 
+     /* In the child process.  */
+ 
+-    /* Close all file descriptors except for socket */
++    /* Close all file descriptors except for socket and fds 0,1,2 */
+     closelog();
+-    for (i=0; i<CLOSEFD; i++) {
++    for (i=3; i<CLOSEFD; i++) {
+ 	if (i != sock) {
+ 	    close(i);
+ 	}

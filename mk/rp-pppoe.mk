@@ -27,7 +27,8 @@ PATCHES = rp-pppoe.patch \
 	rp-pppoe.configure.patch \
 	rp-pppoe.wild_ifname.patch \
 	rp-pppoe.relay.c_padi_no_warn.patch \
-	rp-pppoe.relay_vlan.patch
+	rp-pppoe.relay_vlan.patch \
+	rp-pppoe.dont_close_fds.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
