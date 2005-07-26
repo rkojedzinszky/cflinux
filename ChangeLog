@@ -1,12 +1,11 @@
 Changes from 0.1.5 to 0.2-pre1:
 	- added the ethtool package
-	- upgraded the quagga package to version 0.98.2
 	- upgraded the madwifi package
 	- upgraded the ltraf package
-	- upgraded quagga to 0.98.3
 	- added ifenslave
 	- upgraded the kernel to 2.4.31 and grsec to 2.1.6
 	- upgraded ppp to cvs version
+	- upgraded quagga to 0.98.4
 
 Changes from 0.1.5-pre2 to 0.1.5:
 	- version rename
