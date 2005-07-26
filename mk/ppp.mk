@@ -31,7 +31,7 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT); ./configure)
+	(cd $(PKG_ROOT); ./configure --prefix=/usr)
 	touch $(CONFIGURED_STAMP)
 
 clean:

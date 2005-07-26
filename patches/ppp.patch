@@ -13,40 +13,6 @@ diff -ru ppp.orig/pppd/main.c ppp-cvs-20050725/pppd/main.c
      script_setenv("BYTES_RCVD", numbuf, 0);
  }
  
-@@ -1558,6 +1558,16 @@
- 	tdb_close(pppdb);
- #endif
- 
-+	closelog();
-+	if (log_to_fd > 2)
-+		close(log_to_fd);
-+	if (the_channel->close)
-+		(*the_channel->close)();
-+	else
-+		close(devfd);	/* some plugins don't have a close function */
-+	close(fd_ppp);
-+	close(fd_devnull);
-+
- 	/* make sure infd, outfd and errfd won't get tromped on below */
- 	if (infd == 1 || infd == 2)
- 		infd = dup(infd);
-@@ -1574,15 +1584,6 @@
- 	if (errfd != 2)
- 		dup2(errfd, 2);
- 
--	closelog();
--	if (log_to_fd > 2)
--		close(log_to_fd);
--	if (the_channel->close)
--		(*the_channel->close)();
--	else
--		close(devfd);	/* some plugins don't have a close function */
--	close(fd_ppp);
--	close(fd_devnull);
- 	if (infd != 0)
- 		close(infd);
- 	if (outfd != 1)
-Only in ppp-cvs-20050725/pppd: main.c.orig
 diff -ru ppp.orig/pppd/Makefile.linux ppp-cvs-20050725/pppd/Makefile.linux
 --- ppp.orig/pppd/Makefile.linux	2005-07-12 03:50:23.000000000 +0200
 +++ ppp-cvs-20050725/pppd/Makefile.linux	2005-07-26 00:02:20.000000000 +0200
@@ -236,7 +202,6 @@ diff -ru ppp.orig/pppd/plugins/radius/radiusclient.h ppp-cvs-20050725/pppd/plugi
  
  /* Server data structures */
  
-Only in ppp-cvs-20050725/pppd/plugins/radius: radius.c.orig
 diff -ru ppp.orig/pppd/plugins/radius/sendserver.c ppp-cvs-20050725/pppd/plugins/radius/sendserver.c
 --- ppp.orig/pppd/plugins/radius/sendserver.c	2004-11-14 08:26:26.000000000 +0100
 +++ ppp-cvs-20050725/pppd/plugins/radius/sendserver.c	2005-07-26 00:02:20.000000000 +0200
