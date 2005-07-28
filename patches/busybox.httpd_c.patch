@@ -1,0 +1,41 @@
+--- busybox-1.00/networking/httpd.c.orig	Thu Jul 28 15:03:04 2005
++++ busybox-1.00/networking/httpd.c	Thu Jul 28 15:26:48 2005
+@@ -1976,7 +1976,7 @@
+ 
+ #ifdef CONFIG_FEATURE_HTTPD_SETUID
+   const char *s_uid;
+-  long uid = -1;
++  struct passwd* pw = NULL;
+ #endif
+ 
+ #ifdef CONFIG_FEATURE_HTTPD_AUTH_MD5
+@@ -2036,11 +2036,15 @@
+ #ifdef CONFIG_FEATURE_HTTPD_SETUID
+     if(opt & OPT_SETUID) {
+ 	char *e;
++	long uid;
+ 
+ 	uid = strtol(s_uid, &e, 0);
+ 	if(*e != '\0') {
+ 		/* not integer */
+-		uid = my_getpwnam(s_uid);
++		pw = getpwnam(s_uid);
++	} else {
++		/* integer */
++		pw = getpwuid(uid);
+ 	}
+       }
+ #endif
+@@ -2053,8 +2057,10 @@
+   server = openServer();
+ # ifdef CONFIG_FEATURE_HTTPD_SETUID
+   /* drop privileges */
+-  if(uid > 0)
+-	setuid(uid);
++  if(pw) {
++	setgid(pw->pw_gid);
++	setuid(pw->pw_uid);
++  }
+ # endif
+ #endif
+ 

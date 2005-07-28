@@ -29,7 +29,8 @@ PATCHES = busybox.init.patch \
 	busybox.pwd2spwd.c.patch \
 	busybox.modprobe.c.patch \
 	busybox.uclibc_mmu.patch \
-	busybox.ifenslave.patch
+	busybox.ifenslave.patch \
+	busybox.httpd_c.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
