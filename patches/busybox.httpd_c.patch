@@ -1,6 +1,67 @@
 --- busybox-1.00.orig/networking/httpd.c	Fri Oct  8 10:03:29 2004
-+++ busybox-1.00/networking/httpd.c	Fri Jul 29 12:13:48 2005
-@@ -1976,7 +1976,7 @@
++++ busybox-1.00/networking/httpd.c	Fri Jul 29 14:43:57 2005
+@@ -1468,18 +1468,49 @@
+ 			char *cipher;
+ 			char *pp;
+ 
+-			if(strncmp(p, request, u-request) != 0) {
+-				/* user uncompared */
+-				continue;
+-			}
+ 			pp = strchr(p, ':');
+-			if(pp && pp[1] == '$' && pp[2] == '1' &&
+-						 pp[3] == '$' && pp[4]) {
+-				pp++;
+-				cipher = pw_encrypt(u+1, pp);
+-				if (strcmp(cipher, pp) == 0)
+-					goto set_remoteuser_var;   /* Ok */
+-				/* unauthorized */
++			if (pp) {
++				if(strncmp(p, request, u-request) != 0) {
++					/* user uncompared */
++					continue;
++				}
++				if(pp[1] == '$' && pp[2] == '1' &&
++							 pp[3] == '$' && pp[4]) {
++					/* check for inline password */
++					pp++;
++					cipher = pw_encrypt(u+1, pp);
++					if (strcmp(cipher, pp) == 0)
++						goto set_remoteuser_var;   /* Ok */
++					/* unauthorized */
++					continue;
++				}
++			} else {
++				/* a filename is specified */
++				FILE *f;
++				char buf[1024];
++				char *t1,*t2,*t3;
++				int found=0;
++
++				if ((f=fopen(p,"r")) == NULL)
++					continue;
++				while( fgets(buf,sizeof(buf),f) == buf ) {
++					/* remove the '\n' */
++					if ((t1=strchr(buf,'\n')))
++						*t1=0;
++					t3=buf;
++					t1=strtok_r(NULL,":",&t3);
++					t2=strtok_r(NULL,":",&t3);
++					if (!t1 || t1[0] == '#' || !t2)
++						continue;
++					if (strncmp(request,t1,u-request) == 0 &&
++							strcmp(t2,crypt(u+1,t2)) == 0) {
++						found=1;
++						break;
++					}
++				}
++				fclose(f);
++				if (found)
++					goto set_remoteuser_var;
+ 				continue;
+ 			}
+ 		}
+@@ -1976,7 +2007,7 @@
  
  #ifdef CONFIG_FEATURE_HTTPD_SETUID
    const char *s_uid;
@@ -9,7 +70,7 @@
  #endif
  
  #ifdef CONFIG_FEATURE_HTTPD_AUTH_MD5
-@@ -2036,11 +2036,15 @@
+@@ -2036,11 +2067,15 @@
  #ifdef CONFIG_FEATURE_HTTPD_SETUID
      if(opt & OPT_SETUID) {
  	char *e;
@@ -26,7 +87,7 @@
  	}
        }
  #endif
-@@ -2053,8 +2057,11 @@
+@@ -2053,8 +2088,11 @@
    server = openServer();
  # ifdef CONFIG_FEATURE_HTTPD_SETUID
    /* drop privileges */
