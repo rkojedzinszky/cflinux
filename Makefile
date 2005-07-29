@@ -29,6 +29,7 @@ DO_MK += grsec
 DO_MK += kernel
 DO_MK += tools
 DO_MK += uclibc
+DO_MK += db
 DO_MK += busybox
 DO_MK += mawk
 DO_MK += farsync
