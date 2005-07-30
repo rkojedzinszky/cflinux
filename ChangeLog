@@ -8,6 +8,7 @@ Changes from 0.1.5 to 0.2-pre1:
 	- upgraded quagga to 0.98.4
 	- added db.1.86
 	- added perl-5.8.7 as package
+	- upgraded uClibc to 0.9.27
 
 Changes from 0.1.5-pre2 to 0.1.5:
 	- version rename

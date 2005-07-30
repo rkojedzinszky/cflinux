@@ -1,0 +1,139 @@
+--- uClibc-0.9.27.orig/libc/inet/resolv.c	2005-01-12 08:59:21.000000000 +0100
++++ uClibc-0.9.27/libc/inet/resolv.c	2005-07-30 11:58:03.000000000 +0200
+@@ -243,7 +243,8 @@
+ 			    struct hostent ** result,
+ 			    int * h_errnop);
+ extern int __dns_lookup(const char * name, int type, int nscount, 
+-	char ** nsip, unsigned char ** outpacket, struct resolv_answer * a);
++	char ** nsip, unsigned char ** outpacket, struct resolv_answer * a,
++	int maxlen);
+ 
+ extern int __encode_dotted(const char * dotted, unsigned char * dest, int maxlen);
+ extern int __decode_dotted(const unsigned char * message, int offset, 
+@@ -662,7 +663,8 @@
+ static int ns=0, id=1;
+ 
+ int __dns_lookup(const char *name, int type, int nscount, char **nsip,
+-			   unsigned char **outpacket, struct resolv_answer *a)
++			   unsigned char **outpacket, struct resolv_answer *a,
++			   int maxlen)
+ {
+ 	int i, j, len, fd, pos, rc;
+ 	struct timeval tv;
+@@ -670,10 +672,11 @@
+ 	struct resolv_header h;
+ 	struct resolv_question q;
+ 	int retries = 0;
+-	unsigned char * packet = malloc(PACKETSZ);
++	unsigned char * packet = malloc(maxlen > PACKETSZ ? maxlen : PACKETSZ);
+ 	char *dns, *lookup = malloc(MAXDNAME);
+ 	int variant = -1;
+ 	struct sockaddr_in sa;
++	int use_vc;
+ #ifdef __UCLIBC_HAS_IPV6__
+ 	int v6;
+ 	struct sockaddr_in6 sa6;
+@@ -684,6 +687,8 @@
+ 	if (!packet || !lookup || !nscount)
+ 	    goto fail;
+ 
++	// determine if we should use udp or tcp connection
++	use_vc = (maxlen > PACKETSZ);
+ 	DPRINTF("Looking up type %d answer for '%s'\n", type, name);
+ 
+ 	LOCK;
+@@ -740,9 +745,13 @@
+ 
+ #ifdef __UCLIBC_HAS_IPV6__
+ 		v6 = inet_pton(AF_INET6, dns, &sa6.sin6_addr) > 0;
+-		fd = socket(v6 ? AF_INET6 : AF_INET, SOCK_DGRAM, IPPROTO_UDP);
++		fd = socket(v6 ? AF_INET6 : AF_INET,
++				use_vc ? SOCK_STREAM : SOCK_DGRAM,
++				use_vc ? IPPROTO_TCP : IPPROTO_UDP);
+ #else
+-		fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
++		fd = socket(AF_INET,
++				use_vc ? SOCK_STREAM : SOCK_DGRAM,
++				use_vc ? IPPROTO_TCP : IPPROTO_UDP);
+ #endif
+ 		if (fd < 0) {
+                     retries++;
+@@ -778,6 +787,10 @@
+ 		DPRINTF("Transmitting packet of length %d, id=%d, qr=%d\n",
+ 				len, h.id, h.qr);
+ 
++		if ( use_vc ) {
++			unsigned short	nlen=htons(len);
++			send(fd,&nlen,sizeof(short),0);
++		}
+ 		send(fd, packet, len, 0);
+ 
+ 		FD_ZERO(&fds);
+@@ -792,7 +805,30 @@
+ 			goto tryall;
+ 		}
+ 
+-		len = recv(fd, packet, 512, 0);
++		if ( use_vc ) {
++			char* p;
++			int   r;
++			unsigned short	nlen;
++			int		rlen;
++
++			if ( recv(fd,&nlen,2,0) != 2 )
++				goto again;
++
++			rlen = ntohs(nlen);
++			if ( rlen > maxlen )
++				rlen=maxlen;
++			p=packet;
++			len=rlen;
++			while( len > 0 && (r=recv(fd,p,len,0)) > 0 ) {
++				p+=r;
++				len-=r;
++			}
++			if ( len > 0 )	// could not read enough data
++				goto again;
++			len=rlen;
++		} else {
++			len = recv(fd, packet, PACKETSZ, 0);
++		}
+ 		if (len < HFIXEDSZ) {
+ 			/* too short ! */
+ 			goto again;
+@@ -1132,7 +1168,7 @@
+ 	__nameserversXX=__nameservers;
+ 	__nameserverXX=__nameserver;
+ 	BIGUNLOCK;
+-	i = __dns_lookup(dname, type, __nameserversXX, __nameserverXX, &packet, &a);
++	i = __dns_lookup(dname, type, __nameserversXX, __nameserverXX, &packet, &a, anslen);
+ 
+ 	if (i < 0) {
+ 		h_errno = TRY_AGAIN;
+@@ -1941,7 +1977,7 @@
+ 	__nameserversXX=__nameservers;
+ 	__nameserverXX=__nameserver;
+ 	BIGUNLOCK;
+-		i = __dns_lookup(buf, T_A, __nameserversXX, __nameserverXX, &packet, &a);
++		i = __dns_lookup(buf, T_A, __nameserversXX, __nameserverXX, &packet, &a, PACKETSZ);
+ 
+ 		if (i < 0) {
+ 			*h_errnop = HOST_NOT_FOUND;
+@@ -2086,7 +2122,7 @@
+ 	__nameserverXX=__nameserver;
+ 	BIGUNLOCK;
+ 
+-		i = __dns_lookup(buf, T_AAAA, __nameserversXX, __nameserverXX, &packet, &a);
++		i = __dns_lookup(buf, T_AAAA, __nameserversXX, __nameserverXX, &packet, &a, PACKETSZ);
+ 
+ 		if (i < 0) {
+ 			*h_errnop = HOST_NOT_FOUND;
+@@ -2260,7 +2296,7 @@
+ 	__nameserversXX=__nameservers;
+ 	__nameserverXX=__nameserver;
+ 	BIGUNLOCK;
+-		i = __dns_lookup(buf, T_PTR, __nameserversXX, __nameserverXX, &packet, &a);
++		i = __dns_lookup(buf, T_PTR, __nameserversXX, __nameserverXX, &packet, &a, PACKETSZ);
+ 
+ 		if (i < 0) {
+ 			*h_errnop = HOST_NOT_FOUND;

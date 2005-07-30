@@ -18,13 +18,14 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := uclibc
-SRC_FILENAME = uClibc-0.9.26.tar.bz2
-EXTRACTED_DIR = uClibc-0.9.26
+SRC_FILENAME = uClibc-0.9.27.tar.bz2
+EXTRACTED_DIR = uClibc-0.9.27
 DOWNLOAD_SITES = http://www.uclibc.org/downloads/ \
 		$(CFLINUX_PACKAGES)
-PATCHES = uClibc-0.9.26.patch \
-	  uClibc.resolv_c.patch \
-	  uClibc.syslog_c.patch
+PATCHES = uclibc.gcc_wrapper.patch \
+	  uclibc.syslog_h.patch \
+	  uclibc.syslog_c.patch \
+	  uclibc.resolv_c.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -46,15 +47,15 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all BUILD_DIR=$(BUILD_DIR)
-	$(MAKE) -C $(PKG_ROOT) install
+	$(MAKE) -C $(PKG_ROOT) all BUILD_DIR=$(BUILD_DIR) 
+	$(MAKE) -C $(PKG_ROOT) install_dev install_toolchain RUNTIME_PREFIX_LIB_FROM_DEVEL_PREFIX_LIB=
+	$(MAKE) -C $(PKG_ROOT) install_runtime PREFIX=$(UC_ROOT)
 	cp -a $(PKG_ROOT)/lib/ld-uC* /lib/
-	$(MAKE) -C $(PKG_ROOT)/utils ldd $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT)/utils $(UC_PATH)
 	for i in include lib ; do rmdir $(UC_ROOT)/usr/$$i ; ln -sf ../$$i $(UC_ROOT)/usr/$$i ; done
 	touch $(BUILT_STAMP)
 
 install: build
-	cp -av $(PKG_ROOT)/lib/*.so* $(ROOTFS)/lib/
-	$(INSTALL_BIN) $(PKG_ROOT)/utils/ldd $(ROOTFS)/usr/bin/
+	$(MAKE) -C $(PKG_ROOT) install_runtime install_utils PREFIX=$(ROOTFS)
 
 .PHONY: configure clean build install

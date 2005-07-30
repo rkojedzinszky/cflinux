@@ -1,0 +1,12 @@
+diff -ruNP uClibc-0.9.26/include/sys/syslog.h uClibc-0.9.26-gcc/include/sys/syslog.h
+--- uClibc-0.9.26/include/sys/syslog.h	Thu Sep 27 07:21:15 2001
++++ uClibc-0.9.26-gcc/include/sys/syslog.h	Sun Jan  4 16:38:51 2004
+@@ -37,7 +37,7 @@
+ #include <stdarg.h>
+ 
+ 
+-#define	_PATH_LOG	"/dev/log"
++#define	_PATH_LOG	"/var/run/log"
+ 
+ /*
+  * priorities/facilities are encoded into a single 32-bit quantity, where the
