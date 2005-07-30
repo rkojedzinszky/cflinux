@@ -23,8 +23,7 @@ EXTRACTED_DIR = perl-5.8.7
 DOWNLOAD_SITES = http://www.perl.com/CPAN/src/		# look at \
 							# the ending \
 							# dash
-PATCHES = perl.Configure.patch \
-	  perl.perlio_c.patch
+PATCHES = perl.Configure.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -34,7 +33,17 @@ configure: patch $(CONFIGURED_STAMP)
 $(CONFIGURED_STAMP):
 	(cd $(PKG_ROOT) && rm -f config.sh Policy.sh && \
 	 UC_ROOT=$(UC_ROOT) $(UC_PATH) sh Configure -de \
-	 -Uuselargefiles -Ui_shadow -Dd_dosuid -Di_db -Duseposix)
+	 -Darchname=i386-linux \
+	 -Uuselargefiles \
+	 -Ui_shadow \
+	 -Dd_dosuid \
+	 -Di_db \
+	 -Duseposix \
+	 -Dlibc=$(UC_ROOT)/lib/libc.a \
+	 -Ulocincpth= \
+	 -Uloclibpth= \
+	 -Dglibpth="$(UC_ROOT)/lib" )
+
 	touch $(CONFIGURED_STAMP)
 
 clean:
