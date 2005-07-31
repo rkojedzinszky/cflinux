@@ -24,6 +24,8 @@
 # The package's makefile should contain the following variables:
 # VERSION	- the version for the package
 
+CFPKG_VERSION := 1.0
+
 export CFPKG_PKG := $(PKG)
 export CFPKG_DIR := $(shell pwd)
 export TOP_DIR := $(shell cd $(CFLINUX_ROOT) && pwd)
@@ -41,14 +43,26 @@ BUILD_DIR = $(CFPKG_DIR)/build
 # the md5sums dir
 MD5SUMS_DIR = $(CFPKG_DIR)
 
+# where the package temporary installation should go?
+PKG_INSTALL_DIR = $(BUILD_DIR)/_install
+
+# the package version for cflinux
+CFPKG_PKG_VERS = $(PKG_VERSION)$(PKG_VERSION_SUFF)
+
 include $(TOP_DIR)/packages.mk
 
+$(PKG_INSTALL_DIR):
+	mkdir $(PKG_INSTALL_DIR) && chown 0:0 $(PKG_INSTALL_DIR) && chmod 755 $(PKG_INSTALL_DIR)
+
 pack: install
-	rm -rf $(PKG_ROOT)/_install/CONFIG && \
-		mkdir $(PKG_ROOT)/_install/CONFIG && \
-		cd $(PKG_ROOT)/_install/ && ( \
-		find . -path ./CONFIG -prune -o \
-			-type d -fprintf CONFIG/FILES 'd %p\n' ; \
-		find . -path ./CONFIG -prune -o \
-			-type f -fprintf CONFIG/FILES 'f %p\n' ; \
-		true)
+	rm -rf $(PKG_INSTALL_DIR)/CONFIG
+	mkdir $(PKG_INSTALL_DIR)/CONFIG && \
+		cd $(PKG_INSTALL_DIR)/ && ( \
+		find . -path './CONFIG' -prune \
+			-o -type d -mindepth 1 -printf 'd %p\n' ; \
+		find . -path './CONFIG' -prune \
+			-o ! -type d -mindepth 1 -printf 'f %p\n' ; \
+		true) > CONFIG/FILES
+	@echo -e "PKG_NAME=$(PKG)\nPKG_VERSION=$(CFPKG_PKG_VERS)" \
+		> $(PKG_INSTALL_DIR)/CONFIG/INFO
+	cd "$(PKG_INSTALL_DIR)" && tar czf "$(CFPKG_DIR)/$(PKG)-$(CFPKG_PKG_VERS).cfpkg" *
