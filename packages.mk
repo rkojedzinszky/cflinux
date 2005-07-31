@@ -29,7 +29,7 @@
 
 include $(TOP_DIR)/config.mk
 
-PKG_ROOT = $(BUILD_DIR)/$(EXTRACTED_DIR)
+PKG_ROOT ?= $(BUILD_DIR)/$(EXTRACTED_DIR)
 
 EXTRACTED_STAMP = $(BUILD_DIR)/.$(PKG).extracted
 PATCHED_STAMP = $(PKG_ROOT)/.$(PKG).patched
@@ -39,6 +39,7 @@ BUILT_STAMP = $(PKG_ROOT)/.$(PKG).built
 download: $(SOURCES_DIR)/$(SRC_FILENAME)
 
 $(SOURCES_DIR)/$(SRC_FILENAME):
+	@test -d "$(SOURCES_DIR)" || mkdir "$(SOURCES_DIR)"
 	@for i in $(DOWNLOAD_SITES); do \
 		echo "Downloading $(SRC_FILENAME)" ; \
 		wget -T 60 -t 1 -P $(SOURCES_DIR) "$$i/$(SRC_FILENAME)" && break ; \
@@ -47,8 +48,9 @@ $(SOURCES_DIR)/$(SRC_FILENAME):
 extract: download $(EXTRACTED_STAMP)
 
 $(EXTRACTED_STAMP):
+	@test -d "$(BUILD_DIR)" || mkdir "$(BUILD_DIR)"
 	@(echo -n "Checking integrity of $(PKG): " ; cd "$(SOURCES_DIR)" ; \
-	 if md5sum -c "$(FDEVEL_DIR)/md5sums/$(SRC_FILENAME).md5" ; then \
+	 if md5sum -c "$(MD5SUMS_DIR)/$(SRC_FILENAME).md5" ; then \
 		echo "valid" ; else echo "failed" ; exit 1 ; fi)
 	@echo -n "Extracting $(PKG): "
 	@if echo "$(SRC_FILENAME)" | grep -qE "\.t(ar\.)?gz$$" ; then \
@@ -65,9 +67,15 @@ patch: extract $(PATCHED_STAMP)
 
 $(PATCHED_STAMP):
 	@echo -n "Patching $(PKG): "
-	@(cd $(PKG_ROOT); for i in $(PATCHES); do \
+ifeq ($(PKG_PATCHES_DIR),)
+	@cd $(PKG_ROOT); for i in $(PATCHES); do \
 		patch -p1 < "$(PATCHES_DIR)/$$i" >/dev/null || exit 1 ; \
-		echo -n " [$$i]" ; done)
+		echo -n " [$$i]" ; done
+else
+	@cd $(PKG_ROOT) && for i in $(PKG_PATCHES_DIR)/*.patch ; do \
+		[ -f "$$i" ] && echo -n " [$$i" && patch -p1 < "$$i" > /dev/null \
+		&& echo -n "]" ; done
+endif
 	@echo " done"
 	@touch $@
 

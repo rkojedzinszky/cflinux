@@ -39,13 +39,16 @@ export UC_PATH
 KERNEL_VERSION := 2.4.31
 
 # the downloads dir, where the sources will reside
-SOURCES_DIR = $(TOP_DIR)/sources
+SOURCES_DIR ?= $(TOP_DIR)/sources
 
 # the patches' directory
-PATCHES_DIR = $(TOP_DIR)/patches
+PATCHES_DIR ?= $(TOP_DIR)/patches
 
 # the work directory, where the compiling takes place
-BUILD_DIR = $(TOP_DIR)/build
+BUILD_DIR ?= $(TOP_DIR)/build
+
+# md5 sums directory
+MD5SUMS_DIR ?= $(TOP_DIR)/md5sums
 
 # the default's dir
 DEFAULTS_DIR = $(ROOTFS)/usr/share/defaults

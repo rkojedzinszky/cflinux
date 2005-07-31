@@ -83,12 +83,10 @@ export TOP_DIR := $(shell pwd)
 include $(TOP_DIR)/config.mk
 
 all:
-	test -d $(BUILD_DIR) || mkdir $(BUILD_DIR)
 	for i in $(DO_MK) ; do \
 		$(MAKE) -f $(MK)/$$i.mk build || exit ; done
 
 download:
-	test -d $(SOURCES_DIR) || mkdir $(SOURCES_DIR)
 	for i in $(DO_MK) ; do $(MAKE) -f $(MK)/$$i.mk download || exit 1 ; done
 
 patch:
