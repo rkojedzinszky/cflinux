@@ -1,0 +1,22 @@
+--- madwifi/net80211/ieee80211_var.h.orig	Mon Aug  1 14:51:39 2005
++++ madwifi/net80211/ieee80211_var.h	Mon Aug  1 14:51:49 2005
+@@ -37,7 +37,7 @@
+ /*
+  * Definitions for IEEE 802.11 drivers.
+  */
+-#define	IEEE80211_DEBUG
++#undef	IEEE80211_DEBUG
+ #undef	IEEE80211_DEBUG_REFCNT			/* node refcnt stuff */
+ 
+ /* NB: portability glue must go first */
+--- madwifi/ath/if_ath.c.orig	Mon Aug  1 14:48:03 2005
++++ madwifi/ath/if_ath.c	Mon Aug  1 14:52:44 2005
+@@ -69,7 +69,7 @@
+  * #define AR_DEBUG here if you need to debug the ath_pci module (athdebug)
+  * disable this if not needed because it adds an amount of load
+  */
+-#define AR_DEBUG
++#undef AR_DEBUG
+ 
+ #include "radar.h"
+ 

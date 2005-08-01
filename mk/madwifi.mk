@@ -22,6 +22,7 @@ SRC_FILENAME = madwifi-cvs-20050801.tar.bz2
 EXTRACTED_DIR = madwifi
 DOWNLOAD_SITES = \
 		$(CFLINUX_PACKAGES)
+PATCHES = madwifi.nodebug.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -41,7 +42,8 @@ build: configure $(BUILT_STAMP)
 $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH) \
 		KERNELPATH=$(BUILD_DIR)/kernel \
-		KERNELRELEASE=$(KERNEL_VERSION)
+		KERNELRELEASE=$(KERNEL_VERSION) \
+		ATH_RATE=ath_rate/sample
 	touch $(BUILT_STAMP)
 
 install: build
@@ -50,6 +52,8 @@ install: build
 	cp $(PKG_ROOT)/ath_hal/ath_hal.o \
 		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
 	cp $(PKG_ROOT)/ath/ath_pci.o \
+		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
+	cp $(PKG_ROOT)/ath_rate/sample/ath_rate_sample.o \
 		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
 
 .PHONY: configure clean build install
