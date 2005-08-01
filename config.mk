@@ -20,6 +20,10 @@
 # the top level dir
 #
 
+# cflinux version
+RELEASE_STRING = 0.2-pre1
+PACKAGE = cflinux
+
 export FDEVEL_DIR := $(TOP_DIR)
 
 # the directory where uclibc will be installed

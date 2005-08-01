@@ -20,9 +20,6 @@
 #
 # $Id$
 
-RELEASE_STRING = 0.2-pre1
-PACKAGE = cflinux
-
 ifndef DO_MK
 DO_MK = base
 DO_MK += grsec
