@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := madwifi
-SRC_FILENAME = madwifi-cvs-20050422.tar.bz2
+SRC_FILENAME = madwifi-cvs-20050801.tar.bz2
 EXTRACTED_DIR = madwifi
 DOWNLOAD_SITES = \
 		$(CFLINUX_PACKAGES)
@@ -50,8 +50,6 @@ install: build
 	cp $(PKG_ROOT)/ath_hal/ath_hal.o \
 		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
 	cp $(PKG_ROOT)/ath/ath_pci.o \
-		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
-	cp $(PKG_ROOT)/ath_rate/onoe/ath_rate_onoe.o \
 		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
 
 .PHONY: configure clean build install
