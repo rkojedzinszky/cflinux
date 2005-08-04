@@ -1,5 +1,5 @@
---- rp-pppoe-3.5.orig/src/relay.h	Mon Jul  8 16:38:24 2002
-+++ rp-pppoe-3.5/src/relay.h	Thu Apr 14 17:26:30 2005
+--- rp-pppoe-3.5.orig/src/relay.h	2002-07-08 16:38:24.000000000 +0200
++++ rp-pppoe-3.5/src/relay.h	2005-08-04 22:05:08.000000000 +0200
 @@ -17,6 +17,15 @@
  
  #include "pppoe.h"
@@ -21,7 +21,7 @@
      int clientOK;		/* Client requests allowed (PADI, PADR) */
      int acOK;			/* AC replies allowed (PADO, PADS) */
 +#ifdef SUPPORT_8021Q_VLAN
-+    int dot1q;			/* This interface is a 802.1Q trunk */
++    UINT16_t dot1q;			/* This interface is a 802.1Q trunk */
 +#endif
      unsigned char mac[ETH_ALEN]; /* MAC address */
  } PPPoEInterface;
@@ -36,7 +36,37 @@
      unsigned int epoch;		/* Epoch when last activity was seen */
      UINT16_t sesNum;		/* Session number assigned by relay */
  } PPPoESession;
-@@ -53,6 +68,11 @@
+@@ -49,10 +64,41 @@
+     PPPoESession *ses;		/* Session data */
+ } SessionHash;
+ 
++#define SERVNAME_HT_SIZE			23
++
++/* PRE-Session data struct, and hashes */
++/* Service-Name hashes */
++typedef struct ServiceNameStruct {
++	struct ServiceNameStruct*		next;
++	void*												serviceName;		/* the service name, not null terminated string */
++	unsigned										serviceNameLen; /* the serviceName's length */
++	unsigned char								serverMac[ETH_ALEN];	/* the server's MAC address */
++	PPPoEInterface const*				interface;			/* the server's interface */
++} ServiceName;
++
++typedef struct PreSessionStruct {
++	struct PreSessionStruct*		next;	/* Free list link */
++	struct PreSessionStruct*		prev; /* Free list link */
++	void*												uniqueID;								/* the unique ID used in the relay-session-id */
++	unsigned int								uniqueIDLen;
++	ServiceName*								SNHT[SERVNAME_HT_SIZE]; /* available serviceNames */
++	unsigned char								clientMac[ETH_ALEN];		/* client's MAC address */
++	PPPoEInterface const*				interface;							/* client's interface */
++	unsigned int								epoch;									/* the epoch when last data was seen */
++#ifdef SUPPORT_8021Q_VLAN
++  UINT16_t dot1qTag;		/* 802.1Q Tag on client side if needed */
++#endif
++} PreSession;
++
+ /* Function prototypes */
  
  void relayGotSessionPacket(PPPoEInterface const *i);
  void relayGotDiscoveryPacket(PPPoEInterface const *i);
@@ -48,7 +78,7 @@
  PPPoEInterface *findInterface(int sock);
  unsigned int hash(unsigned char const *mac, UINT16_t sesNum);
  SessionHash *findSession(unsigned char const *mac, UINT16_t sesNum);
-@@ -61,9 +81,10 @@
+@@ -61,9 +107,10 @@
  			    PPPoEInterface const *cli,
  			    unsigned char const *acMac,
  			    unsigned char const *cliMac,
@@ -61,7 +91,7 @@
  void usage(char const *progname);
  void initRelay(int nsess);
  void relayLoop(void);
-@@ -71,9 +92,9 @@
+@@ -71,9 +118,9 @@
  void unhash(SessionHash *sh);
  
  void relayHandlePADT(PPPoEInterface const *iface, PPPoEPacket *packet, int size);
@@ -73,7 +103,7 @@
  void relayHandlePADS(PPPoEInterface const *iface, PPPoEPacket *packet, int size);
  
  int addTag(PPPoEPacket *packet, PPPoETag const *tag);
-@@ -86,7 +107,8 @@
+@@ -86,7 +133,8 @@
  		    PPPoEInterface const *iface,
  		    unsigned char const *mac,
  		    PPPoETag const *hostUniq,
@@ -83,13 +113,17 @@
  
  void alarmHandler(int sig);
  void cleanSessions(void);
---- rp-pppoe-3.5.orig/src/relay.c	Mon Jul  8 16:38:24 2002
-+++ rp-pppoe-3.5/src/relay.c	Thu Apr 14 17:32:21 2005
-@@ -47,7 +47,17 @@
+--- rp-pppoe-3.5.orig/src/relay.c	2002-07-08 16:38:24.000000000 +0200
++++ rp-pppoe-3.5/src/relay.c	2005-08-04 22:15:45.000000000 +0200
+@@ -47,11 +47,33 @@
  #include <unistd.h>
  #endif
  
 -
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <fcntl.h>
++
 +#ifdef SUPPORT_8021Q_VLAN
 +/* This is stolen from /usr/include/linux/if_vlan.h */
 +#define VLAN_HLEN	4
@@ -104,7 +138,37 @@
  /* Interfaces (max MAX_INTERFACES) */
  PPPoEInterface Interfaces[MAX_INTERFACES];
  int NumInterfaces;
-@@ -203,6 +213,9 @@
+ 
++#define APS_HASHTAB_SIZE	47
++#define MAX_PRESESSIONS		512
++#define PRESESSION_TIMEOUT 5
++
++/* Pre-Session variables */
++PreSession*			FreePreSessions;
++PreSession*			ActivePreSessions[APS_HASHTAB_SIZE];
++
+ /* Relay info */
+ int NumSessions;
+ int MaxSessions;
+@@ -77,6 +99,9 @@
+ /* Pipe for breaking select() to initiate periodic cleaning */
+ int CleanPipe[2];
+ 
++/* /dev/urandom fd */
++static int dev_urandom_fd;
++
+ /* Our relay: if_index followed by peer_mac */
+ #define MY_RELAY_TAG_LEN (sizeof(int) + ETH_ALEN)
+ 
+@@ -94,6 +119,7 @@
+ keepDescriptor(int fd)
+ {
+     int i;
++		if (fd == dev_urandom_fd) return 1;
+     if (fd == CleanPipe[0] || fd == CleanPipe[1]) return 1;
+     for (i=0; i<NumInterfaces; i++) {
+ 	if (fd == Interfaces[i].discoverySock ||
+@@ -203,6 +229,9 @@
      fprintf(stderr, "   -S if_name     -- Specify interface for PPPoE Server\n");
      fprintf(stderr, "   -C if_name     -- Specify interface for PPPoE Client\n");
      fprintf(stderr, "   -B if_name     -- Specify interface for both clients and server\n");
@@ -114,7 +178,7 @@
      fprintf(stderr, "   -n nsess       -- Maxmimum number of sessions to relay\n");
      fprintf(stderr, "   -i timeout     -- Idle timeout in seconds (0 = no timeout)\n");
      fprintf(stderr, "   -F             -- Do not fork into background\n");
-@@ -227,6 +240,7 @@
+@@ -227,6 +256,7 @@
  * -C ifname           -- Use interface for PPPoE clients
  * -S ifname           -- Use interface for PPPoE servers
  * -B ifname           -- Use interface for both clients and servers
@@ -122,7 +186,7 @@
  * -n sessions         -- Maximum of "n" sessions
  ***********************************************************************/
  int
-@@ -238,7 +252,11 @@
+@@ -238,7 +268,11 @@
      int beDaemon = 1;
      openlog("pppoe-relay", LOG_PID, LOG_DAEMON);
  
@@ -134,7 +198,7 @@
  	switch(opt) {
  	case 'h':
  	    usage(argv[0]);
-@@ -247,14 +265,19 @@
+@@ -247,14 +281,19 @@
  	    beDaemon = 0;
  	    break;
  	case 'C':
@@ -157,7 +221,7 @@
  	case 'i':
  	    if (sscanf(optarg, "%u", &IdleTimeout) != 1) {
  		fprintf(stderr, "Illegal argument to -i: should be -i timeout\n");
-@@ -354,6 +377,7 @@
+@@ -354,6 +393,7 @@
  * ifname -- interface name
  * clientOK -- true if this interface should relay PADI, PADR packets.
  * acOK -- true if this interface should relay PADO, PADS packets.
@@ -165,7 +229,7 @@
  *%RETURNS:
  * Nothing
  *%DESCRIPTION:
-@@ -362,7 +386,8 @@
+@@ -362,7 +402,8 @@
  void
  addInterface(char const *ifname,
  	     int clientOK,
@@ -175,7 +239,7 @@
  {
      PPPoEInterface *i;
      int j;
-@@ -382,8 +407,17 @@
+@@ -382,8 +423,17 @@
      strncpy(i->name, ifname, IFNAMSIZ);
      i->name[IFNAMSIZ] = 0;
  
@@ -195,7 +259,400 @@
      i->clientOK = clientOK;
      i->acOK = acOK;
  }
-@@ -458,6 +492,7 @@
+@@ -413,6 +463,11 @@
+ 	rp_fatal("Unable to allocate memory for PPPoE hash table");
+     }
+ 
++		FreePreSessions = (PreSession*)calloc(MAX_PRESESSIONS, sizeof(PreSession));
++		if (!FreePreSessions) {
++			rp_fatal("Unable to allocate memory for PPPoE Pre-session table");
++		}
++
+     /* Initialize sessions in a linked list */
+     AllSessions[0].prev = NULL;
+     if (MaxSessions > 1) {
+@@ -432,6 +487,15 @@
+     FreeSessions = AllSessions;
+     ActiveSessions = NULL;
+ 
++		FreePreSessions[0].prev = NULL;
++		FreePreSessions[0].next = &FreePreSessions[1];
++		for (i=1; i<MAX_PRESESSIONS-1; i++) {
++			FreePreSessions[i].prev = &FreePreSessions[i-1];
++			FreePreSessions[i].next = &FreePreSessions[i+1];
++		}
++		FreePreSessions[i].prev = &FreePreSessions[i-1];
++		FreePreSessions[i].next = NULL;
++
+     /* Initialize session numbers which we hand out */
+     for (i=0; i<MaxSessions; i++) {
+ 	AllSessions[i].sesNum = htons((UINT16_t) i+1);
+@@ -448,6 +512,364 @@
+     AllHashes[2*MaxSessions-1].next = NULL;
+ 
+     FreeHashes = AllHashes;
++
++		/* initialize the PreSession hash */
++		memset(ActivePreSessions,0,sizeof(PreSession*)*APS_HASHTAB_SIZE);
++
++		/* initialize the random source */
++		dev_urandom_fd = open("/dev/urandom",O_RDONLY);
++		if (dev_urandom_fd == -1) {
++			rp_fatal("Unable to open /dev/urandom");
++		}
++}
++
++/**********************************************************************
++ * %FUNCTION: genRandString
++ * %ARGUMENTS:
++ * uniqueID -- pointer to where to generate the string
++ * len -- the length of the string
++ * %RETURNS:
++ * Nothing
++**********************************************************************/
++static void
++genRandString(void* uniqueID, unsigned int len)
++{
++	read(dev_urandom_fd,uniqueID,len);
++}
++
++
++/**********************************************************************
++ * %FUNCTION: stringHash
++ * %ARGUMENTS:
++ * string -- the pointer to the uniqueID
++ * len -- the length of the id
++ * max -- the maximum value+1 for the hash value
++ * %RETURNS:
++ * the calculated hash for the string
++ * %DESCRIPTION:
++ * calculates a hash for the given string
++**********************************************************************/
++static unsigned int
++stringHash(const void* string,
++		unsigned int len,
++		unsigned int max)
++{
++	unsigned int		hv=0;
++	unsigned char*	hp=(unsigned char*)string;
++
++	while( len ) {
++		hv += hp[0];
++		if (len > 1) {
++			hv += hp[0]*hp[1];
++		}
++		len--;
++		hp++;
++	}
++	return (hv % max);
++}
++
++#define sessIdHash(s,l)	stringHash((s),(l),APS_HASHTAB_SIZE)
++#define servNameHash(s,l) stringHash((s),(l),SERVNAME_HT_SIZE)
++
++/**********************************************************************
++ * %FUNCTION: newServiceName
++ * %ARGUMENTS:
++ * serviceName -- the pointer to the serviceName
++ * length -- the serviceName's length
++ * ac -- the interface it was received on
++ * acMac -- the AC's MAC address who sent this
++ * %RETURNS:
++ * the pointer to ServiceName
++ * %DESCRIPTION:
++ * allocates a new ServiceName and fills in the structure
++**********************************************************************/
++static ServiceName*
++newServiceName(const void* serviceName,
++		unsigned int length,
++		const PPPoEInterface* ac,
++		const unsigned char* acMac)
++{
++	ServiceName*	sp;
++
++	sp = (ServiceName*)malloc(sizeof(ServiceName));
++	if (sp) {
++		sp->serviceName = malloc(length);
++		if (sp->serviceName) {
++			sp->next = NULL;
++			memcpy(sp->serviceName,serviceName,length);
++			sp->interface = ac;
++			memcpy(sp->serverMac,acMac,ETH_ALEN);
++			return sp;
++		}
++		free(sp);
++	}
++	return NULL;
++}
++
++/**********************************************************************
++ * %FUNCTION: hashServiceName
++ * %ARGUMENTS:
++ * psess -- the PreSession where to hash the ServiceName
++ * sname -- the ServiceName to be hashed
++ * %RETURNS:
++ * nothing
++ * %DESCRIPTION:
++ * this inserts the given ServiceName into the PreSession's
++**********************************************************************/
++static void
++hashServiceName(
++		PreSession* psess,
++		ServiceName* sname)
++{
++	unsigned int	v=servNameHash(sname->serviceName,sname->serviceNameLen);
++
++	sname->next = psess->SNHT[v];
++	psess->SNHT[v] = sname;
++}
++
++/**********************************************************************
++ * %FUNCTION: findServiceName
++ * %ARGUMENTS:
++ * psess -- presession where to search for the service name
++ * serviceName -- the requested serviceName
++ * serviceNameLen -- the length of the serviceName
++ * %RETURNS:
++ * ServiceName -- the found ServiceName or NULL
++ * %DESCRIPTION:
++ * This function searches for the given serviceName in the psess
++**********************************************************************/
++static ServiceName*
++findServiceName(
++		PreSession* psess,
++		const void* serviceName,
++		unsigned int serviceNameLen)
++{
++	ServiceName* sname;
++
++	sname = psess->SNHT[servNameHash(serviceName,serviceNameLen)];
++	while( sname &&
++			(sname->serviceNameLen != serviceNameLen ||
++			 memcmp(sname->serviceName,serviceName,serviceNameLen)) ) {
++		sname = sname->next;
++	}
++	return sname;
++}
++
++/**********************************************************************
++ * %FUNCTION: allocPreSession
++ * %ARGUMENTS:
++ * none
++ * %RETURNS:
++ * psess -- the allocated PreSession
++ * %DESCRIPTION:
++ * allocates a PreSession, initializes it,
++ * and removes it from the free list
++**********************************************************************/
++static PreSession*
++allocPreSession(void)
++{
++	PreSession*	psess;
++
++	psess = FreePreSessions;
++	if (psess) {
++		FreePreSessions = psess->next;
++		if (FreePreSessions) {
++			FreePreSessions->prev = NULL;
++		}
++		psess->uniqueID = NULL;
++		memset(psess->SNHT,0,sizeof(ServiceName*)*SERVNAME_HT_SIZE);
++		psess->epoch = Epoch;
++	}
++	return psess;
++}
++
++/**********************************************************************
++ * %FUNCTION: releasePreSession
++ * %ARGUMENTS:
++ * sess -- the session to be released
++ * %RETURNS:
++ * none
++ * %DESCRIPTION:
++ * it frees the struct, and links it in the free list
++**********************************************************************/
++static void
++releasePreSession(
++		PreSession*	psess)
++{
++	ServiceName*	sp;
++	ServiceName*	spt;
++	unsigned int	i;
++
++	/* free the uniqueID if defined */
++	if (psess->uniqueID)
++		free(psess->uniqueID);
++
++	/* free the serviceNames if any */
++	for(i=0;i<SERVNAME_HT_SIZE;i++) {
++		sp = psess->SNHT[i];
++		while(sp) {
++			spt = sp->next;
++			free(sp->serviceName);
++			free(sp);
++			sp = spt;
++		}
++	}
++
++	psess->next = FreePreSessions;
++	if (psess->next) {
++		psess->next->prev = psess;
++	}
++	psess->prev = NULL;
++	FreePreSessions = psess;
++}
++
++/**********************************************************************
++ * %FUNCTION: createPreSession
++ * %ARGUMENTS:
++ * sessID -- PreSessionId
++ * sessIDLen -- PreSessionId length
++ * cli -- client's interface
++ * cliMac -- client's MAC address
++ * dot1qTag -- the 8021q VLAN ID of the client
++ * %DESCRIPTION:
++ * creates a new PreSession and inserts into the hash
++ * it assumes that the unique id is really unique
++**********************************************************************/
++static PreSession*
++createPreSession(
++		const unsigned char* sessID,
++		unsigned int sessIDLen,
++		PPPoEInterface const* cli,
++		const unsigned char* cliMac,
++		UINT16_t dot1qTag)
++{
++	PreSession*				psess;
++
++	psess = allocPreSession();
++	if (!psess)
++		return NULL;
++
++	/* initialize the default values */
++	psess->uniqueID = malloc(sessIDLen);
++	if (!psess->uniqueID) {
++		releasePreSession(psess);
++		return NULL;
++	}
++
++	/* initialize the struct */
++	memcpy(psess->uniqueID,sessID,sessIDLen);
++	psess->uniqueIDLen = sessIDLen;
++	memcpy(psess->clientMac,cliMac,ETH_ALEN);
++	psess->interface = cli;
++#ifdef SUPPORT_8021Q_VLAN
++	psess->dot1qTag = dot1qTag;
++#endif
++
++	return psess;
++}
++
++/**********************************************************************
++ * %FUNCTION: hashPreSession
++ * %ARGUMENTS:
++ * psess -- the PreSession to be hashed
++ * %RETURNS:
++ * nothing
++ * %DESCRIPTION:
++ * this hashes the given PreSession to ActivePreSessions
++**********************************************************************/
++static void
++hashPreSession(PreSession* psess)
++{
++	unsigned int	v=sessIdHash(psess->uniqueID,psess->uniqueIDLen);
++
++	psess->next = ActivePreSessions[v];
++	psess->prev = NULL;
++	if (psess->next) {
++		psess->next->prev = psess;
++	}
++	ActivePreSessions[v] = psess;
++}
++
++/**********************************************************************
++ * %FUNCTION: unhashPreSession
++ * %ARGUMENTS:
++ * psess -- the PreSession to be unhashed
++ * %RETURNS:
++ * nothing
++ * %DESCRIPTION:
++ * this unhashes the given PreSession from ActivePreSessions
++**********************************************************************/
++static void
++unhashPreSession(PreSession* psess)
++{
++	unsigned int	v=sessIdHash(psess->uniqueID,psess->uniqueIDLen);
++
++	if (psess->next) {
++		psess->next->prev = psess->prev;
++	}
++	if (psess->prev) {
++		psess->prev->next = psess->next;
++	} else {
++		ActivePreSessions[v] = psess->next;
++	}
++}
++
++/**********************************************************************
++ * %FUNCTION: findPreSession
++ * %ARGUMENTS:
++ * sessID -- the session id
++ * sessIDLen -- the length of the sessID
++ * %RETURNS:
++ * psess -- the found PreSession if found, NULL otherwise
++ * %DESCRIPTION:
++ * this finds the PreSession by it's sessID
++**********************************************************************/
++static PreSession*
++findPreSession(const void* sessID,
++		unsigned int sessIDLen)
++{
++	PreSession* psess;
++	unsigned int	v=sessIdHash(sessID,sessIDLen);
++
++	psess = ActivePreSessions[v];
++	while( psess &&
++			(psess->uniqueIDLen != sessIDLen || memcmp(psess->uniqueID,sessID,sessIDLen)) ) {
++		psess = psess->next;
++	}
++	return psess;
++}
++
++/**********************************************************************
++ * %FUNCTION: cleanPreSession
++ * %ARGUMENTS:
++ * nothing
++ * %RETURNS:
++ * nothing
++ * %DESCRIPTION:
++ * cleans PreSessions if they are too old (they age 2 seconds)
++***********************************************************************/
++static void
++cleanPreSession(void)
++{
++	PreSession**	pps;
++	PreSession*		ps;
++	unsigned int	i;
++
++	for(i=0;i<APS_HASHTAB_SIZE;i++) {
++		pps=&ActivePreSessions[i];
++		ps=*pps;
++
++		while(ps) {
++			if (ps->epoch < Epoch-PRESESSION_TIMEOUT) {
++				unhashPreSession(ps);
++				releasePreSession(ps);
++				ps=*pps;
++			} else {
++				pps=&ps->next;
++				ps=ps->next;
++			}
++		}
++	}
+ }
+ 
+ /**********************************************************************
+@@ -458,6 +880,7 @@
  * acMac -- Access concentrator's MAC address
  * cliMac -- Client's MAC address
  * acSess -- Access concentrator's session ID.
@@ -203,7 +660,7 @@
  *%RETURNS:
  * PPPoESession structure; NULL if one could not be allocated
  *%DESCRIPTION:
-@@ -468,7 +503,8 @@
+@@ -468,7 +891,8 @@
  	      PPPoEInterface const *cli,
  	      unsigned char const *acMac,
  	      unsigned char const *cliMac,
@@ -213,7 +670,7 @@
  {
      PPPoESession *sess;
      SessionHash *acHash, *cliHash;
-@@ -504,6 +540,10 @@
+@@ -504,6 +928,10 @@
      sess->acHash = acHash;
      sess->clientHash = cliHash;
  
@@ -224,7 +681,7 @@
      acHash->interface = ac;
      cliHash->interface = cli;
  
-@@ -774,18 +814,35 @@
+@@ -774,24 +1202,42 @@
  
  	/* Handle session packets first */
  	for (i=0; i<NumInterfaces; i++) {
@@ -260,7 +717,14 @@
  	/* Handle the session-cleaning process */
  	if (FD_ISSET(CleanPipe[0], &readableCopy)) {
  	    char dummy;
-@@ -808,48 +865,49 @@
+ 	    CleanCounter = 0;
+ 	    read(CleanPipe[0], &dummy, 1);
+ 	    if (IdleTimeout) cleanSessions();
++			cleanPreSession();
+ 	}
+     }
+ }
+@@ -808,48 +1254,49 @@
  void
  relayGotDiscoveryPacket(PPPoEInterface const *iface)
  {
@@ -324,7 +788,7 @@
      }
  }
  
-@@ -865,45 +923,46 @@
+@@ -865,45 +1312,46 @@
  void
  relayGotSessionPacket(PPPoEInterface const *iface)
  {
@@ -382,7 +846,7 @@
      if (!sh) {
  	/* Don't log this.  Someone could be running the client and the
  	   relay on the same box. */
-@@ -914,9 +973,9 @@
+@@ -914,9 +1362,9 @@
      ses = sh->ses;
      ses->epoch = Epoch;
      sh = sh->peer;
@@ -395,7 +859,7 @@
  #if 0
      fprintf(stderr, "Relaying %02x:%02x:%02x:%02x:%02x:%02x(%s:%d) to %02x:%02x:%02x:%02x:%02x:%02x(%s:%d)\n",
  	    sh->peer->peerMac[0], sh->peer->peerMac[1], sh->peer->peerMac[2],
-@@ -926,9 +985,182 @@
+@@ -926,8 +1374,181 @@
  	    sh->peerMac[3], sh->peerMac[4], sh->peerMac[5],
  	    sh->interface->name, ntohs(sh->sesNum));
  #endif
@@ -406,8 +870,8 @@
 +    }
 +#endif
 +    sendPacket(NULL, sh->interface->sessionSock, packet, size);
- }
- 
++}
++
 +#ifdef SUPPORT_8021Q_VLAN
 +/**********************************************************************
 +*%FUNCTION relayUnTag8021QPacket
@@ -573,13 +1037,12 @@
 +#endif
 +	    sendPacket(NULL, sh->interface->sessionSock, packet, size);
 +    }
-+}
+ }
 +#endif
-+
+ 
  /**********************************************************************
  *%FUNCTION: relayHandlePADT
- *%ARGUMENTS:
-@@ -957,6 +1189,11 @@
+@@ -957,6 +1578,11 @@
      packet->session = sh->sesNum;
      memcpy(packet->ethHdr.h_source, sh->interface->mac, ETH_ALEN);
      memcpy(packet->ethHdr.h_dest, sh->peerMac, ETH_ALEN);
@@ -591,7 +1054,7 @@
      sendPacket(NULL, sh->interface->sessionSock, packet, size);
  
      /* Destroy the session */
-@@ -968,6 +1205,7 @@
+@@ -968,6 +1594,7 @@
  *%ARGUMENTS:
  * iface -- interface on which packet was received
  * packet -- the PADI packet
@@ -599,7 +1062,7 @@
  *%RETURNS:
  * Nothing
  *%DESCRIPTION:
-@@ -976,7 +1214,8 @@
+@@ -976,9 +1603,11 @@
  void
  relayHandlePADI(PPPoEInterface const *iface,
  		PPPoEPacket *packet,
@@ -608,32 +1071,78 @@
 +		UINT16_t dot1qTag)
  {
      PPPoETag tag;
++		PreSession*	psess;
      unsigned char *loc;
-@@ -1035,6 +1274,13 @@
- 	tag.length = htons(MY_RELAY_TAG_LEN);
- 	memcpy(tag.payload, &ifIndex, sizeof(ifIndex));
- 	memcpy(tag.payload+sizeof(ifIndex), packet->ethHdr.h_source, ETH_ALEN);
-+#ifdef SUPPORT_8021Q_VLAN
-+	/* only allow 802.1Q vlan IDs above 1 */
-+	if ( (dot1qTag & 0xfff) > 1 ) {
-+		memcpy(tag.payload+sizeof(ifIndex)+ETH_ALEN,&dot1qTag,sizeof(UINT16_t));
-+		tag.length = htons(htons(tag.length) + sizeof(UINT16_t));
-+	}
-+#endif
- 	/* Add a relay tag if there's room */
+     int i, r;
+ 
+@@ -1032,20 +1661,38 @@
+     loc = findTag(packet, TAG_RELAY_SESSION_ID, &tag);
+     if (!loc) {
+ 	tag.type = htons(TAG_RELAY_SESSION_ID);
+-	tag.length = htons(MY_RELAY_TAG_LEN);
+-	memcpy(tag.payload, &ifIndex, sizeof(ifIndex));
+-	memcpy(tag.payload+sizeof(ifIndex), packet->ethHdr.h_source, ETH_ALEN);
+-	/* Add a relay tag if there's room */
++	tag.length = htons(12);
++	genRandString(tag.payload,htons(tag.length));
  	r = addTag(packet, &tag);
- 	if (r < 0) return;
-@@ -1076,6 +1322,9 @@
+-	if (r < 0) return;
++	if ( r < 0 )
++		return;
+ 	size += r;
+     } else {
+-	/* We do not re-use relay-id tags.  Drop the frame.  The RFC says the
++	/* We do re-use relay-id tags only if it is at least 6 bytes long.
++	   Otherwise drop the frame.  The RFC says the
+ 	   relay agent SHOULD return a Generic-Error tag, but this does not
+ 	   make sense for PADI packets. */
+-	return;
++			if (htons(tag.length) < 6)
++				return;
+     }
+ 
++		psess = findPreSession(tag.payload, htons(tag.length));
++		if (psess) {
++			/* if such a session with the same PreSessionId exists
++			 * skip this packet. It should be wiped out in the next
++			 * cleanPeriod */
++			return;
++		}
++
++		psess = createPreSession(
++				tag.payload,htons(tag.length),
++				iface, packet->ethHdr.h_source, dot1qTag);
++		if (!psess) {
++			/* some error occured */
++			return;
++		}
++		hashPreSession(psess);
++
+     /* Broadcast the PADI on all AC-capable interfaces except the interface
+        on which it came */
+     for (i=0; i < NumInterfaces; i++) {
+@@ -1073,9 +1720,9 @@
+ 		int size)
+ {
+     PPPoETag tag;
++		PreSession* psess;
++		ServiceName* sname;
      unsigned char *loc;
-     int ifIndex;
-     int acIndex;
-+#ifdef SUPPORT_8021Q_VLAN
-+    UINT16_t dot1qTag;
-+#endif
+-    int ifIndex;
+-    int acIndex;
  
      /* Can a server legally be behind this interface? */
      if (!iface->acOK) {
-@@ -1128,7 +1377,11 @@
+@@ -1091,8 +1738,6 @@
+ 	return;
+     }
+ 
+-    acIndex = iface - Interfaces;
+-
+     /* Source address must be unicast */
+     if (NOT_UNICAST(packet->ethHdr.h_source)) {
+ 	syslog(LOG_ERR,
+@@ -1128,7 +1773,11 @@
      }
  
      /* If it's the wrong length, ignore it */
@@ -646,44 +1155,85 @@
  	syslog(LOG_ERR,
  	       "PADO packet from %02x:%02x:%02x:%02x:%02x:%02x on interface %s does not have correct length Relay-Session-Id tag",
  	       packet->ethHdr.h_source[0],
-@@ -1159,6 +1412,24 @@
+@@ -1141,14 +1790,12 @@
  	return;
      }
  
-+#ifdef SUPPORT_8021Q_VLAN
-+    if ( Interfaces[ifIndex].dot1q ) {
-+	if (ntohs(tag.length) != (MY_RELAY_TAG_LEN + sizeof(UINT16_t))) {
-+		syslog(LOG_ERR,
-+		       "PADO packet from %02x:%02x:%02x:%02x:%02x:%02x on interface %s has no VLAN ID in Relay-Session-Id tag",
-+		       packet->ethHdr.h_source[0],
-+		       packet->ethHdr.h_source[1],
-+		       packet->ethHdr.h_source[2],
-+		       packet->ethHdr.h_source[3],
-+		       packet->ethHdr.h_source[4],
-+		       packet->ethHdr.h_source[5],
-+		       iface->name);
-+		return;
-+	}
-+	memcpy(&dot1qTag,tag.payload + sizeof(ifIndex) + ETH_ALEN,sizeof(UINT16_t));
-+	dot1qTag &= 0xfff;
-+    }
-+#endif
-     /* Replace Relay-ID tag with opposite-direction tag */
-     memcpy(loc+TAG_HDR_SIZE, &acIndex, sizeof(acIndex));
-     memcpy(loc+TAG_HDR_SIZE+sizeof(ifIndex), packet->ethHdr.h_source, ETH_ALEN);
-@@ -1170,6 +1441,11 @@
-     memcpy(packet->ethHdr.h_source, Interfaces[ifIndex].mac, ETH_ALEN);
+-    /* Extract interface index */
+-    memcpy(&ifIndex, tag.payload, sizeof(ifIndex));
++		psess = findPreSession(tag.payload, htons(tag.length));
+ 
+-    if (ifIndex < 0 || ifIndex >= NumInterfaces ||
+-	!Interfaces[ifIndex].clientOK ||
+-	iface == &Interfaces[ifIndex]) {
++    /* If it is not found, log it and ignore it */
++		if (!psess) {
+ 	syslog(LOG_ERR,
+-	       "PADO packet from %02x:%02x:%02x:%02x:%02x:%02x on interface %s has invalid interface in Relay-Session-Id tag",
++	       "PADO packet from %02x:%02x:%02x:%02x:%02x:%02x on interface %s does not have a valid Relay-Session-Id tag",
+ 	       packet->ethHdr.h_source[0],
+ 	       packet->ethHdr.h_source[1],
+ 	       packet->ethHdr.h_source[2],
+@@ -1159,18 +1806,51 @@
+ 	return;
+     }
+ 
+-    /* Replace Relay-ID tag with opposite-direction tag */
+-    memcpy(loc+TAG_HDR_SIZE, &acIndex, sizeof(acIndex));
+-    memcpy(loc+TAG_HDR_SIZE+sizeof(ifIndex), packet->ethHdr.h_source, ETH_ALEN);
++		/* record the offered Service-Name */
++    loc = findTag(packet, TAG_SERVICE_NAME, &tag);
++		if (!loc) {
++			syslog(LOG_ERR,
++	       "PADO packet from %02x:%02x:%02x:%02x:%02x:%02x on interface %s does not have Service-Name tag",
++	       packet->ethHdr.h_source[0],
++	       packet->ethHdr.h_source[1],
++	       packet->ethHdr.h_source[2],
++	       packet->ethHdr.h_source[3],
++	       packet->ethHdr.h_source[4],
++	       packet->ethHdr.h_source[5],
++	       iface->name);
++	return;
++		}
++
++		sname = findServiceName(psess, tag.payload, htons(tag.length));
++		if (sname) {
++			/* we only record one host for each Service-Name, the others are ignored */
++			return;
++		}
++		sname = newServiceName(tag.payload, htons(tag.length),
++				iface,
++				packet->ethHdr.h_source);
++		if (!sname) {
++			/* some error occured */
++			return;
++		}
++		hashServiceName(psess, sname);
+ 
+-    /* Set destination address to MAC address in relay ID */
+-    memcpy(packet->ethHdr.h_dest, tag.payload + sizeof(ifIndex), ETH_ALEN);
++		/* update the epoch timer */
++		psess->epoch = Epoch;
++
++    /* Set destination address to MAC address in PreSession */
++    memcpy(packet->ethHdr.h_dest, psess->clientMac, ETH_ALEN);
+ 
+     /* Set source address to MAC address of interface */
+-    memcpy(packet->ethHdr.h_source, Interfaces[ifIndex].mac, ETH_ALEN);
++    memcpy(packet->ethHdr.h_source, psess->interface->mac, ETH_ALEN);
  
      /* Send the PADO to the proper client */
+-    sendPacket(NULL, Interfaces[ifIndex].discoverySock, packet, size);
 +#ifdef SUPPORT_8021Q_VLAN
-+    if ( Interfaces[ifIndex].dot1q ) {
-+	    packet = (PPPoEPacket*)relayTag8021QPacket(packet, &size, dot1qTag);
++    if ( psess->interface->dot1q ) {
++	    packet = (PPPoEPacket*)relayTag8021QPacket(packet, &size, psess->dot1qTag);
 +    }
 +#endif
-     sendPacket(NULL, Interfaces[ifIndex].discoverySock, packet, size);
++    sendPacket(NULL, psess->interface->discoverySock, packet, size);
  }
  
-@@ -1178,6 +1454,7 @@
+ /**********************************************************************
+@@ -1178,6 +1858,7 @@
  *%ARGUMENTS:
  * iface -- interface on which packet was received
  * packet -- the PADR packet
@@ -691,7 +1241,7 @@
  *%RETURNS:
  * Nothing
  *%DESCRIPTION:
-@@ -1186,7 +1463,8 @@
+@@ -1186,12 +1867,13 @@
  void
  relayHandlePADR(PPPoEInterface const *iface,
  		PPPoEPacket *packet,
@@ -700,91 +1250,182 @@
 +		UINT16_t dot1qTag)
  {
      PPPoETag tag;
++		PreSession* psess;
++		ServiceName* sname;
      unsigned char *loc;
-@@ -1244,7 +1522,11 @@
+-    int ifIndex;
+-    int cliIndex;
+ 
+     /* Can a client legally be behind this interface? */
+     if (!iface->clientOK) {
+@@ -1207,8 +1889,6 @@
+ 	return;
      }
  
-     /* If it's the wrong length, ignore it */
--    if (ntohs(tag.length) != MY_RELAY_TAG_LEN) {
-+    if (ntohs(tag.length) != MY_RELAY_TAG_LEN
-+#ifdef SUPPORT_8021Q_VLAN
-+	&& ntohs(tag.length) != (MY_RELAY_TAG_LEN + sizeof(UINT16_t))
-+#endif
-+		    ) {
+-    cliIndex = iface - Interfaces;
+-
+     /* Source address must be unicast */
+     if (NOT_UNICAST(packet->ethHdr.h_source)) {
  	syslog(LOG_ERR,
- 	       "PADR packet from %02x:%02x:%02x:%02x:%02x:%02x on interface %s does not have correct length Relay-Session-Id tag",
+@@ -1243,10 +1923,11 @@
+ 	return;
+     }
+ 
+-    /* If it's the wrong length, ignore it */
+-    if (ntohs(tag.length) != MY_RELAY_TAG_LEN) {
++		psess = findPreSession(tag.payload, htons(tag.length));
++    /* If it is not valid, log and skip it */
++		if (!psess) {
+ 	syslog(LOG_ERR,
+-	       "PADR packet from %02x:%02x:%02x:%02x:%02x:%02x on interface %s does not have correct length Relay-Session-Id tag",
++	       "PADR packet from %02x:%02x:%02x:%02x:%02x:%02x on interface %s does not have a valid Relay-Session-Id tag",
  	       packet->ethHdr.h_source[0],
-@@ -1279,6 +1561,8 @@
-     memcpy(loc+TAG_HDR_SIZE, &cliIndex, sizeof(cliIndex));
-     memcpy(loc+TAG_HDR_SIZE+sizeof(ifIndex), packet->ethHdr.h_source, ETH_ALEN);
+ 	       packet->ethHdr.h_source[1],
+ 	       packet->ethHdr.h_source[2],
+@@ -1257,14 +1938,24 @@
+ 	return;
+     }
  
-+    /* We dont touch 802.1Q Vlan IDs here */
+-    /* Extract interface index */
+-    memcpy(&ifIndex, tag.payload, sizeof(ifIndex));
++		/* check if the correct client sent the relay session id */
++		if (memcmp(psess->clientMac, packet->ethHdr.h_source, ETH_ALEN)) {
++	syslog(LOG_ERR,
++	       "PADR packet from %02x:%02x:%02x:%02x:%02x:%02x on interface %s does have a strange Relay-Session-Id tag",
++	       packet->ethHdr.h_source[0],
++	       packet->ethHdr.h_source[1],
++	       packet->ethHdr.h_source[2],
++	       packet->ethHdr.h_source[3],
++	       packet->ethHdr.h_source[4],
++	       packet->ethHdr.h_source[5],
++	       iface->name);
++	return;
++		}
+ 
+-    if (ifIndex < 0 || ifIndex >= NumInterfaces ||
+-	!Interfaces[ifIndex].acOK ||
+-	iface == &Interfaces[ifIndex]) {
++		loc = findTag(packet, TAG_SERVICE_NAME, &tag);
++		if (!loc) {
+ 	syslog(LOG_ERR,
+-	       "PADR packet from %02x:%02x:%02x:%02x:%02x:%02x on interface %s has invalid interface in Relay-Session-Id tag",
++	       "PADR packet from %02x:%02x:%02x:%02x:%02x:%02x on interface %s does not have a Service-Name tag",
+ 	       packet->ethHdr.h_source[0],
+ 	       packet->ethHdr.h_source[1],
+ 	       packet->ethHdr.h_source[2],
+@@ -1273,20 +1964,27 @@
+ 	       packet->ethHdr.h_source[5],
+ 	       iface->name);
+ 	return;
+-    }
++		}
+ 
+-    /* Replace Relay-ID tag with opposite-direction tag */
+-    memcpy(loc+TAG_HDR_SIZE, &cliIndex, sizeof(cliIndex));
+-    memcpy(loc+TAG_HDR_SIZE+sizeof(ifIndex), packet->ethHdr.h_source, ETH_ALEN);
++		sname = findServiceName(psess, tag.payload, htons(tag.length));
++		if (!sname) {
++			/* the requested Service-Name is not found, cannot handle this */
++			return;
++		}
 +
-     /* Set destination address to MAC address in relay ID */
-     memcpy(packet->ethHdr.h_dest, tag.payload + sizeof(ifIndex), ETH_ALEN);
++		/* update the epoch timer */
++		psess->epoch = Epoch;
++
++    /* We dont touch 802.1Q Vlan IDs here */
  
-@@ -1310,6 +1594,7 @@
-     int acIndex;
+     /* Set destination address to MAC address in relay ID */
+-    memcpy(packet->ethHdr.h_dest, tag.payload + sizeof(ifIndex), ETH_ALEN);
++    memcpy(packet->ethHdr.h_dest, sname->serverMac, ETH_ALEN);
+ 
+     /* Set source address to MAC address of interface */
+-    memcpy(packet->ethHdr.h_source, Interfaces[ifIndex].mac, ETH_ALEN);
++    memcpy(packet->ethHdr.h_source, sname->interface->mac, ETH_ALEN);
+ 
+     /* Send the PADR to the proper access concentrator */
+-    sendPacket(NULL, Interfaces[ifIndex].discoverySock, packet, size);
++    sendPacket(NULL, sname->interface->discoverySock, packet, size);
+ }
+ 
+ /**********************************************************************
+@@ -1305,11 +2003,11 @@
+ 		int size)
+ {
+     PPPoETag tag;
++		PreSession* psess;
+     unsigned char *loc;
+-    int ifIndex;
+-    int acIndex;
      PPPoESession *ses = NULL;
      SessionHash *sh;
 +    UINT16_t dot1qTag = 0;
  
      /* Can a server legally be behind this interface? */
      if (!iface->acOK) {
-@@ -1362,7 +1647,11 @@
-     }
- 
-     /* If it's the wrong length, ignore it */
--    if (ntohs(tag.length) != MY_RELAY_TAG_LEN) {
-+    if (ntohs(tag.length) != MY_RELAY_TAG_LEN
-+#ifdef SUPPORT_8021Q_VLAN
-+	&& ntohs(tag.length) != (MY_RELAY_TAG_LEN + sizeof(UINT16_t))
-+#endif
-+	) {
- 	syslog(LOG_ERR,
- 	       "PADS packet from %02x:%02x:%02x:%02x:%02x:%02x on interface %s does not have correct length Relay-Session-Id tag",
- 	       packet->ethHdr.h_source[0],
-@@ -1393,6 +1682,25 @@
+@@ -1325,8 +2023,6 @@
  	return;
      }
  
-+#ifdef SUPPORT_8021Q_VLAN
-+    if ( Interfaces[ifIndex].dot1q ) {
-+	if (ntohs(tag.length) != (MY_RELAY_TAG_LEN + sizeof(UINT16_t))) {
-+		syslog(LOG_ERR,
-+		       "PADS packet from %02x:%02x:%02x:%02x:%02x:%02x on interface %s has no VLAN ID in Relay-Session-Id tag",
-+		       packet->ethHdr.h_source[0],
-+		       packet->ethHdr.h_source[1],
-+		       packet->ethHdr.h_source[2],
-+		       packet->ethHdr.h_source[3],
-+		       packet->ethHdr.h_source[4],
-+		       packet->ethHdr.h_source[5],
-+		       iface->name);
-+		return;
-+	}
-+	memcpy(&dot1qTag,tag.payload + sizeof(ifIndex) + ETH_ALEN,sizeof(UINT16_t));
-+	dot1qTag &= 0xfff;
-+    }
-+#endif
-+
-     /* If session ID is zero, it's the AC respoding with an error.
-        Just relay it; do not create a session */
-     if (packet->session != htons(0)) {
-@@ -1410,7 +1718,8 @@
+-    acIndex = iface - Interfaces;
+-
+     /* Source address must be unicast */
+     if (NOT_UNICAST(packet->ethHdr.h_source)) {
+ 	syslog(LOG_ERR,
+@@ -1361,28 +2057,12 @@
+ 	return;
+     }
+ 
+-    /* If it's the wrong length, ignore it */
+-    if (ntohs(tag.length) != MY_RELAY_TAG_LEN) {
+-	syslog(LOG_ERR,
+-	       "PADS packet from %02x:%02x:%02x:%02x:%02x:%02x on interface %s does not have correct length Relay-Session-Id tag",
+-	       packet->ethHdr.h_source[0],
+-	       packet->ethHdr.h_source[1],
+-	       packet->ethHdr.h_source[2],
+-	       packet->ethHdr.h_source[3],
+-	       packet->ethHdr.h_source[4],
+-	       packet->ethHdr.h_source[5],
+-	       iface->name);
+-	return;
+-    }
+-
+-    /* Extract interface index */
+-    memcpy(&ifIndex, tag.payload, sizeof(ifIndex));
++		psess = findPreSession(tag.payload, htons(tag.length));
+ 
+-    if (ifIndex < 0 || ifIndex >= NumInterfaces ||
+-	!Interfaces[ifIndex].clientOK ||
+-	iface == &Interfaces[ifIndex]) {
++		/* If it is not found, log it and ignore it */
++		if (!psess) {
+ 	syslog(LOG_ERR,
+-	       "PADS packet from %02x:%02x:%02x:%02x:%02x:%02x on interface %s has invalid interface in Relay-Session-Id tag",
++	       "PADS packet from %02x:%02x:%02x:%02x:%02x:%02x on interface %s does not have correct length Relay-Session-Id tag",
+ 	       packet->ethHdr.h_source[0],
+ 	       packet->ethHdr.h_source[1],
+ 	       packet->ethHdr.h_source[2],
+@@ -1408,9 +2088,10 @@
+ 
+ 	if (!ses) {
  	    /* Create a new session */
- 	    ses = createSession(iface, &Interfaces[ifIndex],
+-	    ses = createSession(iface, &Interfaces[ifIndex],
++	    ses = createSession(iface, psess->interface,
  				packet->ethHdr.h_source,
 -				loc + TAG_HDR_SIZE + sizeof(ifIndex), packet->session);
-+				loc + TAG_HDR_SIZE + sizeof(ifIndex), packet->session,
-+				dot1qTag);
++				psess->clientMac, packet->session,
++				psess->dot1qTag);
  	    if (!ses) {
  		/* Can't allocate session -- send error PADS to client and
  		   PADT to server */
-@@ -1422,10 +1731,10 @@
+@@ -1420,12 +2101,12 @@
+ 		} else {
+ 		    hu = NULL;
  		}
- 		relaySendError(CODE_PADS, htons(0), &Interfaces[ifIndex],
- 			       loc + TAG_HDR_SIZE + sizeof(ifIndex),
+-		relaySendError(CODE_PADS, htons(0), &Interfaces[ifIndex],
+-			       loc + TAG_HDR_SIZE + sizeof(ifIndex),
 -			       hu, "RP-PPPoE: Relay: Unable to allocate session");
++		relaySendError(CODE_PADS, htons(0), psess->interface,
++			       psess->clientMac,
 +			       hu, "RP-PPPoE: Relay: Unable to allocate session", dot1qTag);
  		relaySendError(CODE_PADT, packet->session, iface,
  			       packet->ethHdr.h_source, NULL,
@@ -793,19 +1434,39 @@
  		return;
  	    }
  	}
-@@ -1444,6 +1753,11 @@
-     memcpy(packet->ethHdr.h_source, Interfaces[ifIndex].mac, ETH_ALEN);
+@@ -1433,18 +2114,23 @@
+ 	packet->session = ses->sesNum;
+     }
+ 
+-    /* Remove relay-ID tag */
+-    removeBytes(packet, loc, MY_RELAY_TAG_LEN + TAG_HDR_SIZE);
+-    size -= (MY_RELAY_TAG_LEN + TAG_HDR_SIZE);
+-
+-    /* Set destination address to MAC address in relay ID */
+-    memcpy(packet->ethHdr.h_dest, tag.payload + sizeof(ifIndex), ETH_ALEN);
++    /* Set destination address to MAC address in PreSession */
++    memcpy(packet->ethHdr.h_dest, psess->clientMac, ETH_ALEN);
+ 
+     /* Set source address to MAC address of interface */
+-    memcpy(packet->ethHdr.h_source, Interfaces[ifIndex].mac, ETH_ALEN);
++    memcpy(packet->ethHdr.h_source, psess->interface->mac, ETH_ALEN);
  
      /* Send the PADS to the proper client */
+-    sendPacket(NULL, Interfaces[ifIndex].discoverySock, packet, size);
 +#ifdef SUPPORT_8021Q_VLAN
-+    if ( Interfaces[ifIndex].dot1q ) {
-+	    packet = (PPPoEPacket*)relayTag8021QPacket(packet, &size, dot1qTag);
++    if ( psess->interface->dot1q ) {
++	    packet = (PPPoEPacket*)relayTag8021QPacket(packet, &size, psess->dot1qTag);
 +    }
 +#endif
-     sendPacket(NULL, Interfaces[ifIndex].discoverySock, packet, size);
++    sendPacket(NULL, psess->interface->discoverySock, packet, size);
++
++		/* release the allocated PreSession */
++		unhashPreSession(psess);
++		releasePreSession(psess);
  }
  
-@@ -1456,6 +1770,7 @@
+ /**********************************************************************
+@@ -1456,6 +2142,7 @@
  * mac -- Ethernet address to which frame should be sent
  * hostUniq -- if non-NULL, a hostUniq tag to add to error frame
  * errMsg -- error message to insert into Generic-Error tag.
@@ -813,7 +1474,7 @@
  *%RETURNS:
  * Nothing
  *%DESCRIPTION:
-@@ -1468,32 +1783,40 @@
+@@ -1468,32 +2155,40 @@
  	       PPPoEInterface const *iface,
  	       unsigned char const *mac,
  	       PPPoETag const *hostUniq,
@@ -869,7 +1530,7 @@
      }
  }
  
-@@ -1539,11 +1862,23 @@
+@@ -1539,11 +2234,23 @@
  	    relaySendError(CODE_PADT, cur->acHash->sesNum,
  			   cur->acHash->interface,
  			   cur->acHash->peerMac, NULL,
