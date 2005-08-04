@@ -39,11 +39,15 @@ clean:
 
 build: configure $(BUILT_STAMP)
 
+# here the rate algorithm can be selected
+# for current version, on of amrr, onoe, simple
+A_RATE := amrr
+
 $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH) \
 		KERNELPATH=$(BUILD_DIR)/kernel \
 		KERNELRELEASE=$(KERNEL_VERSION) \
-		ATH_RATE=ath_rate/sample
+		ATH_RATE=ath_rate/$(A_RATE)
 	touch $(BUILT_STAMP)
 
 install: build
@@ -53,7 +57,7 @@ install: build
 		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
 	cp $(PKG_ROOT)/ath/ath_pci.o \
 		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
-	cp $(PKG_ROOT)/ath_rate/sample/ath_rate_sample.o \
+	cp $(PKG_ROOT)/ath_rate/$(A_RATE)/ath_rate_$(A_RATE).o \
 		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
 
 .PHONY: configure clean build install
