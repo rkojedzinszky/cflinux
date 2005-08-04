@@ -67,14 +67,15 @@ patch: extract $(PATCHED_STAMP)
 
 $(PATCHED_STAMP):
 	@echo -n "Patching $(PKG): "
-ifeq ($(PKG_PATCHES_DIR),)
+ifneq ($(PATCHES),)
 	@cd $(PKG_ROOT); for i in $(PATCHES); do \
 		patch -p1 < "$(PATCHES_DIR)/$$i" >/dev/null || exit 1 ; \
 		echo -n " [$$i]" ; done
-else
+endif
+ifeq ($(wildcard $(PKG_PATCHES_DIR)),$(PKG_PATCHES_DIR))
 	@cd $(PKG_ROOT) && for i in $(PKG_PATCHES_DIR)/*.patch ; do \
 		[ -f "$$i" ] && echo -n " [$$i" && patch -p1 < "$$i" > /dev/null \
-		&& echo -n "]" ; done
+		&& echo -n "]" ; done ; true
 endif
 	@echo " done"
 	@touch $@
