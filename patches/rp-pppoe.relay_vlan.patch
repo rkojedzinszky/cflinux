@@ -113,8 +113,8 @@
  
  void alarmHandler(int sig);
  void cleanSessions(void);
---- rp-pppoe-3.5.orig/src/relay.c	Mon Jul  8 16:38:24 2002
-+++ rp-pppoe-3.5/src/relay.c	Fri Aug  5 18:09:32 2005
+--- rp-pppoe-3.5.orig/src/relay.c	2005-08-07 10:37:19.000000000 +0200
++++ rp-pppoe-3.5/src/relay.c	2005-08-07 10:47:21.000000000 +0200
 @@ -47,11 +47,33 @@
  #include <unistd.h>
  #endif
@@ -140,12 +140,12 @@
  int NumInterfaces;
  
 +#define APS_HASHTAB_SIZE	47
-+#define MAX_PRESESSIONS		512
 +#define PRESESSION_TIMEOUT 5
 +
 +/* Pre-Session variables */
 +PreSession*			FreePreSessions;
 +PreSession*			ActivePreSessions[APS_HASHTAB_SIZE];
++static unsigned MaxPreSessions = 512;
 +
  /* Relay info */
  int NumSessions;
@@ -168,7 +168,7 @@
      if (fd == CleanPipe[0] || fd == CleanPipe[1]) return 1;
      for (i=0; i<NumInterfaces; i++) {
  	if (fd == Interfaces[i].discoverySock ||
-@@ -203,6 +229,9 @@
+@@ -203,7 +229,11 @@
      fprintf(stderr, "   -S if_name     -- Specify interface for PPPoE Server\n");
      fprintf(stderr, "   -C if_name     -- Specify interface for PPPoE Client\n");
      fprintf(stderr, "   -B if_name     -- Specify interface for both clients and server\n");
@@ -176,9 +176,11 @@
 +    fprintf(stderr, "   -V if_name     -- Specify interface for PPPoE Clients over 802.1Q vlan trunk\n");
 +#endif
      fprintf(stderr, "   -n nsess       -- Maxmimum number of sessions to relay\n");
++    fprintf(stderr, "   -N nsess       -- Maxmimum number of PreSessions to relay\n");
      fprintf(stderr, "   -i timeout     -- Idle timeout in seconds (0 = no timeout)\n");
      fprintf(stderr, "   -F             -- Do not fork into background\n");
-@@ -227,6 +256,7 @@
+     fprintf(stderr, "   -h             -- Print this help message\n");
+@@ -227,6 +257,7 @@
  * -C ifname           -- Use interface for PPPoE clients
  * -S ifname           -- Use interface for PPPoE servers
  * -B ifname           -- Use interface for both clients and servers
@@ -186,19 +188,20 @@
  * -n sessions         -- Maximum of "n" sessions
  ***********************************************************************/
  int
-@@ -238,7 +268,11 @@
+@@ -238,7 +269,11 @@
      int beDaemon = 1;
      openlog("pppoe-relay", LOG_PID, LOG_DAEMON);
  
+-    while((opt = getopt(argc, argv, "hC:S:B:n:i:F")) != -1) {
 +#ifdef SUPPORT_8021Q_VLAN
-+    while((opt = getopt(argc, argv, "hC:S:B:V:n:i:F")) != -1) {
++    while((opt = getopt(argc, argv, "hC:S:B:V:n:N:i:F")) != -1) {
 +#else
-     while((opt = getopt(argc, argv, "hC:S:B:n:i:F")) != -1) {
++    while((opt = getopt(argc, argv, "hC:S:B:n:N:i:F")) != -1) {
 +#endif
  	switch(opt) {
  	case 'h':
  	    usage(argv[0]);
-@@ -247,14 +281,19 @@
+@@ -247,14 +282,19 @@
  	    beDaemon = 0;
  	    break;
  	case 'C':
@@ -221,7 +224,24 @@
  	case 'i':
  	    if (sscanf(optarg, "%u", &IdleTimeout) != 1) {
  		fprintf(stderr, "Illegal argument to -i: should be -i timeout\n");
-@@ -354,6 +393,7 @@
+@@ -273,6 +313,16 @@
+ 		exit(EXIT_FAILURE);
+ 	    }
+ 	    break;
++	case 'N':
++	    if (sscanf(optarg,"%u",&MaxPreSessions) != 1) {
++		    fprintf(stderr,"Illegal argument to -N: should be -N #PreSessions\n");
++		    exit(EXIT_FAILURE);
++	    }
++	    if (MaxPreSessions < 1) {
++		    fprintf(stderr,"Illegal argument to -N: must be greater than 0\n");
++		    exit(EXIT_FAILURE);
++	    }
++	    break;
+ 	default:
+ 	    usage(argv[0]);
+ 	}
+@@ -354,6 +404,7 @@
  * ifname -- interface name
  * clientOK -- true if this interface should relay PADI, PADR packets.
  * acOK -- true if this interface should relay PADO, PADS packets.
@@ -229,7 +249,7 @@
  *%RETURNS:
  * Nothing
  *%DESCRIPTION:
-@@ -362,7 +402,8 @@
+@@ -362,7 +413,8 @@
  void
  addInterface(char const *ifname,
  	     int clientOK,
@@ -239,7 +259,7 @@
  {
      PPPoEInterface *i;
      int j;
-@@ -382,8 +423,17 @@
+@@ -382,8 +434,17 @@
      strncpy(i->name, ifname, IFNAMSIZ);
      i->name[IFNAMSIZ] = 0;
  
@@ -259,11 +279,11 @@
      i->clientOK = clientOK;
      i->acOK = acOK;
  }
-@@ -413,6 +463,11 @@
+@@ -413,6 +474,11 @@
  	rp_fatal("Unable to allocate memory for PPPoE hash table");
      }
  
-+		FreePreSessions = (PreSession*)calloc(MAX_PRESESSIONS, sizeof(PreSession));
++		FreePreSessions = (PreSession*)calloc(MaxPreSessions, sizeof(PreSession));
 +		if (!FreePreSessions) {
 +			rp_fatal("Unable to allocate memory for PPPoE Pre-session table");
 +		}
@@ -271,23 +291,23 @@
      /* Initialize sessions in a linked list */
      AllSessions[0].prev = NULL;
      if (MaxSessions > 1) {
-@@ -432,6 +487,15 @@
+@@ -432,6 +498,15 @@
      FreeSessions = AllSessions;
      ActiveSessions = NULL;
  
-+		FreePreSessions[0].prev = NULL;
-+		FreePreSessions[0].next = &FreePreSessions[1];
-+		for (i=1; i<MAX_PRESESSIONS-1; i++) {
++    		/* make the linked list */
++		for (i=0; i<MaxPreSessions; i++) {
 +			FreePreSessions[i].prev = &FreePreSessions[i-1];
 +			FreePreSessions[i].next = &FreePreSessions[i+1];
 +		}
-+		FreePreSessions[i].prev = &FreePreSessions[i-1];
-+		FreePreSessions[i].next = NULL;
++		/* fix the first and the last elem */
++		FreePreSessions[0].prev = NULL;
++		FreePreSessions[i-1].next = NULL;
 +
      /* Initialize session numbers which we hand out */
      for (i=0; i<MaxSessions; i++) {
  	AllSessions[i].sesNum = htons((UINT16_t) i+1);
-@@ -448,6 +512,377 @@
+@@ -448,6 +523,377 @@
      AllHashes[2*MaxSessions-1].next = NULL;
  
      FreeHashes = AllHashes;
@@ -665,7 +685,7 @@
  }
  
  /**********************************************************************
-@@ -458,6 +893,7 @@
+@@ -458,6 +904,7 @@
  * acMac -- Access concentrator's MAC address
  * cliMac -- Client's MAC address
  * acSess -- Access concentrator's session ID.
@@ -673,7 +693,7 @@
  *%RETURNS:
  * PPPoESession structure; NULL if one could not be allocated
  *%DESCRIPTION:
-@@ -468,7 +904,8 @@
+@@ -468,7 +915,8 @@
  	      PPPoEInterface const *cli,
  	      unsigned char const *acMac,
  	      unsigned char const *cliMac,
@@ -683,7 +703,7 @@
  {
      PPPoESession *sess;
      SessionHash *acHash, *cliHash;
-@@ -504,6 +941,10 @@
+@@ -504,6 +952,10 @@
      sess->acHash = acHash;
      sess->clientHash = cliHash;
  
@@ -694,7 +714,7 @@
      acHash->interface = ac;
      cliHash->interface = cli;
  
-@@ -774,24 +1215,42 @@
+@@ -774,24 +1226,42 @@
  
  	/* Handle session packets first */
  	for (i=0; i<NumInterfaces; i++) {
@@ -737,7 +757,7 @@
  	}
      }
  }
-@@ -808,48 +1267,49 @@
+@@ -808,48 +1278,49 @@
  void
  relayGotDiscoveryPacket(PPPoEInterface const *iface)
  {
@@ -801,7 +821,7 @@
      }
  }
  
-@@ -865,45 +1325,46 @@
+@@ -865,45 +1336,46 @@
  void
  relayGotSessionPacket(PPPoEInterface const *iface)
  {
@@ -859,7 +879,7 @@
      if (!sh) {
  	/* Don't log this.  Someone could be running the client and the
  	   relay on the same box. */
-@@ -914,9 +1375,9 @@
+@@ -914,9 +1386,9 @@
      ses = sh->ses;
      ses->epoch = Epoch;
      sh = sh->peer;
@@ -872,7 +892,7 @@
  #if 0
      fprintf(stderr, "Relaying %02x:%02x:%02x:%02x:%02x:%02x(%s:%d) to %02x:%02x:%02x:%02x:%02x:%02x(%s:%d)\n",
  	    sh->peer->peerMac[0], sh->peer->peerMac[1], sh->peer->peerMac[2],
-@@ -926,8 +1387,181 @@
+@@ -926,8 +1398,181 @@
  	    sh->peerMac[3], sh->peerMac[4], sh->peerMac[5],
  	    sh->interface->name, ntohs(sh->sesNum));
  #endif
@@ -938,7 +958,7 @@
 +
 +	*size += VLAN_HLEN;
 +	return (PPPoEPacket8021Q*)vhdr;
-+}
+ }
 +#endif
 +
 +#ifdef SUPPORT_8021Q_VLAN
@@ -1050,12 +1070,12 @@
 +#endif
 +	    sendPacket(NULL, sh->interface->sessionSock, packet, size);
 +    }
- }
++}
 +#endif
  
  /**********************************************************************
  *%FUNCTION: relayHandlePADT
-@@ -957,6 +1591,11 @@
+@@ -957,6 +1602,11 @@
      packet->session = sh->sesNum;
      memcpy(packet->ethHdr.h_source, sh->interface->mac, ETH_ALEN);
      memcpy(packet->ethHdr.h_dest, sh->peerMac, ETH_ALEN);
@@ -1067,7 +1087,7 @@
      sendPacket(NULL, sh->interface->sessionSock, packet, size);
  
      /* Destroy the session */
-@@ -968,6 +1607,7 @@
+@@ -968,6 +1618,7 @@
  *%ARGUMENTS:
  * iface -- interface on which packet was received
  * packet -- the PADI packet
@@ -1075,7 +1095,7 @@
  *%RETURNS:
  * Nothing
  *%DESCRIPTION:
-@@ -976,14 +1616,14 @@
+@@ -976,14 +1627,14 @@
  void
  relayHandlePADI(PPPoEInterface const *iface,
  		PPPoEPacket *packet,
@@ -1093,7 +1113,7 @@
      /* Can a client legally be behind this interface? */
      if (!iface->clientOK) {
  	syslog(LOG_ERR,
-@@ -1026,26 +1666,41 @@
+@@ -1026,26 +1677,41 @@
  	return;
      }
  
@@ -1145,7 +1165,7 @@
      /* Broadcast the PADI on all AC-capable interfaces except the interface
         on which it came */
      for (i=0; i < NumInterfaces; i++) {
-@@ -1073,9 +1728,9 @@
+@@ -1073,9 +1739,9 @@
  		int size)
  {
      PPPoETag tag;
@@ -1157,7 +1177,7 @@
  
      /* Can a server legally be behind this interface? */
      if (!iface->acOK) {
-@@ -1091,8 +1746,6 @@
+@@ -1091,8 +1757,6 @@
  	return;
      }
  
@@ -1166,7 +1186,7 @@
      /* Source address must be unicast */
      if (NOT_UNICAST(packet->ethHdr.h_source)) {
  	syslog(LOG_ERR,
-@@ -1127,10 +1780,12 @@
+@@ -1127,10 +1791,12 @@
  	return;
      }
  
@@ -1182,7 +1202,7 @@
  	       packet->ethHdr.h_source[0],
  	       packet->ethHdr.h_source[1],
  	       packet->ethHdr.h_source[2],
-@@ -1141,14 +1796,11 @@
+@@ -1141,14 +1807,11 @@
  	return;
      }
  
@@ -1202,7 +1222,7 @@
  	       packet->ethHdr.h_source[0],
  	       packet->ethHdr.h_source[1],
  	       packet->ethHdr.h_source[2],
-@@ -1157,20 +1809,38 @@
+@@ -1157,20 +1820,38 @@
  	       packet->ethHdr.h_source[5],
  	       iface->name);
  	return;
@@ -1249,7 +1269,7 @@
  }
  
  /**********************************************************************
-@@ -1178,6 +1848,7 @@
+@@ -1178,6 +1859,7 @@
  *%ARGUMENTS:
  * iface -- interface on which packet was received
  * packet -- the PADR packet
@@ -1257,7 +1277,7 @@
  *%RETURNS:
  * Nothing
  *%DESCRIPTION:
-@@ -1186,12 +1857,13 @@
+@@ -1186,12 +1868,13 @@
  void
  relayHandlePADR(PPPoEInterface const *iface,
  		PPPoEPacket *packet,
@@ -1274,7 +1294,7 @@
  
      /* Can a client legally be behind this interface? */
      if (!iface->clientOK) {
-@@ -1207,8 +1879,6 @@
+@@ -1207,8 +1890,6 @@
  	return;
      }
  
@@ -1283,7 +1303,7 @@
      /* Source address must be unicast */
      if (NOT_UNICAST(packet->ethHdr.h_source)) {
  	syslog(LOG_ERR,
-@@ -1243,10 +1913,11 @@
+@@ -1243,10 +1924,11 @@
  	return;
      }
  
@@ -1298,7 +1318,7 @@
  	       packet->ethHdr.h_source[0],
  	       packet->ethHdr.h_source[1],
  	       packet->ethHdr.h_source[2],
-@@ -1257,14 +1928,24 @@
+@@ -1257,14 +1939,24 @@
  	return;
      }
  
@@ -1329,16 +1349,13 @@
  	       packet->ethHdr.h_source[0],
  	       packet->ethHdr.h_source[1],
  	       packet->ethHdr.h_source[2],
-@@ -1273,20 +1954,27 @@
+@@ -1273,20 +1965,27 @@
  	       packet->ethHdr.h_source[5],
  	       iface->name);
  	return;
 -    }
 +		}
- 
--    /* Replace Relay-ID tag with opposite-direction tag */
--    memcpy(loc+TAG_HDR_SIZE, &cliIndex, sizeof(cliIndex));
--    memcpy(loc+TAG_HDR_SIZE+sizeof(ifIndex), packet->ethHdr.h_source, ETH_ALEN);
++
 +		sname = findServiceName(psess, tag.payload, ntohs(tag.length), 1);
 +		if (!sname) {
 +			/* the requested Service-Name is not found, cannot handle this */
@@ -1347,7 +1364,10 @@
 +
 +		/* update the epoch timer */
 +		psess->epoch = Epoch;
-+
+ 
+-    /* Replace Relay-ID tag with opposite-direction tag */
+-    memcpy(loc+TAG_HDR_SIZE, &cliIndex, sizeof(cliIndex));
+-    memcpy(loc+TAG_HDR_SIZE+sizeof(ifIndex), packet->ethHdr.h_source, ETH_ALEN);
 +    /* We dont touch 802.1Q Vlan IDs here */
  
      /* Set destination address to MAC address in relay ID */
@@ -1364,7 +1384,7 @@
  }
  
  /**********************************************************************
-@@ -1305,11 +1993,11 @@
+@@ -1305,11 +2004,11 @@
  		int size)
  {
      PPPoETag tag;
@@ -1378,7 +1398,7 @@
  
      /* Can a server legally be behind this interface? */
      if (!iface->acOK) {
-@@ -1325,8 +2013,6 @@
+@@ -1325,8 +2024,6 @@
  	return;
      }
  
@@ -1387,7 +1407,7 @@
      /* Source address must be unicast */
      if (NOT_UNICAST(packet->ethHdr.h_source)) {
  	syslog(LOG_ERR,
-@@ -1361,28 +2047,12 @@
+@@ -1361,28 +2058,12 @@
  	return;
      }
  
@@ -1420,7 +1440,7 @@
  	       packet->ethHdr.h_source[0],
  	       packet->ethHdr.h_source[1],
  	       packet->ethHdr.h_source[2],
-@@ -1408,9 +2078,10 @@
+@@ -1408,9 +2089,10 @@
  
  	if (!ses) {
  	    /* Create a new session */
@@ -1433,7 +1453,7 @@
  	    if (!ses) {
  		/* Can't allocate session -- send error PADS to client and
  		   PADT to server */
-@@ -1420,12 +2091,12 @@
+@@ -1420,12 +2102,12 @@
  		} else {
  		    hu = NULL;
  		}
@@ -1450,7 +1470,7 @@
  		return;
  	    }
  	}
-@@ -1433,18 +2104,23 @@
+@@ -1433,18 +2115,23 @@
  	packet->session = ses->sesNum;
      }
  
@@ -1482,7 +1502,7 @@
  }
  
  /**********************************************************************
-@@ -1456,6 +2132,7 @@
+@@ -1456,6 +2143,7 @@
  * mac -- Ethernet address to which frame should be sent
  * hostUniq -- if non-NULL, a hostUniq tag to add to error frame
  * errMsg -- error message to insert into Generic-Error tag.
@@ -1490,7 +1510,7 @@
  *%RETURNS:
  * Nothing
  *%DESCRIPTION:
-@@ -1468,32 +2145,40 @@
+@@ -1468,32 +2156,40 @@
  	       PPPoEInterface const *iface,
  	       unsigned char const *mac,
  	       PPPoETag const *hostUniq,
@@ -1546,7 +1566,7 @@
      }
  }
  
-@@ -1539,11 +2224,23 @@
+@@ -1539,11 +2235,23 @@
  	    relaySendError(CODE_PADT, cur->acHash->sesNum,
  			   cur->acHash->interface,
  			   cur->acHash->peerMac, NULL,
