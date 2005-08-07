@@ -145,7 +145,7 @@
 +/* Pre-Session variables */
 +PreSession*			FreePreSessions;
 +PreSession*			ActivePreSessions[APS_HASHTAB_SIZE];
-+static unsigned MaxPreSessions = 512;
++static unsigned MaxPreSessions = 128;
 +
  /* Relay info */
  int NumSessions;
