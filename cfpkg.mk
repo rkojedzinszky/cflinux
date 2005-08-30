@@ -49,20 +49,29 @@ PKG_INSTALL_DIR = $(BUILD_DIR)/_install
 # the package version for cflinux
 CFPKG_PKG_VERS = $(PKG_VERSION)$(PKG_VERSION_SUFF)
 
+PKG_BASE ?= /usr/local
+
+PKG_CONF_DIR = _CFPKG
+
+PKG_PACK_DIR = $(PKG_INSTALL_DIR)$(PKG_BASE)
+
 include $(TOP_DIR)/packages.mk
 
 $(PKG_INSTALL_DIR):
 	mkdir $(PKG_INSTALL_DIR) && chown 0:0 $(PKG_INSTALL_DIR) && chmod 755 $(PKG_INSTALL_DIR)
 
 pack: install
-	rm -rf $(PKG_INSTALL_DIR)/CONFIG
-	mkdir $(PKG_INSTALL_DIR)/CONFIG && \
-		cd $(PKG_INSTALL_DIR)/ && ( \
-		find . -path './CONFIG' -prune \
+	rm -rf $(PKG_PACK_DIR)/$(PKG_CONF_DIR)
+	mkdir $(PKG_PACK_DIR)/$(PKG_CONF_DIR) && \
+		cd $(PKG_PACK_DIR)/ && ( \
+		find . -path './$(PKG_CONF_DIR)' -prune \
 			-o -type d -mindepth 1 -printf 'd %p\n' ; \
-		find . -path './CONFIG' -prune \
+		find . -path './$(PKG_CONF_DIR)' -prune \
 			-o ! -type d -mindepth 1 -printf 'f %p\n' ; \
-		true) > CONFIG/FILES
-	@echo -e "PKG_NAME=$(PKG)\nPKG_VERSION=$(CFPKG_PKG_VERS)" \
-		> $(PKG_INSTALL_DIR)/CONFIG/INFO
-	cd "$(PKG_INSTALL_DIR)" && tar czf "$(CFPKG_DIR)/$(PKG)-$(CFPKG_PKG_VERS).cfpkg" *
+		true) > $(PKG_CONF_DIR)/FILES
+	@echo "PKG_NAME=$(PKG)" && \
+		echo "PKG_VERSION=$(CFPKG_PKG_VERS)" && \
+		echo "PKG_BASE=$(PKG_BASE)" && \
+		echo "PKG_FORMAT=1" \
+		> $(PKG_PACK_DIR)/$(PKG_CONF_DIR)/INFO
+	cd "$(PKG_PACK_DIR)" && tar czf "$(CFPKG_DIR)/$(PKG)-$(CFPKG_PKG_VERS).cfpkg" *
