@@ -51,9 +51,12 @@ CFPKG_PKG_VERS = $(PKG_VERSION)$(PKG_VERSION_SUFF)
 
 PKG_BASE ?= /usr/local
 
+# the package information in the archive
 PKG_CONF_DIR = _CFPKG
 
 PKG_PACK_DIR = $(PKG_INSTALL_DIR)$(PKG_BASE)
+
+PKG_INFO_FILE = $(PKG_PACK_DIR)/$(PKG_CONF_DIR)/INFO
 
 include $(TOP_DIR)/packages.mk
 
@@ -69,9 +72,9 @@ pack: install
 		find . -path './$(PKG_CONF_DIR)' -prune \
 			-o ! -type d -mindepth 1 -printf 'f %p\n' ; \
 		true) > $(PKG_CONF_DIR)/FILES
-	@echo "PKG_NAME=$(PKG)" && \
+	@(echo "PKG_NAME=$(PKG)" && \
 		echo "PKG_VERSION=$(CFPKG_PKG_VERS)" && \
 		echo "PKG_BASE=$(PKG_BASE)" && \
-		echo "PKG_FORMAT=1" \
-		> $(PKG_PACK_DIR)/$(PKG_CONF_DIR)/INFO
+		echo "PKG_FORMAT=1") \
+		> $(PKG_INFO_FILE)
 	cd "$(PKG_PACK_DIR)" && tar czf "$(CFPKG_DIR)/$(PKG)-$(CFPKG_PKG_VERS).cfpkg" *

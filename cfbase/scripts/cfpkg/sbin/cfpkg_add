@@ -1,0 +1,111 @@
+#!/bin/sh
+
+#   FILE: cfpkg_add -- a script to install a cfpkg
+# AUTHOR: Richard Kojedzinszky <krichy@cflinux.hu>
+#   DATE: 30 August 2005
+#
+# Copyright (C) 2005 root <>
+# All rights reserved.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+. /usr/lib/cfpkg/cfpkg_common.sh
+
+package="$1"
+
+log 3 "I: Extracting $_pkg_config/*"
+tar xzf "$package" -C "$_pkg_tmpdir" "$_pkg_config/*" >/dev/null 2>&1
+
+# because the busybox's tar behaves strange, we have to check the success other way
+log 3 "I: Sanity checking"
+if [ ! -d "$_pkg_tmpdir/$_pkg_config" ] || \
+	   [ ! -f "$_pkg_tmpdir/$_pkg_config/INFO" ] || \
+	   [ ! -f "$_pkg_tmpdir/$_pkg_config/FILES" ] ; then
+	log 0 "E: '$package': does not seem to be a cfpkg"
+	exit 1
+fi
+
+# read info
+. "$_pkg_tmpdir/$_pkg_config/INFO"
+
+# check essential variables
+if [ -z "$PKG_NAME" -o -z "$PKG_VERSION" ]; then
+	echo "E: '$package': Strange cfpkg format, skipping"
+	exit 1
+fi
+
+# check versions
+if [ "$PKG_FORMAT" -ne "1" ]; then
+	echo "E: $PKG_NAME: Invalid cfpkg format: '$PKG_FORMAT'"
+	exit 1
+fi
+
+# emit log message
+log 1 "I: Installing $PKG_NAME (version: $PKG_VERSION from: $package)"
+
+# check if already installed
+log 2 "I: Checking existing installation"
+if [ -d "$_pkg_db/$PKG_NAME" ]; then
+	# load the installed version number
+	. "$_pkg_db/$PKG_NAME/INFO"
+	echo "E: $PKG_NAME is already installed (version: $PKG_VERSION)"
+	exit 1
+fi
+
+# dependency checking
+log 1 "I: Checking dependencies"
+if [ -f "$_pkg_tmpdir/$_pkg_config/DEPENDS" ]; then
+	exec 3< "$_pkg_tmpdir/$_pkg_config/DEPENDS"	# open for reading
+	while read dep <&3 ; do
+		# weak check to see if a package is installed
+		log 1 "I: Checking for '$dep'"
+		if [ ! -f "$_pkg_db/$dep/FILES" ] ; then
+			log 0 "E: $PKG_NAME: dependency check failed: '$dep' needs to be installed"
+			exit 1
+		fi
+	done
+	exec 3<&-
+fi
+
+# now everything looks good, just unpack the contents
+log 1 "I: Unpacking archive"
+PKG_BASE=${PKG_BASE:-/usr/local}
+tar xzf "$package" -C "$PKG_BASE" >/dev/null 2>&1
+
+# and register the dependencies
+log 2 "I: Registering dependencies"
+if [ -f "$_pkg_tmpdir/$_pkg_config/DEPENDS" ]; then
+	exec 3< "$_pkg_tmpdir/$_pkg_config/DEPENDS"	# open for reading
+	while read dep <&3 ; do
+		log 3 "I: Registering dependency '$dep' for '$PKG_NAME'"
+		grep -v "^$PKG_NAME$" "$_pkg_db/$dep/REQUIRED_BY" > "$_pkg_db/$dep/tmp" \
+			2>/dev/null ; \
+			echo "$PKG_NAME" >> "$_pkg_db/$dep/tmp" && \
+			mv "$_pkg_db/$dep/tmp" "$_pkg_db/$dep/REQUIRED_BY"
+		if [ $? -ne 0 ]; then
+			log 0 "E: Failed to register dependency"
+			exit 1
+		fi
+	done
+	exec 3<&-
+fi
+
+# install the _pkg_config dir
+log 1 "I: $PKG_NAME: Registering installation"
+mv "$PKG_BASE/$_pkg_config" "$_pkg_db/$PKG_NAME"
+
+# success
+log 1 "I: $PKG_NAME: installed"
+exit 0

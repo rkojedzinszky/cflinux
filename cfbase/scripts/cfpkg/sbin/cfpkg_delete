@@ -1,0 +1,102 @@
+#!/bin/sh
+
+#   FILE: cfpkg_add -- a script to deinstall a cfpkg
+# AUTHOR: Richard Kojedzinszky <krichy@cflinux.hu>
+#   DATE: 30 August 2005
+#
+# Copyright (C) 2005 root <>
+# All rights reserved.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+. /usr/lib/cfpkg/cfpkg_common.sh
+
+package="$1"
+
+# checking existing installation
+log 2 "I: Checking installation of $package"
+if [ ! -d "$_pkg_db/$package" ]; then
+	log 0 "E: $package: no such package installed"
+	exit 1
+fi
+
+# do some sanity checks
+log 3 "I: Sanity checking"
+if [ ! -f "$_pkg_db/$package/FILES" ] || \
+	   [ ! -f "$_pkg_db/$package/INFO" ] ; then
+	   log 0 "E: $package: corrupted package, fix manually!"
+	   exit 1
+fi
+
+# load package information
+. "$_pkg_db/$package/INFO"
+
+# extra sanity check
+if [ "$PKG_NAME" != "$package" ]; then
+	log 0 "E: Incosistency found in package's database, fix it manually!"
+	exit 1
+fi
+
+# print log message
+log 1 "I: Deleting package $package"
+
+# checking dependencies
+log 2 "I: $package: checking packages requiring this"
+while [ -s "$_pkg_db/$package/REQUIRED_BY" ]; do
+	while read req < "$_pkg_db/$package/REQUIRED_BY" ; do
+		if [ -z "$_pkg_recurse" ]; then
+			log 0 "E: $package is required by $req, aborting"
+			log 0 "E: Specify -r to do recursive deleting"
+			exit 1
+		fi
+		log 3 "I: Recursively deleting: $req"
+		$0 "$req" || exit 1
+	done
+done
+
+# removing dependencies
+log 2 "I: $package: Removing this package's dependencies"
+if [ -s "$_pkg_db/$package/DEPENDS" ]; then
+	exec 3< "$_pkg_db/$package/DEPENDS"
+	while read dep <&3 ; do
+		log 3 "I: Removing dependency on $dep"
+		grep -v "^$package$" "$_pkg_db/$dep/REQUIRED_BY" > "$_pkg_db/$dep/tmp" \
+			2>/dev/null ; \
+			mv "$_pkg_db/$dep/tmp" "$_pkg_db/$dep/REQUIRED_BY"
+		if [ $? -ne 0 ]; then
+			log 0 "E: Failed to deregister dependency"
+			exit 1
+		fi
+	done
+	exec 3<&-
+fi
+
+# now, nothing keeps us back: removing files
+log 2 "I: $package: removing files"
+PKG_BASE="${PKG_BASE:-/usr/local}"
+cd "$PKG_BASE" && awk '$1 == "f" {print $2}' "$_pkg_db/$package/FILES" | xargs -r rm
+log 2 "I: $package: removing dirs"
+cd "$PKG_BASE" && awk 'BEGIN {idx = 0}
+	$1 == "d" {dir[idx++] = $2}
+	END {while (--idx >= 0) {print dir[idx]}}' "$_pkg_db/$package/FILES" | \
+	xargs -r rmdir 2>/dev/null
+
+# deregistering package
+log 1 "I: $PKG_NAME: Deregistering package installation"
+rm -rf "$_pkg_db/$package"
+
+# success
+log 1 "I: $PKG_NAME: deleted"
+exit 0

@@ -78,6 +78,13 @@ $(INSTALL_STAMP):
 	$(INSTALL) -d $(ROOTFS)/usr/share/udhcpc
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/udhcpc.events \
 		$(ROOTFS)/usr/share/udhcpc/default.script
+# installing cfpkg scripts
+	$(INSTALL) -d -m 555 $(ROOTFS)/usr/lib/cfpkg
+	$(INSTALL) -m 444 $(PKG_ROOT)/scripts/cfpkg/lib/cfpkg_common.sh \
+		$(ROOTFS)/usr/lib/cfpkg/
+	for i in cfpkg_add cfpkg_delete ; do \
+		$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/cfpkg/sbin/$$i \
+			$(ROOTFS)/usr/sbin/ ; done
 	touch $@
 
 .PHONY: configure clean build install
