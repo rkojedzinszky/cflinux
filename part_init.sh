@@ -137,3 +137,4 @@ EOF
 echo ""
 cd /
 umount /mnt
+mke2fs "${maindev}6"

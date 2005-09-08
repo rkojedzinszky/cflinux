@@ -4,4 +4,4 @@
 tmpfs		/var		tmpfs	rw,size=64M,mode=755	0	0
 /dev/ram0	/etc		minix	defaults		0	0
 proc		/proc		proc	defaults		0	0
-#/dev/hdc6	/usr/local	ext2	ro			0	0
+/dev/hdc6	/usr/local	ext2	ro			0	0
