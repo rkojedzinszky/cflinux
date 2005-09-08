@@ -72,9 +72,13 @@ pack: install
 		find . -path './$(PKG_CONF_DIR)' -prune \
 			-o ! -type d -mindepth 1 -printf 'f %p\n' ; \
 		true) > $(PKG_CONF_DIR)/FILES
-	@(echo "PKG_NAME=$(PKG)" && \
+	(echo "PKG_NAME=$(PKG)" && \
 		echo "PKG_VERSION=$(CFPKG_PKG_VERS)" && \
 		echo "PKG_BASE=$(PKG_BASE)" && \
 		echo "PKG_FORMAT=1") \
 		> $(PKG_INFO_FILE)
-	cd "$(PKG_PACK_DIR)" && tar czf "$(CFPKG_DIR)/$(PKG)-$(CFPKG_PKG_VERS).cfpkg" *
+ifneq ($(DEPENDS),)
+	for i in $(DEPENDS) ; do echo "$$i" ; done \
+		> $(PKG_PACK_DIR)/$(PKG_CONF_DIR)/DEPENDS
+endif
+	cd "$(PKG_PACK_DIR)" && tar czf "$(CFPKG_DIR)/../$(PKG)-$(CFPKG_PKG_VERS).cfpkg" *
