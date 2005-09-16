@@ -54,7 +54,7 @@ $(BUILT_STAMP):
 install: build
 	for i in $(PKG_ROOT)/lib/.libs/libzebra.so* ; do \
 		$(INSTALL_BIN) $$i $(ROOTFS)/usr/lib/ ; done
-	for i in zebra ospfd ripd ; do \
+	for i in zebra ospfd ripd bgpd ; do \
 		$(MAKE) -C $(PKG_ROOT)/$$i install-sbinPROGRAMS \
 		DESTDIR=$(ROOTFS) INSTALL_STRIP_FLAG=-s ; \
 		strip -s $(ROOTFS)/usr/sbin/$$i ; done

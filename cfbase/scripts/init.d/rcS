@@ -208,6 +208,12 @@ case "$ripd_enable" in
 			/usr/sbin/ripd -d $ripd_flags && echo -n " ripd"
 		;;
 esac
+case "$bgpd_enable" in
+	[Yy][Ee][Ss])
+		[ -r /etc/zebra/bgpd.conf ] && \
+			/usr/sbin/bgpd -d $ripd_flags && echo -n " bgpd"
+		;;
+esac
 case "$httpd_enable" in
 	[Yy][Ee][Ss])
 		/usr/sbin/httpd $httpd_flags && echo -n " httpd"

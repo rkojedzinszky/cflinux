@@ -23,6 +23,9 @@ ospfd_flags="-A 127.0.0.1"
 ripd_enable="NO"		# ripd
 ripd_flags="-A 127.0.0.1"
 
+bgpd_enable="NO"		# bgpd
+bgpd_flags="-A 127.0.0.1"
+
 snmpd_enable="NO"		# snmp daemon
 snmpd_flags="-Lsd -u snmpd"	# default flags, log to syslog using facility daemon
 				# and run as snmpd user
