@@ -13,33 +13,6 @@ diff -ru ppp.orig/pppd/main.c ppp-cvs-20050725/pppd/main.c
      script_setenv("BYTES_RCVD", numbuf, 0);
  }
  
-diff -ru ppp.orig/pppd/Makefile.linux ppp-cvs-20050725/pppd/Makefile.linux
---- ppp.orig/pppd/Makefile.linux	2005-07-12 03:50:23.000000000 +0200
-+++ ppp-cvs-20050725/pppd/Makefile.linux	2005-07-26 00:02:20.000000000 +0200
-@@ -48,19 +48,19 @@
- # Uncomment the next line to include support for PPP packet filtering.
- # This requires that the libpcap library and headers be installed
- # and that the kernel driver support PPP packet filtering.
--FILTER=y
-+#FILTER=y
- 
- # Uncomment the next line to enable multilink PPP (enabled by default)
- # Linux distributions: Please leave multilink ENABLED in your builds
- # of pppd!
--HAVE_MULTILINK=y
-+#HAVE_MULTILINK=y
- 
- # Uncomment the next line to enable the TDB database (enabled by default.)
- # If you enable multilink, then TDB is automatically enabled also.
- # Linux distributions: Please leave TDB ENABLED in your builds.
--USE_TDB=y
-+#USE_TDB=y
- 
--HAS_SHADOW=y
-+#HAS_SHADOW=y
- #USE_PAM=y
- #HAVE_INET6=y
- 
 diff -ru ppp.orig/pppd/pathnames.h ppp-cvs-20050725/pppd/pathnames.h
 --- ppp.orig/pppd/pathnames.h	2005-07-10 13:19:10.000000000 +0200
 +++ ppp-cvs-20050725/pppd/pathnames.h	2005-07-26 00:02:20.000000000 +0200
@@ -333,3 +306,26 @@ diff -ru ppp.orig/pppd/sys-linux.c ppp-cvs-20050725/pppd/sys-linux.c
  }
  
  /**********************************************************************
+--- ppp-cvs-20050725.orig/pppd/Makefile.linux	2005-07-12 03:50:23.000000000 +0200
++++ ppp-cvs-20050725/pppd/Makefile.linux	2005-10-22 16:31:00.000000000 +0200
+@@ -48,7 +48,7 @@
+ # Uncomment the next line to include support for PPP packet filtering.
+ # This requires that the libpcap library and headers be installed
+ # and that the kernel driver support PPP packet filtering.
+-FILTER=y
++#FILTER=y
+ 
+ # Uncomment the next line to enable multilink PPP (enabled by default)
+ # Linux distributions: Please leave multilink ENABLED in your builds
+@@ -58,9 +58,9 @@
+ # Uncomment the next line to enable the TDB database (enabled by default.)
+ # If you enable multilink, then TDB is automatically enabled also.
+ # Linux distributions: Please leave TDB ENABLED in your builds.
+-USE_TDB=y
++#USE_TDB=y
+ 
+-HAS_SHADOW=y
++#HAS_SHADOW=y
+ #USE_PAM=y
+ #HAVE_INET6=y
+ 
