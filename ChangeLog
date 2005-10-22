@@ -1,3 +1,6 @@
+Changes from 0.2-pre1 to 0.2:
+	- upgraded openssl to 0.9.7i
+
 Changes from 0.1.5 to 0.2-pre1:
 	- added the ethtool package
 	- upgraded the madwifi package
@@ -10,7 +13,7 @@ Changes from 0.1.5 to 0.2-pre1:
 	- upgraded uClibc to 0.9.27
 	- upgraded wireless-tools to version 27
 	- some modifications made to cfpkg.mk
-	- added a primitive package handling
+	- added primitive package handling
 	- upgraded quagga to 0.98.5
 	- added bgpd to the base quagga
 
