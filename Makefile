@@ -91,7 +91,7 @@ patch:
 
 clean:
 	for i in $(DO_MK) ; do $(MAKE) -f $(MK)/$$i.mk clean ; done
-	rm -f rootfs.bin
+	rm -f rootfs.bin*
 
 distclean: clean
 	rm -rf $(BUILD_DIR)
@@ -115,7 +115,7 @@ image:
 	umount /mnt
 	dd if=/dev/ram0 bs=1k of=$(ROOTFS)/usr/share/defaults/etc.img \
 		count=2047 >/dev/null 2>&1
-	$(MKCRAMFS) -i topad $(ROOTFS) rootfs.bin
+	$(MKCRAMFS) -i topad $(ROOTFS) rootfs-$(RELEASE_STRING).bin
 	rm -f topad
 
 dist: scratch

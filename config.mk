@@ -21,7 +21,7 @@
 #
 
 # cflinux version
-RELEASE_STRING = 0.2-pre1
+RELEASE_STRING = 0.2
 PACKAGE = cflinux
 
 export FDEVEL_DIR := $(TOP_DIR)
