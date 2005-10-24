@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := ppp
-SRC_FILENAME = ppp-cvs-20050725.tar.bz2
-EXTRACTED_DIR = ppp-cvs-20050725
+SRC_FILENAME = ppp-cvs-20050725-p1.tar.bz2
+EXTRACTED_DIR = ppp-cvs-20050725-p1
 DOWNLOAD_SITES = \
 	$(CFLINUX_PACKAGES)
 
