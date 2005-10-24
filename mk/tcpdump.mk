@@ -18,11 +18,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := tcpdump
-SRC_FILENAME = tcpdump-3.8.3.tar.gz
-EXTRACTED_DIR = tcpdump-3.8.3
+SRC_FILENAME = tcpdump-3.9.4.tar.gz
+EXTRACTED_DIR = tcpdump-3.9.4
 DOWNLOAD_SITES = http://www.tcpdump.org/release/ \
 		$(CFLINUX_PACKAGES)
-PATCHES = tcpdump.pcap_debug.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

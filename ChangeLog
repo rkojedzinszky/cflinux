@@ -1,6 +1,7 @@
 Changes from 0.2-pre1 to 0.2:
 	- upgraded openssl to 0.9.7i
 	- applied some cvs fixes for pppd
+	- upgraded libpcap (to 0.9.4) and tcpdump (to 3.9.4)
 
 Changes from 0.1.5 to 0.2-pre1:
 	- added the ethtool package

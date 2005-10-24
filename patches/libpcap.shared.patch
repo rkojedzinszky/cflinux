@@ -1,0 +1,11 @@
+--- libpcap-0.9.4/Makefile.in.orig	Mon Dec 15 02:35:03 2003
++++ libpcap-0.9.4/Makefile.in	Mon Oct 24 15:55:49 2005
+@@ -112,7 +112,7 @@
+ #
+ libpcap.so: $(OBJ)
+ 	@rm -f $@
+-	ld -shared -o $@.`cat VERSION` $(OBJ)
++	ld -shared -o $@ $(OBJ)
+ 
+ # the following rule succeeds, but the result is untested.
+ libpcap.dylib: $(OBJ)
