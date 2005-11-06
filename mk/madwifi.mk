@@ -18,11 +18,12 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := madwifi
-SRC_FILENAME = madwifi-cvs-20050801.tar.bz2
+SRC_FILENAME = madwifi-svn-rev-1302.tar.bz2
 EXTRACTED_DIR = madwifi
 DOWNLOAD_SITES = \
 		$(CFLINUX_PACKAGES)
-PATCHES = madwifi.nodebug.patch
+PATCHES = madwifi.nodebug.patch \
+	  madwifi.tools::Makefile.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -43,11 +44,15 @@ build: configure $(BUILT_STAMP)
 # for current version, on of amrr, onoe, simple
 A_RATE := amrr
 
+# the required tools
+TOOLS = athctrl athkey
+
 $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH) \
 		KERNELPATH=$(BUILD_DIR)/kernel \
 		KERNELRELEASE=$(KERNEL_VERSION) \
 		ATH_RATE=ath_rate/$(A_RATE)
+	$(MAKE) -C $(PKG_ROOT)/tools $(TOOLS) $(UC_PATH)
 	touch $(BUILT_STAMP)
 
 install: build
@@ -59,5 +64,7 @@ install: build
 		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
 	cp $(PKG_ROOT)/ath_rate/$(A_RATE)/ath_rate_$(A_RATE).o \
 		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
+	$(MAKE) -C $(PKG_ROOT)/tools install BINDIR=/sbin DESTDIR=$(ROOTFS) \
+		ALL_INSTALL="$(TOOLS)"
 
 .PHONY: configure clean build install

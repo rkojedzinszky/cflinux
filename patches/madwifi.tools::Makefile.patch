@@ -1,0 +1,11 @@
+--- madwifi/tools/Makefile.orig	2005-11-05 18:37:22.000000000 +0100
++++ madwifi/tools/Makefile	2005-11-05 18:38:07.000000000 +0100
+@@ -55,7 +55,7 @@
+ 	${CC} -o 80211debug ${CFLAGS} ${LDFLAGS} 80211debug.c
+ install: ${ALL_INSTALL}
+ 	for i in ${ALL_INSTALL}; do \
+-		cp $$i ${DESTDIR}${BINDIR}; \
++		install -o root -g root -m 555 -s $$i ${DESTDIR}${BINDIR}; \
+ 	done
+ 
+ clean:

@@ -91,7 +91,7 @@ patch:
 
 clean:
 	for i in $(DO_MK) ; do $(MAKE) -f $(MK)/$$i.mk clean ; done
-	rm -f rootfs.bin*
+	rm -f rootfs*.bin
 
 distclean: clean
 	rm -rf $(BUILD_DIR)
