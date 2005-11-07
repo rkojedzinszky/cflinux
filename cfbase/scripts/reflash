@@ -29,6 +29,7 @@ else
     then
 	echo "Retrieving file..."
 	wget "$file"
+	echo "Retrieving checksum..."
 	wget "${file}.md5"
 	tfile="${file##*/}"
 	if ! md5sum -sc "$tfile.md5" ; then
