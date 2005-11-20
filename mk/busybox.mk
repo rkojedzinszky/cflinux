@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := busybox
-SRC_FILENAME = busybox-1.00.tar.bz2
-EXTRACTED_DIR = busybox-1.00
+SRC_FILENAME = busybox-1.01.tar.bz2
+EXTRACTED_DIR = busybox-1.01
 DOWNLOAD_SITES = http://busybox.net/downloads/ \
 		$(CFLINUX_PACKAGES)
 
@@ -28,6 +28,7 @@ PATCHES = busybox.init.patch \
 	busybox.rdate.patch \
 	busybox.pwd2spwd.c.patch \
 	busybox.modprobe.c.patch \
+	busybox.modprobe_c_options.patch \
 	busybox.ifenslave.patch \
 	busybox.httpd_c.patch
 
