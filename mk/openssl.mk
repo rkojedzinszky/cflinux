@@ -40,7 +40,8 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all build-shared $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT) all "DIRS=crypto ssl" $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT) build-shared $(UC_PATH)
 	cp -a $(PKG_ROOT)/libcrypto.so* $(UC_ROOT)/lib
 	cp -a $(PKG_ROOT)/libssl.so* $(UC_ROOT)/lib
 	cp -vLr $(PKG_ROOT)/include/openssl $(UC_ROOT)/include
