@@ -1,6 +1,7 @@
 Changes from 0.2p2 to 0.2p3:
 	- upgraded ltraf
 	- upgraded busybox to version 1.01
+	- upgraded the kernel to version 2.4.32
 
 Changes from 0.2p1 to 0.2p2:
 	- modified the 'reflash' script
