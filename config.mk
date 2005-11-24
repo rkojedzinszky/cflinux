@@ -21,7 +21,7 @@
 #
 
 # cflinux version
-RELEASE_STRING = 0.2p3
+RELEASE_STRING = 0.2p4
 PACKAGE = cflinux
 
 export FDEVEL_DIR := $(TOP_DIR)
@@ -60,7 +60,9 @@ DEFAULTS_DIR = $(ROOTFS)/usr/share/defaults
 # the cflinux's package site as a last resort for packages
 CFLINUX_PACKAGES = ftp://ftp.cflinux.hu/pub/cflinux/packages/
 
+ifeq ($(TOP_DIR),)
 export TOP_DIR := $(shell pwd)
+endif
 export MK := $(FDEVEL_DIR)/mk
 export CONFIGS := $(FDEVEL_DIR)/configs
 export INSTALL_BIN := $(TOP_DIR)/install_bin.sh
