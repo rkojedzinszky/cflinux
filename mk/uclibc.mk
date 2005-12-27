@@ -25,7 +25,6 @@ DOWNLOAD_SITES = http://www.uclibc.org/downloads/ \
 PATCHES = uclibc.gcc_wrapper.patch \
 	  uclibc.syslog_h.patch \
 	  uclibc.syslog_c.patch \
-	  uclibc.syslog_c_no_loop.patch \
 	  uclibc.resolv_c.patch
 
 # include the common package targets 
