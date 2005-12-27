@@ -1,0 +1,25 @@
+--- uc/libc/misc/syslog/syslog.c.orig	2005-12-27 19:10:07.000000000 +0100
++++ uc/libc/misc/syslog/syslog.c	2005-12-27 19:18:58.000000000 +0100
+@@ -228,6 +228,14 @@
+ 	/* Output the message to the local logger using NUL as a message delimiter. */
+ 	p = tbuf;
+ 	*last_chr = 0;
++	if ( (rc = write(LogFile, p, last_chr + 1 - p)) < 0 ) {
++		if ( connected ) {
++			closelog_intern(0);
++			openlog(LogTag, LogStat | LOG_NDELAY, 0);
++		}
++		rc = write(LogFile, p, last_chr + 1 - p);
++	}
++/*
+ 	do {
+ 		rc = write(LogFile, p, last_chr + 1 - p);
+ 		if (rc < 0) {
+@@ -240,6 +248,7 @@
+ 		}
+ 		p+=rc;
+ 	} while (p <= last_chr);
++*/
+ 	if (rc >= 0) 
+ 		goto getout;
+ 
