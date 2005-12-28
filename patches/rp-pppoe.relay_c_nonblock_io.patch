@@ -1,0 +1,26 @@
+--- rp-pppoe-3.5/src/relay.c.orig	2005-12-28 17:15:17.000000000 +0100
++++ rp-pppoe-3.5/src/relay.c	2005-12-28 17:15:30.000000000 +0100
+@@ -43,6 +43,10 @@
+ #include <sys/uio.h>
+ #endif
+ 
++#ifdef HAVE_FCNTL_H
++#include <fcntl.h>
++#endif
++
+ #ifdef HAVE_UNISTD_H
+ #include <unistd.h>
+ #endif
+@@ -386,6 +390,12 @@
+     i->sessionSock   = openInterface(ifname, Eth_PPPOE_Session,   NULL);
+     i->clientOK = clientOK;
+     i->acOK = acOK;
++
++    /* set the O_NONBLOCK flag */
++    if (fcntl( i->discoverySock, F_SETFL, O_NONBLOCK | fcntl( i->discoverySock, F_GETFL ) ) < 0)
++	    fatalSys("fcntl");
++    if (fcntl( i->sessionSock,   F_SETFL, O_NONBLOCK | fcntl( i->sessionSock,   F_GETFL ) ) < 0)
++	    fatalSys("fcntl");
+ }
+ 
+ /**********************************************************************

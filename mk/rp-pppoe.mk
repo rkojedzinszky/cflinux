@@ -24,6 +24,7 @@ DOWNLOAD_SITES = \
 		http://www.roaringpenguin.com/penguin/pppoe/ \
 		$(CFLINUX_PACKAGES)
 PATCHES = rp-pppoe.patch \
+	rp-pppoe.relay_c_nonblock_io.patch \
 	rp-pppoe.configure.patch \
 	rp-pppoe.wild_ifname.patch \
 	rp-pppoe.relay.patch \
