@@ -1,3 +1,9 @@
+Changes from 0.2p4 to 0.2p5:
+	- pppoe-relay now sets O_NONBLOCK on fds to
+	  avoid the possibility of blocking
+	- patched wget to parse the PASV ftp command's
+	  result correctly
+
 Changes from 0.2p3 to 0.2p4:
 	- backported a patch to vi.c from svn
 

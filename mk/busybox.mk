@@ -31,7 +31,8 @@ PATCHES = busybox.init.patch \
 	busybox.modprobe_c_options.patch \
 	busybox.ifenslave.patch \
 	busybox.httpd_c.patch \
-	busybox.vi_r11477_r11451.patch
+	busybox.vi_r11477_r11451.patch \
+	busybox.wget_c.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

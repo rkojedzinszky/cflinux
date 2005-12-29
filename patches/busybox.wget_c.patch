@@ -1,0 +1,37 @@
+--- busybox-1.01/networking/wget.c.orig	2005-12-29 11:19:40.000000000 +0100
++++ busybox-1.01/networking/wget.c	2005-12-29 11:42:57.000000000 +0100
+@@ -165,10 +165,9 @@
+ {
+ 	int n, try=5, status;
+ 	unsigned long opt;
+-	int port;
+ 	char *proxy = 0;
+ 	char *dir_prefix=NULL;
+-	char *s, buf[512];
++	char *s, *p, buf[512];
+ 	struct stat sbuf;
+ 	char extra_headers[1024];
+ 	char *extra_headers_ptr = extra_headers;
+@@ -473,12 +472,16 @@
+ 		 */
+ 		if (ftpcmd("PASV", NULL, sfp, buf) !=  227)
+ 			close_delete_and_die("PASV: %s", buf+4);
+-		s = strrchr(buf, ',');
+-		*s = 0;
+-		port = atoi(s+1);
+-		s = strrchr(buf, ',');
+-		port += atoi(s+1) * 256;
+-		s_in.sin_port = htons(port);
++		s=p=strrchr(buf,'(') + 1;
++		for(n=0; n<4; n++) {
++			s=strchr(s, ',');
++			*s++ = '.';
++		}
++		s[-1] = 0;
++		inet_aton(p, &s_in.sin_addr);
++		s=strchr((p=s), ',');
++		*s++ = 0;
++		s_in.sin_port = htons(atoi(p)*256 + atoi(s));
+ 		dfp = open_socket(&s_in);
+ 
+ 		if (do_continue) {
