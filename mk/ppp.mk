@@ -23,7 +23,8 @@ EXTRACTED_DIR = ppp-cvs-20050725-p1
 DOWNLOAD_SITES = \
 	$(CFLINUX_PACKAGES)
 
-PATCHES = ppp.patch
+PATCHES = ppp.patch \
+	ppp.pathnames_h_connect_errors.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
