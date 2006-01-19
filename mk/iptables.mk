@@ -42,7 +42,8 @@ $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) iptables $(UC_PATH) \
 		KERNEL_DIR=$(BUILD_DIR)/kernel \
 		NO_SHARED_LIBS=1 \
-		DO_IPV6=0
+		DO_IPV6=0 \
+		LDFLAGS=
 	touch $(BUILT_STAMP)
 
 install: build
