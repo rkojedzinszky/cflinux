@@ -18,9 +18,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := iptables
-SRC_FILENAME = iptables-1.2.9.tar.bz2
-EXTRACTED_DIR = iptables-1.2.9
-DOWNLOAD_SITES = http://www.netfilter.org/files/ \
+SRC_FILENAME = iptables-1.3.4.tar.bz2
+EXTRACTED_DIR = iptables-1.3.4
+DOWNLOAD_SITES = http://www.netfilter.org/projects/iptables/files \
 		$(CFLINUX_PACKAGES)
 
 # include the common package targets 
