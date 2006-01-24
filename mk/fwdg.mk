@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := fwdg
-SRC_FILENAME = fwdg-r18.tar.bz2
-EXTRACTED_DIR = fwdg-r18
+SRC_FILENAME = fwdg-r19.tar.bz2
+EXTRACTED_DIR = fwdg-r19
 DOWNLOAD_SITES = $(CFLINUX_PACKAGES)
 
 # include the common package targets 
