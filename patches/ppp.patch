@@ -49,132 +49,6 @@ diff -ru ppp.orig/pppd/plugins/radius/avpair.c ppp-cvs-20050725/pppd/plugins/rad
  	if (vlen < 0 || vlen > attrlen - 2) {
  	    /* Do not log an error.  We are supposed to be able to cope with
  	       arbitrary vendor-specific gunk */
-diff -ru ppp.orig/pppd/plugins/radius/radius.c ppp-cvs-20050725/pppd/plugins/radius/radius.c
---- ppp.orig/pppd/plugins/radius/radius.c	2005-07-10 12:28:55.000000000 +0200
-+++ ppp-cvs-20050725/pppd/plugins/radius/radius.c	2005-07-26 00:02:20.000000000 +0200
-@@ -963,20 +963,43 @@
- 
- 
-     if (link_stats_valid) {
-+ 	DICT_ATTR*	attr;
-+ 	static char	bigint[64];
-+ 	
- 	av_type = link_connect_time;
- 	rc_avpair_add(&send, PW_ACCT_SESSION_TIME, &av_type, 0, VENDOR_NONE);
- 
--	av_type = link_stats.bytes_out;
--	rc_avpair_add(&send, PW_ACCT_OUTPUT_OCTETS, &av_type, 0, VENDOR_NONE);
--
--	av_type = link_stats.bytes_in;
--	rc_avpair_add(&send, PW_ACCT_INPUT_OCTETS, &av_type, 0, VENDOR_NONE);
--
--	av_type = link_stats.pkts_out;
--	rc_avpair_add(&send, PW_ACCT_OUTPUT_PACKETS, &av_type, 0, VENDOR_NONE);
--
--	av_type = link_stats.pkts_in;
--	rc_avpair_add(&send, PW_ACCT_INPUT_PACKETS, &av_type, 0, VENDOR_NONE);
-+ 	if ( (attr=rc_dict_findattr("Acct-Output-Octets-64")) ) {
-+ 		snprintf(bigint,sizeof(bigint),"%llu",link_stats.bytes_out);
-+ 		rc_avpair_add(&send,attr->value,bigint,0,attr->vendorcode);
-+ 	} else {
-+ 		av_type = link_stats.bytes_out;
-+ 		rc_avpair_add(&send, PW_ACCT_OUTPUT_OCTETS, &av_type, 0, VENDOR_NONE);
-+ 	}
-+  
-+ 	if ( (attr=rc_dict_findattr("Acct-Input-Octets-64")) ) {
-+ 		snprintf(bigint,sizeof(bigint),"%llu",link_stats.bytes_in);
-+ 		rc_avpair_add(&send,attr->value,bigint,0,attr->vendorcode);
-+ 	} else {
-+ 		av_type = link_stats.bytes_in;
-+ 		rc_avpair_add(&send, PW_ACCT_INPUT_OCTETS, &av_type, 0, VENDOR_NONE);
-+ 	}
-+  
-+ 	if ( (attr=rc_dict_findattr("Acct-Output-Packets-64")) ) {
-+ 		snprintf(bigint,sizeof(bigint),"%llu",link_stats.pkts_out);
-+ 		rc_avpair_add(&send,attr->value,bigint,0,attr->vendorcode);
-+ 	} else {
-+ 		av_type = link_stats.pkts_out;
-+ 		rc_avpair_add(&send, PW_ACCT_OUTPUT_PACKETS, &av_type, 0, VENDOR_NONE);
-+ 	}
-+ 
-+ 	if ( (attr=rc_dict_findattr("Acct-Input-Packets-64")) ) {
-+ 		snprintf(bigint,sizeof(bigint),"%llu",link_stats.pkts_in);
-+ 		rc_avpair_add(&send,attr->value,bigint,0,attr->vendorcode);
-+ 	} else {
-+ 		av_type = link_stats.pkts_in;
-+ 		rc_avpair_add(&send, PW_ACCT_INPUT_PACKETS, &av_type, 0, VENDOR_NONE);
-+ 	}
-     }
- 
-     if (*remote_number) {
-@@ -1105,22 +1128,45 @@
-     update_link_stats(0);
- 
-     if (link_stats_valid) {
-+ 	DICT_ATTR*	attr;
-+ 	static char	bigint[64];
-+ 	
- 	link_stats_valid = 0; /* Force later code to update */
- 
- 	av_type = link_connect_time;
- 	rc_avpair_add(&send, PW_ACCT_SESSION_TIME, &av_type, 0, VENDOR_NONE);
- 
--	av_type = link_stats.bytes_out;
--	rc_avpair_add(&send, PW_ACCT_OUTPUT_OCTETS, &av_type, 0, VENDOR_NONE);
--
--	av_type = link_stats.bytes_in;
--	rc_avpair_add(&send, PW_ACCT_INPUT_OCTETS, &av_type, 0, VENDOR_NONE);
--
--	av_type = link_stats.pkts_out;
--	rc_avpair_add(&send, PW_ACCT_OUTPUT_PACKETS, &av_type, 0, VENDOR_NONE);
--
--	av_type = link_stats.pkts_in;
--	rc_avpair_add(&send, PW_ACCT_INPUT_PACKETS, &av_type, 0, VENDOR_NONE);
-+ 	if ( (attr=rc_dict_findattr("Acct-Output-Octets-64")) ) {
-+ 		snprintf(bigint,sizeof(bigint),"%llu",link_stats.bytes_out);
-+ 		rc_avpair_add(&send,attr->value,bigint,0,attr->vendorcode);
-+ 	} else {
-+ 		av_type = link_stats.bytes_out;
-+ 		rc_avpair_add(&send, PW_ACCT_OUTPUT_OCTETS, &av_type, 0, VENDOR_NONE);
-+ 	}
-+  
-+ 	if ( (attr=rc_dict_findattr("Acct-Input-Octets-64")) ) {
-+ 		snprintf(bigint,sizeof(bigint),"%llu",link_stats.bytes_in);
-+ 		rc_avpair_add(&send,attr->value,bigint,0,attr->vendorcode);
-+ 	} else {
-+ 		av_type = link_stats.bytes_in;
-+ 		rc_avpair_add(&send, PW_ACCT_INPUT_OCTETS, &av_type, 0, VENDOR_NONE);
-+ 	}
-+  
-+ 	if ( (attr=rc_dict_findattr("Acct-Output-Packets-64")) ) {
-+ 		snprintf(bigint,sizeof(bigint),"%llu",link_stats.pkts_out);
-+ 		rc_avpair_add(&send,attr->value,bigint,0,attr->vendorcode);
-+ 	} else {
-+ 		av_type = link_stats.pkts_out;
-+ 		rc_avpair_add(&send, PW_ACCT_OUTPUT_PACKETS, &av_type, 0, VENDOR_NONE);
-+ 	}
-+  
-+ 	if ( (attr=rc_dict_findattr("Acct-Input-Packets-64")) ) {
-+ 		snprintf(bigint,sizeof(bigint),"%llu",link_stats.pkts_in);
-+ 		rc_avpair_add(&send,attr->value,bigint,0,attr->vendorcode);
-+ 	} else {
-+ 		av_type = link_stats.pkts_in;
-+ 		rc_avpair_add(&send, PW_ACCT_INPUT_PACKETS, &av_type, 0, VENDOR_NONE);
-+ 	}
-     }
- 
-     if (*remote_number) {
-diff -ru ppp.orig/pppd/plugins/radius/radiusclient.h ppp-cvs-20050725/pppd/plugins/radius/radiusclient.h
---- ppp.orig/pppd/plugins/radius/radiusclient.h	2004-11-14 08:26:26.000000000 +0100
-+++ ppp-cvs-20050725/pppd/plugins/radius/radiusclient.h	2005-07-26 00:02:20.000000000 +0200
-@@ -292,6 +292,7 @@
- /* Vendor codes */
- #define VENDOR_NONE     (-1)
- #define VENDOR_MICROSOFT	311
-+#define VENDOR_USR		429
- 
- /* Server data structures */
- 
 diff -ru ppp.orig/pppd/plugins/radius/sendserver.c ppp-cvs-20050725/pppd/plugins/radius/sendserver.c
 --- ppp.orig/pppd/plugins/radius/sendserver.c	2004-11-14 08:26:26.000000000 +0100
 +++ ppp-cvs-20050725/pppd/plugins/radius/sendserver.c	2005-07-26 00:02:20.000000000 +0200
@@ -316,3 +190,131 @@ diff -ru ppp.orig/pppd/sys-linux.c ppp-cvs-20050725/pppd/sys-linux.c
  #USE_PAM=y
  #HAVE_INET6=y
  
+--- ppp-cvs-20050725-p1.orig/pppd/plugins/radius/radiusclient.h	2004-11-14 08:26:26.000000000 +0100
++++ ppp-cvs-20050725-p1/pppd/plugins/radius/radiusclient.h	2006-02-20 15:08:07.000000000 +0100
+@@ -167,6 +167,8 @@
+ #define PW_ACCT_TERMINATE_CAUSE		49	/* integer */
+ #define PW_ACCT_MULTI_SESSION_ID	50	/* string */
+ #define PW_ACCT_LINK_COUNT		51	/* integer */
++#define PW_ACCT_INPUT_GIGAWORDS		52	/* integer */
++#define PW_ACCT_OUTPUT_GIGAWORDS	53	/* integer */
+ 
+ /* From RFC 2869 */
+ #define PW_ACCT_INTERIM_INTERVAL        85	/* integer */
+@@ -292,6 +294,7 @@
+ /* Vendor codes */
+ #define VENDOR_NONE     (-1)
+ #define VENDOR_MICROSOFT	311
++#define VENDOR_USR		429
+ 
+ /* Server data structures */
+ 
+--- ppp-cvs-20050725-p1.orig/pppd/plugins/radius/etc/dictionary	2004-11-14 08:26:26.000000000 +0100
++++ ppp-cvs-20050725-p1/pppd/plugins/radius/etc/dictionary	2006-02-20 15:13:48.000000000 +0100
+@@ -81,6 +81,8 @@
+ ATTRIBUTE	Acct-Session-Time	46	integer
+ ATTRIBUTE	Acct-Input-Packets	47	integer
+ ATTRIBUTE	Acct-Output-Packets	48	integer
++ATTRIBUTE	Acct-Input-Gigawords	52	integer
++ATTRIBUTE	Acct-Output-Gigawords	53	integer
+ ATTRIBUTE	Acct-Terminate-Cause	49	integer
+ ATTRIBUTE       Chap-Challenge          60      string
+ ATTRIBUTE	NAS-Port-Type		61	integer
+--- ppp-cvs-20050725-p1.orig/pppd/plugins/radius/radius.c	2005-07-10 12:28:55.000000000 +0200
++++ ppp-cvs-20050725-p1/pppd/plugins/radius/radius.c	2006-02-22 15:37:36.000000000 +0100
+@@ -963,18 +963,41 @@
+ 
+ 
+     if (link_stats_valid) {
++ 	DICT_ATTR*	attr;
++ 	static char	bigint[64];
++ 	
+ 	av_type = link_connect_time;
+ 	rc_avpair_add(&send, PW_ACCT_SESSION_TIME, &av_type, 0, VENDOR_NONE);
+ 
+-	av_type = link_stats.bytes_out;
++ 	if ( (attr=rc_dict_findattr("Acct-Output-Octets-64")) ) {
++ 		snprintf(bigint,sizeof(bigint),"%llu",link_stats.bytes_out);
++ 		rc_avpair_add(&send,attr->value,bigint,0,attr->vendorcode);
++ 	}
++	av_type = (UINT4)link_stats.bytes_out;
+ 	rc_avpair_add(&send, PW_ACCT_OUTPUT_OCTETS, &av_type, 0, VENDOR_NONE);
+-
+-	av_type = link_stats.bytes_in;
++	av_type = (UINT4)(link_stats.bytes_out >> 32);
++	rc_avpair_add(&send, PW_ACCT_OUTPUT_GIGAWORDS, &av_type, 0, VENDOR_NONE);
++  
++ 	if ( (attr=rc_dict_findattr("Acct-Input-Octets-64")) ) {
++ 		snprintf(bigint,sizeof(bigint),"%llu",link_stats.bytes_in);
++ 		rc_avpair_add(&send,attr->value,bigint,0,attr->vendorcode);
++ 	}
++	av_type = (UINT4)link_stats.bytes_in;
+ 	rc_avpair_add(&send, PW_ACCT_INPUT_OCTETS, &av_type, 0, VENDOR_NONE);
+-
++	av_type = (UINT4)(link_stats.bytes_in >> 32);
++	rc_avpair_add(&send, PW_ACCT_INPUT_GIGAWORDS, &av_type, 0, VENDOR_NONE);
++  
++ 	if ( (attr=rc_dict_findattr("Acct-Output-Packets-64")) ) {
++ 		snprintf(bigint,sizeof(bigint),"%llu",link_stats.pkts_out);
++ 		rc_avpair_add(&send,attr->value,bigint,0,attr->vendorcode);
++ 	}
+ 	av_type = link_stats.pkts_out;
+ 	rc_avpair_add(&send, PW_ACCT_OUTPUT_PACKETS, &av_type, 0, VENDOR_NONE);
+-
++ 
++ 	if ( (attr=rc_dict_findattr("Acct-Input-Packets-64")) ) {
++ 		snprintf(bigint,sizeof(bigint),"%llu",link_stats.pkts_in);
++ 		rc_avpair_add(&send,attr->value,bigint,0,attr->vendorcode);
++ 	}
+ 	av_type = link_stats.pkts_in;
+ 	rc_avpair_add(&send, PW_ACCT_INPUT_PACKETS, &av_type, 0, VENDOR_NONE);
+     }
+@@ -1105,20 +1128,43 @@
+     update_link_stats(0);
+ 
+     if (link_stats_valid) {
++ 	DICT_ATTR*	attr;
++ 	static char	bigint[64];
++ 	
+ 	link_stats_valid = 0; /* Force later code to update */
+ 
+ 	av_type = link_connect_time;
+ 	rc_avpair_add(&send, PW_ACCT_SESSION_TIME, &av_type, 0, VENDOR_NONE);
+ 
+-	av_type = link_stats.bytes_out;
++ 	if ( (attr=rc_dict_findattr("Acct-Output-Octets-64")) ) {
++ 		snprintf(bigint,sizeof(bigint),"%llu",link_stats.bytes_out);
++ 		rc_avpair_add(&send,attr->value,bigint,0,attr->vendorcode);
++ 	}
++	av_type = (UINT4)link_stats.bytes_out;
+ 	rc_avpair_add(&send, PW_ACCT_OUTPUT_OCTETS, &av_type, 0, VENDOR_NONE);
+-
+-	av_type = link_stats.bytes_in;
++	av_type = (UINT4)(link_stats.bytes_out >> 32);
++	rc_avpair_add(&send, PW_ACCT_OUTPUT_GIGAWORDS, &av_type, 0, VENDOR_NONE);
++  
++ 	if ( (attr=rc_dict_findattr("Acct-Input-Octets-64")) ) {
++ 		snprintf(bigint,sizeof(bigint),"%llu",link_stats.bytes_in);
++ 		rc_avpair_add(&send,attr->value,bigint,0,attr->vendorcode);
++ 	}
++	av_type = (UINT4)link_stats.bytes_in;
+ 	rc_avpair_add(&send, PW_ACCT_INPUT_OCTETS, &av_type, 0, VENDOR_NONE);
+-
++	av_type = (UINT4)(link_stats.bytes_in >> 32);
++	rc_avpair_add(&send, PW_ACCT_INPUT_GIGAWORDS, &av_type, 0, VENDOR_NONE);
++  
++ 	if ( (attr=rc_dict_findattr("Acct-Output-Packets-64")) ) {
++ 		snprintf(bigint,sizeof(bigint),"%llu",link_stats.pkts_out);
++ 		rc_avpair_add(&send,attr->value,bigint,0,attr->vendorcode);
++ 	}
+ 	av_type = link_stats.pkts_out;
+ 	rc_avpair_add(&send, PW_ACCT_OUTPUT_PACKETS, &av_type, 0, VENDOR_NONE);
+-
++  
++ 	if ( (attr=rc_dict_findattr("Acct-Input-Packets-64")) ) {
++ 		snprintf(bigint,sizeof(bigint),"%llu",link_stats.pkts_in);
++ 		rc_avpair_add(&send,attr->value,bigint,0,attr->vendorcode);
++ 	}
+ 	av_type = link_stats.pkts_in;
+ 	rc_avpair_add(&send, PW_ACCT_INPUT_PACKETS, &av_type, 0, VENDOR_NONE);
+     }

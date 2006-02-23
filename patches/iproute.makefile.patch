@@ -1,0 +1,26 @@
+--- iproute2-051007/Makefile.orig	2005-07-09 00:08:47.000000000 +0200
++++ iproute2-051007/Makefile	2006-02-22 16:09:07.000000000 +0100
+@@ -5,12 +5,12 @@
+ MANDIR=/usr/share/man
+ 
+ # Path to db_185.h include
+-DBM_INCLUDE:=/usr/include
++#DBM_INCLUDE:=/usr/include
+ 
+ DEFINES= -DRESOLVE_HOSTNAMES
+ 
+ #options if you have a bind>=4.9.4 libresolv (or, maybe, glibc)
+-LDLIBS=-lresolv
++#LDLIBS=-lresolv
+ ADDLIB=
+ 
+ #options for decnet
+@@ -27,7 +27,7 @@
+ 
+ LDLIBS += -L../lib -lnetlink -lutil
+ 
+-SUBDIRS=lib ip tc misc netem
++SUBDIRS=lib ip tc #misc netem
+ 
+ LIBNETLINK=../lib/libnetlink.a ../lib/libutil.a
+ 
