@@ -64,10 +64,6 @@ DO_MK += libnet
 DO_MK += nemesis
 DO_MK += ethtool
 
-ifeq (local.mk,$(wildcard local.mk))
-include local.mk
-endif
-
 # Finish target is last
 DO_MK += finish
 endif
@@ -78,6 +74,10 @@ DISTFILES = AUTHOR BUILD LICENSE ChangeLog Makefile README UPGRADE bzpadder cfba
 
 export TOP_DIR := $(shell pwd)
 include $(TOP_DIR)/config.mk
+
+ifeq (local.mk,$(wildcard local.mk))
+include local.mk
+endif
 
 all:
 	for i in $(DO_MK) ; do \
