@@ -1,3 +1,6 @@
+Changes from 0.2p7 to 0.2p8:
+	- added a patch to work around texas instruments' IRQ bug
+
 Changes from 0.2p6 to 0.2p7:
 	- upgraded pppd's radius to send
 	  'Acct-{Input,Output}-Gigawords' attributes
