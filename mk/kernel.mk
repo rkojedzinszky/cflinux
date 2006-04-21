@@ -36,6 +36,7 @@ PATCHES = kernel.vlan_mtu.patch \
 	kernel.blackhole.patch \
 	kernel.usb_root.patch \
 	kernel.tulip_iff_running.patch \
+	kernel.pcmcia-ti-routing-10_v24.patch \
 	kernel.ipt_random.patch
 
 # include the common package targets 
