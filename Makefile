@@ -90,7 +90,7 @@ patch:
 	for i in $(DO_MK) ; do $(MAKE) -f $(MK)/$$i.mk patch || exit 1 ; done
 
 clean:
-	for i in $(DO_MK) ; do $(MAKE) -f $(MK)/$$i.mk clean ; done
+	-for i in $(DO_MK) ; do $(MAKE) -f $(MK)/$$i.mk clean ; done
 	rm -f rootfs*.bin
 
 distclean: clean
