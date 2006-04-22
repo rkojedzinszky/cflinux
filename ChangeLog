@@ -1,7 +1,17 @@
+Changes from 0.2p8 to 1.0:
+	- version rename
+	- improved the cfpkg_add to compare cflinux major versions
+	  packages are compiled for and currently running system
+	TODO:
+	- let write_helper check the validity of the image, at least by
+	  md5 or sha1
+
 Changes from 0.2p7 to 0.2p8:
 	- added a patch to work around texas instruments' IRQ bug
 	- upraded grsec to 2.1.8, and re-ported the random
 	  IP ID, TCP ISN, RPC XID patches from grsec 2.1.1
+	- upgraded pcmcia-cs to 3.2.8
+	- upgraded uClibc to 0.9.28
 
 Changes from 0.2p6 to 0.2p7:
 	- upgraded pppd's radius to send

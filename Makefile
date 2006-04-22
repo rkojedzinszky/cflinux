@@ -102,7 +102,7 @@ scratch: distclean
 
 install: all
 	for i in $(DO_MK) ; do $(MAKE) -f $(MK)/$$i.mk install || exit ; done
-	echo "$(RELEASE_STRING) ($(shell date "+%Y/%m/%d-%H.%M.%S"))" > $(ROOTFS)/.release
+	echo "$(RELEASE_STRING) ($(shell date "+%Y/%m/%d-%H.%M.%S %Z"))" > $(ROOTFS)/.release
 
 image:
 	cat bzpadder $(BUILD_DIR)/kernel/arch/i386/boot/bzImage > topad

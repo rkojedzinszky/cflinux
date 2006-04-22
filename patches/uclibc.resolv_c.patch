@@ -1,16 +1,15 @@
---- uClibc-0.9.27.orig/libc/inet/resolv.c	2005-01-12 08:59:21.000000000 +0100
-+++ uClibc-0.9.27/libc/inet/resolv.c	2005-07-30 11:58:03.000000000 +0200
-@@ -243,7 +243,8 @@
+--- uClibc-0.9.28/libc/inet/resolv.c.orig	2005-08-18 00:49:41.000000000 +0200
++++ uClibc-0.9.28/libc/inet/resolv.c	2006-04-22 20:14:58.000000000 +0200
+@@ -246,7 +246,7 @@
  			    struct hostent ** result,
  			    int * h_errnop);
- extern int __dns_lookup(const char * name, int type, int nscount, 
+ extern int __dns_lookup(const char * name, int type, int nscount,
 -	char ** nsip, unsigned char ** outpacket, struct resolv_answer * a);
-+	char ** nsip, unsigned char ** outpacket, struct resolv_answer * a,
-+	int maxlen);
++	char ** nsip, unsigned char ** outpacket, struct resolv_answer * a, int maxlen);
  
  extern int __encode_dotted(const char * dotted, unsigned char * dest, int maxlen);
- extern int __decode_dotted(const unsigned char * message, int offset, 
-@@ -662,7 +663,8 @@
+ extern int __decode_dotted(const unsigned char * message, int offset,
+@@ -665,7 +665,8 @@
  static int ns=0, id=1;
  
  int __dns_lookup(const char *name, int type, int nscount, char **nsip,
@@ -20,20 +19,21 @@
  {
  	int i, j, len, fd, pos, rc;
  	struct timeval tv;
-@@ -670,10 +672,11 @@
- 	struct resolv_header h;
- 	struct resolv_question q;
+@@ -675,11 +676,12 @@
+ 	struct resolv_answer ma;
+ 	int first_answer = 1;
  	int retries = 0;
 -	unsigned char * packet = malloc(PACKETSZ);
 +	unsigned char * packet = malloc(maxlen > PACKETSZ ? maxlen : PACKETSZ);
  	char *dns, *lookup = malloc(MAXDNAME);
  	int variant = -1;
  	struct sockaddr_in sa;
+ 	int local_ns = -1, local_id = -1;
 +	int use_vc;
  #ifdef __UCLIBC_HAS_IPV6__
  	int v6;
  	struct sockaddr_in6 sa6;
-@@ -684,6 +687,8 @@
+@@ -690,6 +692,8 @@
  	if (!packet || !lookup || !nscount)
  	    goto fail;
  
@@ -41,8 +41,8 @@
 +	use_vc = (maxlen > PACKETSZ);
  	DPRINTF("Looking up type %d answer for '%s'\n", type, name);
  
- 	LOCK;
-@@ -740,9 +745,13 @@
+ 	/* Mess with globals while under lock */
+@@ -745,9 +749,13 @@
  
  #ifdef __UCLIBC_HAS_IPV6__
  		v6 = inet_pton(AF_INET6, dns, &sa6.sin6_addr) > 0;
@@ -58,7 +58,7 @@
  #endif
  		if (fd < 0) {
                      retries++;
-@@ -778,6 +787,10 @@
+@@ -783,6 +791,10 @@
  		DPRINTF("Transmitting packet of length %d, id=%d, qr=%d\n",
  				len, h.id, h.qr);
  
@@ -69,7 +69,7 @@
  		send(fd, packet, len, 0);
  
  		FD_ZERO(&fds);
-@@ -792,7 +805,30 @@
+@@ -797,7 +809,30 @@
  			goto tryall;
  		}
  
@@ -101,7 +101,7 @@
  		if (len < HFIXEDSZ) {
  			/* too short ! */
  			goto again;
-@@ -1132,7 +1168,7 @@
+@@ -1179,7 +1214,7 @@
  	__nameserversXX=__nameservers;
  	__nameserverXX=__nameserver;
  	BIGUNLOCK;
@@ -110,16 +110,16 @@
  
  	if (i < 0) {
  		h_errno = TRY_AGAIN;
-@@ -1941,7 +1977,7 @@
- 	__nameserversXX=__nameservers;
- 	__nameserverXX=__nameserver;
- 	BIGUNLOCK;
--		i = __dns_lookup(buf, T_A, __nameserversXX, __nameserverXX, &packet, &a);
-+		i = __dns_lookup(buf, T_A, __nameserversXX, __nameserverXX, &packet, &a, PACKETSZ);
+@@ -1990,7 +2025,7 @@
+ 	    a.buf = buf;
+ 	    a.buflen = buflen;
+ 	    a.add_count = 0;
+-	    i = __dns_lookup(name, T_A, __nameserversXX, __nameserverXX, &packet, &a);
++	    i = __dns_lookup(name, T_A, __nameserversXX, __nameserverXX, &packet, &a, PACKETSZ);
  
- 		if (i < 0) {
- 			*h_errnop = HOST_NOT_FOUND;
-@@ -2086,7 +2122,7 @@
+ 	    if (i < 0) {
+ 		*h_errnop = HOST_NOT_FOUND;
+@@ -2142,7 +2177,7 @@
  	__nameserverXX=__nameserver;
  	BIGUNLOCK;
  
@@ -128,7 +128,7 @@
  
  		if (i < 0) {
  			*h_errnop = HOST_NOT_FOUND;
-@@ -2260,7 +2296,7 @@
+@@ -2318,7 +2353,7 @@
  	__nameserversXX=__nameservers;
  	__nameserverXX=__nameserver;
  	BIGUNLOCK;

@@ -18,13 +18,11 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := pcmcia-cs
-SRC_FILENAME = pcmcia-cs-3.2.7.tar.gz
-EXTRACTED_DIR = pcmcia-cs-3.2.7
+SRC_FILENAME = pcmcia-cs-3.2.8.tar.gz
+EXTRACTED_DIR = pcmcia-cs-3.2.8
 DOWNLOAD_SITES = \
-		http://cesnet.dl.sourceforge.net/sourceforge/pcmcia-cs/ \
-		http://keihanna.dl.sourceforge.net/sourceforge/pcmcia-cs/ \
-		http://aleron.dl.sourceforge.net/sourceforge/pcmcia-cs/ \
-		$(CFLINUX_PACKAGES)
+		 http://pcmcia-cs.sourceforge.net/ftp \
+		 $(CFLINUX_PACKAGES)
 PATCHES = pcmcia-cs.patch \
 	pcmcia-cs.cardmgr_execute.patch
 

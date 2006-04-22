@@ -75,10 +75,14 @@ pack: install
 	(echo "PKG_NAME=$(PKG)" && \
 		echo "PKG_VERSION=$(CFPKG_PKG_VERS)" && \
 		echo "PKG_BASE=$(PKG_BASE)" && \
-		echo "PKG_FORMAT=1") \
+		echo "PKG_FORMAT=2" && \
+		echo "PKG_CFLINUX_MAJOR=$(VERSION_MAJOR)") \
 		> $(PKG_INFO_FILE)
 ifneq ($(DEPENDS),)
 	for i in $(DEPENDS) ; do echo "$$i" ; done \
 		> $(PKG_PACK_DIR)/$(PKG_CONF_DIR)/DEPENDS
 endif
+	# install messages if they exist
+	-cp INST_MSG $(PKG_PACK_DIR)/$(PKG_CONF_DIR)/
+
 	cd "$(PKG_PACK_DIR)" && tar czf "$(CFPKG_DIR)/../$(PKG)-$(CFPKG_PKG_VERS).cfpkg" *

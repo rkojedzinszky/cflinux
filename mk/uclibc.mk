@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := uclibc
-SRC_FILENAME = uClibc-0.9.27.tar.bz2
-EXTRACTED_DIR = uClibc-0.9.27
+SRC_FILENAME = uClibc-0.9.28.tar.bz2
+EXTRACTED_DIR = uClibc-0.9.28
 DOWNLOAD_SITES = http://www.uclibc.org/downloads/ \
 		$(CFLINUX_PACKAGES)
 PATCHES = uclibc.gcc_wrapper.patch \
@@ -51,6 +51,7 @@ $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) install_dev install_toolchain RUNTIME_PREFIX_LIB_FROM_DEVEL_PREFIX_LIB=
 	$(MAKE) -C $(PKG_ROOT) install_runtime PREFIX=$(UC_ROOT)
 	cp -a $(PKG_ROOT)/lib/ld-uC* /lib/
+	ln -sf crt1.o $(UC_ROOT)/lib/crt0.o
 	$(MAKE) -C $(PKG_ROOT)/utils $(UC_PATH)
 	for i in include lib ; do rmdir $(UC_ROOT)/usr/$$i ; ln -sf ../$$i $(UC_ROOT)/usr/$$i ; done
 	touch $(BUILT_STAMP)

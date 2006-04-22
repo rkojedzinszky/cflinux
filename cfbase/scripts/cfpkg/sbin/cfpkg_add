@@ -40,15 +40,21 @@ fi
 # read info
 . "$_pkg_tmpdir/$_pkg_config/INFO"
 
+# check versions - required at least v2
+if ! [ "$PKG_FORMAT" -ge "2" ]; then
+	echo "E: $PKG_NAME: Invalid cfpkg format: '$PKG_FORMAT' - at least '2' needed"
+	exit 1
+fi
+
 # check essential variables
-if [ -z "$PKG_NAME" -o -z "$PKG_VERSION" ]; then
+if [ -z "$PKG_NAME" -o -z "$PKG_VERSION" -o -z "$PKG_CFLINUX_MAJOR" ]; then
 	echo "E: '$package': Strange cfpkg format, skipping"
 	exit 1
 fi
 
-# check versions
-if [ "$PKG_FORMAT" -ne "1" ]; then
-	echo "E: $PKG_NAME: Invalid cfpkg format: '$PKG_FORMAT'"
+# compare cflinux versions package is compiled for and running system
+if [ "$PKG_CFLINUX_MAJOR" != "$_cflinux_major" ]; then
+	log 0 "E: $PKG_NAME: major version mismatch: package was compiled for cflinux $PKG_CFLINUX_MAJOR.*"
 	exit 1
 fi
 
@@ -105,6 +111,11 @@ fi
 # install the _pkg_config dir
 log 1 "I: $PKG_NAME: Registering installation"
 mv "$PKG_BASE/$_pkg_config" "$_pkg_db/$PKG_NAME"
+
+# show the package's message
+if [ -f "$_pkg_db/$PKG_NAME/INST_MSG" ]; then
+	cat "$_pkg_db/$PKG_NAME/INST_MSG"
+fi
 
 # success
 log 1 "I: $PKG_NAME: installed"

@@ -44,6 +44,19 @@ if [ -z "$_pkg_base" ]; then
 	[ -z "$_pkg_verbose" ] && _pkg_verbose=0
 	_pkg_recurse=
 
+	# get cflinux's version
+	# check /.release string
+	if ! grep -qE "^[0-9]+\.[0-9]+(p[0-9]+)? " /.release ; then
+		log 0 "E: invalid /.release file"
+		exit 1
+	fi
+	# clear the version variables
+	_cflinux_major= _cflinux_minor= _cflinux_patch=
+	# read them in
+	eval $(sed 's/(.*$//;s/^/_cflinux_major=/;s/\./ _cflinux_minor=/;s/p/ _cflinux_patch=/' /.release)
+	# export them
+	export _cflinux_major _cflinux_minor _cflinux_patch
+
 	while : ; do
 		case "$1" in
 			-v)
