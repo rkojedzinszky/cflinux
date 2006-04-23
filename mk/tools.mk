@@ -35,9 +35,10 @@ build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) all \
-		KERNEL_INCLUDE=$(BUILD_DIR)/kernel/include
+		KERNEL_INCLUDE=$(BUILD_DIR)/kernel/include $(UC_PATH)
 	touch $(BUILT_STAMP)
 
 install: build
+	$(INSTALL_BIN) $(PKG_ROOT)/write_helper $(ROOTFS)/usr/lib/cfmaint/
 
 .PHONY: configure clean build install

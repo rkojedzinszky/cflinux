@@ -24,7 +24,6 @@ ifndef DO_MK
 DO_MK = base
 DO_MK += grsec
 DO_MK += kernel
-DO_MK += tools
 DO_MK += uclibc
 DO_MK += db
 DO_MK += busybox
@@ -37,7 +36,6 @@ DO_MK += iproute
 DO_MK += iptables
 DO_MK += libpcap
 DO_MK += tcpdump
-DO_MK += extra
 DO_MK += net-tools
 DO_MK += net-snmp
 DO_MK += quagga
@@ -65,6 +63,7 @@ DO_MK += nemesis
 DO_MK += ethtool
 
 # Finish target is last
+DO_MK += tools
 DO_MK += finish
 endif
 
