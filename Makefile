@@ -114,7 +114,8 @@ image:
 	umount /mnt
 	dd if=/dev/ram0 bs=1k of=$(ROOTFS)/usr/share/defaults/etc.img \
 		count=2047 >/dev/null 2>&1
-	$(MKCRAMFS) -i topad $(ROOTFS) rootfs-$(RELEASE_STRING).bin
+	$(MKCRAMFS) -i topad $(ROOTFS) rootfs.bin
+	$(PACKROOT) '$(VERSION_MAJOR)' '$(VERSION_MINOR)' '$(VERSION_PATCH)' '' rootfs.bin /dev/null cflinux-$(RELEASE_STRING).img
 	rm -f topad
 
 dist: scratch

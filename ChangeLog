@@ -2,9 +2,9 @@ Changes from 0.2p8 to 1.0:
 	- version rename
 	- improved the cfpkg_add to compare cflinux major versions
 	  packages are compiled for and currently running system
-	TODO:
-	- let write_helper check the validity of the image, at least by
-	  md5 or sha1
+	- write_helper now checks the validity of the image with
+	  an sha1 digest. also, a .tar.gz file can be included in
+	  the cflinux.img
 
 Changes from 0.2p7 to 0.2p8:
 	- added a patch to work around texas instruments' IRQ bug

@@ -79,3 +79,4 @@ export INSTALL_SCRIPT := install -o 0 -g 0 -m 555
 INSTALL := install -o 0 -g 0
 
 MKCRAMFS := $(TOP_DIR)/tools/mkcramfs
+PACKROOT := $(TOP_DIR)/tools/rootfs-pack

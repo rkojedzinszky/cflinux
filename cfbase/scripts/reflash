@@ -43,9 +43,4 @@ else
     fi
 fi
 
-for i in 5 4 3 2 1 ; do
-	echo -ne "\rWriting $tfile to $rootdev in $i secs..."
-	sleep 1
-done
-echo ""
-/usr/lib/cfmaint/write_helper "$tfile" "$rootdev"
+exec /usr/lib/cfmaint/write_helper "$tfile" "$rootdev"
