@@ -72,11 +72,12 @@ DISTFILES = AUTHOR BUILD LICENSE ChangeLog Makefile README UPGRADE bzpadder cfba
 	    packages.mk part_init.sh patches tools
 
 export TOP_DIR := $(shell pwd)
-include $(TOP_DIR)/config.mk
 
 ifeq (local.mk,$(wildcard local.mk))
 include local.mk
 endif
+
+include $(TOP_DIR)/config.mk
 
 all:
 	for i in $(DO_MK) ; do \
