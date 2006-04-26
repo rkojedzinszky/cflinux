@@ -46,7 +46,6 @@ DO_MK += hostapd
 DO_MK += ppp
 DO_MK += rp-pppoe
 DO_MK += rp-l2tp
-DO_MK += e2fsprogs
 DO_MK += wireless_tools
 DO_MK += madwifi
 DO_MK += fwdg

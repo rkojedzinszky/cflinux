@@ -6,9 +6,6 @@ set +e
 # invoking ldconfig
 /sbin/ldconfig
 
-# Make / appear in the mtab and force readonly
-mount -o remount,ro /
-
 # Mounting all filesystems
 echo -n "Mounting filesystems: "
 mount -a
@@ -27,8 +24,9 @@ echo -n "" > /var/run/utmp
 echo "done"
 
 # save the __system_device file
+umask 0227
 echo "$__system_device" > /var/run/__system_device
-chmod 444 /var/run/__system_device
+umask 0022
 
 # processing modules
 modules_file="/etc/modules"

@@ -5,6 +5,8 @@ Changes from 0.2p8 to 1.0:
 	- write_helper now checks the validity of the image with
 	  an sha1 digest. also, a .tar.gz file can be included in
 	  the cflinux.img
+	- upgraded to busybox 1.1.2
+	- e2fsprogs is now used from busybox
 
 Changes from 0.2p7 to 0.2p8:
 	- added a patch to work around texas instruments' IRQ bug

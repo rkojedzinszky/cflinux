@@ -1,6 +1,6 @@
---- busybox-1.00.orig/networking/httpd.c	Fri Oct  8 10:03:29 2004
-+++ busybox-1.00/networking/httpd.c	Fri Jul 29 14:43:57 2005
-@@ -1468,18 +1468,49 @@
+--- busybox-1.1.2/networking/httpd.c.orig	2006-03-22 22:16:19.000000000 +0100
++++ busybox-1.1.2/networking/httpd.c	2006-04-26 19:49:47.000000000 +0200
+@@ -1530,18 +1530,49 @@
  			char *cipher;
  			char *pp;
  
@@ -61,16 +61,16 @@
  				continue;
  			}
  		}
-@@ -1976,7 +2007,7 @@
+@@ -2039,7 +2070,7 @@
+   SKIP_FEATURE_HTTPD_USAGE_FROM_INETD_ONLY(int server;)
  
- #ifdef CONFIG_FEATURE_HTTPD_SETUID
-   const char *s_uid;
--  long uid = -1;
-+  struct passwd* pw = NULL;
- #endif
+   USE_FEATURE_HTTPD_SETUID(const char *s_uid;)
+-  USE_FEATURE_HTTPD_SETUID(long uid = -1;)
++  USE_FEATURE_HTTPD_SETUID(struct passwd* pw = NULL;)
  
- #ifdef CONFIG_FEATURE_HTTPD_AUTH_MD5
-@@ -2036,11 +2067,15 @@
+   USE_FEATURE_HTTPD_AUTH_MD5(const char *pass;)
+ 
+@@ -2085,12 +2116,18 @@
  #ifdef CONFIG_FEATURE_HTTPD_SETUID
      if(opt & OPT_SETUID) {
  	char *e;
@@ -79,15 +79,18 @@
  	uid = strtol(s_uid, &e, 0);
  	if(*e != '\0') {
  		/* not integer */
--		uid = my_getpwnam(s_uid);
+-		uid = bb_xgetpwnam(s_uid);
 +		pw = getpwnam(s_uid);
 +	} else {
 +		/* integer */
 +		pw = getpwuid(uid);
  	}
++	if (!pw)
++		bb_error_msg_and_die("Invalid user name: %s", s_uid);
        }
  #endif
-@@ -2053,8 +2088,11 @@
+ #endif
+@@ -2102,8 +2139,11 @@
    server = openServer();
  # ifdef CONFIG_FEATURE_HTTPD_SETUID
    /* drop privileges */

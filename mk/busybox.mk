@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := busybox
-SRC_FILENAME = busybox-1.01.tar.bz2
-EXTRACTED_DIR = busybox-1.01
+SRC_FILENAME = busybox-1.1.2.tar.bz2
+EXTRACTED_DIR = busybox-1.1.2
 DOWNLOAD_SITES = http://busybox.net/downloads/ \
 		$(CFLINUX_PACKAGES)
 
@@ -27,11 +27,8 @@ PATCHES = busybox.init.patch \
 	busybox.crond.patch \
 	busybox.rdate.patch \
 	busybox.pwd2spwd.c.patch \
-	busybox.modprobe.c.patch \
-	busybox.modprobe_c_options.patch \
 	busybox.ifenslave.patch \
 	busybox.httpd_c.patch \
-	busybox.vi_r11477_r11451.patch \
 	busybox.wget_c.patch
 
 # include the common package targets 
@@ -41,6 +38,7 @@ configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
 	cp $(CONFIGS)/$(PKG).config $(PKG_ROOT)/.config
+	$(MAKE) -C $(PKG_ROOT) oldconfig
 	touch $(CONFIGURED_STAMP)
 
 clean:

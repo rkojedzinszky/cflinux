@@ -62,13 +62,10 @@ fi
 echo -ne "\n"
 
 # Do the real mount
-mount -nt minix /dev/ram0 /etc
+mount -t minix /dev/ram0 /etc 2>/dev/null
 
-# Make an empty mtab file
-echo -n "" > /etc/mtab
-
-# make /etc appear in the mtab
-mount -o remount /etc
+# Make /etc/mtab to be a symlink to /proc/mounts
+ln -sf /proc/mounts /etc/mtab
 
 # Invoke /sbin/init
 export __system_device
