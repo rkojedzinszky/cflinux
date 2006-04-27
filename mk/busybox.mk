@@ -29,7 +29,8 @@ PATCHES = busybox.init.patch \
 	busybox.pwd2spwd.c.patch \
 	busybox.ifenslave.patch \
 	busybox.httpd_c.patch \
-	busybox.wget_c.patch
+	busybox.wget_c.patch \
+	busybox.no_halt_poweroff.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

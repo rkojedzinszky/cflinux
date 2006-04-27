@@ -1,0 +1,20 @@
+--- busybox-1.1.2/include/applets.h.orig	2006-04-27 16:07:02.000000000 +0200
++++ busybox-1.1.2/include/applets.h	2006-04-27 16:07:36.000000000 +0200
+@@ -127,7 +127,7 @@
+ USE_GREP(APPLET(grep, grep_main, _BB_DIR_BIN, _BB_SUID_NEVER))
+ USE_GUNZIP(APPLET(gunzip, gunzip_main, _BB_DIR_BIN, _BB_SUID_NEVER))
+ USE_GZIP(APPLET(gzip, gzip_main, _BB_DIR_BIN, _BB_SUID_NEVER))
+-USE_HALT(APPLET(halt, halt_main, _BB_DIR_SBIN, _BB_SUID_NEVER))
++//USE_HALT(APPLET(halt, halt_main, _BB_DIR_SBIN, _BB_SUID_NEVER))
+ USE_HDPARM(APPLET(hdparm, hdparm_main, _BB_DIR_SBIN, _BB_SUID_NEVER))
+ USE_HEAD(APPLET(head, head_main, _BB_DIR_USR_BIN, _BB_SUID_NEVER))
+ USE_HEXDUMP(APPLET(hexdump, hexdump_main, _BB_DIR_USR_BIN, _BB_SUID_NEVER))
+@@ -210,7 +210,7 @@
+ USE_PING6(APPLET(ping6, ping6_main, _BB_DIR_BIN, _BB_SUID_NEVER))
+ USE_PIPE_PROGRESS(APPLET_NOUSAGE(pipe_progress, pipe_progress_main, _BB_DIR_BIN, _BB_SUID_NEVER))
+ USE_PIVOT_ROOT(APPLET(pivot_root, pivot_root_main, _BB_DIR_SBIN, _BB_SUID_NEVER))
+-USE_HALT(APPLET(poweroff, halt_main, _BB_DIR_SBIN, _BB_SUID_NEVER))
++//USE_HALT(APPLET(poweroff, halt_main, _BB_DIR_SBIN, _BB_SUID_NEVER))
+ USE_PRINTENV(APPLET(printenv, printenv_main, _BB_DIR_BIN, _BB_SUID_NEVER))
+ USE_PRINTF(APPLET(printf, printf_main, _BB_DIR_USR_BIN, _BB_SUID_NEVER))
+ USE_PS(APPLET(ps, ps_main, _BB_DIR_BIN, _BB_SUID_NEVER))
