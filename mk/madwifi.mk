@@ -18,12 +18,11 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := madwifi
-SRC_FILENAME = madwifi-svn-rev-1302.tar.bz2
-EXTRACTED_DIR = madwifi
+SRC_FILENAME = madwifi-ng-r1531.tar.bz2
+EXTRACTED_DIR = madwifi-ng-r1531
 DOWNLOAD_SITES = \
 		$(CFLINUX_PACKAGES)
-PATCHES = madwifi.nodebug.patch \
-	  madwifi.tools::Makefile.patch
+PATCHES = madwifi.nodebug.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -41,11 +40,11 @@ clean:
 build: configure $(BUILT_STAMP)
 
 # here the rate algorithm can be selected
-# for current version, on of amrr, onoe, simple
+# for current version, one of amrr, onoe, simple
 A_RATE := amrr
 
 # the required tools
-TOOLS = athctrl athkey
+TOOLS = athchans athctrl athkey wlanconfig
 
 $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH) \
@@ -61,6 +60,10 @@ install: build
 	cp $(PKG_ROOT)/ath_hal/ath_hal.o \
 		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
 	cp $(PKG_ROOT)/ath/ath_pci.o \
+		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
+	cp $(PKG_ROOT)/net80211/wlan_scan_ap.o \
+		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
+	cp $(PKG_ROOT)/net80211/wlan_scan_sta.o \
 		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
 	cp $(PKG_ROOT)/ath_rate/$(A_RATE)/ath_rate_$(A_RATE).o \
 		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia

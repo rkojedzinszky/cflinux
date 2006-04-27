@@ -1,5 +1,5 @@
---- madwifi/net80211/ieee80211_var.h.orig	Mon Aug  1 14:51:39 2005
-+++ madwifi/net80211/ieee80211_var.h	Mon Aug  1 14:51:49 2005
+--- madwifi-ng-r1531.orig/net80211/ieee80211_var.h	2006-04-27 10:00:01.000000000 +0200
++++ madwifi-ng-r1531/net80211/ieee80211_var.h	2006-04-27 10:49:28.000000000 +0200
 @@ -37,7 +37,7 @@
  /*
   * Definitions for IEEE 802.11 drivers.
@@ -8,15 +8,109 @@
 +#undef	IEEE80211_DEBUG
  #undef	IEEE80211_DEBUG_REFCNT			/* node refcnt stuff */
  
- /* NB: portability glue must go first */
---- madwifi/ath/if_ath.c.orig	Mon Aug  1 14:48:03 2005
-+++ madwifi/ath/if_ath.c	Mon Aug  1 14:52:44 2005
-@@ -69,7 +69,7 @@
-  * #define AR_DEBUG here if you need to debug the ath_pci module (athdebug)
-  * disable this if not needed because it adds an amount of load
-  */
--#define AR_DEBUG
-+#undef AR_DEBUG
+ #include <net80211/ieee80211_linux.h>
+@@ -641,6 +641,7 @@
+ #define	IEEE80211_DPRINTF(_vap, _m, _fmt, ...)
+ #define	IEEE80211_NOTE_FRAME(_vap, _m, _wh, _fmt, ...)
+ #define	IEEE80211_NOTE_MAC(_vap, _m, _mac, _fmt, ...)
++#define	IEEE80211_NOTE(_vap, _m, _ni, _fmt, ...)
+ #define	ieee80211_msg_dumppkts(_vap)	0
+ #define	ieee80211_msg(_vap, _m)		0
+ #endif
+--- madwifi-ng-r1531.orig/net80211/ieee80211_node.c	2006-04-27 10:00:01.000000000 +0200
++++ madwifi-ng-r1531/net80211/ieee80211_node.c	2006-04-27 10:55:09.000000000 +0200
+@@ -510,7 +510,9 @@
+ ieee80211_ibss_merge(struct ieee80211_node *ni)
+ {
+ 	struct ieee80211vap *vap = ni->ni_vap;
++#ifdef IEEE80211_DEBUG
+ 	struct ieee80211com *ic = ni->ni_ic;
++#endif
  
- #include "radar.h"
+ 	if (ni == vap->iv_bss ||
+ 	    IEEE80211_ADDR_EQ(ni->ni_bssid, vap->iv_bss->ni_bssid)) {
+@@ -1705,7 +1707,9 @@
+ ieee80211_node_join_11g(struct ieee80211_node *ni)
+ {
+ 	struct ieee80211com *ic = ni->ni_ic;
++#ifdef IEEE80211_DEBUG
+ 	struct ieee80211vap *vap = ni->ni_vap;
++#endif
  
+ 	IEEE80211_LOCK_ASSERT(ic);
+ 
+--- madwifi-ng-r1531.orig/net80211/ieee80211_proto.c	2006-04-27 10:00:01.000000000 +0200
++++ madwifi-ng-r1531/net80211/ieee80211_proto.c	2006-04-27 10:56:28.000000000 +0200
+@@ -1083,7 +1083,9 @@
+ ieee80211_dturbo_switch(struct ieee80211com *ic, int newflags)
+ {
+ 	/* XXX use first vap for debug flags */
++#ifdef IEEE80211_DEBUG
+ 	struct ieee80211vap *vap = TAILQ_FIRST(&ic->ic_vaps);
++#endif
+ 	struct ieee80211_channel *chan;
+ 
+ 	chan = ieee80211_find_channel(ic, ic->ic_bsschan->ic_freq, newflags);
+--- madwifi-ng-r1531.orig/ath/if_ath.c	2006-04-27 10:00:17.000000000 +0200
++++ madwifi-ng-r1531/ath/if_ath.c	2006-04-27 11:05:04.000000000 +0200
+@@ -72,7 +72,7 @@
+ #include <net80211/if_llc.h>
+ #endif
+ 
+-#define	AR_DEBUG
++#undef	AR_DEBUG
+ 
+ #include "if_athrate.h"
+ #include "net80211/if_athproto.h"
+@@ -348,9 +348,10 @@
+ 		ath_keyprint(__func__, ix, hk, mac);		\
+ } while (0)
+ #else
+-#define	IFF_DUMPPKTS(sc, _m)	netif_msg_dumppkts(&sc->sc_ic)
++#define	IFF_DUMPPKTS(sc, _m)	0
+ #define	DPRINTF(sc, _m, _fmt, ...)
+ #define	KEYPRINTF(sc, k, ix, mac)
++#define ath_debug 0
+ #endif
+ 
+ #define ATH_SETUP_XR_VAP(sc,vap,rfilt) \
+@@ -1275,7 +1276,9 @@
+ void
+ ath_suspend(struct net_device *dev)
+ {
++#ifdef AR_DEBUG
+ 	struct ath_softc *sc = dev->priv;
++#endif
+ 
+ 	DPRINTF(sc, ATH_DEBUG_ANY, "%s: flags %x\n", __func__, dev->flags);
+ 	ath_stop(dev);
+@@ -1284,7 +1287,9 @@
+ void
+ ath_resume(struct net_device *dev)
+ {
++#ifdef AR_DEBUG
+ 	struct ath_softc *sc = dev->priv;
++#endif
+ 
+ 	DPRINTF(sc, ATH_DEBUG_ANY, "%s: flags %x\n", __func__, dev->flags);
+ 	ath_init(dev);
+@@ -1293,7 +1298,9 @@
+ void
+ ath_shutdown(struct net_device *dev)
+ {
++#ifdef AR_DEBUG
+ 	struct ath_softc *sc = dev->priv;
++#endif
+ 
+ 	DPRINTF(sc, ATH_DEBUG_ANY, "%s: flags %x\n", __func__, dev->flags);
+ 	ath_stop(dev);
+@@ -7319,7 +7326,9 @@
+ static void
+ ath_tx_draintxq(struct ath_softc *sc, struct ath_txq *txq)
+ {
++#ifdef AR_DEBUG
+ 	struct ath_hal *ah = sc->sc_ah;
++#endif
+ 	struct ath_buf *bf;
+ 	struct sk_buff *skb, *tskb;
+ 	int i;
