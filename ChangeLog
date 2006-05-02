@@ -8,6 +8,8 @@ Changes from 0.2p8 to 1.0:
 	- upgraded to busybox 1.1.2
 	- e2fsprogs is now used from busybox
 	- upgraded madwifi to madwifi-ng-svn-1531
+	- upgraded hostap-driver to version 0.4.7
+	- upgraded hostapd to version 0.4.8
 
 Changes from 0.2p7 to 0.2p8:
 	- added a patch to work around texas instruments' IRQ bug

@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := hostap
-SRC_FILENAME = hostap-driver-0.3.9.tar.gz
-EXTRACTED_DIR = hostap-driver-0.3.9
+SRC_FILENAME = hostap-driver-0.4.7.tar.gz
+EXTRACTED_DIR = hostap-driver-0.4.7
 DOWNLOAD_SITES = http://hostap.epitest.fi/releases/ \
 		$(CFLINUX_PACKAGES)
 PATCHES = hostap.patch

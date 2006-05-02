@@ -20,8 +20,8 @@
 # $Id$
 
 PKG := hostapd
-SRC_FILENAME = hostapd-0.3.7.tar.gz
-EXTRACTED_DIR = hostapd-0.3.7
+SRC_FILENAME = hostapd-0.4.8.tar.gz
+EXTRACTED_DIR = hostapd-0.4.8
 DOWNLOAD_SITES = http://hostap.epitest.fi/releases/ \
 		$(CFLINUX_PACKAGES)
 PATCHES =
@@ -33,7 +33,7 @@ configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
 	perl -ne 's/^#(?=(CONFIG_(RADIUS_SERVER)))//;' \
-		-e 's/^(?=(CONFIG_(IAPP|RSN|EAP|PKCS12)))/#/;' \
+		-e 's/^(?=(CONFIG_(IAPP|RSN|EAP|PKCS12|IPV6)))/#/;' \
 		-e 'print;' $(PKG_ROOT)/defconfig > $(PKG_ROOT)/.config
 #		-e 's/^#CFLAGS.*$$/CFLAGS += -I..\/madwifi/;'
 	touch $(CONFIGURED_STAMP)
