@@ -1,6 +1,6 @@
---- openssh-3.8p1/Makefile.in.orig	Thu Mar 18 09:32:51 2004
-+++ openssh-3.8p1/Makefile.in	Thu Mar 18 09:33:56 2004
-@@ -127,45 +127,44 @@
+--- openssh-4.3p2/Makefile.in.orig	2006-01-01 09:47:05.000000000 +0100
++++ openssh-4.3p2/Makefile.in	2006-05-02 18:57:03.000000000 +0200
+@@ -128,45 +128,44 @@
  	(cd openbsd-compat && $(MAKE))
  always:
  
@@ -20,7 +20,7 @@
  
 -scp$(EXEEXT): $(LIBCOMPAT) libssh.a scp.o progressmeter.o
 +scp$(EXEEXT): $(LIBCOMPAT) libssh.so scp.o progressmeter.o
- 	$(LD) -o $@ scp.o progressmeter.o $(LDFLAGS) -lssh -lopenbsd-compat $(LIBS)
+ 	$(LD) -o $@ scp.o progressmeter.o bufaux.o $(LDFLAGS) -lssh -lopenbsd-compat $(LIBS)
  
 -ssh-add$(EXEEXT): $(LIBCOMPAT) libssh.a ssh-add.o
 +ssh-add$(EXEEXT): $(LIBCOMPAT) libssh.so ssh-add.o
@@ -48,7 +48,7 @@
  
 -sftp$(EXEEXT): $(LIBCOMPAT) libssh.a sftp.o sftp-client.o sftp-common.o sftp-glob.o progressmeter.o
 +sftp$(EXEEXT): $(LIBCOMPAT) libssh.so sftp.o sftp-client.o sftp-common.o sftp-glob.o progressmeter.o
- 	$(LD) -o $@ progressmeter.o sftp.o sftp-client.o sftp-common.o sftp-glob.o $(LDFLAGS) -lssh -lopenbsd-compat $(LIBS)
+ 	$(LD) -o $@ progressmeter.o sftp.o sftp-client.o sftp-common.o sftp-glob.o $(LDFLAGS) -lssh -lopenbsd-compat $(LIBS) $(LIBEDIT)
  
 -ssh-rand-helper${EXEEXT}: $(LIBCOMPAT) libssh.a ssh-rand-helper.o
 +ssh-rand-helper${EXEEXT}: $(LIBCOMPAT) libssh.so ssh-rand-helper.o
