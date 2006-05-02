@@ -93,7 +93,7 @@ int			main(int argc, char* argv[])
 	}
 	rhdr.tar_l = htonl((unsigned long)tst.st_size);
 
-	ofd=open(argv[7], O_WRONLY|O_TRUNC|O_CREAT, 0777);
+	ofd=open(argv[7], O_WRONLY|O_TRUNC|O_CREAT, 0660);
 	if (ofd == -1) {
 		fprintf(stderr, "%s: open: %s\n", argv[7], strerror(errno));
 		exit(EXIT_FAILURE);
