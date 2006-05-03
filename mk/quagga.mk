@@ -20,7 +20,7 @@
 PKG := quagga
 SRC_FILENAME = quagga-0.98.5-20060503.tar.gz
 EXTRACTED_DIR = quagga-0.98.5
-DOWNLOAD_SITES = http://www.quagga.net/download/cvs/ \
+DOWNLOAD_SITES = \
 		$(CFLINUX_PACKAGES)
 PATCHES = quagga.patch
 
