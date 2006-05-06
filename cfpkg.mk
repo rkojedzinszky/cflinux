@@ -63,7 +63,15 @@ include $(TOP_DIR)/packages.mk
 $(PKG_INSTALL_DIR):
 	mkdir $(PKG_INSTALL_DIR) && chown 0:0 $(PKG_INSTALL_DIR) && chmod 755 $(PKG_INSTALL_DIR)
 
-pack: install
+defaultperms:
+	find $(PKG_PACK_DIR) -type d -print0 | xargs -r0 chmod 755
+	find $(PKG_PACK_DIR) -type f -print0 | xargs -r0 chmod 444
+	find $(PKG_PACK_DIR) -type f -path '*/bin/*' -print0 | xargs -r0 chmod 555
+	find $(PKG_PACK_DIR) -type f -path '*/sbin/*' -print0 | xargs -r0 chmod 555
+	find $(PKG_PACK_DIR) -type f -path '*/lib/*.so*' -print0 | xargs -r0 chmod 555
+	chown -R 0:0 $(PKG_PACK_DIR)
+
+pack: install permissions
 	rm -rf $(PKG_PACK_DIR)/$(PKG_CONF_DIR)
 	mkdir $(PKG_PACK_DIR)/$(PKG_CONF_DIR) && \
 		cd $(PKG_PACK_DIR)/ && ( \
