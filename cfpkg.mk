@@ -44,7 +44,7 @@ BUILD_DIR = $(CFPKG_DIR)/build
 MD5SUMS_DIR = $(CFPKG_DIR)
 
 # where the package temporary installation should go?
-PKG_INSTALL_DIR = $(BUILD_DIR)/_install
+PKG_INSTALL_DIR ?= $(BUILD_DIR)/_install
 
 # the package version for cflinux
 CFPKG_PKG_VERS = $(PKG_VERSION)$(PKG_VERSION_SUFF)
