@@ -1,6 +1,6 @@
 # default settings
 # override settings in this file in /etc/rc.conf
-# it's style is based on freebsd's init,
+# it's style is based on *BSD's init,
 # and it seems to be faster than having an
 # /etc/init.d/* for each application
 
@@ -49,3 +49,6 @@ arp_announce="1"		# ARP announce method. This is recommended.
 console_blank="NO"		# disables console blanking
 				# set it to a number to set the blanking
 				# time in minutes, YES means 10 minutes
+
+# local startup dirs
+rc_dirs="/etc/rc.d /usr/local/etc/rc.d"

@@ -232,9 +232,12 @@ case "$snmpd_enable" in
 esac
 echo "."
 
-if [ -d /etc/rc.d ]; then
-	echo -n "Local initialization: "
-	run-parts /etc/rc.d
-	echo "."
-fi
+echo -n "Local initialization: "
+for rcdir in $rc_dirs; do
+	if [ -d "$rcdir" ]; then
+		run-parts "$rcdir"
+	fi
+done
+echo "."
+
 echo -e "\n"
