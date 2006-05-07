@@ -78,15 +78,10 @@ endif
 
 include $(TOP_DIR)/config.mk
 
-all:
-	for i in $(DO_MK) ; do \
-		$(MAKE) -f $(MK)/$$i.mk build || exit ; done
+all: build
 
-download:
-	for i in $(DO_MK) ; do $(MAKE) -f $(MK)/$$i.mk download || exit 1 ; done
-
-patch:
-	for i in $(DO_MK) ; do $(MAKE) -f $(MK)/$$i.mk patch || exit 1 ; done
+download patch check build:
+	for i in $(DO_MK) ; do $(MAKE) -f $(MK)/$$i.mk $@ || exit 1 ; done
 
 clean:
 	-for i in $(DO_MK) ; do $(MAKE) -f $(MK)/$$i.mk clean ; done
