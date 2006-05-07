@@ -59,5 +59,6 @@ install: build
 		strip -s $(ROOTFS)/usr/libexec/ipsec/$$i ; done
 	for i in _copyright ; do \
 		strip -s $(ROOTFS)/usr/lib/ipsec/$$i ; done
+	rm -f $(ROOTFS)/sbin/init.d/ipsec*
 
 .PHONY: configure clean build install
