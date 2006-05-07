@@ -5,42 +5,44 @@ rootdev="$(cat /var/run/__system_device)5"	# default root device
 
 if [ "$1" ]
 then
-    file="$1"
+	file="$1"
 else
-    file="/tmp/rootfs.bin"
-    echo "No filename given, using \"$file\""
+	echo "Usage: $0 <image file> [<rootdev>]"
+	echo "No filename given, exiting"
+	exit 1
 fi
 if [ "$2" ]; then
-    rootdev="$2"
+	rootdev="$2"
 fi
 if [ ! -e "$rootdev" ]; then
-    echo "ERR: Rootdev is invalid (maybe could not be guessed, or you"
-    echo "     specified it wrong)"
-    exit 1
+	echo "ERR: Rootdev is invalid (maybe could not be guessed, or you"
+	echo "     specified it wrong)"
+	exit 1
 fi
 
 if [ -f "$file" ]
 then
-    tfile="$file"
+	tfile="$file"
 else
-    cd /tmp
-    pre="${file%//*}"
-    if [ "$pre" = "ftp:" -o "$pre" = "http:" ]
-    then
-	echo "Retrieving file..."
-	wget "$file"
-	echo "Retrieving checksum..."
-	wget "${file}.md5"
-	tfile="${file##*/}"
-	if ! md5sum -sc "$tfile.md5" ; then
-	    echo "md5 checksum failure"
-	    exit 1
-	fi	
-    else
-	echo "File not found, or unsupported protocol"
-	echo "Please, give a valid filename or a [http://|ftp://] URL"
-	exit 1
-    fi
+	cd /tmp
+	pre="${file%//*}"
+	if [ "$pre" = "ftp:" -o "$pre" = "http:" ] ; then
+		echo "Retrieving file..."
+		wget "$file"
+		echo "Retrieving checksum..."
+		wget "${file}.md5"
+		tfile="${file##*/}"
+		if ! md5sum -sc "$tfile.md5" ; then
+			echo "md5 checksum failure"
+			exit 1
+		fi
+		else
+			echo "File not found, or unsupported protocol"
+			echo "Please, give a valid filename or a [http://|ftp://] URL"
+		exit 1
+	fi
 fi
 
 exec /usr/lib/cfmaint/write_helper "$tfile" "$rootdev"
+
+# vim: ts=4 sw=4
