@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := gmp
-SRC_FILENAME = gmp-4.1.2.tar.gz
-EXTRACTED_DIR = gmp-4.1.2
+SRC_FILENAME = gmp-4.2.1.tar.gz
+EXTRACTED_DIR = gmp-4.2.1
 DOWNLOAD_SITES = \
 		ftp://ftp.sunet.se/pub/gnu/gmp/ \
 		ftp://ftp.funet.fi/pub/gnu/prep/gmp/ \
@@ -50,8 +50,11 @@ $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) install DESTDIR=$(UC_ROOT)
 	touch $(BUILT_STAMP)
 
-install: build
+install: build check
 	$(MAKE) -C $(PKG_ROOT) install-libLTLIBRARIES DESTDIR=$(ROOTFS)/usr
 	strip -s $(ROOTFS)/usr/lib/libgmp.so
+
+check:
+	$(MAKE) -C $(PKG_ROOT) check $(UC_PATH)
 
 .PHONY: configure clean build install
