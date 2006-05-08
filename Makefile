@@ -121,4 +121,4 @@ dist: scratch
 	tar czf $(PACKAGE)-$(RELEASE_STRING).tar.gz $(PACKAGE)-$(RELEASE_STRING)
 	rm -rf $(PACKAGE)-$(RELEASE_STRING)
 
-.PHONY: all distclean clean install image scratch
+.PHONY: all build distclean clean install image scratch
