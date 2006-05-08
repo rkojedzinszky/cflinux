@@ -189,30 +189,24 @@ if [ ! -d /var/quagga ]; then
 	mkdir /var/quagga
 	chown quagga:quagga /var/quagga
 fi
-case "$zebra_enable" in
-	[Yy][Ee][Ss])
-		[ -r /etc/zebra/zebra.conf ] && \
-			/usr/sbin/zebra -d $zebra_flags && echo -n " zebra"
-		;;
-esac
-case "$ospfd_enable" in
-	[Yy][Ee][Ss])
-		[ -r /etc/zebra/ospfd.conf ] && \
-			/usr/sbin/ospfd -d $ospfd_flags && echo -n " ospfd"
-		;;
-esac
-case "$ripd_enable" in
-	[Yy][Ee][Ss])
-		[ -r /etc/zebra/ripd.conf ] && \
-			/usr/sbin/ripd -d $ripd_flags && echo -n " ripd"
-		;;
-esac
-case "$bgpd_enable" in
-	[Yy][Ee][Ss])
-		[ -r /etc/zebra/bgpd.conf ] && \
-			/usr/sbin/bgpd -d $ripd_flags && echo -n " bgpd"
-		;;
-esac
+
+# start up quagga daemons
+for _daemon in zebra ripd ospfd bgpd ; do
+	eval "_enable=\"\$${_daemon}_enable\""
+	case "$_enable" in
+		[Yy][Ee][Ss])
+			_cfg="/etc/zebra/${_daemon}.conf"
+			eval "_flags=\"\$${_daemon}_flags\""
+			if ! [ -e "$_cfg" ] ; then
+				echo -e 'line vty\n no login\nservice advanced-vty' > "$_cfg"
+				chown quagga:quagga "$_cfg"
+				chmod 640 "$_cfg"
+			fi
+			/usr/sbin/${_daemon} -d ${_flags} && echo -n " ${_daemon}"
+			;;
+	esac
+done
+
 case "$httpd_enable" in
 	[Yy][Ee][Ss])
 		/usr/sbin/httpd $httpd_flags && echo -n " httpd"
