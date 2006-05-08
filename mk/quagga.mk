@@ -18,9 +18,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := quagga
-SRC_FILENAME = quagga-0.98.5-20060503.tar.gz
-EXTRACTED_DIR = quagga-0.98.5
-DOWNLOAD_SITES = \
+SRC_FILENAME = quagga-0.98.6.tar.gz
+EXTRACTED_DIR = quagga-0.98.6
+DOWNLOAD_SITES = http://www.quagga.net/download/ \
 		$(CFLINUX_PACKAGES)
 PATCHES = quagga.patch
 
