@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := poptop
-SRC_FILENAME = pptpd-1.1.3-20030409.tar.gz
-EXTRACTED_DIR = poptop
+SRC_FILENAME = pptpd-1.3.0.tar.gz
+EXTRACTED_DIR = pptpd-1.3.0
 DOWNLOAD_SITES = \
 		http://heanet.dl.sourceforge.net/sourceforge/poptop/ \
 		http://aleron.dl.sourceforge.net/sourceforge/poptop/ \
