@@ -104,7 +104,7 @@ image:
 	mkfs.minix -v /dev/ram0 2047 >/dev/null 2>&1
 	mount -t minix /dev/ram0 /mnt
 	cp -a $(FDEVEL_DIR)/fs_config/* /mnt
-	find /mnt -type d -name CVS -print0 | xargs -0 rm -rf
+	find /mnt -type d -name .svn -print0 | xargs -r0 rm -rf
 	-mkdir /mnt/root /mnt/rc.d
 	umount /mnt
 	dd if=/dev/ram0 bs=1k of=$(ROOTFS)/usr/share/defaults/etc.img \
@@ -117,7 +117,7 @@ dist: scratch
 	rm -rf $(PACKAGE)-$(RELEASE_STRING)
 	mkdir $(PACKAGE)-$(RELEASE_STRING)
 	cp -R $(DISTFILES) $(PACKAGE)-$(RELEASE_STRING)
-	find $(PACKAGE)-$(RELEASE_STRING) -type d -name CVS -print0 | xargs -0 rm -rf
+	find $(PACKAGE)-$(RELEASE_STRING) -type d -name .svn -print0 | xargs -r0 rm -rf
 	tar czf $(PACKAGE)-$(RELEASE_STRING).tar.gz $(PACKAGE)-$(RELEASE_STRING)
 	rm -rf $(PACKAGE)-$(RELEASE_STRING)
 
