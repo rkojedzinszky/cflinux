@@ -1,0 +1,11 @@
+--- openswan-2.2.0/programs/setup/Makefile.orig	2006-05-09 00:16:54.000000000 +0200
++++ openswan-2.2.0/programs/setup/Makefile	2006-05-09 00:17:08.000000000 +0200
+@@ -18,7 +18,7 @@
+ 
+ # this dance is because setup has to get installed as /etc/rc.d/init.d/ipsec
+ # not as /etc/rc.d/init.d/setup.
+-PROGRAMDIR=$(RCDIR)
++PROGRAMDIR=$(LIBDIR)
+ PROGRAM=
+ EXTRA8MAN=setup.8
+ 

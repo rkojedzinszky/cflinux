@@ -23,7 +23,8 @@ EXTRACTED_DIR = openswan-2.2.0
 DOWNLOAD_SITES = http://www.openswan.org/download/ \
 		$(CFLINUX_PACKAGES)
 PATCHES = openswan.patch \
-	  openswan.nodebug.patch
+	  openswan.nodebug.patch \
+	  openswan.setup_dir.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
