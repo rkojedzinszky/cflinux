@@ -1,0 +1,40 @@
+--- openswan-2.4.5.orig/linux/net/ipsec/ipsec_xmit.c	2005-11-29 22:52:57.000000000 +0100
++++ openswan-2.4.5/linux/net/ipsec/ipsec_xmit.c	2006-05-09 13:55:19.000000000 +0200
+@@ -647,9 +647,11 @@
+ 		dat[len - authlen - 1] = ixs->iph->protocol;
+ 		ixs->iph->protocol = IPPROTO_ESP;
+ 		
++#ifdef CONFIG_KLIPS_DEBUG
+ 		if(debug_tunnel & DB_TN_ENCAP) {
+ 		        dmp("pre-encrypt", dat, len);
+ 		}
++#endif
+ 
+ 		/*
+ 		 * Do all operations here:
+@@ -1706,10 +1708,12 @@
+ 			    "head,tailroom: %d,%d after allocation\n",
+ 			    skb_headroom(ixs->skb), skb_tailroom(ixs->skb));
+ 	}
+-		
++
++#ifdef CONFIG_KLIPS_DEBUG
+ 	if(debug_tunnel & DB_TN_ENCAP) {
+ 		ipsec_print_ip(ixs->iph);
+ 	}
++#endif
+ 
+ 	/*
+ 	 * Apply grouped transforms to packet
+@@ -1719,9 +1723,11 @@
+ 
+ 		encap_stat = ipsec_xmit_encap_once(ixs);
+ 
++#ifdef CONFIG_KLIPS_DEBUG
+ 		if(debug_tunnel & DB_TN_ENCAP) {
+ 			ipsec_print_ip(ixs->iph);
+ 		}
++#endif
+ 
+ 		if(encap_stat != IPSEC_XMIT_OK) {
+ 			KLIPS_PRINT(debug_tunnel & DB_TN_XMIT,
