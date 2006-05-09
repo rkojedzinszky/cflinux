@@ -1,0 +1,177 @@
+--- rp-pppoe-3.5/src/relay.h.o	2005-12-30 15:45:46.000000000 +0100
++++ rp-pppoe-3.5/src/relay.h	2005-12-30 15:46:00.000000000 +0100
+@@ -37,6 +37,7 @@
+     UINT16_t dot1q;			/* This interface is a 802.1Q trunk */
+ #endif
+     unsigned char mac[ETH_ALEN]; /* MAC address */
++		unsigned sessions;
+ } PPPoEInterface;
+ 
+ /* Session state for relay */
+--- rp-pppoe-3.5/src/relay.c.o	2005-12-30 15:45:42.000000000 +0100
++++ rp-pppoe-3.5/src/relay.c	2005-12-30 15:54:20.000000000 +0100
+@@ -51,6 +51,14 @@
+ #include <unistd.h>
+ #endif
+ 
++#ifdef HAVE_SYS_TYPES_H
++#include <sys/types.h>
++#endif
++
++#ifdef HAVE_SYS_SOCKET_H
++#include <sys/socket.h>
++#endif
++
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <fcntl.h>
+@@ -124,6 +132,9 @@
+ /* /dev/urandom fd */
+ static int dev_urandom_fd;
+ 
++/* statistics port */
++int stat_fd = -1;
++
+ /* Our relay: if_index followed by peer_mac */
+ #define MY_RELAY_TAG_LEN (sizeof(int) + ETH_ALEN)
+ 
+@@ -142,7 +153,7 @@
+ {
+     int i;
+ 		if (fd == dev_urandom_fd) return 1;
+-    if (fd == CleanPipe[0] || fd == CleanPipe[1]) return 1;
++    if (fd == CleanPipe[0] || fd == CleanPipe[1] || fd == stat_fd) return 1;
+     for (i=0; i<NumInterfaces; i++) {
+ 	if (fd == Interfaces[i].discoverySock ||
+ 	    fd == Interfaces[i].sessionSock) return 1;
+@@ -258,6 +269,7 @@
+     fprintf(stderr, "   -N nsess       -- Maxmimum number of PreSessions to relay\n");
+     fprintf(stderr, "   -i timeout     -- Idle timeout in seconds (0 = no timeout)\n");
+     fprintf(stderr, "   -F             -- Do not fork into background\n");
++    fprintf(stderr, "   -p port        -- Open tcp port for giving some stats out\n");
+     fprintf(stderr, "   -H             -- Enable hack for broken devices that do not send the Relay-Session-Id\n");
+     fprintf(stderr, "                     tag back. With this, pppoe-relay tries to find out what Id was forgotten\n");
+     fprintf(stderr, "                     and adds it\n");
+@@ -293,11 +305,17 @@
+     struct sigaction sa;
+     int beDaemon = 1;
+     openlog("pppoe-relay", LOG_PID, LOG_DAEMON);
+-
++		short stat_port = 0;
++		struct sockaddr_in saddr = {
++			.sin_family = AF_INET,
++			.sin_addr = { .s_addr = htonl(INADDR_LOOPBACK) },
++			.sin_port = htons(0)
++		};
++ 
+ #ifdef SUPPORT_8021Q_VLAN
+-    while((opt = getopt(argc, argv, "hC:S:B:V:n:N:i:FH")) != -1) {
++    while((opt = getopt(argc, argv, "hC:S:B:V:n:N:i:Fp:H")) != -1) {
+ #else
+-    while((opt = getopt(argc, argv, "hC:S:B:n:N:i:FH")) != -1) {
++    while((opt = getopt(argc, argv, "hC:S:B:n:N:i:Fp:H")) != -1) {
+ #endif
+ 	switch(opt) {
+ 	case 'h':
+@@ -351,6 +369,13 @@
+ 	case 'H':
+ 	    enableClientHack++;
+ 	    break;
++	case 'p':
++			if (sscanf(optarg, "%hu", &stat_port) != 1) {
++				fprintf(stderr, "Illegal argument to -p: must be -p #port\n");
++				exit(EXIT_FAILURE);
++			}
++			saddr.sin_port = htons(stat_port);
++			break;
+ 	default:
+ 	    usage(argv[0]);
+ 	}
+@@ -405,6 +430,16 @@
+ 	    exit(0);
+ 	}
+ 
++	/* init statistics port */
++	if (stat_port) {
++		stat_fd = socket(PF_INET, SOCK_STREAM, 0);
++		if (stat_fd == -1)
++			fatalSys("socket");
++		if (bind(stat_fd, (struct sockaddr*)&saddr, sizeof(saddr)) == -1)
++			fatalSys("bind");
++		if (listen(stat_fd, 0) == -1)
++			fatalSys("listen");
++	}
+ 	chdir("/");
+ 	closelog();
+ 	for (i=0; i<CLOSEFD; i++) {
+@@ -461,6 +496,7 @@
+     i = &Interfaces[NumInterfaces++];
+     strncpy(i->name, ifname, IFNAMSIZ);
+     i->name[IFNAMSIZ] = 0;
++		i->sessions = 0;
+ 
+ #ifdef SUPPORT_8021Q_VLAN
+     if ( dot1q ) {
+@@ -1064,6 +1100,7 @@
+     sess = FreeSessions;
+     FreeSessions = sess->next;
+     NumSessions++;
++		((PPPoEInterface*)cli)->sessions++;
+ 
+     /* Link it to the active list */
+     sess->next = ActiveSessions;
+@@ -1163,6 +1200,7 @@
+     ses->next = FreeSessions;
+     FreeSessions = ses;
+ 
++		((PPPoEInterface*)ses->clientHash->interface)->sessions--;
+     unhash(ses->acHash);
+     unhash(ses->clientHash);
+     NumSessions--;
+@@ -1343,9 +1381,13 @@
+ 	sock = Interfaces[i].sessionSock;
+ 	if (sock > maxFD) maxFD = sock;
+ 	FD_SET(sock, &readable);
++    }
+ 	if (CleanPipe[0] > maxFD) maxFD = CleanPipe[0];
+ 	FD_SET(CleanPipe[0], &readable);
+-    }
++	if (stat_fd != -1) {
++		FD_SET(stat_fd, &readable);
++		if (stat_fd > maxFD) maxFD = stat_fd;
++	}
+     maxFD++;
+     for(;;) {
+ 	readableCopy = readable;
+@@ -1397,6 +1439,31 @@
+ 	    if (IdleTimeout) cleanSessions();
+ 			cleanPreSession();
+ 	}
++
++	/* handle statistics requests */
++	if (stat_fd != -1 && FD_ISSET(stat_fd, &readableCopy)) {
++		int cl;
++		struct sockaddr_in sa;
++		int sa_len = sizeof(sa);
++		int i;
++
++		cl = accept(stat_fd, (struct sockaddr*)&sa, &sa_len);
++		if (cl == -1) {
++			sysErr("accept");
++		} else {
++			if (fcntl(cl, F_SETFL, O_NONBLOCK | fcntl(cl, F_GETFL)) == -1) {
++				sysErr("fcntl");
++			} else {
++				dprintf(cl, "# pppoe-relay statistics\n");
++				for (i=0; i<NumInterfaces; i++) {
++					if (Interfaces[i].clientOK) {
++						dprintf(cl, "%s=%u\n", Interfaces[i].name, Interfaces[i].sessions);
++					}
++				}
++			}
++			close(cl);
++		}
++	}
+     }
+ }
+ 

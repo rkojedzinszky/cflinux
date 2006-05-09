@@ -30,7 +30,8 @@ PATCHES = rp-pppoe.patch \
 	rp-pppoe.relay.patch \
 	rp-pppoe.dont_close_fds.patch \
 	rp-pppoe.relay.c_padi_no_warn.patch \
-	rp-pppoe.relay_h_maxinterfaces.patch
+	rp-pppoe.relay_h_maxinterfaces.patch \
+	rp-pppoe.relay_stat.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
