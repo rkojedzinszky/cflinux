@@ -49,7 +49,7 @@ $(INSTALL_STAMP):
 	-chown 0:0 $(ROOTFS)
 	for i in bin boot dev/net etc lib mnt proc sbin usr var \
 		usr/bin usr/lib usr/sbin usr/local dev/pts \
-		usr/lib/cfmaint ; do \
+		usr/lib/cfmaint usr/lib/cflinux ; do \
 			mkdir -p $(ROOTFS)/$$i ; done
 	mkdir -p $(DEFAULTS_DIR)/etc
 	ln -s var/tmp $(ROOTFS)/tmp
@@ -85,6 +85,8 @@ $(INSTALL_STAMP):
 	for i in cfpkg_add cfpkg_delete ; do \
 		$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/cfpkg/sbin/$$i \
 			$(ROOTFS)/usr/sbin/ ; done
+	$(INSTALL) -m 444 -o 0 -g 0 $(PKG_ROOT)/scripts/hackps.sh \
+		$(ROOTFS)/usr/lib/cflinux/
 	touch $@
 
 .PHONY: configure clean build install
