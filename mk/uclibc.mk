@@ -25,7 +25,8 @@ DOWNLOAD_SITES = http://www.uclibc.org/downloads/ \
 PATCHES = uclibc.gcc_wrapper.patch \
 	  uclibc.syslog_h.patch \
 	  uclibc.syslog_c.patch \
-	  uclibc.resolv_c.patch
+	  uclibc.resolv_c.patch \
+	  uclibc.cmsg_nxthdr.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

@@ -1,0 +1,11 @@
+--- uClibc-0.9.28/libc/sysdeps/linux/common/cmsg_nxthdr.c.orig	2006-05-09 12:24:29.000000000 +0200
++++ uClibc-0.9.28/libc/sysdeps/linux/common/cmsg_nxthdr.c	2006-05-09 12:24:36.000000000 +0200
+@@ -34,7 +34,7 @@
+   if ((unsigned char *) (cmsg + 1) >= ((unsigned char *) mhdr->msg_control
+ 				       + mhdr->msg_controllen)
+       || ((unsigned char *) cmsg + CMSG_ALIGN (cmsg->cmsg_len)
+-	  >= ((unsigned char *) mhdr->msg_control + mhdr->msg_controllen)))
++	  > ((unsigned char *) mhdr->msg_control + mhdr->msg_controllen)))
+     /* No more entries.  */
+     return NULL;
+   return cmsg;
