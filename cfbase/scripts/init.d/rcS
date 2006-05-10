@@ -225,6 +225,11 @@ case "$snmpd_enable" in
 		/usr/sbin/snmpd $snmpd_flags && echo -n " snmpd"
 		;;
 esac
+case "$ipsec_enable" in
+	[Yy][Ee][Ss])
+		ipsec setup --start && echo -n " ipsec"
+		;;
+esac
 echo "."
 
 echo -n "Local initialization: "

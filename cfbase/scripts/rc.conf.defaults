@@ -50,5 +50,9 @@ console_blank="NO"		# disables console blanking
 				# set it to a number to set the blanking
 				# time in minutes, YES means 10 minutes
 
+# ipsec by openswan
+ipsec_enable="NO"		# disable IPSEC by default
+				# set up openswan correctly, then enable
+
 # local startup dirs
 rc_dirs="/etc/rc.d /usr/local/etc/rc.d"
