@@ -24,7 +24,8 @@ DOWNLOAD_SITES = http://www.openswan.org/download/ \
 		$(CFLINUX_PACKAGES)
 PATCHES = openswan.patch \
 	  openswan.setup_dir.patch \
-	  openswan.nodebug.patch
+	  openswan.nodebug.patch \
+	  openswan.hackps.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
