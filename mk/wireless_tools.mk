@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := wireless_tools
-SRC_FILENAME = wireless_tools.27.tar.gz
-EXTRACTED_DIR = wireless_tools.27
+SRC_FILENAME = wireless_tools.28.tar.gz
+EXTRACTED_DIR = wireless_tools.28
 DOWNLOAD_SITES = http://pcmcia-cs.sourceforge.net/ftp/contrib/ \
 		$(CFLINUX_PACKAGES)
 

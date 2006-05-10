@@ -20,6 +20,7 @@ Changes from 0.2p8 to 1.0:
 	- upgraded quagga to the latest stable (0.98.6)
 	- upgraded poptop to the latest stable (1.3.0)
 	- upgraded openswan to the latest stable (2.4.5)
+	- upgraded wireless tools to version 28
 
 Changes from 0.2p7 to 0.2p8:
 	- added a patch to work around texas instruments' IRQ bug
