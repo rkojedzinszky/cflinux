@@ -25,7 +25,8 @@ DOWNLOAD_SITES = http://www.openswan.org/download/ \
 PATCHES = openswan.patch \
 	  openswan.setup_dir.patch \
 	  openswan.nodebug.patch \
-	  openswan.hackps.patch
+	  openswan.hackps.patch \
+	  openswan.killklips_remove_module.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
