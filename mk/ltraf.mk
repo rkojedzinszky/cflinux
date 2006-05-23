@@ -18,11 +18,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := ltraf
-SRC_FILENAME = ltraf-0.2.2-beta2.tar.gz
-EXTRACTED_DIR = ltraf-0.2.2-beta2
-DOWNLOAD_SITES = http://www.klamzi.hu/ltraf/downloads \
-		 $(CFLINUX_PACKAGES)
-#PATCHES = skel.patch
+SRC_FILENAME = ltraf-r137.tar.bz2
+EXTRACTED_DIR = ltraf-r137
+DOWNLOAD_SITES = $(CFLINUX_PACKAGES)
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
