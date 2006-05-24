@@ -174,10 +174,15 @@ case "$sshd_enable" in
 	[Yy][Ee][Ss])
 		for i in rsa dsa ; do
 			if ! [ -f /etc/ssh/ssh_host_${i}_key ]; then
-				echo -n " [generating 2048 bits $i key"
-				ssh-keygen -t $i -b 2048 -N "" \
+				case "$i" in
+					dsa)	__bits=1024 ;;
+					*)	__bits=2048 ;;
+				esac
+				echo -n " [generating $__bits bits $i key"
+				ssh-keygen -t $i -b $__bits -N "" \
 				-f /etc/ssh/ssh_host_${i}_key >/dev/null 2>&1
 				echo -n "]"
+				unset __bits
 			fi
 		done
 		/usr/sbin/sshd $sshd_flags

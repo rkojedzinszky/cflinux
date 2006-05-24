@@ -22,6 +22,8 @@ Changes from 0.2p8 to 1.0:
 	- upgraded openswan to the latest stable (2.4.5)
 	- upgraded wireless tools to version 28
 	- upgraded ltraf to svn rev 137
+	- changed the default DSA key size to 1024 bits as
+	  openssh does not accept any other value
 
 Changes from 0.2p7 to 0.2p8:
 	- added a patch to work around texas instruments' IRQ bug
