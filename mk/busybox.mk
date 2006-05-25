@@ -31,7 +31,8 @@ PATCHES = busybox.init.patch \
 	busybox.httpd_c.patch \
 	busybox.wget_c.patch \
 	busybox.no_halt_poweroff.patch \
-	busybox.ps_ax_hack.patch
+	busybox.ps_ax_hack.patch \
+	busybox.mount_all.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

@@ -1,0 +1,15 @@
+--- busybox-1.1.2/util-linux/mount.c.orig	2006-05-25 09:48:09.000000000 +0200
++++ busybox-1.1.2/util-linux/mount.c	2006-05-25 09:56:41.000000000 +0200
+@@ -536,8 +536,10 @@
+ 			rc = singlemount(mtcur);
+ 			if (rc) {
+ 				// Don't whine about already mounted fs when mounting all.
+-				if (errno == EBUSY) rc = 0;
+-				else break;
++				if (errno != EBUSY)
++					bb_perror_msg("Mounting %s on %s failed",
++							mtcur->mnt_fsname, mtcur->mnt_dir);
++				rc = 0;
+ 			}
+ 		}
+ 	}
