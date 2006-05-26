@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := busybox
-SRC_FILENAME = busybox-1.1.2.tar.bz2
-EXTRACTED_DIR = busybox-1.1.2
+SRC_FILENAME = busybox-1.1.3.tar.bz2
+EXTRACTED_DIR = busybox-1.1.3
 DOWNLOAD_SITES = http://busybox.net/downloads/ \
 		$(CFLINUX_PACKAGES)
 
@@ -31,8 +31,7 @@ PATCHES = busybox.init.patch \
 	busybox.httpd_c.patch \
 	busybox.wget_c.patch \
 	busybox.no_halt_poweroff.patch \
-	busybox.ps_ax_hack.patch \
-	busybox.mount_all.patch
+	busybox.ps_ax_hack.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

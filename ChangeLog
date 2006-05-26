@@ -5,8 +5,6 @@ Changes from 0.2p8 to 1.0:
 	- write_helper now checks the validity of the image with
 	  an sha1 digest. also, a .tar.gz file can be included in
 	  the cflinux.img
-	- upgraded to busybox 1.1.2
-	- e2fsprogs is now used from busybox
 	- upgraded madwifi to madwifi-ng-svn-1531
 	- upgraded hostap-driver to version 0.4.7
 	- upgraded hostapd to version 0.4.8
@@ -24,6 +22,8 @@ Changes from 0.2p8 to 1.0:
 	- upgraded ltraf to svn rev 137
 	- changed the default DSA key size to 1024 bits as
 	  openssh does not accept any other value
+	- upgraded to busybox 1.1.3
+	- e2fsprogs is now used from busybox
 
 Changes from 0.2p7 to 0.2p8:
 	- added a patch to work around texas instruments' IRQ bug
