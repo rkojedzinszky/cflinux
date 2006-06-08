@@ -1,3 +1,7 @@
+Changes from 1.0 to 1.0p1:
+	- enabled some watchdog devices in the kernel
+	  all in modules
+
 Changes from 0.2p8 to 1.0:
 	- version rename
 	- improved the cfpkg_add to compare cflinux major versions
