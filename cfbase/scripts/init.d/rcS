@@ -3,9 +3,6 @@
 # make sure the shell won't exit on any error
 set +e
 
-# invoking ldconfig
-/sbin/ldconfig
-
 # Mounting all filesystems
 echo -n "Mounting filesystems: "
 mount -a
@@ -14,6 +11,9 @@ echo "done"
 echo -n "Mounting /dev/pts: "
 mount devpts /dev/pts -t devpts
 echo "done"
+
+# invoking ldconfig
+/sbin/ldconfig
 
 echo -n "Creating /var structure: "
 mkdir /var/lock /var/run /var/lib /var/tmp /var/log /var/empty
