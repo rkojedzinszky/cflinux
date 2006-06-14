@@ -1,6 +1,6 @@
---- uClibc-0.9.27.orig/Makefile	2005-01-12 08:59:21.000000000 +0100
-+++ uClibc-0.9.27/Makefile	2005-07-30 11:27:25.000000000 +0200
-@@ -257,6 +257,11 @@
+--- uClibc-0.9.28/Makefile.orig	2005-08-18 00:49:49.000000000 +0200
++++ uClibc-0.9.28/Makefile	2006-06-14 19:39:29.000000000 +0200
+@@ -279,6 +279,11 @@
  #	$(INSTALL) -m 755 libc/misc/wchar/iconv.target $(PREFIX)$(RUNTIME_PREFIX)/usr/bin/iconv
  #endif
  
@@ -10,21 +10,21 @@
 +	$(MAKE) -C extra/gcc-uClibc install
 +
  finished2:
- 	@echo
- 	@echo Finished installing...
-@@ -325,6 +330,7 @@
+ 	$(SECHO)
+ 	$(SECHO) Finished installing ...
+@@ -347,6 +352,7 @@
  	$(MAKE) -C libc/misc/wchar clean
  	$(MAKE) -C libc/unistd clean
  	$(MAKE) -C libc/sysdeps/linux/common clean
 +	$(MAKE) -C extra/gcc-uClibc clean
  	$(MAKE) -C extra/locale clean
+ 	$(MAKE) -C utils clean
  	@set -e; \
- 	for i in `(cd $(TOPDIR)/libc/sysdeps/linux/common/sys; ls *.h)` ; do \
---- uClibc-0.9.27.orig/ldso/ldso/Makefile	2005-01-12 08:59:21.000000000 +0100
-+++ uClibc-0.9.27/ldso/ldso/Makefile	2005-07-30 11:35:02.000000000 +0200
-@@ -38,6 +38,7 @@
+--- uClibc-0.9.28/ldso/ldso/Makefile.orig	2005-08-18 00:49:41.000000000 +0200
++++ uClibc-0.9.28/ldso/ldso/Makefile	2006-06-14 19:42:29.000000000 +0200
+@@ -42,6 +42,7 @@
  endif
- XXFLAGS+= $(XARCH_CFLAGS) $(CPU_CFLAGS) $(PICFLAG) \
+ XXFLAGS+= -DUCLIBC_LDSO=\"$(UCLIBC_LDSO)\" $(XARCH_CFLAGS) $(CPU_CFLAGS) $(PICFLAG) \
  	-DUCLIBC_RUNTIME_PREFIX=\"$(RUNTIME_PREFIX)\" \
 +	-DUCLIBC_DEVEL_PREFIX=\"$(DEVEL_PREFIX)\" \
  	-fno-builtin -nostdinc -D_LIBC -I$(TOPDIR)ldso/include -I. -I$(TOPDIR)include
@@ -40,11 +40,24 @@
  	-fno-builtin -nostdinc -D_LIBC -I$(TOPDIR)ldso/include -I$(TOPDIR)ldso/ldso -I. -I$(TOPDIR)include
  
  XXFLAGS+=-isystem $(shell $(CC) -print-file-name=include)
---- uClibc-0.9.27.orig/ldso/ldso/dl-elf.c	2005-01-12 08:59:21.000000000 +0100
-+++ uClibc-0.9.27/ldso/ldso/dl-elf.c	2005-07-30 12:47:55.000000000 +0200
-@@ -374,6 +374,7 @@
- 	if(_dl_debug) _dl_dprintf(_dl_debug_file, "\tsearching full lib path list\n");
- #endif
+--- uClibc-0.9.28/ldso/ldso/dl-elf.c.orig	2005-08-18 00:49:41.000000000 +0200
++++ uClibc-0.9.28/ldso/ldso/dl-elf.c	2006-06-14 19:36:08.000000000 +0200
+@@ -356,17 +356,20 @@
+ 
+ 	/* Look for libraries wherever the shared library loader
+ 	 * was installed */
++/*
+ 	_dl_if_debug_dprint("\tsearching ldso dir='%s'\n", _dl_ldsopath);
+ 	if ((tpnt1 = search_for_named_library(libname, secure, _dl_ldsopath, rpnt)) != NULL)
+ 	{
+ 		return tpnt1;
+ 	}
++*/
+ 
+ 
+ 	/* Lastly, search the standard list of paths for the library.
+ 	   This list must exactly match the list in uClibc/ldso/util/ldd.c */
+ 	_dl_if_debug_dprint("\tsearching full lib path list\n");
  	if ((tpnt1 = search_for_named_library(libname, secure,
 +					UCLIBC_DEVEL_PREFIX "lib:"
  					UCLIBC_RUNTIME_PREFIX "lib:"
