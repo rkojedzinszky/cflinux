@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := postgres
-POSTGRES_VER = 7.3.14
+POSTGRES_VER = 7.4.13
 SRC_FILENAME = postgresql-base-$(POSTGRES_VER).tar.bz2
 EXTRACTED_DIR = postgresql-$(POSTGRES_VER)
 DOWNLOAD_SITES = \
@@ -49,9 +49,11 @@ build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT)/src/bin/psql all $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT)/src/bin/pg_config all $(UC_PATH)
 	$(MAKE) -C $(PKG_ROOT)/src/interfaces/libpq all $(UC_PATH)
 	$(MAKE) -C $(PKG_ROOT)/src/include install DESTDIR=$(UC_ROOT)
-	$(MAKE) -C $(PKG_ROOT)/src/interfaces/libpq install-lib DESTDIR=$(UC_ROOT)
+	$(MAKE) -C $(PKG_ROOT)/src/interfaces/libpq install DESTDIR=$(UC_ROOT)
+	$(MAKE) -C $(PKG_ROOT)/src/bin/pg_config install DESTDIR=$(UC_ROOT) bindir=/bin
 	touch $(BUILT_STAMP)
 
 install: build

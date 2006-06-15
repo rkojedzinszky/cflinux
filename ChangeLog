@@ -3,6 +3,7 @@ Changes from 1.0 to 1.0p1:
 	  all in modules
 	- tuned ld-uClibc.so to skip searching in its own directory
 	  first
+	- upgraded postgresql lib to v7.4.13
 
 Changes from 0.2p8 to 1.0:
 	- version rename
