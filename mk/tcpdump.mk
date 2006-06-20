@@ -22,6 +22,7 @@ SRC_FILENAME = tcpdump-3.9.4.tar.gz
 EXTRACTED_DIR = tcpdump-3.9.4
 DOWNLOAD_SITES = http://www.tcpdump.org/release/ \
 		$(CFLINUX_PACKAGES)
+PATCHES = tcpdump.configure.no_ssleay.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
