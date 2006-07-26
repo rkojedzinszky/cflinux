@@ -1,3 +1,6 @@
+Changes from 1.0p1 to 1.0p2:
+	- upgraded madwifi to svn rev 1692
+
 Changes from 1.0 to 1.0p1:
 	- enabled some watchdog devices in the kernel
 	  all in modules

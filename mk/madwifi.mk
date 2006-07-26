@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := madwifi
-SRC_FILENAME = madwifi-ng-r1531.tar.bz2
-EXTRACTED_DIR = madwifi-ng-r1531
+SRC_FILENAME = madwifi-ng-r1692.tar.bz2
+EXTRACTED_DIR = madwifi-ng-r1692
 DOWNLOAD_SITES = \
 		$(CFLINUX_PACKAGES)
 PATCHES = madwifi.nodebug.patch
@@ -57,7 +57,7 @@ $(BUILT_STAMP):
 install: build
 	cp $(PKG_ROOT)/net80211/wlan.o \
 		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
-	cp $(PKG_ROOT)/ath_hal/ath_hal.o \
+	cp $(PKG_ROOT)/ath/ath_hal.o \
 		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
 	cp $(PKG_ROOT)/ath/ath_pci.o \
 		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
