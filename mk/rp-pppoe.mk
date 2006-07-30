@@ -50,7 +50,8 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT)/src all $(UC_PATH) PLUGIN_DIR=/usr/lib/pppd
+	$(MAKE) -C $(PKG_ROOT)/src all $(UC_PATH) PLUGIN_DIR=/usr/lib/pppd \
+		PPPD_PATH=/usr/sbin/pppd
 	touch $(BUILT_STAMP)
 
 install: build
