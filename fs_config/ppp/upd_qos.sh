@@ -9,6 +9,6 @@ case "$4" in
 		exec kill $(cat /var/run/$if.pid)
 	;;
 	*)
-		exec /etc/ppp/set_qos.sh "$if" "$2" "$2"
+		exec /etc/ppp/set_qos.sh "$if" "$2" "$3"
 	;;
 esac
