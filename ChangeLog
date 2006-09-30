@@ -1,3 +1,10 @@
+Changes from 1.0p2 to 1.0p3:
+	- raised the default IP_MAX_MEMBERSHIPS from 20 to 128 in
+	  net/ipv4/igmp.c. If anyone needs higher values, set it
+	  through /proc.
+	- upgraded the linux kernel to version 2.4.33.3
+	- upgraded grsec to 2.1.9 for 2.4.33.3
+
 Changes from 1.0p1 to 1.0p2:
 	- upgraded madwifi to svn rev 1692
 	- upgraded the kernel to version 2.4.33
