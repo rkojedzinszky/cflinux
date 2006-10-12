@@ -18,10 +18,14 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := iptables
-SRC_FILENAME = iptables-1.3.5.tar.bz2
-EXTRACTED_DIR = iptables-1.3.5
+SRC_FILENAME = iptables-1.3.6.tar.bz2
+EXTRACTED_DIR = iptables-1.3.6
 DOWNLOAD_SITES = http://www.netfilter.org/projects/iptables/files \
 		$(CFLINUX_PACKAGES)
+
+PATCHES = \
+	  iptables.multiport_v1.patch \
+	  iptables.MARK_v1.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
