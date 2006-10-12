@@ -1,13 +1,13 @@
---- linux-2.4.27/init/main.c.orig	Thu Sep 16 18:23:31 2004
-+++ linux-2.4.27/init/main.c	Thu Sep 16 18:24:26 2004
-@@ -123,7 +123,9 @@
+--- linux-2.6.17.13/init/main.c.orig	2006-09-09 05:23:25.000000000 +0200
++++ linux-2.6.17.13/init/main.c	2006-09-12 20:49:06.000000000 +0200
+@@ -118,7 +118,9 @@
+ /* Untouched command line (eg. for /proc) saved by arch-specific code. */
+ char saved_command_line[COMMAND_LINE_SIZE];
  
- int rows, cols;
- 
--char *execute_command;
+-static char *execute_command;
 +/* Try /linuxrc first, as it is the first that must be run
 + * in cflinux */
-+char *execute_command = "/linuxrc";
++static char *execute_command = "/linuxrc";
+ static char *ramdisk_execute_command;
  
- static char * argv_init[MAX_INIT_ARGS+2] = { "init", NULL, };
- char * envp_init[MAX_INIT_ENVS+2] = { "HOME=/", "TERM=linux", NULL, };
+ /* Setup configured maximum number of CPUs to activate */

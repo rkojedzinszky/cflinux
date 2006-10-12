@@ -64,13 +64,12 @@ diff -ruNP linux-2.4.25.orig/drivers/net/tulip/tulip.h linux-2.4.25/drivers/net/
  
  #define TULIP_MIN_CACHE_LINE	8	/* in units of 32-bit words */
  
-diff -ruNP linux-2.4.25.orig/drivers/net/tulip/tulip_core.c linux-2.4.25/drivers/net/tulip/tulip_core.c
---- linux-2.4.25.orig/drivers/net/tulip/tulip_core.c	Wed Feb 18 15:17:41 2004
-+++ linux-2.4.25/drivers/net/tulip/tulip_core.c	Wed Feb 18 16:38:12 2004
-@@ -64,7 +64,7 @@
+--- linux-2.6.17.13/drivers/net/tulip/tulip_core.c.orig	2006-09-09 05:23:25.000000000 +0200
++++ linux-2.6.17.13/drivers/net/tulip/tulip_core.c	2006-09-12 20:44:59.000000000 +0200
+@@ -70,7 +70,7 @@
  #if defined(__alpha__) || defined(__arm__) || defined(__hppa__) \
  	|| defined(__sparc_) || defined(__ia64__) \
- 	|| defined(__sh__) || defined(__mips__) || defined(__SH5__)
+ 	|| defined(__sh__) || defined(__mips__)
 -static int rx_copybreak = 1518;
 +static int rx_copybreak = 1522;
  #else

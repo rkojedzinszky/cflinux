@@ -1,3 +1,9 @@
+Changes from 1.0p3 to 2.0alpha:
+	- changed the kernel 2.4 to 2.6, currently 2.6.18
+	- removed grsecurity
+	- removed pcmcia-cs
+	- removed hostap (as it is included in the kernel)
+
 Changes from 1.0p2 to 1.0p3:
 	- raised the default IP_MAX_MEMBERSHIPS from 20 to 128 in
 	  net/ipv4/igmp.c. If anyone needs higher values, set it

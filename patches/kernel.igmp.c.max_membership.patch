@@ -1,8 +1,8 @@
---- linux-2.4.33/net/ipv4/igmp.c.orig	2006-09-30 11:15:16.000000000 +0200
-+++ linux-2.4.33/net/ipv4/igmp.c	2006-08-11 06:18:20.000000000 +0200
-@@ -101,7 +101,7 @@
+--- linux-2.6.18/net/ipv4/igmp.c.orig	2006-09-30 17:20:29.000000000 +0200
++++ linux-2.6.18/net/ipv4/igmp.c	2006-09-30 17:20:39.000000000 +0200
+@@ -106,7 +106,7 @@
+ #include <linux/seq_file.h>
  #endif
- 
  
 -#define IP_MAX_MEMBERSHIPS	20
 +#define IP_MAX_MEMBERSHIPS	128

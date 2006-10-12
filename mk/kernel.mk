@@ -23,50 +23,22 @@ PKG := kernel
 SRC_FILENAME = linux-$(KERNEL_VERSION).tar.bz2
 EXTRACTED_DIR = linux-$(KERNEL_VERSION)
 DOWNLOAD_SITES = \
-		ftp://ftp.hu.kernel.org/pub/linux/kernel/v2.4/ \
-		ftp://ftp.nl.kernel.org/pub/linux/kernel/v2.4/ \
-		ftp://ftp.se.kernel.org/pub/linux/kernel/v2.4/ \
-		ftp://ftp.sm.kernel.org/pub/linux/kernel/v2.4/ \
-		ftp://ftp.kernel.org/pub/linux/kernel/v2.4/ \
+		ftp://ftp.hu.kernel.org/pub/linux/kernel/v2.6/ \
+		ftp://ftp.nl.kernel.org/pub/linux/kernel/v2.6/ \
+		ftp://ftp.se.kernel.org/pub/linux/kernel/v2.6/ \
+		ftp://ftp.sm.kernel.org/pub/linux/kernel/v2.6/ \
+		ftp://ftp.kernel.org/pub/linux/kernel/v2.6/ \
 		$(CFLINUX_PACKAGES)
 PATCHES = kernel.vlan_mtu.patch \
-	kernel.mppe.patch \
-	kernel.multigate.patch \
 	kernel.init.patch \
 	kernel.blackhole.patch \
 	kernel.usb_root.patch \
-	kernel.tulip_iff_running.patch \
-	kernel.pcmcia-ti-routing-10_v24.patch \
-	kernel.ipt_random.patch \
 	kernel.igmp.c.max_membership.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
 
-OPENSWAN_STAMP=$(PKG_ROOT)/.openswan_applied
-GRSEC_STAMP=$(PKG_ROOT)/.grsec_applied
-
-configure: patch openswanpatch grsecpatch $(CONFIGURED_STAMP)
-
-openswanpatch: $(OPENSWAN_STAMP)
-grsecpatch: $(GRSEC_STAMP)
-
-$(OPENSWAN_STAMP): $(BUILD_DIR)/openswan/.openswan.patched
-	(cd $(PKG_ROOT); \
-	$(MAKE) -C $(BUILD_DIR)/openswan kernelpatch2.4 | patch -p1)
-	touch $@
-
-$(GRSEC_STAMP): $(BUILD_DIR)/grsec/.grsec.patched
-	(cd $(PKG_ROOT) && find $(BUILD_DIR)/grsec/ \
-	 -type f -name '*.patch' | xargs cat | \
-	 patch -p1)
-	touch $@
-
-$(BUILD_DIR)/grsec/.grsec.patched:
-	$(MAKE) -f mk/grsec.mk patch
-
-$(BUILD_DIR)/openswan/.openswan.patched:
-	$(MAKE) -f mk/openswan.mk patch
+configure: patch $(CONFIGURED_STAMP)
 
 ifeq ($(wildcard $(CONFIGS)/$(PKG).config.patch),$(CONFIGS)/$(PKG).config.patch)
 CFGPATCH = $(CONFIGS)/$(PKG).config.patch
@@ -93,10 +65,10 @@ $(BUILT_STAMP):
 install: build
 	$(MAKE) -C $(PKG_ROOT) modules_install INSTALL_MOD_PATH=$(ROOTFS)
 	(cd $(ROOTFS)/lib/modules/$(KERNEL_VERSION)/kernel/net/sched && \
-	 for i in 0 1 2 3 4 5 6 7; do ln -f sch_teql.o teql$$i.o ; done)
+	 for i in 0 1 2 3 4 5 6 7; do ln -f sch_teql.ko teql$$i.ko ; done)
 	(cd $(ROOTFS)/lib/modules/$(KERNEL_VERSION)/kernel/drivers/net && \
-	 for i in 0 1 2 3 4 5 6 7; do ln -f dummy.o dummy$$i.o ; \
-	 ln -f bonding/bonding.o bonding/bond$$i.o ; done)
+	 for i in 0 1 2 3 4 5 6 7; do ln -f dummy.ko dummy$$i.ko ; \
+	 ln -f bonding/bonding.ko bonding/bond$$i.ko ; done)
 
 .PHONY: configure clean build install
 

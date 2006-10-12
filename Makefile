@@ -22,7 +22,6 @@
 
 ifndef DO_MK
 DO_MK = base
-DO_MK += grsec
 DO_MK += kernel
 DO_MK += uclibc
 DO_MK += db
@@ -40,8 +39,6 @@ DO_MK += net-tools
 DO_MK += net-snmp
 DO_MK += quagga
 DO_MK += iputils
-DO_MK += pcmcia-cs
-DO_MK += hostap
 DO_MK += hostapd
 DO_MK += ppp
 DO_MK += rp-pppoe

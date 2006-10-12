@@ -21,9 +21,9 @@
 #
 
 # cflinux version
-VERSION_MAJOR = 1
-VERSION_MINOR = 0
-VERSION_PATCH = 3
+VERSION_MAJOR = 2
+VERSION_MINOR = 0-alpha
+VERSION_PATCH = 0
 
 RELEASE_STRING := $(VERSION_MAJOR).$(VERSION_MINOR)
 ifneq ($(VERSION_PATCH),)
@@ -50,7 +50,7 @@ export UC_ENV
 export UC_PATH
 
 # The version of the used kernel
-KERNEL_VERSION := 2.4.33.3
+KERNEL_VERSION := 2.6.18
 
 # the downloads dir, where the sources will reside
 SOURCES_DIR ?= $(TOP_DIR)/sources

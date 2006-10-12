@@ -12,6 +12,12 @@ echo -n "Mounting /dev/pts: "
 mount devpts /dev/pts -t devpts
 echo "done"
 
+if grep -q 'sysfs' /proc/filesystems ; then
+	echo -n "Mounting /sys: "
+	mount sysfs -t sysfs /sys
+	echo "done"
+fi
+
 # invoking ldconfig
 /sbin/ldconfig
 
@@ -167,7 +173,7 @@ case "$crond_enable" in
 esac
 case "$cardmgr_enable" in
 	[Yy][Ee][Ss])
-		/sbin/cardmgr $cardmgr_flags && echo -n " cardmgr"
+		echo -n " [cardmgr: not installed]"
 		;;
 esac
 case "$sshd_enable" in

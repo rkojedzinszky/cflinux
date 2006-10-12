@@ -40,7 +40,6 @@ build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT)/common farutil fartest $(UC_PATH)
-	$(MAKE) -C $(PKG_ROOT)/kernel2.4 all KERNEL_SOURCE=$(BUILD_DIR)/kernel
 	touch $(BUILT_STAMP)
 
 install: build
@@ -53,7 +52,5 @@ install: build
 	cp -R $(PKG_ROOT)/common/downloads $(ROOTFS)/usr/share/farsync/
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/common/farsync.init \
 		$(ROOTFS)/usr/share/farsync/
-	cp $(PKG_ROOT)/kernel2.4/farsync.o \
-		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/kernel/drivers/net/wan/
 
 .PHONY: configure clean build install

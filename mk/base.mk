@@ -49,7 +49,7 @@ $(INSTALL_STAMP):
 	-chown 0:0 $(ROOTFS)
 	for i in bin boot dev/net etc lib mnt proc sbin usr var \
 		usr/bin usr/lib usr/sbin usr/local dev/pts \
-		usr/lib/cfmaint usr/lib/cflinux ; do \
+		usr/lib/cfmaint usr/lib/cflinux sys ; do \
 			mkdir -p $(ROOTFS)/$$i ; done
 	mkdir -p $(DEFAULTS_DIR)/etc
 	ln -s var/tmp $(ROOTFS)/tmp

@@ -46,8 +46,8 @@ install:
 	chmod 700 $(FDEVEL_DIR)/fs_config/zebra
 	rm -rf $(ROOTFS)/etc/*
 	rm -rf $(ROOTFS)/sbin/rc?.d
-	find $(ROOTFS)/lib/modules/$(KERNEL_VERSION)/ -name '*.o' -print0 | \
-		xargs -0 strip -g
+	find $(ROOTFS)/lib/modules/$(KERNEL_VERSION)/ -name '*.ko' -print0 | \
+		xargs -r0 strip -g
 	depmod -raeb $(ROOTFS) -F $(BUILD_DIR)/kernel/System.map $(KERNEL_VERSION)
 	rm -f fs_config/modules.conf
 
