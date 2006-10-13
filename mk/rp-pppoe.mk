@@ -21,7 +21,6 @@ PKG := rp-pppoe
 SRC_FILENAME = rp-pppoe-3.5.tar.gz
 EXTRACTED_DIR = rp-pppoe-3.5
 DOWNLOAD_SITES = \
-		http://www.roaringpenguin.com/penguin/pppoe/ \
 		$(CFLINUX_PACKAGES)
 PATCHES = rp-pppoe.patch \
 	rp-pppoe.relay_c_nonblock_io.patch \
