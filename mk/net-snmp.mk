@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := net-snmp
-SRC_FILENAME = net-snmp-5.1.2.tar.gz
-EXTRACTED_DIR = net-snmp-5.1.2
+SRC_FILENAME = net-snmp-5.3.1.tar.gz
+EXTRACTED_DIR = net-snmp-5.3.1
 DOWNLOAD_SITES = \
 		http://heanet.dl.sourceforge.net/sourceforge/net-snmp/ \
 		http://unc.dl.sourceforge.net/sourceforge/net-snmp/ \
@@ -66,14 +66,14 @@ $(BUILT_STAMP):
 
 install: build
 	for i in agent mibs ; do \
-		for j in $(PKG_ROOT)/agent/.libs/libnetsnmp$${i}.so.5* ; do \
+		for j in $(PKG_ROOT)/agent/.libs/libnetsnmp$${i}.so.10* ; do \
 			$(INSTALL_BIN) $${j} \
 				$(ROOTFS)/usr/lib/ ; done ; done
 	for i in helpers ; do \
-		for j in $(PKG_ROOT)/agent/helpers/.libs/libnetsnmp$${i}.so.5* ; do \
+		for j in $(PKG_ROOT)/agent/helpers/.libs/libnetsnmp$${i}.so.10* ; do \
 			$(INSTALL_BIN) $${j} \
 				$(ROOTFS)/usr/lib/ ; done ; done
-	for i in $(PKG_ROOT)/snmplib/.libs/libnetsnmp.so.5* ; do \
+	for i in $(PKG_ROOT)/snmplib/.libs/libnetsnmp.so.10* ; do \
 		$(INSTALL_BIN) $${i} \
 			$(ROOTFS)/usr/lib/ ; done
 #	$(INSTALL_BIN) $(PKG_ROOT)/apps/.libs/snmptrap \
