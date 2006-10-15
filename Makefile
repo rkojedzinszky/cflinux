@@ -110,7 +110,8 @@ image:
 	dd if=/dev/ram0 bs=1k of=$(ROOTFS)/usr/share/defaults/etc.img \
 		count=2047 >/dev/null 2>&1
 	$(MKCRAMFS) -i topad $(ROOTFS) rootfs.bin
-	$(PACKROOT) '$(VERSION_MAJOR)' '$(VERSION_MINOR)' '$(VERSION_PATCH)' '$(VERSION_EXTRA)' rootfs.bin /dev/null cflinux-$(RELEASE_STRING).img
+	$(MAKE) -C cfbase/scripts/upgrade setup.tgz
+	$(PACKROOT) '$(VERSION_MAJOR)' '$(VERSION_MINOR)' '$(VERSION_PATCH)' '$(VERSION_EXTRA)' rootfs.bin cfbase/scripts/upgrade/setup.tgz cflinux-$(RELEASE_STRING).img
 	rm -f topad
 
 dist: scratch
