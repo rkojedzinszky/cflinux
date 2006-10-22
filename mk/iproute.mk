@@ -44,11 +44,11 @@ build: configure $(BUILT_STAMP)
 $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH) \
 		KERNEL_INCLUDE=$(BUILD_DIR)/kernel/include \
-		LIBC_INCLUDE=$(UC_ROOT)/include
+		LIBC_INCLUDE=$(UC_ROOT)/include \
+		SUBDIRS="lib ip"
 	touch $(BUILT_STAMP)
 
 install: build
 	$(INSTALL_BIN) $(PKG_ROOT)/ip/ip $(ROOTFS)/sbin/
-	$(INSTALL_BIN) $(PKG_ROOT)/tc/tc $(ROOTFS)/sbin/
 
 .PHONY: configure clean build install

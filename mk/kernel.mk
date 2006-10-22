@@ -33,7 +33,9 @@ PATCHES = kernel.vlan_mtu.patch \
 	kernel.init.patch \
 	kernel.blackhole.patch \
 	kernel.usb_root.patch \
-	kernel.igmp.c.max_membership.patch
+	kernel.igmp.c.max_membership.patch \
+	kernel.ipv4_no_rt_cache.patch \
+	kernel.ip_multitable.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -64,8 +66,6 @@ $(BUILT_STAMP):
 
 install: build
 	$(MAKE) -C $(PKG_ROOT) modules_install INSTALL_MOD_PATH=$(ROOTFS)
-	(cd $(ROOTFS)/lib/modules/$(KERNEL_VERSION)/kernel/net/sched && \
-	 for i in 0 1 2 3 4 5 6 7; do ln -f sch_teql.ko teql$$i.ko ; done)
 	(cd $(ROOTFS)/lib/modules/$(KERNEL_VERSION)/kernel/drivers/net && \
 	 for i in 0 1 2 3 4 5 6 7; do ln -f dummy.ko dummy$$i.ko ; \
 	 ln -f bonding/bonding.ko bonding/bond$$i.ko ; done)
