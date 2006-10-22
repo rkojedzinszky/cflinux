@@ -46,7 +46,6 @@ DO_MK += rp-l2tp
 DO_MK += wireless_tools
 DO_MK += madwifi
 DO_MK += fwdg
-DO_MK += bridge
 DO_MK += postgresql
 DO_MK += libgmp
 DO_MK += openswan
