@@ -48,7 +48,6 @@ DO_MK += madwifi
 DO_MK += fwdg
 DO_MK += postgresql
 DO_MK += libgmp
-DO_MK += openswan
 DO_MK += mcom
 DO_MK += poptop
 DO_MK += vtun

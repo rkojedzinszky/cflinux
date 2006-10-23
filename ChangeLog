@@ -10,6 +10,7 @@ Changes from 1.0p3 to 2.0alpha:
 	- removed the route cache for ipv4 (improving routing performance)
 	- disabled any QoS support and removed 'tc' utility
 	- turned off policy routing, and made only one route table
+	- removed IPSEC support / openswan (improving routing performance)
 
 Changes from 1.0p2 to 1.0p3:
 	- raised the default IP_MAX_MEMBERSHIPS from 20 to 128 in

@@ -238,7 +238,7 @@ case "$snmpd_enable" in
 esac
 case "$ipsec_enable" in
 	[Yy][Ee][Ss])
-		ipsec setup --start && echo -n " ipsec"
+		echo -n " [IPSEC not available]"
 		;;
 esac
 echo "."
