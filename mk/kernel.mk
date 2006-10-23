@@ -35,7 +35,8 @@ PATCHES = kernel.vlan_mtu.patch \
 	kernel.usb_root.patch \
 	kernel.igmp.c.max_membership.patch \
 	kernel.ipv4_no_rt_cache.patch \
-	kernel.ip_multitable.patch
+	kernel.ip_multitable.patch \
+	kernel.dst_input_no_loop.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
