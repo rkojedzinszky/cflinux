@@ -1,0 +1,745 @@
+--- linux-2.6.18.orig/net/ipv4/Makefile	2006-09-20 05:42:06.000000000 +0200
++++ linux-2.6.18/net/ipv4/Makefile	2006-10-27 22:40:22.000000000 +0200
+@@ -13,6 +13,7 @@
+ 
+ obj-$(CONFIG_IP_FIB_HASH) += fib_hash.o
+ obj-$(CONFIG_IP_FIB_TRIE) += fib_trie.o
++obj-$(CONFIG_IP_FIB_RADIX) += fib_radix.o
+ obj-$(CONFIG_PROC_FS) += proc.o
+ obj-$(CONFIG_IP_MULTIPLE_TABLES) += fib_rules.o
+ obj-$(CONFIG_IP_MROUTE) += ipmr.o
+--- linux-2.6.18.orig/net/ipv4/Kconfig	2006-09-20 05:42:06.000000000 +0200
++++ linux-2.6.18/net/ipv4/Kconfig	2006-10-28 20:20:40.000000000 +0200
+@@ -79,12 +79,24 @@
+ 	An experimental study of compression methods for dynamic tries
+  	Stefan Nilsson and Matti Tikkanen. Algorithmica, 33(1):19-33, 2002.
+  	http://www.nada.kth.se/~snilsson/public/papers/dyntrie2/
+-       
++
++config IP_FIB_RADIX
++	bool "FIB_RADIX"
++	---help---
++	Radix based FIB lookup algorithm. Currently in testing phase, but much simpler
++	than the trie.
++
+ endchoice
+ 
+ config IP_FIB_HASH
+ 	def_bool ASK_IP_FIB_HASH || !IP_ADVANCED_ROUTER
+ 
++config IP_NO_ROUTE_CACHE
++	bool "IP: disable route cache"
++	depends on IP_ADVANCED_ROUTER
++	---help---
++	You can disable the internal route cache used in the Linux kernel, for now only for IPV4.
++
+ config IP_MULTIPLE_TABLES
+ 	bool "IP: policy routing"
+ 	depends on IP_ADVANCED_ROUTER
+--- linux-2.6.18.orig/include/net/ip_fib.h	2006-10-28 20:22:02.000000000 +0200
++++ linux-2.6.18/include/net/ip_fib.h	2006-10-27 23:03:49.000000000 +0200
+@@ -171,10 +171,12 @@
+ 
+ extern struct fib_table *ip_fib_main_table;
+ 
+-#ifdef CONFIG_IP_FIB_HASH
++#if defined(CONFIG_IP_FIB_HASH)
+ #define _tb_lookup fn_hash_lookup
+-#else
++#elif defined(CONFIG_IP_FIB_TRIE)
+ #define _tb_lookup fn_trie_lookup
++#elif defined(CONFIG_IP_FIB_RADIX)
++#define _tb_lookup fn_radix_lookup
+ #endif
+ 
+ extern int _tb_lookup(struct fib_table *, const struct flowi *, struct fib_result *);
+--- linux-2.6.18.orig/net/ipv4/fib_radix.c	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.18/net/ipv4/fib_radix.c	2006-10-29 00:31:26.000000000 +0200
+@@ -0,0 +1,687 @@
++/*
++ *   This program is free software; you can redistribute it and/or
++ *   modify it under the terms of the GNU General Public License
++ *   as published by the Free Software Foundation; either version
++ *   2 of the License, or (at your option) any later version.
++ *
++ *   A simple radix based FIB implemetation by krichy
++ */
++
++#include <linux/config.h>
++#include <asm/uaccess.h>
++#include <asm/system.h>
++#include <asm/bitops.h>
++#include <linux/types.h>
++#include <linux/kernel.h>
++#include <linux/sched.h>
++#include <linux/mm.h>
++#include <linux/string.h>
++#include <linux/socket.h>
++#include <linux/sockios.h>
++#include <linux/errno.h>
++#include <linux/in.h>
++#include <linux/inet.h>
++#include <linux/inetdevice.h>
++#include <linux/netdevice.h>
++#include <linux/if_arp.h>
++#include <linux/proc_fs.h>
++#include <linux/rcupdate.h>
++#include <linux/skbuff.h>
++#include <linux/netlink.h>
++#include <linux/init.h>
++#include <linux/list.h>
++#include <net/ip.h>
++#include <net/protocol.h>
++#include <net/route.h>
++#include <net/tcp.h>
++#include <net/sock.h>
++#include <net/ip_fib.h>
++#include "fib_lookup.h"
++
++/*
++ * radix tree implemetation
++ */
++
++
++/* many code is borrowed from fib_trie, please, forgive me :) */
++
++#define	HBIT		0x80000000	// high bit
++
++static kmem_cache_t*	fn_alias_kmem __read_mostly;
++
++static void __alias_free_mem(struct rcu_head *head)
++{
++	struct fib_alias *fa = container_of(head, struct fib_alias, rcu);
++	kmem_cache_free(fn_alias_kmem, fa);
++}
++
++static inline void alias_free_mem_rcu(struct fib_alias *fa)
++{
++	call_rcu(&fa->rcu, __alias_free_mem);
++}
++
++typedef struct radix_node {
++	struct radix_node*	l_child;	// left child  (0)
++	struct radix_node*	r_child;	// right child (1)
++	struct radix_node*	parent;		// parent
++	struct radix_node**	pp;		// parent's pointer to us
++	struct list_head	falh;
++	struct rcu_head		rcu;
++} radix_t;
++
++// create a new node
++static inline radix_t*		new_radix_node(void)
++{
++	radix_t*		nn = kmalloc(sizeof(radix_t), GFP_KERNEL);
++	if (likely(nn)) {
++		nn->l_child = NULL;
++		nn->r_child = NULL;
++		nn->parent = NULL;
++		nn->pp = NULL;
++		INIT_LIST_HEAD(&nn->falh);
++		INIT_RCU_HEAD(&nn->rcu);
++	}
++	return nn;
++}
++
++// get a node and possibly create it
++static radix_t*			get_node(radix_t** p, u32 k, int klen)
++{
++	radix_t*		n;
++	radix_t*		pa = NULL;	// parent
++
++	if (klen < 0 || klen > 32)
++		return NULL;
++
++	while( 1 ) {
++		n = *p;
++
++		// we create the node if it does not exist
++		if (!n) {
++			n = new_radix_node();
++			if (unlikely(!n))
++				return NULL;
++			n->parent = pa;
++			n->pp = p;
++
++			rcu_assign_pointer(*p, n);
++		}
++
++		if (klen == 0)
++			break;
++
++		if (k & HBIT)
++			p = &n->r_child;
++		else
++			p = &n->l_child;
++
++		pa = n;
++		k <<= 1;
++		klen--;
++	}
++	return n;
++}
++
++// insert a routing entry
++static int
++fn_radix_insert(struct fib_table* tb, struct rtmsg *r, struct kern_rta *rta,
++		struct nlmsghdr *nlhdr, struct netlink_skb_parms *req)
++{
++	struct fib_alias	*fa, *new_fa;
++	struct fib_info		*fi;
++
++	int			plen = r->rtm_dst_len;
++	int			type = r->rtm_type;
++	u8			tos = r->rtm_tos;
++	u32			key, mask;
++	int			err;
++	radix_t*		n;
++
++	if (plen > 32)
++		return -EINVAL;
++
++	key = 0;
++	if (rta->rta_dst)
++		memcpy(&key, rta->rta_dst, sizeof(key));
++
++	key = ntohl(key);
++
++	mask = ntohl(inet_make_mask(plen));
++
++	if (key & ~mask)
++		return -EINVAL;
++
++	fi = fib_create_info(r, rta, nlhdr, &err);
++
++	if (!fi)
++		goto err;
++
++	n = get_node((radix_t**)tb->tb_data, key, plen);
++
++	if (unlikely(!n)) {
++		err = -ENOBUFS;
++		goto out;
++	}
++
++	fa = fib_find_alias(&n->falh, tos, fi->fib_priority);
++
++	/* Now fa, if non-NULL, points to the first fib alias
++	 * with the same keys [prefix,tos,priority], if such key already
++	 * exists or to the node before which we will insert new one.
++	 *
++	 * If fa is NULL, we will need to allocate a new one and
++	 * insert to the head of f.
++	 *
++	 * If f is NULL, no fib node matched the destination key
++	 * and we need to allocate a new one of those as well.
++	 */
++
++	if (fa && fa->fa_info->fib_priority == fi->fib_priority) {
++		struct fib_alias *fa_orig;
++
++		err = -EEXIST;
++		if (nlhdr->nlmsg_flags & NLM_F_EXCL)
++			goto out;
++
++		if (nlhdr->nlmsg_flags & NLM_F_REPLACE) {
++			struct fib_info *fi_drop;
++			u8 state;
++
++			err = -ENOBUFS;
++			new_fa = kmem_cache_alloc(fn_alias_kmem, SLAB_KERNEL);
++			if (new_fa == NULL)
++				goto out;
++
++			fi_drop = fa->fa_info;
++			new_fa->fa_tos = fa->fa_tos;
++			new_fa->fa_info = fi;
++			new_fa->fa_type = type;
++			new_fa->fa_scope = r->rtm_scope;
++			state = fa->fa_state;
++			new_fa->fa_state &= ~FA_S_ACCESSED;
++
++			list_replace_rcu(&fa->fa_list, &new_fa->fa_list);
++			alias_free_mem_rcu(fa);
++
++			fib_release_info(fi_drop);
++			if (state & FA_S_ACCESSED)
++				rt_cache_flush(-1);
++
++			goto succeeded;
++		}
++
++		/* Error if we find a perfect match which
++		 * uses the same scope, type, and nexthop
++		 * information.
++		 */
++		fa_orig = fa;
++		list_for_each_entry(fa, fa_orig->fa_list.prev, fa_list) {
++			if (fa->fa_tos != tos)
++				break;
++			if (fa->fa_info->fib_priority != fi->fib_priority)
++				break;
++			if (fa->fa_type == type &&
++			    fa->fa_scope == r->rtm_scope &&
++			    fa->fa_info == fi) {
++				goto out;
++			}
++		}
++		if (!(nlhdr->nlmsg_flags & NLM_F_APPEND))
++			fa = fa_orig;
++	}
++	err = -ENOENT;
++	if (!(nlhdr->nlmsg_flags & NLM_F_CREATE))
++		goto out;
++
++	err = -ENOBUFS;
++	new_fa = kmem_cache_alloc(fn_alias_kmem, SLAB_KERNEL);
++	if (new_fa == NULL)
++		goto out;
++
++	new_fa->fa_info = fi;
++	new_fa->fa_tos = tos;
++	new_fa->fa_type = type;
++	new_fa->fa_scope = r->rtm_scope;
++	new_fa->fa_state = 0;
++
++	list_add_tail_rcu(&new_fa->fa_list, (fa ? &fa->fa_list : &n->falh));
++
++	rt_cache_flush(-1);
++	rtmsg_fib(RTM_NEWROUTE, htonl(key), new_fa, plen, tb->tb_id, nlhdr, req);
++succeeded:
++	return 0;
++
++out:
++	fib_release_info(fi);
++err:
++	return err;
++}
++
++#ifdef CONFIG_IP_MULTIPLE_TABLES
++static
++#endif
++int
++fn_radix_lookup(struct fib_table *tb, const struct flowi *flp, struct fib_result *res)
++{
++	radix_t*		n;		// current node
++	int			plen = 0;
++	u32			key = ntohl(flp->fl4_dst);
++	u32			mask;
++	struct list_head	*fas[36];	// we collect all possible points here and start matching backwards
++	int			fap = 0;
++
++	rcu_read_lock();
++
++	n = *((radix_t**)tb->tb_data);
++
++	while( n ) {
++		mask = ntohl(inet_make_mask(plen));
++
++		if (!list_empty(&n->falh)) {
++			fas[fap++] = &n->falh;
++		}
++
++		if (key & HBIT)
++			n = n->r_child;
++		else
++			n = n->l_child;
++
++		plen++;
++		key <<= 1;
++	}
++
++	while( --fap >= 0 ) {
++		if (fib_semantic_match(fas[fap], flp, res, key, mask, plen) <= 0) {
++			rcu_read_unlock();
++			return 0;
++		}
++	}
++
++	rcu_read_unlock();
++
++	return -ESRCH;
++}
++
++static inline int	radix_node_has_refs(radix_t* n)
++{
++	return !list_empty(&n->falh) || n->l_child || n->r_child;
++}
++
++static void		__radix_delete_node(struct rcu_head* head)
++{
++	radix_t*	n = container_of(head, radix_t, rcu);
++
++	BUG_ON(radix_node_has_refs(n));
++
++	kfree(n);
++}
++
++static inline void	radix_delete_node(radix_t* s)
++{
++	call_rcu(&s->rcu, __radix_delete_node);
++}
++
++static void		radix_remove_node(radix_t* n)
++{
++	BUG_ON(!n);
++
++	rcu_assign_pointer(*(n->pp), NULL);
++	radix_delete_node(n);
++
++	if (n->parent && !radix_node_has_refs(n->parent))
++		radix_remove_node(n->parent);
++}
++
++static int
++fn_radix_delete(struct fib_table *tb, struct rtmsg *r, struct kern_rta *rta,
++		struct nlmsghdr *nlhdr, struct netlink_skb_parms *req)
++{
++	// we do a lookup here, but only for a maximum depth
++	radix_t*		n = *((radix_t**)tb->tb_data);
++	int			plen = r->rtm_dst_len;
++	u32			key, mask;
++	u8			tos = r->rtm_tos;
++	struct list_head	*fa_head;
++	struct fib_alias	*fa, *fa_to_delete;
++
++	key = 0;
++	if (rta->rta_dst)
++		memcpy(&key, rta->rta_dst, sizeof(key));
++	key = ntohl(key);
++	mask = ntohl(inet_make_mask(plen));
++
++	if (key & ~mask)
++		return -EINVAL;
++
++	while ( plen && n ) {
++		if (key & HBIT)
++			n = n->r_child;
++		else
++			n = n->l_child;
++
++		key <<= 1;
++		plen--;
++	}
++
++	if (plen || !n)
++		return -ESRCH;
++
++	fa_to_delete = NULL;
++	fa_head = &n->falh;
++
++	list_for_each_entry(fa, fa_head, fa_list) {
++		struct fib_info *fi = fa->fa_info;
++
++		if (fa->fa_tos != tos)
++			break;
++
++		if ((!r->rtm_type ||
++		     fa->fa_type == r->rtm_type) &&
++		    (r->rtm_scope == RT_SCOPE_NOWHERE ||
++		     fa->fa_scope == r->rtm_scope) &&
++		    (!r->rtm_protocol ||
++		     fi->fib_protocol == r->rtm_protocol) &&
++		    fib_nh_match(r, nlhdr, rta, fi) == 0) {
++			fa_to_delete = fa;
++			break;
++		}
++	}
++
++	if (!fa_to_delete)
++		return -ESRCH;
++
++	fa = fa_to_delete;
++	rtmsg_fib(RTM_DELROUTE, htonl(key), fa, plen, tb->tb_id, nlhdr, req);
++
++	list_del_rcu(&fa->fa_list);
++
++	// now the entry is removed, we must find the top-most node which can be removed
++	if (!radix_node_has_refs(n))
++		radix_remove_node(n);
++
++	if (fa->fa_state & FA_S_ACCESSED)
++		rt_cache_flush(-1);
++
++	fib_release_info(fa->fa_info);
++	alias_free_mem_rcu(fa);
++
++	return 0;
++}
++
++static int last_dflt = -1;
++
++static void
++fn_radix_select_default(struct fib_table *tb, const struct flowi *flp, struct fib_result *res)
++{
++	radix_t* n;
++	int order, last_idx;
++	struct fib_info *fi = NULL;
++	struct fib_info *last_resort;
++	struct fib_alias *fa = NULL;
++	struct list_head *fa_head;
++
++	last_idx = -1;
++	last_resort = NULL;
++	order = -1;
++
++	rcu_read_lock();
++
++	n = *((radix_t**)tb->tb_data);
++	if (!n)
++		goto out;
++
++	fa_head = &n->falh;
++
++	if (!fa_head)
++		goto out;
++
++	if (list_empty(fa_head))
++		goto out;
++
++	list_for_each_entry_rcu(fa, fa_head, fa_list) {
++		struct fib_info *next_fi = fa->fa_info;
++
++		if (fa->fa_scope != res->scope ||
++		    fa->fa_type != RTN_UNICAST)
++			continue;
++
++		if (next_fi->fib_priority > res->fi->fib_priority)
++			break;
++		if (!next_fi->fib_nh[0].nh_gw ||
++		    next_fi->fib_nh[0].nh_scope != RT_SCOPE_LINK)
++			continue;
++		fa->fa_state |= FA_S_ACCESSED;
++
++		if (fi == NULL) {
++			if (next_fi != res->fi)
++				break;
++		} else if (!fib_detect_death(fi, order, &last_resort,
++					     &last_idx, &last_dflt)) {
++			if (res->fi)
++				fib_info_put(res->fi);
++			res->fi = fi;
++			atomic_inc(&fi->fib_clntref);
++			last_dflt = order;
++			goto out;
++		}
++		fi = next_fi;
++		order++;
++	}
++	if (order <= 0 || fi == NULL) {
++		last_dflt = -1;
++		goto out;
++	}
++
++	if (!fib_detect_death(fi, order, &last_resort, &last_idx, &last_dflt)) {
++		if (res->fi)
++			fib_info_put(res->fi);
++		res->fi = fi;
++		atomic_inc(&fi->fib_clntref);
++		last_dflt = order;
++		goto out;
++	}
++	if (last_idx >= 0) {
++		if (res->fi)
++			fib_info_put(res->fi);
++		res->fi = last_resort;
++		if (last_resort)
++			atomic_inc(&last_resort->fib_clntref);
++	}
++	last_dflt = last_idx;
++ out:;
++	rcu_read_unlock();
++}
++
++#define BIT(i)  (HBIT >> (i-1))
++#define TB(v,i)	((v) & BIT(i))
++
++static int fn_radix_dump(struct fib_table *tb, struct sk_buff *skb, struct netlink_callback *cb)
++{
++	u32		key = cb->args[1];	// represents the actual key
++	u32		plen = cb->args[2];	// represents the actual key length
++	int		i;
++
++	radix_t*	n;
++	radix_t*	nn;
++
++	// pre-order tree traversal
++	rcu_read_lock();
++
++	// first of all we look for our node
++	n = *((radix_t**)tb->tb_data);
++	i = 0;
++
++	while( i < plen ) {
++		if (TB(key,i+1))
++			nn = n->r_child;
++		else
++			nn = n->l_child;
++		if (!nn)
++			break;
++		n = nn;
++		i++;
++	}
++
++	// now we must continue pre-order traversal from n
++	while(n) {
++		if (!list_empty(&n->falh)) {
++			int			fai = cb->args[3];
++			struct fib_alias	*fa;
++			struct list_head	*fah;
++			u32			xkey = htonl(key);
++
++			fah = &n->falh;
++			i = 0;
++
++			list_for_each_entry_rcu(fa, fah, fa_list) {
++				if (i < fai) {
++					i++;
++					continue;
++				}
++
++				BUG_ON(!fa->fa_info);
++
++				if (fib_dump_info(skb, NETLINK_CB(cb->skb).pid,
++						  cb->nlh->nlmsg_seq,
++						  RTM_NEWROUTE,
++						  tb->tb_id,
++						  fa->fa_type,
++						  fa->fa_scope,
++						  &xkey,
++						  plen,
++						  fa->fa_tos,
++						  fa->fa_info, 0) < 0) {
++
++					rcu_read_unlock();
++
++					cb->args[1] = key;
++					cb->args[2] = plen;
++					cb->args[3] = i;
++
++					return -1; // to indicate there is more data
++				}
++				i++;
++			}
++		}
++
++		// now must find next node to dump
++		cb->args[3] = 0;
++
++		if (n->l_child) {
++			n = n->l_child;
++			plen++;
++			BUG_ON(TB(key, plen));
++		} else if (n->r_child) {
++			n = n->r_child;
++			plen++;
++			BUG_ON(TB(key, plen));
++			key |= BIT(plen);	// set the last bit to 1
++		} else { // we must step upwards
++			while(n->parent && (n->parent->r_child == NULL || n->parent->r_child == n)) { // walk up while we are a right child
++				n = n->parent;
++				key &= ~BIT(plen); // set current bit to zero
++				plen--;
++			}
++
++			if (!n->parent) {
++				break;
++			}
++
++			BUG_ON(TB(key, plen));	// it must be 0 now
++
++			n = n->parent->r_child;
++			key |= BIT(plen);
++		}
++	}
++
++	rcu_read_unlock();
++
++	BUG_ON(plen != 0); // we should leave only if plen == 0
++
++	return skb->len;
++}
++
++static int	radix_flush_recursive(radix_t* n)
++{
++	struct fib_alias	*fa, *fa_node;
++	int			found = 0;
++
++	if (!n)
++		return 0;
++
++	found += radix_flush_recursive(n->l_child);
++	found += radix_flush_recursive(n->r_child);
++
++	list_for_each_entry_safe(fa, fa_node, &n->falh, fa_list) {
++		struct fib_info *fi = fa->fa_info;
++
++		if (fi && (fi->fib_flags & RTNH_F_DEAD)) {
++			list_del_rcu(&fa->fa_list);
++			fib_release_info(fa->fa_info);
++			alias_free_mem_rcu(fa);
++			found++;
++		}
++	}
++
++	if (!radix_node_has_refs(n)) { // dont delete parents, recursion will do that
++		n->parent = NULL;
++		radix_remove_node(n);
++	}
++
++	return found;
++}
++
++static int	fn_radix_flush(struct fib_table *tb)
++{
++	radix_t*		n = *((radix_t**)tb->tb_data);
++	int			found;
++
++	rcu_read_lock();
++	found = radix_flush_recursive(n);
++	rcu_read_unlock();
++
++	return found;
++}
++
++#ifdef CONFIG_IP_MULTIPLE_TABLES
++struct fib_table * fib_hash_init(int id)
++#else
++struct fib_table * __init fib_hash_init(int id)
++#endif
++{
++	struct fib_table *tb;
++
++	if (fn_alias_kmem == NULL)
++		fn_alias_kmem = kmem_cache_create("ip_fib_alias",
++						  sizeof(struct fib_alias),
++						  0, SLAB_HWCACHE_ALIGN,
++						  NULL, NULL);
++
++	tb = kmalloc(sizeof(struct fib_table) + sizeof(radix_t*),
++		     GFP_KERNEL);
++	if (tb == NULL)
++		return NULL;
++
++	tb->tb_id = id;
++	tb->tb_lookup = fn_radix_lookup;
++	tb->tb_insert = fn_radix_insert;
++	tb->tb_delete = fn_radix_delete;
++	tb->tb_flush = fn_radix_flush;
++	tb->tb_select_default = fn_radix_select_default;
++	tb->tb_dump = fn_radix_dump;
++	memset(tb->tb_data, 0, sizeof(radix_t*));
++
++	printk(KERN_INFO "IPv4 FIB: Using RADIX for table %d\n", id);
++
++	return tb;
++}
++
++int __init fib_proc_init(void)
++{
++	return 0;
++}
++
++void __init fib_proc_exit(void)
++{
++}
++
