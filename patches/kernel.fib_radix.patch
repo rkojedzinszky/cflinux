@@ -54,8 +54,8 @@
  
  extern int _tb_lookup(struct fib_table *, const struct flowi *, struct fib_result *);
 --- linux-2.6.18.orig/net/ipv4/fib_radix.c	1970-01-01 01:00:00.000000000 +0100
-+++ linux-2.6.18/net/ipv4/fib_radix.c	2006-10-29 00:31:26.000000000 +0200
-@@ -0,0 +1,687 @@
++++ linux-2.6.18/net/ipv4/fib_radix.c	2006-10-29 19:05:26.000000000 +0100
+@@ -0,0 +1,703 @@
 +/*
 + *   This program is free software; you can redistribute it and/or
 + *   modify it under the terms of the GNU General Public License
@@ -324,8 +324,12 @@
 +	radix_t*		n;		// current node
 +	int			plen = 0;
 +	u32			key = ntohl(flp->fl4_dst);
-+	u32			mask;
-+	struct list_head	*fas[36];	// we collect all possible points here and start matching backwards
++	struct list_head	*fas[33];	// we collect all possible points here and start matching backwards
++#ifdef CONFIG_IP_ROUTE_MULTIPATH_CACHED
++	u32			mask = 0;	// mask is only needed when multipath caching is enabled
++						// read fib_semantic_match in fib_semantics.c
++	u32			masks[33];	// the mask for each possible node
++#endif
 +	int			fap = 0;
 +
 +	rcu_read_lock();
@@ -333,9 +337,11 @@
 +	n = *((radix_t**)tb->tb_data);
 +
 +	while( n ) {
-+		mask = ntohl(inet_make_mask(plen));
 +
 +		if (!list_empty(&n->falh)) {
++#ifdef CONFIG_IP_ROUTE_MULTIPATH_CACHED
++			masks[fap] = mask;
++#endif
 +			fas[fap++] = &n->falh;
 +		}
 +
@@ -344,12 +350,22 @@
 +		else
 +			n = n->l_child;
 +
++#ifdef CONFIG_IP_ROUTE_MULTIPATH_CACHED
++		mask >>= 1;
++#endif
 +		plen++;
 +		key <<= 1;
++#ifdef CONFIG_IP_ROUTE_MULTIPATH_CACHED
++		mask |= HBIT;
++#endif
 +	}
 +
 +	while( --fap >= 0 ) {
-+		if (fib_semantic_match(fas[fap], flp, res, key, mask, plen) <= 0) {
++#ifdef CONFIG_IP_ROUTE_MULTIPATH_CACHED
++		if (fib_semantic_match(fas[fap], flp, res, key, masks[fap], plen) <= 0) {
++#else
++		if (fib_semantic_match(fas[fap], flp, res, 0, 0, plen) <= 0) {
++#endif
 +			rcu_read_unlock();
 +			return 0;
 +		}
