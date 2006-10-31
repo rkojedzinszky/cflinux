@@ -26,8 +26,8 @@
  
  extern int _tb_lookup(struct fib_table *, const struct flowi *, struct fib_result *);
 --- linux-2.6.18.orig/net/ipv4/fib_radix.c	1970-01-01 01:00:00.000000000 +0100
-+++ linux-2.6.18/net/ipv4/fib_radix.c	2006-10-30 21:08:15.000000000 +0100
-@@ -0,0 +1,713 @@
++++ linux-2.6.18/net/ipv4/fib_radix.c	2006-10-31 18:45:51.000000000 +0100
+@@ -0,0 +1,714 @@
 +/*
 + *   This program is free software; you can redistribute it and/or
 + *   modify it under the terms of the GNU General Public License
@@ -82,6 +82,10 @@
 +static void __alias_free_mem(struct rcu_head *head)
 +{
 +	struct fib_alias *fa = container_of(head, struct fib_alias, rcu);
++
++	BUG_ON(!fa->fa_info);
++	fib_release_info(fa->fa_info);
++
 +	kmem_cache_free(fn_alias_kmem, fa);
 +}
 +
@@ -131,9 +135,9 @@
 +			n = new_radix_node();
 +			if (unlikely(!n))
 +				return NULL;
-+			n->parent = pa;
 +			n->pp = p;
 +
++			rcu_assign_pointer(n->parent, pa);
 +			rcu_assign_pointer(*p, n);
 +		}
 +
@@ -233,7 +237,6 @@
 +			list_replace_rcu(&fa->fa_list, &new_fa->fa_list);
 +			alias_free_mem_rcu(fa);
 +
-+			fib_release_info(fi_drop);
 +			if (state & FA_S_ACCESSED)
 +				rt_cache_flush(-1);
 +
@@ -450,7 +453,6 @@
 +	if (fa->fa_state & FA_S_ACCESSED)
 +		rt_cache_flush(-1);
 +
-+	fib_release_info(fa->fa_info);
 +	alias_free_mem_rcu(fa);
 +
 +	return 0;
@@ -574,7 +576,7 @@
 +
 +	// now we must continue pre-order traversal from n
 +	while(n) {
-+		fah = rcu_dereference(&n->falh);
++		fah = &n->falh;
 +
 +		if (!list_empty(fah)) {
 +			int			fai = cb->args[3];
@@ -675,7 +677,6 @@
 +
 +		if (fi && (fi->fib_flags & RTNH_F_DEAD)) {
 +			list_del_rcu(&fa->fa_list);
-+			fib_release_info(fa->fa_info);
 +			alias_free_mem_rcu(fa);
 +			found++;
 +		}
