@@ -339,7 +339,7 @@
 +
 +	while( --fap >= 0 ) {
 +#ifdef CONFIG_IP_ROUTE_MULTIPATH_CACHED
-+		if (fib_semantic_match(fas[fap], flp, res, key, masks[fap], plens[fap]) <= 0) {
++		if (fib_semantic_match(fas[fap], flp, res, ntohl(flp->fl4_dst), masks[fap], plens[fap]) <= 0) {
 +#else
 +		if (fib_semantic_match(fas[fap], flp, res, 0, 0, plens[fap]) <= 0) {
 +#endif
