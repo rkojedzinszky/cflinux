@@ -1,80 +1,94 @@
+--- linux-2.6.18.orig/net/core/skbuff.c	2006-09-20 05:42:06.000000000 +0200
++++ linux-2.6.18/net/core/skbuff.c	2006-11-04 19:27:58.000000000 +0100
+@@ -365,6 +365,11 @@
+ 
+ void __kfree_skb(struct sk_buff *skb)
+ {
++#ifdef CONFIG_IP_NO_ROUTE_CACHE
++	if (likely(skb->dst && !atomic_read(&skb->dst->__refcnt)))
++		dst_free(skb->dst);
++	else
++#endif
+ 	dst_release(skb->dst);
+ #ifdef CONFIG_XFRM
+ 	secpath_put(skb->sp);
 --- linux-2.6.18.orig/net/ipv4/route.c	2006-09-20 05:42:06.000000000 +0200
-+++ linux-2.6.18/net/ipv4/route.c	2006-10-22 13:07:56.000000000 +0200
-@@ -928,6 +928,7 @@
- 	candp = NULL;
- 	now = jiffies;
++++ linux-2.6.18/net/ipv4/route.c	2006-11-04 19:29:11.000000000 +0100
+@@ -252,6 +252,15 @@
+ #define RT_CACHE_STAT_INC(field) \
+ 	(__raw_get_cpu_var(rt_cache_stat).field++)
  
-+#ifndef CONFIG_IP_NO_ROUTE_CACHE
- 	rthp = &rt_hash_table[hash].chain;
- 
- 	spin_lock_bh(rt_hash_lock_addr(hash));
-@@ -991,13 +992,16 @@
- 		}
- 	}
- 
-+#endif /* CONFIG_IP_NO_ROUTE_CACHE */
- 	/* Try to bind route to arp only if it is output
- 	   route or unicast forwarding path.
- 	 */
- 	if (rt->rt_type == RTN_UNICAST || rt->fl.iif == 0) {
- 		int err = arp_bind_neighbour(&rt->u.dst);
- 		if (err) {
-+#ifndef CONFIG_IP_NO_ROUTE_CACHE
- 			spin_unlock_bh(rt_hash_lock_addr(hash));
-+#endif /* CONFIG_IP_NO_ROUTE_CACHE */
- 
- 			if (err != -ENOBUFS) {
- 				rt_drop(rt);
-@@ -1026,7 +1030,9 @@
- 		}
- 	}
- 
-+#ifndef CONFIG_IP_NO_ROUTE_CACHE
- 	rt->u.rt_next = rt_hash_table[hash].chain;
-+#endif
- #if RT_CACHE_DEBUG >= 2
- 	if (rt->u.rt_next) {
- 		struct rtable *trt;
-@@ -1037,8 +1043,12 @@
- 		printk("\n");
- 	}
- #endif
-+#ifndef CONFIG_IP_NO_ROUTE_CACHE
- 	rt_hash_table[hash].chain = rt;
- 	spin_unlock_bh(rt_hash_lock_addr(hash));
++#ifdef CONFIG_IP_NO_ROUTE_CACHE
++static inline int rt_intern_hash(unsigned hash, struct rtable *rth,
++				struct rtable **res);
++
++static inline unsigned int rt_hash_code(u32 daddr, u32 saddr)
++{
++	return 0;
++}
 +#else
-+	rt_free(rt);
-+#endif
+ static int rt_intern_hash(unsigned hash, struct rtable *rth,
+ 				struct rtable **res);
+ 
+@@ -260,6 +269,7 @@
+ 	return (jhash_2words(daddr, saddr, rt_hash_rnd)
+ 		& rt_hash_mask);
+ }
++#endif /* CONFIG_IP_NO_ROUTE_CACHE */
+ 
+ #ifdef CONFIG_PROC_FS
+ struct rt_cache_iter_state {
+@@ -912,6 +922,22 @@
+ out:	return 0;
+ }
+ 
++#ifdef CONFIG_IP_NO_ROUTE_CACHE
++static inline int rt_intern_hash(unsigned hash, struct rtable *rt, struct rtable **rp)
++{
++	int err;
++
++	err = arp_bind_neighbour(&rt->u.dst);
++	if (err) {
++		rt_drop(rt);
++		return err;
++	}
++
++	*rp = rt;
++
++	return 0;
++}
++#else
+ static int rt_intern_hash(unsigned hash, struct rtable *rt, struct rtable **rp)
+ {
+ 	struct rtable	*rth, **rthp;
+@@ -1042,6 +1068,7 @@
  	*rp = rt;
  	return 0;
  }
-@@ -1830,8 +1840,12 @@
- 		return err;
- 
- 	/* put it into the cache */
-+#ifndef CONFIG_IP_NO_ROUTE_CACHE
- 	hash = rt_hash_code(daddr, saddr ^ (fl->iif << 5));
- 	return rt_intern_hash(hash, rth, (struct rtable**)&skb->dst);	
-+#else
-+	return rt_intern_hash(0, rth, (struct rtable**)&skb->dst);	
 +#endif
- }
  
- static inline int ip_mkroute_input(struct sk_buff *skb, 
-@@ -1871,8 +1885,12 @@
- 			return err;
+ void rt_bind_peer(struct rtable *rt, int create)
+ {
+@@ -1767,7 +1794,9 @@
+ 		goto cleanup;
+ 	}
  
- 		/* put it into the cache */
 +#ifndef CONFIG_IP_NO_ROUTE_CACHE
- 		hash = rt_hash_code(daddr, saddr ^ (fl->iif << 5));
- 		err = rt_intern_hash(hash, rth, &rtres);
-+#else
-+		err = rt_intern_hash(0, rth, &rtres);
-+#endif /* CONFIG_IP_NO_ROUTE_CACHE */
- 		if (err)
- 			return err;
+ 	atomic_set(&rth->u.dst.__refcnt, 1);
++#endif
+ 	rth->u.dst.flags= DST_HOST;
+ #ifdef CONFIG_IP_ROUTE_MULTIPATH_CACHED
+ 	if (res->fi->fib_nhs > 1)
+@@ -1901,7 +1930,7 @@
+  *	2. IP spoofing attempts are filtered with 100% of guarantee.
+  */
  
-@@ -2095,6 +2113,7 @@
+-static int ip_route_input_slow(struct sk_buff *skb, u32 daddr, u32 saddr,
++static inline int ip_route_input_slow(struct sk_buff *skb, u32 daddr, u32 saddr,
+ 			       u8 tos, struct net_device *dev)
+ {
+ 	struct fib_result res;
+@@ -2095,6 +2124,7 @@
  	int iif = dev->ifindex;
  
  	tos &= IPTOS_RT_MASK;
@@ -82,16 +96,16 @@
  	hash = rt_hash_code(daddr, saddr ^ (iif << 5));
  
  	rcu_read_lock();
-@@ -2119,6 +2138,7 @@
+@@ -2119,6 +2149,7 @@
  		RT_CACHE_STAT_INC(in_hlist_search);
  	}
  	rcu_read_unlock();
-+#endif /* CONFIG_IP_NO_ROUTE_CACHE */
++#endif
  
  	/* Multicast recognition logic is moved from route cache to here.
  	   The problem was that too many Ethernet cards have broken/missing
 --- linux-2.6.18.orig/net/ipv4/Kconfig	2006-09-20 05:42:06.000000000 +0200
-+++ linux-2.6.18/net/ipv4/Kconfig	2006-10-22 15:34:56.000000000 +0200
++++ linux-2.6.18/net/ipv4/Kconfig	2006-11-04 19:48:28.000000000 +0100
 @@ -85,6 +85,12 @@
  config IP_FIB_HASH
  	def_bool ASK_IP_FIB_HASH || !IP_ADVANCED_ROUTER
@@ -105,9 +119,7 @@
  config IP_MULTIPLE_TABLES
  	bool "IP: policy routing"
  	depends on IP_ADVANCED_ROUTER
---- linux-2.6.18/net/ipv4/Kconfig.orig	2006-10-29 19:10:36.000000000 +0100
-+++ linux-2.6.18/net/ipv4/Kconfig	2006-10-29 19:07:47.000000000 +0100
-@@ -136,7 +136,7 @@
+@@ -124,7 +130,7 @@
  
  config IP_ROUTE_MULTIPATH_CACHED
  	bool "IP: equal cost multipath with caching support (EXPERIMENTAL)"
