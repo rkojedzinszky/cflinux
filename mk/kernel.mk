@@ -34,7 +34,7 @@ PATCHES = kernel.vlan_mtu.patch \
 	kernel.blackhole.patch \
 	kernel.usb_root.patch \
 	kernel.igmp.c.max_membership.patch \
-	kernel.ipv4_no_rt_cache.patch \
+	kernel.lef.patch \
 	kernel.ip_multitable.patch \
 	kernel.dst_input_no_loop.patch \
 	kernel.fib_radix.patch
