@@ -1,0 +1,107 @@
+--- linux-2.6.18.orig/net/ipv4/Kconfig	2006-09-20 05:42:06.000000000 +0200
++++ linux-2.6.18/net/ipv4/Kconfig	2006-11-04 19:48:28.000000000 +0100
+@@ -85,6 +85,12 @@
+ config IP_FIB_HASH
+ 	def_bool ASK_IP_FIB_HASH || !IP_ADVANCED_ROUTER
+ 
++config IP_NO_ROUTE_CACHE
++	bool "IP: disable route cache"
++	depends on IP_ADVANCED_ROUTER
++	---help---
++	You can disable the internal route cache used in the Linux kernel, for now only for IPV4.
++
+ config IP_MULTIPLE_TABLES
+ 	bool "IP: policy routing"
+ 	depends on IP_ADVANCED_ROUTER
+@@ -124,7 +130,7 @@
+ 
+ config IP_ROUTE_MULTIPATH_CACHED
+ 	bool "IP: equal cost multipath with caching support (EXPERIMENTAL)"
+-	depends on IP_ROUTE_MULTIPATH
++	depends on IP_ROUTE_MULTIPATH && !IP_NO_ROUTE_CACHE
+ 	help
+ 	  Normally, equal cost multipath routing is not supported by the
+ 	  routing cache. If you say Y here, alternative routes are cached
+--- linux-2.6.18.orig/net/ipv4/route.c	2006-09-20 05:42:06.000000000 +0200
++++ linux-2.6.18/net/ipv4/route.c	2006-11-09 21:06:54.000000000 +0100
+@@ -252,6 +252,15 @@
+ #define RT_CACHE_STAT_INC(field) \
+ 	(__raw_get_cpu_var(rt_cache_stat).field++)
+ 
++#ifdef CONFIG_IP_NO_ROUTE_CACHE
++static inline int rt_intern_hash(unsigned hash, struct rtable *rth,
++				struct rtable **res);
++
++static inline unsigned int rt_hash_code(u32 daddr, u32 saddr)
++{
++	return 0;
++}
++#else
+ static int rt_intern_hash(unsigned hash, struct rtable *rth,
+ 				struct rtable **res);
+ 
+@@ -260,6 +269,7 @@
+ 	return (jhash_2words(daddr, saddr, rt_hash_rnd)
+ 		& rt_hash_mask);
+ }
++#endif /* CONFIG_IP_NO_ROUTE_CACHE */
+ 
+ #ifdef CONFIG_PROC_FS
+ struct rt_cache_iter_state {
+@@ -912,6 +922,23 @@
+ out:	return 0;
+ }
+ 
++#ifdef CONFIG_IP_NO_ROUTE_CACHE
++static inline int rt_intern_hash(unsigned hash, struct rtable *rt, struct rtable **rp)
++{
++	int err;
++
++	err = arp_bind_neighbour(&rt->u.dst);
++	if (err) {
++		rt_drop(rt);
++		return err;
++	}
++
++	*rp = rt;
++	rt_free(rt);
++
++	return 0;
++}
++#else
+ static int rt_intern_hash(unsigned hash, struct rtable *rt, struct rtable **rp)
+ {
+ 	struct rtable	*rth, **rthp;
+@@ -1042,6 +1069,7 @@
+ 	*rp = rt;
+ 	return 0;
+ }
++#endif
+ 
+ void rt_bind_peer(struct rtable *rt, int create)
+ {
+@@ -1901,7 +1929,7 @@
+  *	2. IP spoofing attempts are filtered with 100% of guarantee.
+  */
+ 
+-static int ip_route_input_slow(struct sk_buff *skb, u32 daddr, u32 saddr,
++static inline int ip_route_input_slow(struct sk_buff *skb, u32 daddr, u32 saddr,
+ 			       u8 tos, struct net_device *dev)
+ {
+ 	struct fib_result res;
+@@ -2095,6 +2123,7 @@
+ 	int iif = dev->ifindex;
+ 
+ 	tos &= IPTOS_RT_MASK;
++#ifndef CONFIG_IP_NO_ROUTE_CACHE
+ 	hash = rt_hash_code(daddr, saddr ^ (iif << 5));
+ 
+ 	rcu_read_lock();
+@@ -2119,6 +2148,7 @@
+ 		RT_CACHE_STAT_INC(in_hlist_search);
+ 	}
+ 	rcu_read_unlock();
++#endif
+ 
+ 	/* Multicast recognition logic is moved from route cache to here.
+ 	   The problem was that too many Ethernet cards have broken/missing
