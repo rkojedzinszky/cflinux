@@ -24,7 +24,7 @@ echo -n "Do you let me to replace your menu.lst with the shown one? [N/y]"
 read ans
 case "$ans" in
 	[yY]*)
-		echo -n "Replacing you menu.lst "
+		echo -n "Replacing your menu.lst "
 		mount -o remount,rw /boot
 		mv $tmp /boot/grub/menu.lst
 		mount -o remount,ro /boot
