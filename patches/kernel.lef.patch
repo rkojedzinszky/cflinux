@@ -716,3 +716,23 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/Makefile linux-2.6.18/net/ipv4/Makefile
 +	kfree_skb(skb);
 +	return NET_RX_DROP;
 +}
+--- linux-2.6.18.orig/net/ipv4/netfilter/Kconfig	2006-09-20 05:42:06.000000000 +0200
++++ linux-2.6.18/net/ipv4/netfilter/Kconfig	2006-11-12 15:45:00.000000000 +0100
+@@ -353,7 +353,7 @@
+ 
+ config IP_NF_TARGET_REJECT
+ 	tristate "REJECT target support"
+-	depends on IP_NF_FILTER
++	depends on IP_NF_FILTER && !IP_LEF
+ 	help
+ 	  The REJECT target allows a filtering rule to specify that an ICMP
+ 	  error should be issued in response to an incoming packet, rather
+@@ -433,7 +433,7 @@
+ 
+ config IP_NF_TARGET_MASQUERADE
+ 	tristate "MASQUERADE target support"
+-	depends on IP_NF_NAT
++	depends on IP_NF_NAT && !IP_LEF
+ 	help
+ 	  Masquerading is a special case of NAT: all outgoing connections are
+ 	  changed to seem to come from a particular interface's address, and
