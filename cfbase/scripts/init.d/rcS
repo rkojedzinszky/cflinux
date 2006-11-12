@@ -171,11 +171,6 @@ case "$crond_enable" in
 		echo -n " crond"
 		;;
 esac
-case "$cardmgr_enable" in
-	[Yy][Ee][Ss])
-		echo -n " [cardmgr: not installed]"
-		;;
-esac
 case "$sshd_enable" in
 	[Yy][Ee][Ss])
 		for i in rsa dsa ; do
