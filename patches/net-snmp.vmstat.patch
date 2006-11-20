@@ -1,0 +1,11 @@
+--- net-snmp-5.2.3.orig/agent/mibgroup/ucd-snmp/vmstat.c	2006-04-13 20:21:50.000000000 +0200
++++ net-snmp-5.2.3/agent/mibgroup/ucd-snmp/vmstat.c	2006-11-20 15:00:04.000000000 +0100
+@@ -378,7 +378,7 @@
+             &pgpgin, &pgpgout, &pswpin, &pswpout, &inter, &ticks, &ctxt,
+ 	    &cpu_wait, &cpu_irq, &cpu_softirq);
+     duse = cpu_use + cpu_nic;
+-    dsys = cpu_sys;
++    dsys = cpu_sys + cpu_wait + cpu_irq + cpu_softirq;
+     didl = cpu_idl;
+     ddiv = duse + dsys + didl;
+     hertz = sysconf(_SC_CLK_TCK);  /* get ticks/s from system */
