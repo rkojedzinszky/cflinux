@@ -95,22 +95,22 @@
      switch (iindex) {
      case swapin:
 -        return (pswpin  * 4 * hertz + divo2) / ddiv;
-+        return (cpustats[0].pswpin  * 4 * hertz + divo2) / ddiv;
++        return (cpustats[1].pswpin  * 4 * hertz + divo2) / ddiv;
      case swapout:
 -        return (pswpout * 4 * hertz + divo2) / ddiv;
-+        return (cpustats[0].pswpout * 4 * hertz + divo2) / ddiv;
++        return (cpustats[1].pswpout * 4 * hertz + divo2) / ddiv;
      case iosent:
 -        return (pgpgin      * hertz + divo2) / ddiv;
-+        return (cpustats[0].pgpgin      * hertz + divo2) / ddiv;
++        return (cpustats[1].pgpgin      * hertz + divo2) / ddiv;
      case ioreceive:
 -        return (pgpgout     * hertz + divo2) / ddiv;
-+        return (cpustats[0].pgpgout     * hertz + divo2) / ddiv;
++        return (cpustats[1].pgpgout     * hertz + divo2) / ddiv;
      case sysinterrupts:
 -        return (inter       * hertz + divo2) / ddiv;
-+        return (cpustats[0].inter       * hertz + divo2) / ddiv;
++        return (cpustats[1].inter       * hertz + divo2) / ddiv;
      case syscontext:
 -        return (ctxt        * hertz + divo2) / ddiv;
-+        return (cpustats[0].ctxt        * hertz + divo2) / ddiv;
++        return (cpustats[1].ctxt        * hertz + divo2) / ddiv;
      case cpuuser:
          return (100 * duse / ddiv);
      case cpusystem:
@@ -119,31 +119,31 @@
          return dridl;
      case rawinterrupts:
 -	return inter;
-+	return cpustats[0].inter;
++	return cpustats[1].inter;
      case rawcontext:
 -	return ctxt;
-+	return cpustats[0].ctxt;
++	return cpustats[1].ctxt;
      case cpurawwait:
 -	return cpu_wait;
-+	return cpustats[0].cpu_wait;
++	return cpustats[1].cpu_wait;
      case cpurawinter:
 -	return cpu_irq;
-+	return cpustats[0].cpu_irq;
++	return cpustats[1].cpu_irq;
      case cpurawsoft:
 -	return cpu_softirq;
-+	return cpustats[0].cpu_softirq;
++	return cpustats[1].cpu_softirq;
      case rawiosent:
 -	return pgpgout*2;
-+	return cpustats[0].pgpgout*2;
++	return cpustats[1].pgpgout*2;
      case rawioreceive:
 -	return pgpgin*2;
-+	return cpustats[0].pgpgin*2;
++	return cpustats[1].pgpgin*2;
      case rawswapin:
 -	return pswpin;
-+	return cpustats[0].pswpin;
++	return cpustats[1].pswpin;
      case rawswapout:
 -	return pswpout;
-+	return cpustats[0].pswpout;
++	return cpustats[1].pswpout;
      default:
          return -1;
      }
