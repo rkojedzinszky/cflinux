@@ -84,10 +84,10 @@
 -    drnic = cpu_nic;
 -    drsys = cpu_sys;
 -    dridl = cpu_idl;
-+    druse = cpustats[0].cpu_use;
-+    drnic = cpustats[0].cpu_nic;
-+    drsys = cpustats[0].cpu_sys;
-+    dridl = cpustats[0].cpu_idl;
++    druse = cpustats[1].cpu_use;
++    drnic = cpustats[1].cpu_nic;
++    drsys = cpustats[1].cpu_sys;
++    dridl = cpustats[1].cpu_idl;
 +
 +    if (ddiv == 0)
 +	    ddiv = 1;
