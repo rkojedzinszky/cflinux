@@ -1,5 +1,7 @@
 Changes from 2.0alpha to 2.0:
 	- downgraded net-snmp to 5.2.3
+	- fixed (again) the calculation of cpu stats, now differences
+	  are returned (merge from 1.0)
 
 Changes from 1.0p3 to 2.0alpha:
 	- changed the kernel 2.4 to 2.6, currently 2.6.18
