@@ -2,6 +2,7 @@ Changes from 1.0p4 to 1.0p5:
 	- downgraded net-snmp to 5.2.3
 	- fixed (again) the calculation of cpu stats, now differences
 	  are returned
+	- added intel's e1000 driver to detect pci-express cards
 
 Changes from 1.0p3 to 1.0p4:
 	- iptables upgraded to 1.3.6

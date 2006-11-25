@@ -45,11 +45,13 @@ include $(TOP_DIR)/packages.mk
 
 OPENSWAN_STAMP=$(PKG_ROOT)/.openswan_applied
 GRSEC_STAMP=$(PKG_ROOT)/.grsec_applied
+E1000_STAMP=$(PKG_ROOT)/.e1000_applied
 
-configure: patch openswanpatch grsecpatch $(CONFIGURED_STAMP)
+configure: patch openswanpatch grsecpatch e1000patch $(CONFIGURED_STAMP)
 
 openswanpatch: $(OPENSWAN_STAMP)
 grsecpatch: $(GRSEC_STAMP)
+e1000patch: $(E1000_STAMP)
 
 $(OPENSWAN_STAMP): $(BUILD_DIR)/openswan/.openswan.patched
 	(cd $(PKG_ROOT); \
@@ -62,11 +64,19 @@ $(GRSEC_STAMP): $(BUILD_DIR)/grsec/.grsec.patched
 	 patch -p1)
 	touch $@
 
+$(E1000_STAMP): $(BUILD_DIR)/e1000/.e1000.patched
+	cp $(BUILD_DIR)/e1000/src/*.[ch] $(PKG_ROOT)/drivers/net/e1000/
+	sed -i"" -e '/^obj-y/a\obj-y	+= kcompat.o' $(PKG_ROOT)/drivers/net/e1000/Makefile
+	touch $@
+
 $(BUILD_DIR)/grsec/.grsec.patched:
 	$(MAKE) -f mk/grsec.mk patch
 
 $(BUILD_DIR)/openswan/.openswan.patched:
 	$(MAKE) -f mk/openswan.mk patch
+
+$(BUILD_DIR)/e1000/.e1000.patched:
+	$(MAKE) -f mk/e1000.mk patch
 
 ifeq ($(wildcard $(CONFIGS)/$(PKG).config.patch),$(CONFIGS)/$(PKG).config.patch)
 CFGPATCH = $(CONFIGS)/$(PKG).config.patch
