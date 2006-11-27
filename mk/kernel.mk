@@ -38,7 +38,8 @@ PATCHES = kernel.vlan_mtu.patch \
 	kernel.tulip_iff_running.patch \
 	kernel.pcmcia-ti-routing-10_v24.patch \
 	kernel.ipt_random.patch \
-	kernel.igmp.c.max_membership.patch
+	kernel.igmp.c.max_membership.patch \
+	kernel.proc_fs_h.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

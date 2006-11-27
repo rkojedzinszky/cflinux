@@ -1,0 +1,11 @@
+--- linux-2.4.33.3/include/linux/proc_fs.h.orig	2006-11-22 14:07:49.000000000 +0100
++++ linux-2.4.33.3/include/linux/proc_fs.h	2006-11-22 14:08:57.000000000 +0100
+@@ -25,7 +25,7 @@
+ /* Finally, the dynamically allocatable proc entries are reserved: */
+ 
+ #define PROC_DYNAMIC_FIRST 4096
+-#define PROC_NDYNAMIC      4096
++#define PROC_NDYNAMIC      (128 * 1024)
+ 
+ #define PROC_SUPER_MAGIC 0x9fa0
+ 
