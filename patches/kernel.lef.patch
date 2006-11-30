@@ -379,7 +379,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/Makefile linux-2.6.18/net/ipv4/Makefile
  extern unsigned short	ip_rt_frag_needed(struct iphdr *iph, unsigned short new_mtu);
  extern void		ip_rt_send_redirect(struct sk_buff *skb);
 --- linux-2.6.18.orig/net/ipv4/route.c	2006-09-20 05:42:06.000000000 +0200
-+++ linux-2.6.18/net/ipv4/route.c	2006-11-14 12:28:07.000000000 +0100
++++ linux-2.6.18/net/ipv4/route.c	2006-11-30 21:05:03.000000000 +0100
 @@ -108,6 +108,9 @@
  #ifdef CONFIG_SYSCTL
  #include <linux/sysctl.h>
@@ -593,6 +593,16 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/Makefile linux-2.6.18/net/ipv4/Makefile
  
  	return ip_route_output_slow(rp, flp);
  }
+@@ -3206,6 +3297,9 @@
+ 	xfrm_init();
+ 	xfrm4_init();
+ #endif
++#ifdef CONFIG_IP_LEF
++	printk(KERN_DEBUG "route.c: LEF v0.1 is activated\n");
++#endif
+ 	return rc;
+ }
+ 
 --- linux-2.6.18.orig/net/core/neighbour.c	2006-09-20 05:42:06.000000000 +0200
 +++ linux-2.6.18/net/core/neighbour.c	2006-11-14 13:33:31.000000000 +0100
 @@ -34,6 +34,10 @@
