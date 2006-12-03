@@ -1,6 +1,6 @@
---- linux-2.6.18.orig/include/net/ip_fib.h	2006-09-20 05:42:06.000000000 +0200
-+++ linux-2.6.18/include/net/ip_fib.h	2006-10-22 13:31:24.000000000 +0200
-@@ -169,14 +169,19 @@
+--- linux-2.6.19/include/net/ip_fib.h.orig	2006-11-29 22:57:37.000000000 +0100
++++ linux-2.6.19/include/net/ip_fib.h	2006-12-03 10:44:58.000000000 +0100
+@@ -171,14 +171,19 @@
  
  #ifndef CONFIG_IP_MULTIPLE_TABLES
  
@@ -15,7 +15,7 @@
 +
 +extern int _tb_lookup(struct fib_table *, const struct flowi *, struct fib_result *);
 +
- static inline struct fib_table *fib_get_table(int id)
+ static inline struct fib_table *fib_get_table(u32 id)
  {
 -	if (id != RT_TABLE_LOCAL)
 -		return ip_fib_main_table;
@@ -23,8 +23,8 @@
 +	return ip_fib_main_table;
  }
  
- static inline struct fib_table *fib_new_table(int id)
-@@ -186,10 +191,7 @@
+ static inline struct fib_table *fib_new_table(u32 id)
+@@ -188,10 +193,7 @@
  
  static inline int fib_lookup(const struct flowi *flp, struct fib_result *res)
  {
@@ -64,29 +64,17 @@
  fn_trie_lookup(struct fib_table *tb, const struct flowi *flp, struct fib_result *res)
  {
  	struct trie *t = (struct trie *) tb->tb_data;
---- linux-2.6.18.orig/net/ipv4/fib_frontend.c	2006-10-28 20:22:52.000000000 +0200
-+++ linux-2.6.18/net/ipv4/fib_frontend.c	2006-10-28 23:56:17.000000000 +0200
-@@ -50,9 +50,10 @@
+--- linux-2.6.19/net/ipv4/fib_frontend.c.orig	2006-12-03 10:36:29.000000000 +0100
++++ linux-2.6.19/net/ipv4/fib_frontend.c	2006-12-03 10:41:17.000000000 +0100
+@@ -52,7 +52,6 @@
  
  #ifndef CONFIG_IP_MULTIPLE_TABLES
- 
-+#undef RT_TABLE_MAX
- #define RT_TABLE_MIN RT_TABLE_MAIN
-+#define RT_TABLE_MAX RT_TABLE_MAIN
  
 -struct fib_table *ip_fib_local_table;
  struct fib_table *ip_fib_main_table;
  
- #else
-@@ -90,7 +91,6 @@
- 	}
- #else /* CONFIG_IP_MULTIPLE_TABLES */
- 	flushed += ip_fib_main_table->tb_flush(ip_fib_main_table);
--	flushed += ip_fib_local_table->tb_flush(ip_fib_local_table);
- #endif /* CONFIG_IP_MULTIPLE_TABLES */
- 
- 	if (flushed)
-@@ -111,8 +111,12 @@
+ #define FIB_TABLE_HASHSZ 1
+@@ -132,8 +131,12 @@
  	res.r = NULL;
  #endif
  
@@ -99,7 +87,7 @@
  		return NULL;
  	if (res.type != RTN_LOCAL)
  		goto out;
-@@ -140,14 +144,20 @@
+@@ -161,14 +164,20 @@
  	res.r = NULL;
  #endif
  	
@@ -120,15 +108,15 @@
  	return ret;
  }
  
-@@ -378,6 +388,7 @@
- 	memset(&req.rtm, 0, sizeof(req.rtm));
- 	memset(&rta, 0, sizeof(rta));
+@@ -641,6 +650,7 @@
+ 		.fc_nlflags = NLM_F_CREATE | NLM_F_APPEND,
+ 	};
  
 +#ifdef CONFIG_IP_MULTIPLE_TABLES
  	if (type == RTN_UNICAST)
  		tb = fib_new_table(RT_TABLE_MAIN);
  	else
-@@ -385,6 +396,9 @@
+@@ -648,6 +658,9 @@
  
  	if (tb == NULL)
  		return;
@@ -136,13 +124,14 @@
 +	tb = ip_fib_main_table;
 +#endif
  
- 	req.nlh.nlmsg_len = sizeof(req);
- 	req.nlh.nlmsg_type = cmd;
-@@ -653,7 +667,6 @@
- void __init ip_fib_init(void)
- {
+ 	cfg.fc_table = tb->tb_id;
+ 
+@@ -911,8 +924,6 @@
+ 	for (i = 0; i < FIB_TABLE_HASHSZ; i++)
+ 		INIT_HLIST_HEAD(&fib_table_hash[i]);
  #ifndef CONFIG_IP_MULTIPLE_TABLES
 -	ip_fib_local_table = fib_hash_init(RT_TABLE_LOCAL);
+-	hlist_add_head_rcu(&ip_fib_local_table->tb_hlist, &fib_table_hash[0]);
  	ip_fib_main_table  = fib_hash_init(RT_TABLE_MAIN);
+ 	hlist_add_head_rcu(&ip_fib_main_table->tb_hlist, &fib_table_hash[0]);
  #else
- 	fib_rules_init();

@@ -43,20 +43,19 @@ diff -ruNP linux-2.4.25.orig/drivers/net/tulip/interrupt.c linux-2.4.25/drivers/
  				tp->stats.rx_length_errors++;
  			}
  #endif
-diff -ruNP linux-2.4.25.orig/drivers/net/tulip/tulip.h linux-2.4.25/drivers/net/tulip/tulip.h
---- linux-2.4.25.orig/drivers/net/tulip/tulip.h	Wed Feb 18 15:17:41 2004
-+++ linux-2.4.25/drivers/net/tulip/tulip.h	Wed Feb 18 16:38:12 2004
-@@ -188,7 +188,7 @@
- 
- enum desc_status_bits {
- 	DescOwned = 0x80000000,
--	RxDescFatalErr = 0x8000,
-+	RxDescFatalErr = 0x4842,
- 	RxWholePkt = 0x0300,
+--- linux-2.6.19/drivers/net/tulip/tulip.h.orig	2006-11-29 22:57:37.000000000 +0100
++++ linux-2.6.19/drivers/net/tulip/tulip.h	2006-12-03 06:41:38.000000000 +0100
+@@ -199,7 +199,7 @@
+ 	DescStartPkt = 0x20000000,
+ 	DescEndRing  = 0x02000000,
+ 	DescUseLink  = 0x01000000,
+-	RxDescFatalErr = 0x008000,
++	RxDescFatalErr = 0x004842,
+ 	RxWholePkt   = 0x00000300,
  };
  
-@@ -266,7 +266,7 @@
- 
+@@ -267,7 +267,7 @@
+ #define RX_RING_SIZE	128
  #define MEDIA_MASK     31
  
 -#define PKT_BUF_SZ		1536	/* Size of each temporary Rx buffer. */

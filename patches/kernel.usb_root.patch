@@ -1,17 +1,18 @@
---- linux-2.6.18.orig/init/do_mounts.c	2006-09-20 05:42:06.000000000 +0200
-+++ linux-2.6.18/init/do_mounts.c	2006-09-30 13:08:56.000000000 +0200
-@@ -304,11 +304,24 @@
- 		 * and bad superblock on root device.
- 		 */
+--- linux-2.6.19/init/do_mounts.c.orig	2006-11-29 22:57:37.000000000 +0100
++++ linux-2.6.19/init/do_mounts.c	2006-12-03 10:19:44.000000000 +0100
+@@ -311,11 +311,25 @@
+ #ifdef CONFIG_BLOCK
  		__bdevname(ROOT_DEV, b);
+ #endif
 -		printk("VFS: Cannot open root device \"%s\" or %s\n",
 +		printk("VFS: Cannot open root device \"%s\" or %s, retrying in 1 second.\n",
  				root_device_name, b);
 -		printk("Please append a correct \"root=\" boot option\n");
-+		printk("You may need to append a correct \"root=\" boot option\n");
-+		printk("or wait for the root device to become ready.\n");
  
 -		panic("VFS: Unable to mount root fs on %s", b);
++		printk("You may need to append a correct \"root=\" boot option\n");
++		printk("or wait for the root device to become ready.\n");
++  
 +		/* wait 1 second and try again,
 +		 * allowing time for hubs/devices to become ready */
 +		set_current_state(TASK_INTERRUPTIBLE);
