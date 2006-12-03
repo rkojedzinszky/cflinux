@@ -50,7 +50,7 @@ export UC_ENV
 export UC_PATH
 
 # The version of the used kernel
-KERNEL_VERSION := 2.6.19
+KERNEL_VERSION := 2.6.18
 
 # the downloads dir, where the sources will reside
 SOURCES_DIR ?= $(TOP_DIR)/sources
