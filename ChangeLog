@@ -1,5 +1,6 @@
 Changes from 2.0 to 2.0p1:
 	- upgraded the kernel to 2.6.19
+	- made kfree_skb inline
 
 Changes from 2.0alpha to 2.0:
 	- downgraded net-snmp to 5.2.3

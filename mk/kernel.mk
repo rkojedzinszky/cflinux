@@ -37,7 +37,8 @@ PATCHES = kernel.vlan_mtu.patch \
 	kernel.lef.patch \
 	kernel.ip_multitable.patch \
 	kernel.dst_input_no_loop.patch \
-	kernel.fib_radix.patch
+	kernel.fib_radix.patch \
+	kernel.inline_kfree_skb.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

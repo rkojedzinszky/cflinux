@@ -1,0 +1,40 @@
+--- linux-2.6.19/include/linux/skbuff.h.orig	2006-12-03 17:54:14.000000000 +0100
++++ linux-2.6.19/include/linux/skbuff.h	2006-12-03 17:55:19.000000000 +0100
+@@ -335,8 +335,17 @@
+ 
+ #include <asm/system.h>
+ 
+-extern void kfree_skb(struct sk_buff *skb);
+ extern void	       __kfree_skb(struct sk_buff *skb);
++static inline void kfree_skb(struct sk_buff *skb)
++{
++	if (unlikely(!skb))
++		return;
++	if (likely(atomic_read(&skb->users) == 1))
++		smp_rmb();
++	else if (likely(!atomic_dec_and_test(&skb->users)))
++		return;
++	__kfree_skb(skb);
++}
+ extern struct sk_buff *__alloc_skb(unsigned int size,
+ 				   gfp_t priority, int fclone);
+ static inline struct sk_buff *alloc_skb(unsigned int size,
+--- linux-2.6.19/net/core/skbuff.c.orig	2006-12-03 17:55:31.000000000 +0100
++++ linux-2.6.19/net/core/skbuff.c	2006-12-03 17:56:03.000000000 +0100
+@@ -408,6 +408,7 @@
+  *	Drop a reference to the buffer and free it if the usage count has
+  *	hit zero.
+  */
++/* Inlined in include/linux/skbuff.h
+ void kfree_skb(struct sk_buff *skb)
+ {
+ 	if (unlikely(!skb))
+@@ -417,7 +418,7 @@
+ 	else if (likely(!atomic_dec_and_test(&skb->users)))
+ 		return;
+ 	__kfree_skb(skb);
+-}
++} */
+ 
+ /**
+  *	skb_clone	-	duplicate an sk_buff
