@@ -18,13 +18,13 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := iproute
-SRC_FILENAME = iproute2-051007.tar.gz
-EXTRACTED_DIR = iproute2-051007
-DOWNLOAD_SITES = http://developer.osdl.org/dev/iproute2/download \
+SRC_FILENAME = iproute2-2.6.18-061002.tar.gz
+EXTRACTED_DIR = iproute2-2.6.18-061002
+DOWNLOAD_SITES = http://developer.osdl.org/dev/iproute2/download/ \
 	$(CFLINUX_PACKAGES)
+
 PATCHES = \
-	iproute.makefile.patch \
-	iproute.ip.c.patch
+	iproute.makefile.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
