@@ -15,12 +15,3 @@
  ADDLIB=
  
  #options for decnet
-@@ -27,7 +27,7 @@
- 
- LDLIBS += -L../lib -lnetlink -lutil
- 
--SUBDIRS=lib ip tc misc netem
-+SUBDIRS=lib ip tc #misc netem
- 
- LIBNETLINK=../lib/libnetlink.a ../lib/libutil.a
- 
