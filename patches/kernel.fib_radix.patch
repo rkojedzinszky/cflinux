@@ -25,9 +25,9 @@
  #endif
  
  extern int _tb_lookup(struct fib_table *, const struct flowi *, struct fib_result *);
---- linux-2.6.18.orig/net/ipv4/fib_radix.c	1970-01-01 01:00:00.000000000 +0100
-+++ linux-2.6.18/net/ipv4/fib_radix.c	2006-11-11 20:49:08.000000000 +0100
-@@ -0,0 +1,714 @@
+--- linux-2.6.19/net/ipv4/fib_radix.c.orig	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.19/net/ipv4/fib_radix.c	2006-12-03 17:41:29.000000000 +0100
+@@ -0,0 +1,710 @@
 +/*
 + *   This program is free software; you can redistribute it and/or
 + *   modify it under the terms of the GNU General Public License
@@ -37,7 +37,6 @@
 + *   A simple radix based FIB implemetation by krichy
 + */
 +
-+#include <linux/config.h>
 +#include <asm/uaccess.h>
 +#include <asm/system.h>
 +#include <asm/bitops.h>
@@ -158,34 +157,30 @@
 +
 +// insert a routing entry
 +static int
-+fn_radix_insert(struct fib_table* tb, struct rtmsg *r, struct kern_rta *rta,
-+		struct nlmsghdr *nlhdr, struct netlink_skb_parms *req)
++fn_radix_insert(struct fib_table* tb, struct fib_config *cfg)
 +{
 +	struct fib_alias	*fa, *new_fa;
 +	struct fib_info		*fi;
 +
-+	int			plen = r->rtm_dst_len;
-+	int			type = r->rtm_type;
-+	u8			tos = r->rtm_tos;
++	int			plen = cfg->fc_dst_len;
++	u8			tos = cfg->fc_tos;
 +	u32			key, mask;
-+	int			err;
++	int			err = 0;
 +	radix_t*		n;
 +
 +	if (plen > 32)
 +		return -EINVAL;
 +
 +	key = 0;
-+	if (rta->rta_dst)
-+		memcpy(&key, rta->rta_dst, sizeof(key));
-+
-+	key = ntohl(key);
++	if (cfg->fc_dst)
++		key = ntohl(cfg->fc_dst);
 +
 +	mask = ntohl(inet_make_mask(plen));
 +
 +	if (key & ~mask)
 +		return -EINVAL;
 +
-+	fi = fib_create_info(r, rta, nlhdr, &err);
++	fi = fib_create_info(cfg);
 +
 +	if (!fi)
 +		goto err;
@@ -214,10 +209,10 @@
 +		struct fib_alias *fa_orig;
 +
 +		err = -EEXIST;
-+		if (nlhdr->nlmsg_flags & NLM_F_EXCL)
++		if (cfg->fc_nlflags & NLM_F_EXCL)
 +			goto out;
 +
-+		if (nlhdr->nlmsg_flags & NLM_F_REPLACE) {
++		if (cfg->fc_nlflags & NLM_F_REPLACE) {
 +			struct fib_info *fi_drop;
 +			u8 state;
 +
@@ -229,8 +224,8 @@
 +			fi_drop = fa->fa_info;
 +			new_fa->fa_tos = fa->fa_tos;
 +			new_fa->fa_info = fi;
-+			new_fa->fa_type = type;
-+			new_fa->fa_scope = r->rtm_scope;
++			new_fa->fa_type = cfg->fc_type;
++			new_fa->fa_scope = cfg->fc_scope;
 +			state = fa->fa_state;
 +			new_fa->fa_state &= ~FA_S_ACCESSED;
 +
@@ -253,17 +248,17 @@
 +				break;
 +			if (fa->fa_info->fib_priority != fi->fib_priority)
 +				break;
-+			if (fa->fa_type == type &&
-+			    fa->fa_scope == r->rtm_scope &&
++			if (fa->fa_type == cfg->fc_type &&
++			    fa->fa_scope == cfg->fc_scope &&
 +			    fa->fa_info == fi) {
 +				goto out;
 +			}
 +		}
-+		if (!(nlhdr->nlmsg_flags & NLM_F_APPEND))
++		if (!(cfg->fc_nlflags & NLM_F_APPEND))
 +			fa = fa_orig;
 +	}
 +	err = -ENOENT;
-+	if (!(nlhdr->nlmsg_flags & NLM_F_CREATE))
++	if (!(cfg->fc_nlflags & NLM_F_CREATE))
 +		goto out;
 +
 +	err = -ENOBUFS;
@@ -273,14 +268,14 @@
 +
 +	new_fa->fa_info = fi;
 +	new_fa->fa_tos = tos;
-+	new_fa->fa_type = type;
-+	new_fa->fa_scope = r->rtm_scope;
++	new_fa->fa_type = cfg->fc_type;
++	new_fa->fa_scope = cfg->fc_scope;
 +	new_fa->fa_state = 0;
 +
 +	list_add_tail_rcu(&new_fa->fa_list, (fa ? &fa->fa_list : &n->falh));
 +
 +	rt_cache_flush(-1);
-+	rtmsg_fib(RTM_NEWROUTE, htonl(key), new_fa, plen, tb->tb_id, nlhdr, req);
++	rtmsg_fib(RTM_NEWROUTE, htonl(key), new_fa, plen, tb->tb_id, &cfg->fc_nlinfo);
 +succeeded:
 +	return 0;
 +
@@ -384,21 +379,22 @@
 +}
 +
 +static int
-+fn_radix_delete(struct fib_table *tb, struct rtmsg *r, struct kern_rta *rta,
-+		struct nlmsghdr *nlhdr, struct netlink_skb_parms *req)
++fn_radix_delete(struct fib_table *tb, struct fib_config *cfg)
 +{
 +	// we do a lookup here, but only for a maximum depth
 +	radix_t*		n = *((radix_t**)tb->tb_data);
-+	int			plen = r->rtm_dst_len;
++	int			plen = cfg->fc_dst_len;
 +	u32			key, mask;
-+	u8			tos = r->rtm_tos;
 +	struct list_head	*fa_head;
 +	struct fib_alias	*fa, *fa_to_delete;
 +
++	if (plen > 32)
++		return -EINVAL;
++
 +	key = 0;
-+	if (rta->rta_dst)
-+		memcpy(&key, rta->rta_dst, sizeof(key));
-+	key = ntohl(key);
++	if (cfg->fc_dst)
++		key = ntohl(cfg->fc_dst);
++
 +	mask = ntohl(inet_make_mask(plen));
 +
 +	if (key & ~mask)
@@ -423,16 +419,16 @@
 +	list_for_each_entry(fa, fa_head, fa_list) {
 +		struct fib_info *fi = fa->fa_info;
 +
-+		if (fa->fa_tos != tos)
++		if (fa->fa_tos != cfg->fc_tos)
 +			break;
 +
-+		if ((!r->rtm_type ||
-+		     fa->fa_type == r->rtm_type) &&
-+		    (r->rtm_scope == RT_SCOPE_NOWHERE ||
-+		     fa->fa_scope == r->rtm_scope) &&
-+		    (!r->rtm_protocol ||
-+		     fi->fib_protocol == r->rtm_protocol) &&
-+		    fib_nh_match(r, nlhdr, rta, fi) == 0) {
++		if ((!cfg->fc_type ||
++		     fa->fa_type == cfg->fc_type) &&
++		    (cfg->fc_scope == RT_SCOPE_NOWHERE ||
++		     fa->fa_scope == cfg->fc_scope) &&
++		    (!cfg->fc_protocol ||
++		     fi->fib_protocol == cfg->fc_protocol) &&
++		    fib_nh_match(cfg, fi) == 0) {
 +			fa_to_delete = fa;
 +			break;
 +		}
@@ -442,7 +438,7 @@
 +		return -ESRCH;
 +
 +	fa = fa_to_delete;
-+	rtmsg_fib(RTM_DELROUTE, htonl(key), fa, plen, tb->tb_id, nlhdr, req);
++	rtmsg_fib(RTM_DELROUTE, htonl(key), fa, plen, tb->tb_id, &cfg->fc_nlinfo);
 +
 +	list_del_rcu(&fa->fa_list);
 +
@@ -547,8 +543,8 @@
 +
 +static int fn_radix_dump(struct fib_table *tb, struct sk_buff *skb, struct netlink_callback *cb)
 +{
-+	u32			key = cb->args[1];	// represents the actual key
-+	u32			plen = cb->args[2];	// represents the actual key length
++	u32			key = cb->args[2];	// represents the actual key
++	u32			plen = cb->args[3];	// represents the actual key length
 +	int			i;
 +	struct list_head	*fah;
 +	radix_t*		child;
@@ -579,7 +575,7 @@
 +		fah = &n->falh;
 +
 +		if (!list_empty(fah)) {
-+			int			fai = cb->args[3];
++			int			fai = cb->args[4];
 +			struct fib_alias	*fa;
 +			u32			xkey = htonl(key);
 +
@@ -599,16 +595,16 @@
 +						  tb->tb_id,
 +						  fa->fa_type,
 +						  fa->fa_scope,
-+						  &xkey,
++						  xkey,
 +						  plen,
 +						  fa->fa_tos,
 +						  fa->fa_info, 0) < 0) {
 +
 +					rcu_read_unlock();
 +
-+					cb->args[1] = key;
-+					cb->args[2] = plen;
-+					cb->args[3] = i;
++					cb->args[2] = key;
++					cb->args[3] = plen;
++					cb->args[4] = i;
 +
 +					return -1; // to indicate there is more data
 +				}
@@ -701,9 +697,9 @@
 +}
 +
 +#ifdef CONFIG_IP_MULTIPLE_TABLES
-+struct fib_table * fib_hash_init(int id)
++struct fib_table * fib_hash_init(u32 id)
 +#else
-+struct fib_table * __init fib_hash_init(int id)
++struct fib_table * __init fib_hash_init(u32 id)
 +#endif
 +{
 +	struct fib_table *tb;
@@ -728,7 +724,7 @@
 +	tb->tb_dump = fn_radix_dump;
 +	memset(tb->tb_data, 0, sizeof(radix_t*));
 +
-+	printk(KERN_INFO "IPv4 FIB: Using RADIX for table %d\n", id);
++	printk(KERN_INFO "IPv4 FIB: Using RADIX for table %u\n", id);
 +
 +	return tb;
 +}

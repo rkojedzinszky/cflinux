@@ -25,7 +25,8 @@ DOWNLOAD_SITES = http://www.netfilter.org/projects/iptables/files \
 
 PATCHES = \
 	  iptables.multiport_v1.patch \
-	  iptables.MARK_v1.patch
+	  iptables.MARK_v1.patch \
+	  iptables.libipt_iprange_c.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

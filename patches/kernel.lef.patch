@@ -221,9 +221,8 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  /*
   * Check if we can use proxy ARP for this path
   */
-diff -ruNP linux-2.6.18.orig/net/ipv4/Kconfig linux-2.6.18/net/ipv4/Kconfig
---- linux-2.6.18.orig/net/ipv4/Kconfig	2006-09-20 05:42:06.000000000 +0200
-+++ linux-2.6.18/net/ipv4/Kconfig	2006-11-06 23:03:04.000000000 +0100
+--- linux-2.6.19/net/ipv4/Kconfig.orig	2006-11-29 22:57:37.000000000 +0100
++++ linux-2.6.19/net/ipv4/Kconfig	2006-12-03 10:22:07.000000000 +0100
 @@ -51,6 +51,12 @@
  
  	  If unsure, say N here.
@@ -237,16 +236,16 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/Kconfig linux-2.6.18/net/ipv4/Kconfig
  choice 
  	prompt "Choose IP: FIB lookup algorithm (choose FIB_HASH if unsure)"
  	depends on IP_ADVANCED_ROUTER
-@@ -87,7 +99,7 @@
+@@ -87,7 +93,7 @@
  
  config IP_MULTIPLE_TABLES
  	bool "IP: policy routing"
 -	depends on IP_ADVANCED_ROUTER
 +	depends on IP_ADVANCED_ROUTER && !IP_LEF
+ 	select FIB_RULES
  	---help---
  	  Normally, a router decides what to do with a received packet based
- 	  solely on the packet's final destination address. If you say Y here,
-@@ -105,7 +117,7 @@
+@@ -106,7 +112,7 @@
  
  config IP_ROUTE_FWMARK
  	bool "IP: use netfilter MARK value as routing key"
@@ -255,7 +254,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/Kconfig linux-2.6.18/net/ipv4/Kconfig
  	help
  	  If you say Y here, you will be able to specify different routes for
  	  packets with different mark values (see iptables(8), MARK target).
-@@ -124,7 +136,7 @@
+@@ -125,7 +131,7 @@
  
  config IP_ROUTE_MULTIPATH_CACHED
  	bool "IP: equal cost multipath with caching support (EXPERIMENTAL)"
@@ -264,13 +263,12 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/Kconfig linux-2.6.18/net/ipv4/Kconfig
  	help
  	  Normally, equal cost multipath routing is not supported by the
  	  routing cache. If you say Y here, alternative routes are cached
-diff -ruNP linux-2.6.18.orig/net/ipv4/Makefile linux-2.6.18/net/ipv4/Makefile
---- linux-2.6.18.orig/net/ipv4/Makefile	2006-09-20 05:42:06.000000000 +0200
-+++ linux-2.6.18/net/ipv4/Makefile	2006-11-06 21:08:04.000000000 +0100
-@@ -47,6 +47,7 @@
- obj-$(CONFIG_TCP_CONG_VENO) += tcp_veno.o
+--- linux-2.6.19/net/ipv4/Makefile.orig	2006-11-29 22:57:37.000000000 +0100
++++ linux-2.6.19/net/ipv4/Makefile	2006-12-03 10:24:10.000000000 +0100
+@@ -49,6 +49,7 @@
  obj-$(CONFIG_TCP_CONG_SCALABLE) += tcp_scalable.o
  obj-$(CONFIG_TCP_CONG_LP) += tcp_lp.o
+ obj-$(CONFIG_NETLABEL) += cipso_ipv4.o
 +obj-$(CONFIG_IP_LEF) += lef.o
  
  obj-$(CONFIG_XFRM) += xfrm4_policy.o xfrm4_state.o xfrm4_input.o \
@@ -348,15 +346,6 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/Makefile linux-2.6.18/net/ipv4/Makefile
  		else
 --- linux-2.6.18.orig/net/ipv4/netfilter/Kconfig	2006-09-20 05:42:06.000000000 +0200
 +++ linux-2.6.18/net/ipv4/netfilter/Kconfig	2006-11-12 15:45:00.000000000 +0100
-@@ -353,7 +353,7 @@
- 
- config IP_NF_TARGET_REJECT
- 	tristate "REJECT target support"
--	depends on IP_NF_FILTER
-+	depends on IP_NF_FILTER && !IP_LEF
- 	help
- 	  The REJECT target allows a filtering rule to specify that an ICMP
- 	  error should be issued in response to an incoming packet, rather
 @@ -433,7 +433,7 @@
  
  config IP_NF_TARGET_MASQUERADE
@@ -366,20 +355,20 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/Makefile linux-2.6.18/net/ipv4/Makefile
  	help
  	  Masquerading is a special case of NAT: all outgoing connections are
  	  changed to seem to come from a particular interface's address, and
---- linux-2.6.18.orig/include/net/route.h	2006-09-20 05:42:06.000000000 +0200
-+++ linux-2.6.18/include/net/route.h	2006-11-14 12:08:57.000000000 +0100
-@@ -115,6 +115,9 @@
- extern int		__ip_route_output_key(struct rtable **, const struct flowi *flp);
+--- linux-2.6.19/include/net/route.h.orig	2006-11-29 22:57:37.000000000 +0100
++++ linux-2.6.19/include/net/route.h	2006-12-03 10:34:38.000000000 +0100
+@@ -117,6 +117,9 @@
  extern int		ip_route_output_key(struct rtable **, struct flowi *flp);
  extern int		ip_route_output_flow(struct rtable **rp, struct flowi *flp, struct sock *sk, int flags);
+ extern int		ip_route_input(struct sk_buff*, __be32 dst, __be32 src, u8 tos, struct net_device *devin);
 +#ifdef CONFIG_IP_LEF
-+extern int		ip_route_input_lef(struct sk_buff*, u32 dst, u32 src, u8 tos, struct net_device *devin, int use_lef);
++extern int		ip_route_input_lef(struct sk_buff*, __be32 dst, __be32 src, u8 tos, struct net_device *devin, int use_lef);
 +#endif
- extern int		ip_route_input(struct sk_buff*, u32 dst, u32 src, u8 tos, struct net_device *devin);
  extern unsigned short	ip_rt_frag_needed(struct iphdr *iph, unsigned short new_mtu);
  extern void		ip_rt_send_redirect(struct sk_buff *skb);
---- linux-2.6.18.orig/net/ipv4/route.c	2006-09-20 05:42:06.000000000 +0200
-+++ linux-2.6.18/net/ipv4/route.c	2006-11-30 21:05:03.000000000 +0100
+ 
+--- linux-2.6.19/net/ipv4/route.c.orig	2006-11-29 22:57:37.000000000 +0100
++++ linux-2.6.19/net/ipv4/route.c	2006-12-03 10:31:39.000000000 +0100
 @@ -108,6 +108,9 @@
  #ifdef CONFIG_SYSCTL
  #include <linux/sysctl.h>
@@ -412,9 +401,9 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/Makefile linux-2.6.18/net/ipv4/Makefile
  }
 +#endif
  
- #ifdef CONFIG_PROC_FS
- struct rt_cache_iter_state {
-@@ -912,6 +925,23 @@
+ #define rt_hash(daddr, saddr, idx) \
+ 	rt_hash_code((__force u32)(__be32)(daddr),\
+@@ -922,6 +935,23 @@
  out:	return 0;
  }
  
@@ -438,7 +427,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/Makefile linux-2.6.18/net/ipv4/Makefile
  static int rt_intern_hash(unsigned hash, struct rtable *rt, struct rtable **rp)
  {
  	struct rtable	*rth, **rthp;
-@@ -1042,6 +1072,7 @@
+@@ -1052,6 +1082,7 @@
  	*rp = rt;
  	return 0;
  }
@@ -446,10 +435,10 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/Makefile linux-2.6.18/net/ipv4/Makefile
  
  void rt_bind_peer(struct rtable *rt, int create)
  {
-@@ -1713,7 +1744,11 @@
+@@ -1721,7 +1752,11 @@
  				  struct fib_result* res, 
  				  struct in_device *in_dev, 
- 				  u32 daddr, u32 saddr, u32 tos, 
+ 				  __be32 daddr, __be32 saddr, u32 tos,
 -				  struct rtable **result) 
 +				  struct rtable **result
 +#ifdef CONFIG_IP_LEF
@@ -459,7 +448,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/Makefile linux-2.6.18/net/ipv4/Makefile
  {
  
  	struct rtable *rth;
-@@ -1760,6 +1795,20 @@
+@@ -1769,6 +1804,20 @@
  		}
  	}
  
@@ -480,7 +469,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/Makefile linux-2.6.18/net/ipv4/Makefile
  
  	rth = dst_alloc(&ipv4_dst_ops);
  	if (!rth) {
-@@ -1825,7 +1874,11 @@
+@@ -1834,7 +1883,11 @@
  #endif
  
  	/* create a routing cache entry */
@@ -492,22 +481,22 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/Makefile linux-2.6.18/net/ipv4/Makefile
  	if (err)
  		return err;
  
-@@ -1901,8 +1954,13 @@
+@@ -1910,8 +1963,13 @@
   *	2. IP spoofing attempts are filtered with 100% of guarantee.
   */
  
--static int ip_route_input_slow(struct sk_buff *skb, u32 daddr, u32 saddr,
+-static int ip_route_input_slow(struct sk_buff *skb, __be32 daddr, __be32 saddr,
 +#ifdef CONFIG_IP_LEF
-+static inline int ip_route_input_slow(struct sk_buff *skb, u32 daddr, u32 saddr,
++static inline int ip_route_input_slow(struct sk_buff *skb, __be32 daddr, __be32 saddr,
 +			       u8 tos, struct net_device *dev, int use_lef)
 +#else
-+static inline int ip_route_input_slow(struct sk_buff *skb, u32 daddr, u32 saddr,
++static inline int ip_route_input_slow(struct sk_buff *skb, __be32 daddr, __be32 saddr,
  			       u8 tos, struct net_device *dev)
 +#endif
  {
  	struct fib_result res;
  	struct in_device *in_dev = in_dev_get(dev);
-@@ -1981,6 +2039,15 @@
+@@ -1990,6 +2048,15 @@
  	if (res.type != RTN_UNICAST)
  		goto martian_destination;
  
@@ -523,15 +512,15 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/Makefile linux-2.6.18/net/ipv4/Makefile
  	err = ip_mkroute_input(skb, &res, &fl, in_dev, daddr, saddr, tos);
  	if (err == -ENOBUFS)
  		goto e_nobufs;
-@@ -2087,14 +2154,22 @@
+@@ -2096,14 +2163,22 @@
  	goto e_inval;
  }
  
 +#ifdef CONFIG_IP_LEF
-+int ip_route_input_lef(struct sk_buff *skb, u32 daddr, u32 saddr,
++int ip_route_input_lef(struct sk_buff *skb, __be32 daddr, __be32 saddr,
 +		   u8 tos, struct net_device *dev, int use_lef)
 +#else
- int ip_route_input(struct sk_buff *skb, u32 daddr, u32 saddr,
+ int ip_route_input(struct sk_buff *skb, __be32 daddr, __be32 saddr,
  		   u8 tos, struct net_device *dev)
 +#endif
  {
@@ -543,10 +532,10 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/Makefile linux-2.6.18/net/ipv4/Makefile
  
  	tos &= IPTOS_RT_MASK;
 +#ifndef CONFIG_IP_LEF
- 	hash = rt_hash_code(daddr, saddr ^ (iif << 5));
+ 	hash = rt_hash(daddr, saddr, iif);
  
  	rcu_read_lock();
-@@ -2119,6 +2194,7 @@
+@@ -2128,6 +2203,7 @@
  		RT_CACHE_STAT_INC(in_hlist_search);
  	}
  	rcu_read_unlock();
@@ -554,7 +543,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/Makefile linux-2.6.18/net/ipv4/Makefile
  
  	/* Multicast recognition logic is moved from route cache to here.
  	   The problem was that too many Ethernet cards have broken/missing
-@@ -2151,9 +2227,22 @@
+@@ -2160,9 +2236,22 @@
  		rcu_read_unlock();
  		return -EINVAL;
  	}
@@ -577,7 +566,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/Makefile linux-2.6.18/net/ipv4/Makefile
  static inline int __mkroute_output(struct rtable **result,
  				   struct fib_result* res, 
  				   const struct flowi *fl,
-@@ -2564,6 +2653,7 @@
+@@ -2571,6 +2660,7 @@
  
  int __ip_route_output_key(struct rtable **rp, const struct flowi *flp)
  {
@@ -585,7 +574,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/Makefile linux-2.6.18/net/ipv4/Makefile
  	unsigned hash;
  	struct rtable *rth;
  
-@@ -2603,6 +2693,7 @@
+@@ -2610,6 +2700,7 @@
  		RT_CACHE_STAT_INC(out_hlist_search);
  	}
  	rcu_read_unlock_bh();
@@ -593,12 +582,12 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/Makefile linux-2.6.18/net/ipv4/Makefile
  
  	return ip_route_output_slow(rp, flp);
  }
-@@ -3206,6 +3297,9 @@
+@@ -3215,6 +3306,9 @@
  	xfrm_init();
  	xfrm4_init();
  #endif
 +#ifdef CONFIG_IP_LEF
-+	printk(KERN_DEBUG "route.c: LEF v0.1 is activated\n");
++	printk(KERN_DEBUG "IPv4: LEF v0.1 is active\n");
 +#endif
  	return rc;
  }

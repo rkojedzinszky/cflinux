@@ -101,3 +101,15 @@
  EXTRA_DIST = OSPF-MIB.txt OSPF-TRAP-MIB.txt ChangeLog.opaque.txt
  examplesdir = $(exampledir)
  dist_examples_DATA = ospfd.conf.sample
+--- quagga-0.98.6.orig/lib/zebra.h	2005-06-15 13:54:18.000000000 +0200
++++ quagga-0.98.6/lib/zebra.h	2006-12-03 19:50:26.000000000 +0100
+@@ -152,6 +152,9 @@
+ #ifdef HAVE_NETLINK
+ #include <linux/netlink.h>
+ #include <linux/rtnetlink.h>
++#include <linux/if_addr.h>
++#define IFA_RTA(r)  ((struct rtattr*)(((char*)(r)) + NLMSG_ALIGN(sizeof(struct ifaddrmsg))))
++#define IFLA_RTA(r)  ((struct rtattr*)(((char*)(r)) + NLMSG_ALIGN(sizeof(struct ifinfomsg))))
+ #else
+ #define RT_TABLE_MAIN		0
+ #endif /* HAVE_NETLINK */
