@@ -27,7 +27,7 @@
  extern int _tb_lookup(struct fib_table *, const struct flowi *, struct fib_result *);
 --- linux-2.6.19.orig/net/ipv4/fib_radix.c	1970-01-01 01:00:00.000000000 +0100
 +++ linux-2.6.19/net/ipv4/fib_radix.c	2006-12-07 23:34:12.000000000 +0100
-@@ -0,0 +1,714 @@
+@@ -0,0 +1,716 @@
 +/*
 + *   This program is free software; you can redistribute it and/or
 + *   modify it under the terms of the GNU General Public License
@@ -182,8 +182,10 @@
 +
 +	fi = fib_create_info(cfg);
 +
-+	if (!fi)
++	if (IS_ERR(fi)) {
++		err = PTR_ERR(fi);
 +		goto err;
++	}
 +
 +	n = get_node((radix_t**)tb->tb_data, key, plen);
 +
