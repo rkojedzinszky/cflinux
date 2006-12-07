@@ -613,7 +613,7 @@
 +		}
 +
 +		// now must find next node to dump
-+		cb->args[3] = 0;
++		cb->args[4] = 0;
 +
 +		if ((child = rcu_dereference(n->l_child))) {
 +			n = child;
