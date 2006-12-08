@@ -858,31 +858,8 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  
  drop:
 --- linux-2.6.19.orig/net/ipv4/fib_semantics.c	2006-11-29 22:57:37.000000000 +0100
-+++ linux-2.6.19/net/ipv4/fib_semantics.c	2006-12-07 20:47:34.000000000 +0100
-@@ -67,6 +67,11 @@
- #define for_nexthops(fi) { int nhsel; const struct fib_nh * nh; \
- for (nhsel=0, nh = (fi)->fib_nh; nhsel < (fi)->fib_nhs; nh++, nhsel++)
- 
-+#define for_nexthops_rnd(fi) { int nhsel = ((unsigned)jiffies % (fi)->fib_nhs); int __nh_i; const struct fib_nh * nh; \
-+for (__nh_i=0, nh = (fi)->fib_nh+nhsel; __nh_i < (fi)->fib_nhs; nhsel = (nhsel + 1) % (fi)->fib_nhs, nh = (fi)->fib_nh+nhsel, __nh_i++)
-+
-+#define endfor_nexthops_rnd(fi)	}
-+
- #define change_nexthops(fi) { int nhsel; struct fib_nh * nh; \
- for (nhsel=0, nh = (struct fib_nh*)((fi)->fib_nh); nhsel < (fi)->fib_nhs; nh++, nhsel++)
- 
-@@ -77,6 +82,10 @@
- #define for_nexthops(fi) { int nhsel=0; const struct fib_nh * nh = (fi)->fib_nh; \
- for (nhsel=0; nhsel < 1; nhsel++)
- 
-+#define for_nexthops_rnd(fi) for_nexthops(fi)
-+
-+#define endfor_nexthops_rnd(fi) endfor_nexthops(fi)
-+
- #define change_nexthops(fi) { int nhsel=0; struct fib_nh * nh = (struct fib_nh*)((fi)->fib_nh); \
- for (nhsel=0; nhsel < 1; nhsel++)
- 
-@@ -153,6 +162,11 @@
++++ linux-2.6.19/net/ipv4/fib_semantics.c	2006-12-08 09:02:22.000000000 +0100
+@@ -153,6 +153,11 @@
  		if (nh->nh_dev)
  			dev_put(nh->nh_dev);
  		nh->nh_dev = NULL;
@@ -894,7 +871,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  	} endfor_nexthops(fi);
  	fib_info_cnt--;
  	kfree(fi);
-@@ -852,6 +866,9 @@
+@@ -852,6 +857,9 @@
  {
  	struct fib_alias *fa;
  	int nh_sel = 0;
@@ -904,7 +881,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  
  	list_for_each_entry_rcu(fa, head, fa_list) {
  		int err;
-@@ -878,6 +895,32 @@
+@@ -878,6 +886,40 @@
  			case RTN_BROADCAST:
  			case RTN_ANYCAST:
  			case RTN_MULTICAST:
@@ -913,17 +890,25 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
 +					int _nh_i;
 +					unsigned _fib_nhs = fi->fib_nhs;
 +
-+					nh_sel = ((unsigned)jiffies % _fib_nhs);
-+					for (_nh_i = 0; _nh_i < _fib_nhs; _nh_i++) {
-+						_nh = fi->fib_nh + nh_sel;
-+
-+						if (likely(!(_nh->nh_flags&RTNH_F_DEAD))) {
-+							if (!flp->oif || flp->oif == _nh->nh_oif)
-+								break;
++					if (likely(_fib_nhs == 1)) {
++						_nh = fi->fib_nh;
++						if (likely(!(_nh->nh_flags & RTNH_F_DEAD))) {
++							if (!flp->oif || flp->oif == _nh->nh_oif) {
++								nh_sel = 0;
++								goto out_fill_res;
++							}
 +						}
-+						nh_sel++;
-+						if (unlikely(nh_sel > _fib_nhs))
-+							nh_sel = 0;
++					} else {
++						nh_sel = ((unsigned)jiffies % _fib_nhs);
++						for (_nh_i = 0; _nh_i < _fib_nhs; _nh_i++) {
++							_nh = fi->fib_nh + nh_sel;
++
++							if (likely(!(_nh->nh_flags&RTNH_F_DEAD))) {
++								if (!flp->oif || flp->oif == _nh->nh_oif)
++									break;
++							}
++							nh_sel = (nh_sel + 1) % _fib_nhs;
++						}
 +					}
 +#ifdef CONFIG_IP_ROUTE_MULTIPATH
 +					if (_nh_i < _fib_nhs)
@@ -937,7 +922,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  				for_nexthops(fi) {
  					if (nh->nh_flags&RTNH_F_DEAD)
  						continue;
-@@ -895,6 +938,7 @@
+@@ -895,6 +937,7 @@
  				}
  #endif
  				endfor_nexthops(fi);
@@ -945,7 +930,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  				continue;
  
  			default:
-@@ -916,6 +960,7 @@
+@@ -916,6 +959,7 @@
  	res->netmask = mask;
  	res->network = zone & inet_make_mask(prefixlen);
  #endif
@@ -953,7 +938,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  	atomic_inc(&res->fi->fib_clntref);
  	return 0;
  }
-@@ -1045,6 +1090,9 @@
+@@ -1045,6 +1089,9 @@
  		struct hlist_head *head = &fib_info_devhash[hash];
  		struct hlist_node *node;
  		struct fib_nh *nh;
@@ -963,7 +948,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  
  		hlist_for_each_entry(nh, node, head, nh_hash) {
  			struct fib_info *fi = nh->nh_parent;
-@@ -1067,6 +1115,12 @@
+@@ -1067,6 +1114,12 @@
  					nh->nh_power = 0;
  					spin_unlock_bh(&fib_multipath_lock);
  #endif
