@@ -229,7 +229,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  
 +config IP_LEF
 +	bool "IP: Linux express forwarding"
-+	depends on IP_ADVANCED_ROUTER
++	depends on IP_ADVANCED_ROUTER && !SMP && PREEMPT_NONE
 +	---help---
 +	You should not turn this on
 +
