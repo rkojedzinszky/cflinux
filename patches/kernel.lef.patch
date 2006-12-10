@@ -864,7 +864,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  
  drop:
 --- linux-2.6.19.orig/net/ipv4/fib_semantics.c	2006-11-29 22:57:37.000000000 +0100
-+++ linux-2.6.19/net/ipv4/fib_semantics.c	2006-12-09 13:21:44.000000000 +0100
++++ linux-2.6.19/net/ipv4/fib_semantics.c	2006-12-10 19:19:36.000000000 +0100
 @@ -153,6 +153,11 @@
  		if (nh->nh_dev)
  			dev_put(nh->nh_dev);
@@ -890,7 +890,18 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  
  	list_for_each_entry_rcu(fa, head, fa_list) {
  		int err;
-@@ -872,12 +881,49 @@
+@@ -860,8 +869,10 @@
+ 		    fa->fa_tos != flp->fl4_tos)
+ 			continue;
+ 
++#ifndef CONFIG_IP_LEF
+ 		if (fa->fa_scope < flp->fl4_scope)
+ 			continue;
++#endif
+ 
+ 		fa->fa_state |= FA_S_ACCESSED;
+ 
+@@ -872,12 +883,51 @@
  			if (fi->fib_flags & RTNH_F_DEAD)
  				continue;
  
@@ -898,12 +909,14 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
 +			_fib_nhs = fi->fib_nhs;
 +#endif
 +
++#ifndef CONFIG_IP_LEF
  			switch (fa->fa_type) {
  			case RTN_UNICAST:
  			case RTN_LOCAL:
  			case RTN_BROADCAST:
  			case RTN_ANYCAST:
  			case RTN_MULTICAST:
++#endif
 +#ifdef CONFIG_IP_LEF
 +				{
 +					int _nh_i;
@@ -940,25 +953,33 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  				for_nexthops(fi) {
  					if (nh->nh_flags&RTNH_F_DEAD)
  						continue;
-@@ -895,6 +941,7 @@
+@@ -895,12 +945,15 @@
  				}
  #endif
  				endfor_nexthops(fi);
 +#endif
++#ifndef CONFIG_IP_LEF
  				continue;
  
  			default:
-@@ -916,6 +963,9 @@
+ 				printk(KERN_DEBUG "impossible 102\n");
+ 				return -EINVAL;
+ 			};
++#endif
+ 		}
+ 		return err;
+ 	}
+@@ -916,6 +969,9 @@
  	res->netmask = mask;
  	res->network = zone & inet_make_mask(prefixlen);
  #endif
 +#ifdef CONFIG_IP_LEF
-+	res->nh = _nh;
++	res->nh = (struct fib_nh*)_nh;
 +#endif
  	atomic_inc(&res->fi->fib_clntref);
  	return 0;
  }
-@@ -1045,6 +1095,9 @@
+@@ -1045,6 +1101,9 @@
  		struct hlist_head *head = &fib_info_devhash[hash];
  		struct hlist_node *node;
  		struct fib_nh *nh;
@@ -968,7 +989,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  
  		hlist_for_each_entry(nh, node, head, nh_hash) {
  			struct fib_info *fi = nh->nh_parent;
-@@ -1067,6 +1120,12 @@
+@@ -1067,6 +1126,12 @@
  					nh->nh_power = 0;
  					spin_unlock_bh(&fib_multipath_lock);
  #endif
