@@ -958,8 +958,8 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  #endif
  				endfor_nexthops(fi);
 +#endif
-+#ifndef CONFIG_IP_LEF
  				continue;
++#ifndef CONFIG_IP_LEF
  
  			default:
  				printk(KERN_DEBUG "impossible 102\n");
