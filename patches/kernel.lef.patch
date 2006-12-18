@@ -221,8 +221,8 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  /*
   * Check if we can use proxy ARP for this path
   */
---- a/net/ipv4/Kconfig	2006-12-18 09:27:06.000000000 +0100
-+++ linux-2.6.19/net/ipv4/Kconfig	2006-12-18 09:36:21.000000000 +0100
+--- linux-2.6.19/net/ipv4/Kconfig.orig	2006-12-18 12:29:58.000000000 +0100
++++ linux-2.6.19/net/ipv4/Kconfig	2006-12-18 12:30:50.000000000 +0100
 @@ -51,6 +51,12 @@
  
  	  If unsure, say N here.
@@ -236,15 +236,10 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  choice 
  	prompt "Choose IP: FIB lookup algorithm (choose FIB_HASH if unsure)"
  	depends on IP_ADVANCED_ROUTER
-@@ -83,9 +89,13 @@
- config IP_FIB_RADIX
- 	bool "FIB_RADIX"
+@@ -85,6 +91,11 @@
  	---help---
--	Radix based FIB lookup algorithm. Currently in testing phase, but much simpler
--	than the trie.
--     
-+	Radix based FIB lookup algorithm. Much simpler than the trie, and a bit faster.
-+
+ 	Radix based FIB lookup algorithm. Much simpler than the trie, and a bit faster.
+      
 +config IP_FIB_LEF
 +	bool "FIB_LEF"
 +	---help---
@@ -253,7 +248,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  endchoice
  
  config IP_FIB_HASH
-@@ -93,7 +103,7 @@
+@@ -92,7 +103,7 @@
  
  config IP_MULTIPLE_TABLES
  	bool "IP: policy routing"
@@ -262,7 +257,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  	select FIB_RULES
  	---help---
  	  Normally, a router decides what to do with a received packet based
-@@ -112,7 +122,7 @@
+@@ -111,7 +122,7 @@
  
  config IP_ROUTE_FWMARK
  	bool "IP: use netfilter MARK value as routing key"
@@ -271,7 +266,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  	help
  	  If you say Y here, you will be able to specify different routes for
  	  packets with different mark values (see iptables(8), MARK target).
-@@ -131,7 +141,7 @@
+@@ -130,7 +141,7 @@
  
  config IP_ROUTE_MULTIPATH_CACHED
  	bool "IP: equal cost multipath with caching support (EXPERIMENTAL)"
