@@ -4,6 +4,7 @@ Changes from 1.0p4 to 1.0p5:
 	  are returned
 	- added intel's e1000 driver to detect pci-express cards
 	- upgraded iproute
+	- upgraded ltraf to svn rev 163
 
 Changes from 1.0p3 to 1.0p4:
 	- iptables upgraded to 1.3.6
