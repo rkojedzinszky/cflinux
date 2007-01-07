@@ -168,9 +168,13 @@ void			prerun(char* src)
 	int						tot;
 	struct stat		st;
 	int						sstat = 0;
+	char					cwd[PATH_MAX+1];
 
 	if (htonl(rhdr.tar_l) == 0)
 		return;
+
+	if (getcwd(cwd, sizeof(cwd)) == NULL)
+		error_and_die("getcwd() failed\n");
 	if (mkdtemp(tmpdir) == NULL)
 		error_and_die("failed to create temporary directory\n");
 	if ((ifd=open(src, O_RDONLY)) == -1)
@@ -201,6 +205,7 @@ void			prerun(char* src)
 	system(rmcmd);
 	if (!WIFEXITED(sstat) || WEXITSTATUS(sstat))
 		error_and_die("\n%s: script terminated abnormally\n", src);
+	chdir(cwd);
 }
 
 int		main(int argc, char* argv[])
