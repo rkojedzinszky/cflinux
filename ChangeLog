@@ -1,3 +1,8 @@
+Changes from 1.0p5 to 1.0p6:
+	- upgraded write_helper:
+	  - fixed check of subprocess' exit value
+	  - fixed to work correctly with relative filenames
+
 Changes from 1.0p4 to 1.0p5:
 	- downgraded net-snmp to 5.2.3
 	- fixed (again) the calculation of cpu stats, now differences

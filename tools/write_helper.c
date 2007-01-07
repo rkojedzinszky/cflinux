@@ -173,10 +173,10 @@ void			prerun(char* src)
 		return;
 	if (mkdtemp(tmpdir) == NULL)
 		error_and_die("failed to create temporary directory\n");
-	if (chdir(tmpdir) == -1)
-		error_and_die("chdir(%s): %s\n", tmpdir, strerror(errno));
 	if ((ifd=open(src, O_RDONLY)) == -1)
 		error_and_die("%s: open: %s\n", src, strerror(errno));
+	if (chdir(tmpdir) == -1)
+		error_and_die("chdir(%s): %s\n", tmpdir, strerror(errno));
 	out = popen("tar xzf -", "wb");
 	if (!out)
 		error_and_die("failed to open tar\n");
@@ -195,12 +195,12 @@ void			prerun(char* src)
 	pclose(out);
 	close(ifd);
 	if (stat("setup", &st) == 0)
-		sstat = WEXITSTATUS(system("./setup"));
+		sstat = system("./setup");
 	chdir("/");
 	sprintf(rmcmd, "rm -rf %s", tmpdir);
 	system(rmcmd);
-	if (sstat)
-		error_and_die("%s: script terminated abnormally\n", src);
+	if (!WIFEXITED(sstat) || WEXITSTATUS(sstat))
+		error_and_die("\n%s: script terminated abnormally\n", src);
 }
 
 int		main(int argc, char* argv[])
@@ -224,15 +224,16 @@ int		main(int argc, char* argv[])
 	/* validate the image */
 	validate(argv[1]);
 	printf("%s image version: %s\n", argv[1], version);
+
+	/* extract the tar.gz */
+	prerun(argv[1]);
+
 	for(i = 5; i > 0; i--) {
 		printf("\rImage will be written to %s in %d sec%s ... ", argv[2], i, i == 1 ? "" : "s");
 		fflush(stdout);
 		sleep(1);
 	}
 	printf("\n");
-
-	/* extract the tar.gz */
-	prerun(argv[1]);
 
 	/* disable signals */
 	sigfillset(&ss);
