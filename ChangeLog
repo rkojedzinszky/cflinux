@@ -1,3 +1,7 @@
+Changes from 2.0p1 to 2.0p2:
+	- svn merge from trunk: -r459:r474
+	  (write_helper fix, ltraf upgrade)
+
 Changes from 2.0 to 2.0p1:
 	- made kfree_skb inline
 	- upgraded kernel to 2.6.19
