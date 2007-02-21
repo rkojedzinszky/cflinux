@@ -43,20 +43,20 @@
  	struct ieee80211_channel *chan;
  
  	chan = ieee80211_find_channel(ic, ic->ic_bsschan->ic_freq, newflags);
---- madwifi-ng-r1692.orig/ath/if_ath.c	2006-07-25 17:14:08.000000000 +0200
-+++ madwifi-ng-r1692/ath/if_ath.c	2006-07-25 17:26:46.000000000 +0200
-@@ -72,7 +72,7 @@
+--- madwifi-r2143.orig/ath/if_ath.c	2007-02-21 19:10:11.000000000 +0100
++++ madwifi-r2143/ath/if_ath.c	2007-02-21 20:12:08.000000000 +0100
+@@ -75,7 +75,7 @@
  #include <net80211/if_llc.h>
  #endif
  
 -#define	AR_DEBUG
 +#undef	AR_DEBUG
  
- #include "if_athrate.h"
  #include "net80211/if_athproto.h"
-@@ -299,8 +299,8 @@
- MODULE_PARM_DESC(rfkill, "Enable/disable RFKILL capability");
+ #include "if_athvar.h"
+@@ -310,8 +310,8 @@
  MODULE_PARM_DESC(autocreate, "Create ath device in [sta|ap|wds|adhoc|ahdemo|monitor] mode. defaults to sta, use 'none' to disable");
+ MODULE_PARM_DESC(ratectl, "Rate control algorithm [amrr|onoe|sample], defaults to '" DEF_RATE_CTL "'");
  
 -static int	ath_debug = 0;
  #ifdef AR_DEBUG
@@ -64,8 +64,8 @@
  #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,5,52))
  MODULE_PARM(ath_debug, "i");
  #else
-@@ -347,9 +347,10 @@
- 		ath_keyprint(__func__, ix, hk, mac);		\
+@@ -358,9 +358,10 @@
+ 		ath_keyprint(sc, __func__, ix, hk, mac);	\
  } while (0)
  #else /* defined(AR_DEBUG) */
 -#define	IFF_DUMPPKTS(sc, _m)	netif_msg_dumppkts(&sc->sc_ic)
@@ -76,7 +76,7 @@
  #endif /* defined(AR_DEBUG) */
  
  #define ATH_SETUP_XR_VAP(sc,vap,rfilt) \
-@@ -1277,7 +1278,9 @@
+@@ -1310,7 +1311,9 @@
  void
  ath_suspend(struct net_device *dev)
  {
@@ -86,7 +86,7 @@
  
  	DPRINTF(sc, ATH_DEBUG_ANY, "%s: flags %x\n", __func__, dev->flags);
  	ath_stop(dev);
-@@ -1286,7 +1289,9 @@
+@@ -1319,7 +1322,9 @@
  void
  ath_resume(struct net_device *dev)
  {
@@ -96,17 +96,7 @@
  
  	DPRINTF(sc, ATH_DEBUG_ANY, "%s: flags %x\n", __func__, dev->flags);
  	ath_init(dev);
-@@ -1295,7 +1300,9 @@
- void
- ath_shutdown(struct net_device *dev)
- {
-+#ifdef AR_DEBUG
- 	struct ath_softc *sc = dev->priv;
-+#endif
- 
- 	DPRINTF(sc, ATH_DEBUG_ANY, "%s: flags %x\n", __func__, dev->flags);
- 	ath_stop(dev);
-@@ -7321,7 +7328,9 @@
+@@ -7500,7 +7505,9 @@
  static void
  ath_tx_draintxq(struct ath_softc *sc, struct ath_txq *txq)
  {
@@ -114,5 +104,5 @@
  	struct ath_hal *ah = sc->sc_ah;
 +#endif
  	struct ath_buf *bf;
- 	struct sk_buff *skb, *tskb;
- 	int i;
+ 	struct sk_buff *skb;
+ #ifdef ATH_SUPERG_FF
