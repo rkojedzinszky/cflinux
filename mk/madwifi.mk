@@ -39,18 +39,13 @@ clean:
 
 build: configure $(BUILT_STAMP)
 
-# here the rate algorithm can be selected
-# for current version, one of amrr, onoe, simple
-A_RATE := amrr
-
 # the required tools
 TOOLS = athchans athctrl athkey wlanconfig
 
 $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH) \
 		KERNELPATH=$(BUILD_DIR)/kernel \
-		KERNELRELEASE=$(KERNEL_VERSION) \
-		ATH_RATE=ath_rate/$(A_RATE)
+		KERNELRELEASE=$(KERNEL_VERSION)
 	$(MAKE) -C $(PKG_ROOT)/tools $(TOOLS) $(UC_PATH)
 	touch $(BUILT_STAMP)
 
@@ -67,8 +62,8 @@ install: build
 		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
 	cp $(PKG_ROOT)/net80211/wlan_wep.o \
 		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
-	cp $(PKG_ROOT)/ath_rate/$(A_RATE)/ath_rate_$(A_RATE).o \
-		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
+	for rate in onoe sample amrr ; do cp $(PKG_ROOT)/ath_rate/$$rate/ath_rate_$$rate.o \
+		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia ; done
 	$(MAKE) -C $(PKG_ROOT)/tools install BINDIR=/sbin DESTDIR=$(ROOTFS) \
 		ALL_INSTALL="$(TOOLS)"
 
