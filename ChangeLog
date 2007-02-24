@@ -3,6 +3,8 @@ Changes from 2.0p1 to 2.0p2:
 	  (write_helper fix, ltraf upgrade)
 	- upgraded the kernel to 2.6.19.1
 	- upgraded ltraf to 0.2.4
+	- upgraded openssl to 0.9.7m
+	- upgraded openssh to 4.5p1
 
 Changes from 2.0 to 2.0p1:
 	- made kfree_skb inline
