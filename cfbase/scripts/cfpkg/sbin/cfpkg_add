@@ -42,13 +42,13 @@ fi
 
 # check versions - required at least v2
 if ! [ "$PKG_FORMAT" -ge "2" ]; then
-	echo "E: $PKG_NAME: Invalid cfpkg format: '$PKG_FORMAT' - at least '2' needed"
+	log 0 "E: $PKG_NAME: Invalid cfpkg format: '$PKG_FORMAT' - at least '2' needed"
 	exit 1
 fi
 
 # check essential variables
 if [ -z "$PKG_NAME" -o -z "$PKG_VERSION" -o -z "$PKG_CFLINUX_MAJOR" ]; then
-	echo "E: '$package': Strange cfpkg format, skipping"
+	log 0 "E: '$package': Strange cfpkg format, skipping"
 	exit 1
 fi
 
@@ -66,7 +66,7 @@ log 2 "I: Checking existing installation"
 if [ -d "$_pkg_db/$PKG_NAME" ]; then
 	# load the installed version number
 	. "$_pkg_db/$PKG_NAME/INFO"
-	echo "E: $PKG_NAME is already installed (version: $PKG_VERSION)"
+	log 0 "E: $PKG_NAME is already installed (version: $PKG_VERSION)"
 	exit 1
 fi
 
@@ -83,6 +83,16 @@ if [ -f "$_pkg_tmpdir/$_pkg_config/DEPENDS" ]; then
 		fi
 	done
 	exec 3<&-
+fi
+
+# if the package has an PREINSTALL script, execute it NOW
+if [ -f "$_pkg_tmpdir/$_pkg_config/PREINSTALL" -a -x "$_pkg_tmpdir/$_pkg_config/PREINSTALL" ]; then
+	log 2 "I: executing PREINSTALL"
+	( cd "$_pkg_tmpdir/$_pkg_config" && ./PREINSTALL preinstall )
+	if [ $? -ne 0 ]; then
+		log 0 "E: PREINSTALL script returned an error"
+		exit 1
+	fi
 fi
 
 # now everything looks good, just unpack the contents
@@ -111,6 +121,15 @@ fi
 # install the _pkg_config dir
 log 1 "I: $PKG_NAME: Registering installation"
 mv "$PKG_BASE/$_pkg_config" "$_pkg_db/$PKG_NAME"
+
+# if the package has an POSTINSTALL script, execute it NOW
+if [ -f "$_pkg_tmpdir/$_pkg_config/POSTINSTALL" -a -x "$_pkg_tmpdir/$_pkg_config/POSTINSTALL" ]; then
+	log 2 "I: executing POSTINSTALL"
+	( cd "$_pkg_tmpdir/$_pkg_config" && ./POSTINSTALL postinstall )
+	if [ $? -ne 0 ]; then
+		log 0 "W: POSTINSTALL script returned an error"
+	fi
+fi
 
 # show the package's message
 if [ -f "$_pkg_db/$PKG_NAME/INST_MSG" ]; then
