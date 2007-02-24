@@ -93,4 +93,7 @@ endif
 	# install messages if they exist
 	-cp INST_MSG $(PKG_PACK_DIR)/$(PKG_CONF_DIR)/
 
+	# install (pre|post)(install|rm) files
+	-install -m 555 -o 0 -g 0 PREINSTALL POSTINSTALL PRERM POSTRM $(PKG_PACK_DIR)/$(PKG_CONF_DIR)/
+
 	cd "$(PKG_PACK_DIR)" && tar czf "$(CFPKG_DIR)/../$(PKG)-$(CFPKG_PKG_VERS).cfpkg" *

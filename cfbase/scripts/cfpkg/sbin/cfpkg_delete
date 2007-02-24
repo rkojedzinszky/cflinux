@@ -52,6 +52,16 @@ fi
 # print log message
 log 1 "I: Deleting package $package"
 
+# if the package has an PRERM script, execute it NOW
+if [ -f "$_pkg_db/$package/PRERM" -a -x "$_pkg_db/$package/PRERM" ]; then
+	log 2 "I: executing PRERM"
+	( cd "$_pkg_db/$package" && ./PRERM prerm )
+	if [ $? -ne 0 ]; then
+		log 0 "E: PRERM script returned an error"
+		exit 1
+	fi
+fi
+
 # checking dependencies
 log 2 "I: $package: checking packages requiring this"
 while [ -s "$_pkg_db/$package/REQUIRED_BY" ]; do
@@ -92,6 +102,15 @@ cd "$PKG_BASE" && awk 'BEGIN {idx = 0}
 	$1 == "d" {dir[idx++] = $2}
 	END {while (--idx >= 0) {print dir[idx]}}' "$_pkg_db/$package/FILES" | \
 	xargs -r rmdir 2>/dev/null
+
+# if the package has an POSTRM script, execute it NOW
+if [ -f "$_pkg_db/$package/POSTRM" -a -x "$_pkg_db/$package/POSTRM" ]; then
+	log 2 "I: executing POSTRM"
+	( cd "$_pkg_db/$package" && ./POSTRM postrm )
+	if [ $? -ne 0 ]; then
+		log 0 "W: POSTRM script returned an error"
+	fi
+fi
 
 # deregistering package
 log 1 "I: $PKG_NAME: Deregistering package installation"
