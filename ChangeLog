@@ -4,6 +4,8 @@ Changes from 1.0p6 to 1.0p7:
 	- upgraded madwifi to svn rev 2143, and added wlan_wep.o into
 	  cflinux
 	- upgraded hostap and hostapd; enabled eap and support for madwifi
+	- upgraded openssl to 0.9.7m
+	- upgraded openssh to 4.5p1
 
 Changes from 1.0p5 to 1.0p6:
 	- upgraded write_helper:
