@@ -96,4 +96,8 @@ endif
 	# install (pre|post)(install|rm) files
 	-install -m 555 -o 0 -g 0 PREINSTALL POSTINSTALL PRERM POSTRM $(PKG_PACK_DIR)/$(PKG_CONF_DIR)/
 
+	# install rc script if found
+	if [ -f rc.d ]; then install -m 555 -o 0 -g 0 -d $(PKG_INSTALL_DIR)/usr/local/etc/rc.d ; \
+		install -m 555 -o 0 -g 0 rc.d $(PKG_INSTALL_DIR)/usr/local/etc/rc.d/$(PKG) ; fi
+
 	cd "$(PKG_PACK_DIR)" && tar czf "$(CFPKG_DIR)/../$(PKG)-$(CFPKG_PKG_VERS).cfpkg" *
