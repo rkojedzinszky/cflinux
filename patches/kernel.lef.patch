@@ -121,10 +121,9 @@ diff -ruNP linux-2.6.18.orig/include/net/lef_struct.h linux-2.6.18/include/net/l
 +};
 +
 +#endif /* _NET_LEF_STRUCT_H */
-diff -ruNP linux-2.6.18.orig/net/core/skbuff.c linux-2.6.18/net/core/skbuff.c
---- linux-2.6.18.orig/net/core/skbuff.c	2006-09-20 05:42:06.000000000 +0200
-+++ linux-2.6.18/net/core/skbuff.c	2006-11-06 21:46:11.000000000 +0100
-@@ -67,6 +67,10 @@
+--- linux-2.6.20.3/net/core/skbuff.c.orig	2007-03-20 21:40:26.000000000 +0100
++++ linux-2.6.20.3/net/core/skbuff.c	2007-03-20 21:41:25.000000000 +0100
+@@ -66,6 +66,10 @@
  #include <asm/uaccess.h>
  #include <asm/system.h>
  
@@ -132,10 +131,10 @@ diff -ruNP linux-2.6.18.orig/net/core/skbuff.c linux-2.6.18/net/core/skbuff.c
 +#include <net/lef.h>
 +#endif
 +
- static kmem_cache_t *skbuff_head_cache __read_mostly;
- static kmem_cache_t *skbuff_fclone_cache __read_mostly;
+ #include "kmap_skb.h"
  
-@@ -369,6 +373,9 @@
+ static struct kmem_cache *skbuff_head_cache __read_mostly;
+@@ -373,6 +377,9 @@
  #ifdef CONFIG_XFRM
  	secpath_put(skb->sp);
  #endif
@@ -145,7 +144,7 @@ diff -ruNP linux-2.6.18.orig/net/core/skbuff.c linux-2.6.18/net/core/skbuff.c
  	if (skb->destructor) {
  		WARN_ON(in_irq());
  		skb->destructor(skb);
-@@ -457,6 +464,9 @@
+@@ -462,6 +469,9 @@
  #ifdef CONFIG_INET
  	secpath_get(skb->sp);
  #endif
@@ -155,7 +154,7 @@ diff -ruNP linux-2.6.18.orig/net/core/skbuff.c linux-2.6.18/net/core/skbuff.c
  	memcpy(n->cb, skb->cb, sizeof(skb->cb));
  	C(len);
  	C(data_len);
-@@ -524,6 +534,9 @@
+@@ -529,6 +539,9 @@
  #ifdef CONFIG_INET
  	new->sp		= secpath_get(old->sp);
  #endif
@@ -165,7 +164,7 @@ diff -ruNP linux-2.6.18.orig/net/core/skbuff.c linux-2.6.18/net/core/skbuff.c
  	new->h.raw	= old->h.raw + offset;
  	new->nh.raw	= old->nh.raw + offset;
  	new->mac.raw	= old->mac.raw + offset;
-@@ -1974,6 +1987,9 @@
+@@ -1979,6 +1992,9 @@
  		nskb->priority = skb->priority;
  		nskb->protocol = skb->protocol;
  		nskb->dst = dst_clone(skb->dst);
@@ -221,8 +220,8 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  /*
   * Check if we can use proxy ARP for this path
   */
---- linux-2.6.19/net/ipv4/Kconfig.orig	2006-12-18 12:29:58.000000000 +0100
-+++ linux-2.6.19/net/ipv4/Kconfig	2006-12-18 12:30:50.000000000 +0100
+--- linux-2.6.20.3/net/ipv4/Kconfig.orig	2007-03-20 21:40:26.000000000 +0100
++++ linux-2.6.20.3/net/ipv4/Kconfig	2007-03-20 21:40:26.000000000 +0100
 @@ -51,6 +51,12 @@
  
  	  If unsure, say N here.
@@ -257,16 +256,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  	select FIB_RULES
  	---help---
  	  Normally, a router decides what to do with a received packet based
-@@ -111,7 +122,7 @@
- 
- config IP_ROUTE_FWMARK
- 	bool "IP: use netfilter MARK value as routing key"
--	depends on IP_MULTIPLE_TABLES && NETFILTER
-+	depends on IP_MULTIPLE_TABLES && NETFILTER && !IP_LEF
- 	help
- 	  If you say Y here, you will be able to specify different routes for
- 	  packets with different mark values (see iptables(8), MARK target).
-@@ -130,7 +141,7 @@
+@@ -123,7 +134,7 @@
  
  config IP_ROUTE_MULTIPATH_CACHED
  	bool "IP: equal cost multipath with caching support (EXPERIMENTAL)"
@@ -293,16 +283,16 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  
  obj-$(CONFIG_XFRM) += xfrm4_policy.o xfrm4_state.o xfrm4_input.o \
  		      xfrm4_output.o
---- linux-2.6.18/include/net/arp.h.orig	2006-11-07 09:39:59.000000000 +0100
-+++ linux-2.6.18/include/net/arp.h	2006-11-07 09:40:22.000000000 +0100
+--- linux-2.6.20.3/include/net/arp.h.orig	2007-03-13 19:27:08.000000000 +0100
++++ linux-2.6.20.3/include/net/arp.h	2007-03-20 21:48:48.000000000 +0100
 @@ -16,6 +16,9 @@
- 			 struct net_device *dev, u32 src_ip, 
+ 			 struct net_device *dev, __be32 src_ip,
  			 unsigned char *dest_hw, unsigned char *src_hw, unsigned char *th);
  extern int	arp_bind_neighbour(struct dst_entry *dst);
 +#ifdef CONFIG_IP_LEF
 +extern int	arp_bind_neighbour_lef(struct lef *);
 +#endif
- extern int	arp_mc_map(u32 addr, u8 *haddr, struct net_device *dev, int dir);
+ extern int	arp_mc_map(__be32 addr, u8 *haddr, struct net_device *dev, int dir);
  extern void	arp_ifdown(struct net_device *dev);
  
 --- linux-2.6.18.orig/net/ipv4/icmp.c	2006-09-20 05:42:06.000000000 +0200
@@ -342,14 +332,14 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  		if (sysctl_icmp_errors_use_inbound_ifaddr)
  			saddr = inet_select_addr(skb_in->dev, 0, RT_SCOPE_LINK);
  		else
---- linux-2.6.18.orig/net/ipv4/netfilter/Kconfig	2006-09-20 05:42:06.000000000 +0200
-+++ linux-2.6.18/net/ipv4/netfilter/Kconfig	2006-11-12 15:45:00.000000000 +0100
-@@ -433,7 +433,7 @@
+--- linux-2.6.20.3/net/ipv4/netfilter/Kconfig.orig	2007-03-13 19:27:08.000000000 +0100
++++ linux-2.6.20.3/net/ipv4/netfilter/Kconfig	2007-03-20 21:46:59.000000000 +0100
+@@ -421,7 +421,7 @@
  
  config IP_NF_TARGET_MASQUERADE
  	tristate "MASQUERADE target support"
--	depends on IP_NF_NAT
-+	depends on IP_NF_NAT && !IP_LEF
+-	depends on (NF_NAT || IP_NF_NAT)
++	depends on (NF_NAT || IP_NF_NAT) && !IP_LEF
  	help
  	  Masquerading is a special case of NAT: all outgoing connections are
  	  changed to seem to come from a particular interface's address, and
@@ -1083,8 +1073,8 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  #endif
  
  extern int _tb_lookup(struct fib_table *, const struct flowi *, struct fib_result *);
---- linux-2.6.19.orig/net/ipv4/fib_lef.c	1970-01-01 01:00:00.000000000 +0100
-+++ linux-2.6.19/net/ipv4/fib_lef.c	2006-12-16 16:12:11.000000000 +0100
+--- linux-2.6.20.3/net/ipv4/fib_lef.c.orig	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.20.3/net/ipv4/fib_lef.c	2007-03-20 22:28:24.000000000 +0100
 @@ -0,0 +1,969 @@
 +/*
 + *   This program is free software; you can redistribute it and/or
@@ -1146,7 +1136,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
 +#define EX_KEY(k)	(((k) >> (32 - BPS)) & (~((~0) << BPS)))
 +#endif
 +
-+static kmem_cache_t*	fn_alias_kmem __read_mostly;
++static struct kmem_cache*	fn_alias_kmem __read_mostly;
 +
 +static void __alias_free_mem(struct rcu_head *head)
 +{
@@ -1353,7 +1343,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
 +			u8 state;
 +
 +			err = -ENOBUFS;
-+			new_fa = kmem_cache_alloc(fn_alias_kmem, SLAB_KERNEL);
++			new_fa = kmem_cache_alloc(fn_alias_kmem, GFP_KERNEL);
 +			if (new_fa == NULL)
 +				goto out;
 +
@@ -1398,7 +1388,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
 +		goto out;
 +
 +	err = -ENOBUFS;
-+	new_fa = kmem_cache_alloc(fn_alias_kmem, SLAB_KERNEL);
++	new_fa = kmem_cache_alloc(fn_alias_kmem, GFP_KERNEL);
 +	if (new_fa == NULL)
 +		goto out;
 +

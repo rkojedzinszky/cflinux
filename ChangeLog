@@ -1,3 +1,6 @@
+Changes from 2.0p2 to 2.0p3:
+	- upgraded the kernel to 2.6.20.3
+
 Changes from 2.0p1 to 2.0p2:
 	- svn merge from trunk: -r459:r474
 	  (write_helper fix, ltraf upgrade)
