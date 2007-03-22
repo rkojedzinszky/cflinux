@@ -18,9 +18,11 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := iputils
-SRC_FILENAME = iputils.tar.bz2
+SRC_FILENAME = iputils-p1.tar.bz2
 EXTRACTED_DIR = iputils
 DOWNLOAD_SITES = $(CFLINUX_PACKAGES)
+
+PATCHES = iputils.tracepath_c.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
