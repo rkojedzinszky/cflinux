@@ -1074,8 +1074,8 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  
  extern int _tb_lookup(struct fib_table *, const struct flowi *, struct fib_result *);
 --- linux-2.6.20.3/net/ipv4/fib_lef.c.orig	1970-01-01 01:00:00.000000000 +0100
-+++ linux-2.6.20.3/net/ipv4/fib_lef.c	2007-03-20 22:28:24.000000000 +0100
-@@ -0,0 +1,969 @@
++++ linux-2.6.20.3/net/ipv4/fib_lef.c	2007-03-26 20:04:29.000000000 +0200
+@@ -0,0 +1,970 @@
 +/*
 + *   This program is free software; you can redistribute it and/or
 + *   modify it under the terms of the GNU General Public License
@@ -1996,9 +1996,10 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
 +static int	fn_lef_flush(struct fib_table *tb)
 +{
 +	lef_t*			l = *((lef_t**)tb->tb_data);
-+	int			found;
++	int			found = 0;
 +
-+	found = lef_flush_recursive(l);
++	if (l)
++		found += lef_flush_recursive(l);
 +
 +	return found;
 +}
