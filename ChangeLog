@@ -1,5 +1,6 @@
 Changes from 1.0p7 to 1.0p8:
 	- upgraded busybox to 1.4.2
+	- upgraded quagga to 0.99.6
 
 Changes from 1.0p6 to 1.0p7:
 	- upgraded the kernel to 2.4.34.1
