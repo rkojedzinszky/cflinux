@@ -1,106 +1,63 @@
---- busybox-1.1.2/networking/httpd.c.orig	2006-03-22 22:16:19.000000000 +0100
-+++ busybox-1.1.2/networking/httpd.c	2006-04-26 19:49:47.000000000 +0200
-@@ -1530,18 +1530,49 @@
- 			char *cipher;
- 			char *pp;
+--- busybox-1.4.2/networking/httpd.c.orig	2007-03-18 17:59:24.000000000 +0100
++++ busybox-1.4.2/networking/httpd.c	2007-03-24 16:28:10.000000000 +0100
+@@ -1403,19 +1403,48 @@
+ 				char *cipher;
+ 				char *pp;
  
--			if(strncmp(p, request, u-request) != 0) {
--				/* user uncompared */
--				continue;
--			}
- 			pp = strchr(p, ':');
--			if(pp && pp[1] == '$' && pp[2] == '1' &&
--						 pp[3] == '$' && pp[4]) {
--				pp++;
--				cipher = pw_encrypt(u+1, pp);
--				if (strcmp(cipher, pp) == 0)
--					goto set_remoteuser_var;   /* Ok */
--				/* unauthorized */
-+			if (pp) {
-+				if(strncmp(p, request, u-request) != 0) {
-+					/* user uncompared */
-+					continue;
-+				}
-+				if(pp[1] == '$' && pp[2] == '1' &&
-+							 pp[3] == '$' && pp[4]) {
-+					/* check for inline password */
-+					pp++;
-+					cipher = pw_encrypt(u+1, pp);
-+					if (strcmp(cipher, pp) == 0)
-+						goto set_remoteuser_var;   /* Ok */
-+					/* unauthorized */
-+					continue;
-+				}
-+			} else {
-+				/* a filename is specified */
-+				FILE *f;
-+				char buf[1024];
-+				char *t1,*t2,*t3;
-+				int found=0;
-+
-+				if ((f=fopen(p,"r")) == NULL)
-+					continue;
-+				while( fgets(buf,sizeof(buf),f) == buf ) {
-+					/* remove the '\n' */
-+					if ((t1=strchr(buf,'\n')))
-+						*t1=0;
-+					t3=buf;
-+					t1=strtok_r(NULL,":",&t3);
-+					t2=strtok_r(NULL,":",&t3);
-+					if (!t1 || t1[0] == '#' || !t2)
+-				if (strncmp(p, request, u-request) != 0) {
+-					/* user uncompared */
+-					continue;
+-				}
+ 				pp = strchr(p, ':');
+-				if (pp && pp[1] == '$' && pp[2] == '1' &&
+-						pp[3] == '$' && pp[4]) {
+-					pp++;
+-					cipher = pw_encrypt(u+1, pp);
+-					if (strcmp(cipher, pp) == 0)
+-						goto set_remoteuser_var;   /* Ok */
+-					/* unauthorized */
+-					continue;
++				if (pp) {
++					if (strncmp(p, request, u-request) != 0) {
++						/* user uncompared */
 +						continue;
-+					if (strncmp(request,t1,u-request) == 0 &&
-+							strcmp(t2,crypt(u+1,t2)) == 0) {
-+						found=1;
-+						break;
 +					}
-+				}
-+				fclose(f);
-+				if (found)
-+					goto set_remoteuser_var;
- 				continue;
++					if (pp && pp[1] == '$' && pp[2] == '1' &&
++							pp[3] == '$' && pp[4]) {
++						pp++;
++						cipher = pw_encrypt(u+1, pp);
++						if (strcmp(cipher, pp) == 0)
++							goto set_remoteuser_var;   /* Ok */
++						/* unauthorized */
++						continue;
++					}
++				} else {
++					/* a filename have been specified */
++					FILE *f;
++					char buf[1024];
++					char *t1,*t2,*t3;
++					int found=0;
++
++					if ((f=fopen(p,"r")) == NULL)
++						continue;
++					while( fgets(buf,sizeof(buf),f) == buf ) {
++						/* remove the '\n' */
++						if ((t1=strchr(buf,'\n')))
++							*t1=0;
++						t3=buf;
++						t1=strtok_r(NULL,":",&t3);
++						t2=strtok_r(NULL,":",&t3);
++						if (!t1 || t1[0] == '#' || !t2)
++							continue;
++						if (strncmp(request,t1,u-request) == 0 &&
++								strcmp(t2,crypt(u+1,t2)) == 0) {
++							found=1;
++							break;
++						}
++					}
++					fclose(f);
++					if (found)
++						goto set_remoteuser_var;
+ 				}
  			}
- 		}
-@@ -2039,7 +2070,7 @@
-   SKIP_FEATURE_HTTPD_USAGE_FROM_INETD_ONLY(int server;)
- 
-   USE_FEATURE_HTTPD_SETUID(const char *s_uid;)
--  USE_FEATURE_HTTPD_SETUID(long uid = -1;)
-+  USE_FEATURE_HTTPD_SETUID(struct passwd* pw = NULL;)
- 
-   USE_FEATURE_HTTPD_AUTH_MD5(const char *pass;)
- 
-@@ -2085,12 +2116,18 @@
- #ifdef CONFIG_FEATURE_HTTPD_SETUID
-     if(opt & OPT_SETUID) {
- 	char *e;
-+	long uid;
- 
- 	uid = strtol(s_uid, &e, 0);
- 	if(*e != '\0') {
- 		/* not integer */
--		uid = bb_xgetpwnam(s_uid);
-+		pw = getpwnam(s_uid);
-+	} else {
-+		/* integer */
-+		pw = getpwuid(uid);
- 	}
-+	if (!pw)
-+		bb_error_msg_and_die("Invalid user name: %s", s_uid);
-       }
- #endif
- #endif
-@@ -2102,8 +2139,11 @@
-   server = openServer();
- # ifdef CONFIG_FEATURE_HTTPD_SETUID
-   /* drop privileges */
--  if(uid > 0)
--	setuid(uid);
-+  if(pw) {
-+	setgid(pw->pw_gid);
-+	initgroups(pw->pw_name,pw->pw_gid);
-+	setuid(pw->pw_uid);
-+  }
- # endif
- #endif
  

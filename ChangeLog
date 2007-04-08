@@ -1,5 +1,7 @@
 Changes from 2.0p2 to 2.0p3:
 	- upgraded the kernel to 2.6.20.3
+	- upgraded busybox to 1.4.2
+	- upgraded quagga to 0.99.6
 
 Changes from 2.0p1 to 2.0p2:
 	- svn merge from trunk: -r459:r474

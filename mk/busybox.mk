@@ -18,20 +18,19 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := busybox
-SRC_FILENAME = busybox-1.1.3.tar.bz2
-EXTRACTED_DIR = busybox-1.1.3
+SRC_FILENAME = busybox-1.4.2.tar.bz2
+EXTRACTED_DIR = busybox-1.4.2
 DOWNLOAD_SITES = http://busybox.net/downloads/ \
 		$(CFLINUX_PACKAGES)
 
 PATCHES = busybox.init.patch \
 	busybox.crond.patch \
 	busybox.rdate.patch \
-	busybox.pwd2spwd.c.patch \
 	busybox.ifenslave.patch \
 	busybox.httpd_c.patch \
 	busybox.wget_c.patch \
 	busybox.no_halt_poweroff.patch \
-	busybox.ps_ax_hack.patch
+	busybox.ps_opt_hack.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -57,6 +56,6 @@ $(BUILT_STAMP):
 install: build
 	find $(ROOTFS) -lname '*busybox' -print0 | xargs -0 rm -f
 	-mkdir -p $(ROOTFS)/usr/share/udhcpc
-	$(MAKE) -C $(PKG_ROOT) install PREFIX=$(ROOTFS)
+	$(MAKE) -C $(PKG_ROOT) install CONFIG_PREFIX=$(ROOTFS)
 
 .PHONY: configure clean build install
