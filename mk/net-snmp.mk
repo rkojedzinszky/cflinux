@@ -61,7 +61,7 @@ build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH)
-	$(MAKE) -C $(PKG_ROOT) installlocalheaders installlibs INSTALL_PREFIX=$(UC_ROOT)
+	$(MAKE) -C $(PKG_ROOT) installheaders installlibs INSTALL_PREFIX=$(UC_ROOT)
 	touch $(BUILT_STAMP)
 
 install: build
