@@ -20,26 +20,6 @@
  	$(MAKE) -C extra/locale clean
  	$(MAKE) -C utils clean
  	@set -e; \
---- uClibc-0.9.28/ldso/ldso/Makefile.orig	2005-08-18 00:49:41.000000000 +0200
-+++ uClibc-0.9.28/ldso/ldso/Makefile	2006-06-14 19:42:29.000000000 +0200
-@@ -42,6 +42,7 @@
- endif
- XXFLAGS+= -DUCLIBC_LDSO=\"$(UCLIBC_LDSO)\" $(XARCH_CFLAGS) $(CPU_CFLAGS) $(PICFLAG) \
- 	-DUCLIBC_RUNTIME_PREFIX=\"$(RUNTIME_PREFIX)\" \
-+	-DUCLIBC_DEVEL_PREFIX=\"$(DEVEL_PREFIX)\" \
- 	-fno-builtin -nostdinc -D_LIBC -I$(TOPDIR)ldso/include -I. -I$(TOPDIR)include
- 
- # BEWARE!!! At least mips* will die if -O0 is used!!!
---- uClibc-0.9.27.orig/ldso/libdl/Makefile	2005-01-12 08:59:21.000000000 +0100
-+++ uClibc-0.9.27/ldso/libdl/Makefile	2005-07-30 11:40:48.000000000 +0200
-@@ -29,6 +29,7 @@
- endif
- XXFLAGS+= $(XARCH_CFLAGS) $(CPU_CFLAGS) \
- 	-DUCLIBC_RUNTIME_PREFIX=\"$(RUNTIME_PREFIX)\" \
-+	-DUCLIBC_DEVEL_PREFIX=\"$(DEVEL_PREFIX)\" \
- 	-fno-builtin -nostdinc -D_LIBC -I$(TOPDIR)ldso/include -I$(TOPDIR)ldso/ldso -I. -I$(TOPDIR)include
- 
- XXFLAGS+=-isystem $(shell $(CC) -print-file-name=include)
 --- uClibc-0.9.28/ldso/ldso/dl-elf.c.orig	2005-08-18 00:49:41.000000000 +0200
 +++ uClibc-0.9.28/ldso/ldso/dl-elf.c	2006-06-14 19:36:08.000000000 +0200
 @@ -356,17 +356,20 @@
@@ -821,3 +801,23 @@ diff -ruNP uClibc-0.9.27.orig/extra/gcc-uClibc/Makefile uClibc-0.9.27/extra/gcc-
 +	rm -f gcc-uClibc.h *-uclibc-gcc *-uclibc-ld core
 +
 +
+--- uClibc-0.9.28.3/ldso/ldso/Makefile.orig	2007-01-26 01:22:03.000000000 +0100
++++ uClibc-0.9.28.3/ldso/ldso/Makefile	2007-04-09 15:25:37.000000000 +0200
+@@ -46,6 +46,7 @@
+ 	-DLDSO_ELFINTERP=\"$(TARGET_ARCH)/elfinterp.c\" \
+ 	-I$(TOPDIR)ldso/ldso/$(TARGET_ARCH) -I$(TOPDIR)ldso/include -I$(TOPDIR)ldso/ldso -I$(TOPDIR)include
+ XXFLAGS += -D_GNU_SOURCE
++XXFLAGS += -DUCLIBC_DEVEL_PREFIX=\"$(DEVEL_PREFIX)\"
+ 
+ # BEWARE!!! At least mips* will die if -O0 is used!!!
+ XXFLAGS:=$(XXFLAGS:-O0=-O1)
+--- uClibc-0.9.28.3/ldso/libdl/Makefile.orig	2007-01-26 01:22:03.000000000 +0100
++++ uClibc-0.9.28.3/ldso/libdl/Makefile	2007-04-09 15:27:05.000000000 +0200
+@@ -32,6 +32,7 @@
+ 	-fno-builtin -nostdinc -D_LIBC \
+ 	-DLDSO_ELFINTERP=\"$(TARGET_ARCH)/elfinterp.c\" \
+ 	-I$(TOPDIR)ldso/ldso/$(TARGET_ARCH) -I$(TOPDIR)ldso/include -I$(TOPDIR)ldso/ldso -I$(TOPDIR)include
++XXFLAGS += -DUCLIBC_DEVEL_PREFIX=\"$(DEVEL_PREFIX)\"
+ 
+ XXFLAGS+=-isystem $(shell $(CC) -print-file-name=include)
+ XXFLAGS_NOPIC:=$(XXFLAGS)

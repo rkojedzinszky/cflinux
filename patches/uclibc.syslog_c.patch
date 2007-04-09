@@ -1,19 +1,19 @@
---- uClibc-0.9.28/libc/misc/syslog/syslog.c.orig	2005-08-18 00:49:44.000000000 +0200
-+++ uClibc-0.9.28/libc/misc/syslog/syslog.c	2006-06-14 19:42:29.000000000 +0200
+--- uClibc-0.9.28.3/libc/misc/syslog/syslog.c.orig	2007-01-26 01:47:48.000000000 +0100
++++ uClibc-0.9.28.3/libc/misc/syslog/syslog.c	2007-04-09 15:31:25.000000000 +0200
 @@ -79,6 +79,7 @@
  #include <stdio.h>
  #include <ctype.h>
  #include <signal.h>
 +#include <fcntl.h>
  
+ #include <bits/uClibc_mutex.h>
  
- #ifdef __UCLIBC_HAS_THREADS__
-@@ -293,7 +294,7 @@
- 		UNLOCK;
- 		return;
- 	    }
--	    /*			fcntl(LogFile, F_SETFD, 1); */
-+	fcntl(LogFile, F_SETFD, FD_CLOEXEC);
- 	}
+@@ -284,7 +285,7 @@
+ 			if ((LogFile = socket(AF_UNIX, logType, 0)) == -1){
+ 				goto DONE;
+ 			}
+-			/*			fcntl(LogFile, F_SETFD, 1); */
++			fcntl(LogFile, F_SETFD, FD_CLOEXEC);
+ 		}
      }
  
