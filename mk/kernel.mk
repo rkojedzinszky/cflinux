@@ -98,7 +98,7 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) bzImage modules
+	$(MAKE) -C $(PKG_ROOT) bzImage modules -j4
 	touch $(BUILT_STAMP)
 
 install: build
