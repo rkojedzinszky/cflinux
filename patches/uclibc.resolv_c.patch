@@ -1,25 +1,24 @@
---- uClibc-0.9.28/libc/inet/resolv.c.orig	2005-08-18 00:49:41.000000000 +0200
-+++ uClibc-0.9.28/libc/inet/resolv.c	2006-04-22 20:14:58.000000000 +0200
-@@ -246,7 +246,7 @@
- 			    struct hostent ** result,
- 			    int * h_errnop);
+--- uClibc-0.9.28.3/libc/inet/resolv.c.orig	2007-02-22 00:27:09.000000000 +0100
++++ uClibc-0.9.28.3/libc/inet/resolv.c	2007-04-09 15:37:03.000000000 +0200
+@@ -243,7 +243,7 @@
+ 							  struct hostent ** result,
+ 							  int * h_errnop);
  extern int __dns_lookup(const char * name, int type, int nscount,
--	char ** nsip, unsigned char ** outpacket, struct resolv_answer * a);
-+	char ** nsip, unsigned char ** outpacket, struct resolv_answer * a, int maxlen);
+-						char ** nsip, unsigned char ** outpacket, struct resolv_answer * a);
++						char ** nsip, unsigned char ** outpacket, struct resolv_answer * a, int maxlen);
  
  extern int __encode_dotted(const char * dotted, unsigned char * dest, int maxlen);
  extern int __decode_dotted(const unsigned char * message, int offset,
-@@ -665,7 +665,8 @@
+@@ -655,7 +655,7 @@
  static int ns=0, id=1;
  
  int __dns_lookup(const char *name, int type, int nscount, char **nsip,
--			   unsigned char **outpacket, struct resolv_answer *a)
-+			   unsigned char **outpacket, struct resolv_answer *a,
-+			   int maxlen)
+-				 unsigned char **outpacket, struct resolv_answer *a)
++				 unsigned char **outpacket, struct resolv_answer *a, int maxlen)
  {
  	int i, j, len, fd, pos, rc;
  	struct timeval tv;
-@@ -675,11 +676,12 @@
+@@ -665,11 +665,12 @@
  	struct resolv_answer ma;
  	int first_answer = 1;
  	int retries = 0;
@@ -33,7 +32,7 @@
  #ifdef __UCLIBC_HAS_IPV6__
  	int v6;
  	struct sockaddr_in6 sa6;
-@@ -690,6 +692,8 @@
+@@ -680,6 +681,8 @@
  	if (!packet || !lookup || !nscount)
  	    goto fail;
  
@@ -42,23 +41,23 @@
  	DPRINTF("Looking up type %d answer for '%s'\n", type, name);
  
  	/* Mess with globals while under lock */
-@@ -745,9 +749,13 @@
- 
- #ifdef __UCLIBC_HAS_IPV6__
+@@ -743,9 +746,13 @@
+ 		   needs to hold __resolv_lock before access!! */
  		v6 = inet_pton(AF_INET6, dns, &sa6.sin6_addr) > 0;
+ 		__UCLIBC_MUTEX_UNLOCK(__resolv_lock);
 -		fd = socket(v6 ? AF_INET6 : AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 +		fd = socket(v6 ? AF_INET6 : AF_INET,
 +				use_vc ? SOCK_STREAM : SOCK_DGRAM,
-+				use_vc ? IPPROTO_TCP : IPPROTO_UDP);
++				use_vc ? IPPROTO_TCP: IPPROTO_UDP);
  #else
 -		fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 +		fd = socket(AF_INET,
 +				use_vc ? SOCK_STREAM : SOCK_DGRAM,
-+				use_vc ? IPPROTO_TCP : IPPROTO_UDP);
++				use_vc ? IPPROTO_TCP: IPPROTO_UDP);
  #endif
  		if (fd < 0) {
-                     retries++;
-@@ -783,6 +791,10 @@
+ 			retries++;
+@@ -785,6 +792,10 @@
  		DPRINTF("Transmitting packet of length %d, id=%d, qr=%d\n",
  				len, h.id, h.qr);
  
@@ -69,7 +68,7 @@
  		send(fd, packet, len, 0);
  
  		FD_ZERO(&fds);
-@@ -797,7 +809,30 @@
+@@ -799,7 +810,30 @@
  			goto tryall;
  		}
  
@@ -101,16 +100,16 @@
  		if (len < HFIXEDSZ) {
  			/* too short ! */
  			goto again;
-@@ -1179,7 +1214,7 @@
+@@ -1184,7 +1218,7 @@
  	__nameserversXX=__nameservers;
  	__nameserverXX=__nameserver;
- 	BIGUNLOCK;
+ 	__UCLIBC_MUTEX_UNLOCK(__resolv_lock);
 -	i = __dns_lookup(dname, type, __nameserversXX, __nameserverXX, &packet, &a);
 +	i = __dns_lookup(dname, type, __nameserversXX, __nameserverXX, &packet, &a, anslen);
  
  	if (i < 0) {
  		h_errno = TRY_AGAIN;
-@@ -1990,7 +2025,7 @@
+@@ -2011,7 +2045,7 @@
  	    a.buf = buf;
  	    a.buflen = buflen;
  	    a.add_count = 0;
@@ -118,20 +117,20 @@
 +	    i = __dns_lookup(name, T_A, __nameserversXX, __nameserverXX, &packet, &a, PACKETSZ);
  
  	    if (i < 0) {
- 		*h_errnop = HOST_NOT_FOUND;
-@@ -2142,7 +2177,7 @@
- 	__nameserverXX=__nameserver;
- 	BIGUNLOCK;
+ 			*h_errnop = HOST_NOT_FOUND;
+@@ -2163,7 +2197,7 @@
+ 		__nameserverXX=__nameserver;
+ 		__UCLIBC_MUTEX_UNLOCK(__resolv_lock);
  
 -		i = __dns_lookup(buf, T_AAAA, __nameserversXX, __nameserverXX, &packet, &a);
 +		i = __dns_lookup(buf, T_AAAA, __nameserversXX, __nameserverXX, &packet, &a, PACKETSZ);
  
  		if (i < 0) {
  			*h_errnop = HOST_NOT_FOUND;
-@@ -2318,7 +2353,7 @@
- 	__nameserversXX=__nameservers;
- 	__nameserverXX=__nameserver;
- 	BIGUNLOCK;
+@@ -2349,7 +2383,7 @@
+ 		__nameserversXX=__nameservers;
+ 		__nameserverXX=__nameserver;
+ 		__UCLIBC_MUTEX_UNLOCK(__resolv_lock);
 -		i = __dns_lookup(buf, T_PTR, __nameserversXX, __nameserverXX, &packet, &a);
 +		i = __dns_lookup(buf, T_PTR, __nameserversXX, __nameserverXX, &packet, &a, PACKETSZ);
  
