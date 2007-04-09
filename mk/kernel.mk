@@ -34,12 +34,12 @@ PATCHES = kernel.vlan_mtu.patch \
 	kernel.blackhole.patch \
 	kernel.usb_root.patch \
 	kernel.igmp.c.max_membership.patch \
-	kernel.ip_multitable.patch \
 	kernel.dst_input_no_loop.patch \
-	kernel.fib_radix.patch \
 	kernel.inline_kfree_skb.patch \
+	kernel.fib_lef.patch \
 	kernel.lef.patch \
-	kernel.asm_types_h.patch
+	kernel.asm_types_h.patch \
+	kernel.ip_multitable.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -65,7 +65,7 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) bzImage modules
+	$(MAKE) -C $(PKG_ROOT) bzImage modules -j4
 	touch $(BUILT_STAMP)
 
 install: build

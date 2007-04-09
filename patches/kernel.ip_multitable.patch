@@ -1,6 +1,6 @@
---- linux-2.6.19/include/net/ip_fib.h.orig	2006-11-29 22:57:37.000000000 +0100
-+++ linux-2.6.19/include/net/ip_fib.h	2006-12-03 10:44:58.000000000 +0100
-@@ -171,14 +171,19 @@
+--- linux-2.6.20.3/include/net/ip_fib.h.orig	2007-04-09 10:59:51.000000000 +0200
++++ linux-2.6.20.3/include/net/ip_fib.h	2007-04-09 13:22:00.000000000 +0200
+@@ -179,14 +179,23 @@
  
  #ifndef CONFIG_IP_MULTIPLE_TABLES
  
@@ -9,8 +9,12 @@
  
 +#ifdef CONFIG_IP_FIB_HASH
 +#define _tb_lookup fn_hash_lookup
-+#else
++#endif
++#ifdef CONFIG_IP_FIB_TRIE
 +#define _tb_lookup fn_trie_lookup
++#endif
++#ifdef CONFIG_IP_FIB_LEF
++#define _tb_lookup fn_lef_lookup
 +#endif
 +
 +extern int _tb_lookup(struct fib_table *, const struct flowi *, struct fib_result *);
@@ -24,7 +28,7 @@
  }
  
  static inline struct fib_table *fib_new_table(u32 id)
-@@ -188,10 +193,7 @@
+@@ -196,10 +205,7 @@
  
  static inline int fib_lookup(const struct flowi *flp, struct fib_result *res)
  {
@@ -64,6 +68,20 @@
  fn_trie_lookup(struct fib_table *tb, const struct flowi *flp, struct fib_result *res)
  {
  	struct trie *t = (struct trie *) tb->tb_data;
+--- linux-2.6.20.3/net/ipv4/fib_lef.c.orig	2007-04-09 13:23:22.000000000 +0200
++++ linux-2.6.20.3/net/ipv4/fib_lef.c	2007-04-09 13:24:44.000000000 +0200
+@@ -333,7 +333,10 @@
+ 	return err;
+ }
+ 
+-static int
++#ifdef CONFIG_IP_MULTIPLE_TABLES
++static
++#endif
++int
+ fn_lef_lookup(struct fib_table *tb, const struct flowi *flp, struct fib_result *res)
+ {
+ 	lef_t			*ln;		// current lef node
 --- linux-2.6.19/net/ipv4/fib_frontend.c.orig	2006-12-03 10:36:29.000000000 +0100
 +++ linux-2.6.19/net/ipv4/fib_frontend.c	2006-12-03 10:41:17.000000000 +0100
 @@ -52,7 +52,6 @@
