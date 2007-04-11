@@ -1,6 +1,6 @@
 --- linux-2.6.20.3/net/ipv4/fib_lef.c.orig	1970-01-01 01:00:00.000000000 +0100
 +++ linux-2.6.20.3/net/ipv4/fib_lef.c	2007-04-09 10:58:09.000000000 +0200
-@@ -0,0 +1,966 @@
+@@ -0,0 +1,967 @@
 +/*
 + *   This program is free software; you can redistribute it and/or
 + *   modify it under the terms of the GNU General Public License
@@ -348,6 +348,7 @@
 +#endif
 +	int			fap;
 +	struct list_head	*fah;
++	int			err;
 +
 +	rcu_read_lock();
 +
@@ -399,13 +400,13 @@
 +
 +		while( --fap >= 0 ) {
 +#ifdef CONFIG_IP_ROUTE_MULTIPATH_CACHED
-+			if (fib_semantic_match(fas[fap], flp, res, ntohl(flp->fl4_dst), masks[fap], plens[fap]) <= 0)
++			if ((err = fib_semantic_match(fas[fap], flp, res, ntohl(flp->fl4_dst), masks[fap], plens[fap])) <= 0)
 +#else
-+			if (fib_semantic_match(fas[fap], flp, res, 0, 0, plens[fap]) <= 0)
++			if ((err = fib_semantic_match(fas[fap], flp, res, 0, 0, plens[fap])) <= 0)
 +#endif
 +			{
 +				rcu_read_unlock();
-+				return 0;
++				return err;
 +			}
 +		}
 +
@@ -419,7 +420,7 @@
 +	}
 +	rcu_read_unlock();
 +
-+	return -ESRCH;
++	return 1;
 +}
 +
 +static inline int	radix_node_has_refs(radix_t* n)
