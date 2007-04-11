@@ -235,15 +235,6 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  choice 
  	prompt "Choose IP: FIB lookup algorithm (choose FIB_HASH if unsure)"
  	depends on IP_ADVANCED_ROUTER
-@@ -92,7 +98,7 @@
- 
- config IP_MULTIPLE_TABLES
- 	bool "IP: policy routing"
--	depends on IP_ADVANCED_ROUTER
-+	depends on IP_ADVANCED_ROUTER && !IP_LEF
- 	select FIB_RULES
- 	---help---
- 	  Normally, a router decides what to do with a received packet based
 @@ -123,7 +129,7 @@
  
  config IP_ROUTE_MULTIPATH_CACHED
