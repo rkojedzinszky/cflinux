@@ -74,7 +74,7 @@ ifneq ($(PATCHES),)
 endif
 ifeq ($(wildcard $(PKG_PATCHES_DIR)),$(PKG_PATCHES_DIR))
 	@cd $(PKG_ROOT) && for i in $(PKG_PATCHES_DIR)/*.patch ; do \
-		[ -f "$$i" ] && echo -n " [$$i" && patch -p1 < "$$i" > /dev/null \
+		[ -f "$$i" ] && echo -n " [$$i" && (patch -p1 < "$$i" || exit 1) > /dev/null \
 		&& echo -n "]" ; done ; true
 endif
 	@echo " done"
