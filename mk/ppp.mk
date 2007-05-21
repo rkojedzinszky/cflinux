@@ -24,7 +24,8 @@ DOWNLOAD_SITES = \
 	$(CFLINUX_PACKAGES)
 
 PATCHES = ppp.patch \
-	ppp.pathnames_h_connect_errors.patch
+	ppp.pathnames_h_connect_errors.patch \
+	ppp.radius_untimeout.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
