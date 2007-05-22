@@ -1,0 +1,11 @@
+--- busybox-1.4.2.orig/networking/wget.c	2007-03-18 19:00:17.000000000 +0100
++++ busybox-1.4.2/networking/wget.c	2007-05-22 10:29:43.000000000 +0200
+@@ -465,7 +465,7 @@
+ 	/* Do it before progressmeter (want to have nice error message) */
+ 	if (output_fd < 0)
+ 		output_fd = xopen(fname_out,
+-			O_WRONLY|O_CREAT|O_EXCL|O_TRUNC);
++			O_WRONLY|O_CREAT|O_TRUNC);
+ 
+ 	if (!(opt & WGET_OPT_QUIET))
+ 		progressmeter(-1);
