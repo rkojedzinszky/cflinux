@@ -1,5 +1,5 @@
 --- busybox-1.4.2.orig/networking/wget.c	2007-03-18 19:00:17.000000000 +0100
-+++ busybox-1.4.2/networking/wget.c	2007-03-24 19:30:06.000000000 +0100
++++ busybox-1.4.2/networking/wget.c	2007-05-22 09:55:24.000000000 +0200
 @@ -92,10 +92,9 @@
  	struct host_info server, target;
  	len_and_sockaddr *lsa;
@@ -12,7 +12,7 @@
  	char *proxy = 0;
  	char *dir_prefix = NULL;
  #if ENABLE_FEATURE_WGET_LONG_OPTIONS
-@@ -423,16 +422,21 @@
+@@ -423,16 +422,24 @@
  		// Response is "227 garbageN1,N2,N3,N4,P1,P2[)garbage]
  		// Server's IP is N1.N2.N3.N4 (we ignore it)
  		// Server's port for data connection is P1*256+P2
@@ -26,6 +26,9 @@
 -		if (!s) goto pasv_error;
 -		port += xatou_range(s+1, 0, 255) * 256;
 -		set_nport(lsa, htons(port));
++		if (!(s = strrchr(buf, ')')))
++			goto pasv_error;
++		*s = 0;	// clear trailing '\0'
 +		if (!(s = strrchr(buf, '(')))
 +			goto pasv_error;
 +		p = ++s;
