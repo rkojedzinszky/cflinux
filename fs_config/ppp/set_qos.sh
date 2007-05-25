@@ -13,7 +13,7 @@ tc qdisc del dev "$if" root 2>/dev/null
 tc qdisc del dev "$if" ingress 2>/dev/null
 
 if [ "$downstream" != 0 ]; then
-	tc qdisc add dev $if root tbf limit 5000 burst ${db} rate ${downstream}kbit
+	tc qdisc add dev $if root tbf limit 64k burst ${db} rate ${downstream}kbit
 fi
 if [ "$upstream" != 0 ]; then
 	tc qdisc add dev $if handle ffff: ingress
