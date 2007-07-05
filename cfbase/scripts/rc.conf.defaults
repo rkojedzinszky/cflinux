@@ -56,3 +56,7 @@ ipsec_enable="NO"		# disable IPSEC by default
 
 # local startup dirs
 rc_dirs="/etc/rc.d /usr/local/etc/rc.d"
+
+# /dev related options
+dev_tmpfs_enable="YES"		# enable tmpfs on /dev by default
+dev_tmpfs_size="10M"		# size for tmpfs
