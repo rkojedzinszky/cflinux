@@ -3,6 +3,24 @@
 # make sure the shell won't exit on any error
 set +e
 
+# read system wide defaults
+. /usr/share/defaults/etc/rc.conf
+
+# if available, read local configuration
+[ -r /etc/rc.conf ] && . /etc/rc.conf
+
+case "$dev_tmpfs_enable" in
+	[Yy][Ee][Ss])
+		echo -n "Setting up tmpfs on /dev: "
+		mount --bind /dev /mnt
+		mount tmpfs -t tmpfs -o size=$dev_tmpfs_size,mode=755 /dev
+		mkdir /dev/.ro
+		mount --move /mnt /dev/.ro
+		tar cf - -C /dev/.ro . | tar xf - -C /dev
+		echo "done."
+	;;
+esac
+
 # Mounting all filesystems
 echo -n "Mounting filesystems: "
 mount -a
@@ -49,12 +67,6 @@ fi
 
 # Saving dmesg
 dmesg > /var/log/dmesg
-
-# read system wide defaults
-. /usr/share/defaults/etc/rc.conf
-
-# if available, read local configuration
-[ -r /etc/rc.conf ] && . /etc/rc.conf
 
 if [ -n "$hostname" ]; then
 	echo "Setting hostname: $hostname."
