@@ -665,7 +665,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  
  #else /* CONFIG_IP_ROUTE_MULTIPATH */
 --- linux-2.6.21.5/net/ipv4/icmp.c.orig	2007-06-11 20:37:06.000000000 +0200
-+++ linux-2.6.21.5/net/ipv4/icmp.c	2007-07-04 10:02:50.000000000 +0200
++++ linux-2.6.21.5/net/ipv4/icmp.c	2007-07-10 15:28:52.000000000 +0200
 @@ -440,8 +440,10 @@
  	__be32 saddr;
  	u8  tos;
@@ -689,15 +689,16 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  		goto out;
  
  	/*
-@@ -512,7 +518,11 @@
+@@ -512,7 +518,12 @@
  	 */
  
  	saddr = iph->daddr;
 +#ifdef CONFIG_IP_LEF
-+	if (!rt || !(rt->rt_flags & RTCF_LOCAL)) {
-+#else
- 	if (!(rt->rt_flags & RTCF_LOCAL)) {
++	if (!rt) {
++		saddr = 0;
++	} else
 +#endif
+ 	if (!(rt->rt_flags & RTCF_LOCAL)) {
  		struct net_device *dev = NULL;
  
  		if (rt->fl.iif && sysctl_icmp_errors_use_inbound_ifaddr)
