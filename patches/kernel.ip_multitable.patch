@@ -82,9 +82,9 @@
  fn_lef_lookup(struct fib_table *tb, const struct flowi *flp, struct fib_result *res)
  {
  	lef_t			*ln;		// current lef node
---- linux-2.6.19/net/ipv4/fib_frontend.c.orig	2006-12-03 10:36:29.000000000 +0100
-+++ linux-2.6.19/net/ipv4/fib_frontend.c	2006-12-03 10:41:17.000000000 +0100
-@@ -52,7 +52,6 @@
+--- linux-2.6.21.5/net/ipv4/fib_frontend.c.orig	2007-06-11 20:37:06.000000000 +0200
++++ linux-2.6.21.5/net/ipv4/fib_frontend.c	2007-07-04 10:30:15.000000000 +0200
+@@ -51,7 +51,6 @@
  
  #ifndef CONFIG_IP_MULTIPLE_TABLES
  
@@ -92,7 +92,7 @@
  struct fib_table *ip_fib_main_table;
  
  #define FIB_TABLE_HASHSZ 1
-@@ -132,8 +131,12 @@
+@@ -131,8 +130,12 @@
  	res.r = NULL;
  #endif
  
@@ -105,10 +105,10 @@
  		return NULL;
  	if (res.type != RTN_LOCAL)
  		goto out;
-@@ -161,14 +164,20 @@
+@@ -160,14 +163,20 @@
  	res.r = NULL;
  #endif
- 	
+ 
 +#ifdef CONFIG_IP_MULTIPLE_TABLES
  	if (ip_fib_local_table) {
  		ret = RTN_UNICAST;
@@ -126,7 +126,7 @@
  	return ret;
  }
  
-@@ -641,6 +650,7 @@
+@@ -639,6 +648,7 @@
  		.fc_nlflags = NLM_F_CREATE | NLM_F_APPEND,
  	};
  
@@ -134,7 +134,7 @@
  	if (type == RTN_UNICAST)
  		tb = fib_new_table(RT_TABLE_MAIN);
  	else
-@@ -648,6 +658,9 @@
+@@ -646,6 +656,9 @@
  
  	if (tb == NULL)
  		return;
@@ -144,7 +144,7 @@
  
  	cfg.fc_table = tb->tb_id;
  
-@@ -911,8 +924,6 @@
+@@ -918,8 +931,6 @@
  	for (i = 0; i < FIB_TABLE_HASHSZ; i++)
  		INIT_HLIST_HEAD(&fib_table_hash[i]);
  #ifndef CONFIG_IP_MULTIPLE_TABLES

@@ -70,8 +70,6 @@ $(BUILT_STAMP):
 
 install: build
 	$(MAKE) -C $(PKG_ROOT) modules_install INSTALL_MOD_PATH=$(ROOTFS)
-	(cd $(ROOTFS)/lib/modules/$(KERNEL_VERSION)/kernel/drivers/net && \
-	 for i in 0 1 2 3 4 5 6 7; do ln -f dummy.ko dummy$$i.ko ; done )
 
 .PHONY: configure clean build install
 

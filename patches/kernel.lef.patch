@@ -266,43 +266,6 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  extern int	arp_mc_map(__be32 addr, u8 *haddr, struct net_device *dev, int dir);
  extern void	arp_ifdown(struct net_device *dev);
  
---- linux-2.6.18.orig/net/ipv4/icmp.c	2006-09-20 05:42:06.000000000 +0200
-+++ linux-2.6.18/net/ipv4/icmp.c	2006-11-11 16:34:39.000000000 +0100
-@@ -439,8 +439,10 @@
- 	u32 saddr;
- 	u8  tos;
- 
-+#ifndef CONFIG_IP_LEF
- 	if (!rt)
- 		goto out;
-+#endif
- 
- 	/*
- 	 *	Find the original header. It is expected to be valid, of course.
-@@ -461,7 +463,11 @@
- 	/*
- 	 *	Now check at the protocol level
- 	 */
-+#ifdef CONFIG_IP_LEF
-+	if (rt && rt->rt_flags & (RTCF_BROADCAST | RTCF_MULTICAST))
-+#else
- 	if (rt->rt_flags & (RTCF_BROADCAST | RTCF_MULTICAST))
-+#endif
- 		goto out;
- 
- 	/*
-@@ -511,7 +517,11 @@
- 	 */
- 
- 	saddr = iph->daddr;
-+#ifdef CONFIG_IP_LEF
-+	if (!rt || !(rt->rt_flags & RTCF_LOCAL)) {
-+#else
- 	if (!(rt->rt_flags & RTCF_LOCAL)) {
-+#endif
- 		if (sysctl_icmp_errors_use_inbound_ifaddr)
- 			saddr = inet_select_addr(skb_in->dev, 0, RT_SCOPE_LINK);
- 		else
 --- linux-2.6.20.3/net/ipv4/netfilter/Kconfig.orig	2007-03-13 19:27:08.000000000 +0100
 +++ linux-2.6.20.3/net/ipv4/netfilter/Kconfig	2007-03-20 21:46:59.000000000 +0100
 @@ -421,7 +421,7 @@
@@ -325,273 +288,6 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
 +#endif
  extern unsigned short	ip_rt_frag_needed(struct iphdr *iph, unsigned short new_mtu);
  extern void		ip_rt_send_redirect(struct sk_buff *skb);
- 
---- linux-2.6.19.orig/net/ipv4/route.c	2006-11-29 22:57:37.000000000 +0100
-+++ linux-2.6.19/net/ipv4/route.c	2006-12-09 19:07:27.000000000 +0100
-@@ -108,6 +108,9 @@
- #ifdef CONFIG_SYSCTL
- #include <linux/sysctl.h>
- #endif
-+#ifdef CONFIG_IP_LEF
-+#include <net/lef.h>
-+#endif
- 
- #define RT_FL_TOS(oldflp) \
-     ((u32)(oldflp->fl4_tos & (IPTOS_RT_MASK | RTO_ONLINK)))
-@@ -252,6 +255,15 @@
- #define RT_CACHE_STAT_INC(field) \
- 	(__raw_get_cpu_var(rt_cache_stat).field++)
- 
-+#ifdef CONFIG_IP_LEF
-+static inline int rt_intern_hash(unsigned hash, struct rtable *rth,
-+				struct rtable **res);
-+
-+static inline unsigned int rt_hash_code(u32 daddr, u32 saddr)
-+{
-+	return 0;
-+}
-+#else
- static int rt_intern_hash(unsigned hash, struct rtable *rth,
- 				struct rtable **res);
- 
-@@ -260,6 +272,7 @@
- 	return (jhash_2words(daddr, saddr, rt_hash_rnd)
- 		& rt_hash_mask);
- }
-+#endif
- 
- #define rt_hash(daddr, saddr, idx) \
- 	rt_hash_code((__force u32)(__be32)(daddr),\
-@@ -922,6 +935,23 @@
- out:	return 0;
- }
- 
-+#ifdef CONFIG_IP_LEF
-+static inline int rt_intern_hash(unsigned hash, struct rtable *rt, struct rtable **rp)
-+{
-+	int err;
-+
-+	err = arp_bind_neighbour(&rt->u.dst);
-+	if (err) {
-+		rt_drop(rt);
-+		return err;
-+	}
-+
-+	rt_free(rt);
-+	*rp = rt;
-+
-+	return 0;
-+}
-+#else
- static int rt_intern_hash(unsigned hash, struct rtable *rt, struct rtable **rp)
- {
- 	struct rtable	*rth, **rthp;
-@@ -1052,6 +1082,7 @@
- 	*rp = rt;
- 	return 0;
- }
-+#endif
- 
- void rt_bind_peer(struct rtable *rt, int create)
- {
-@@ -1721,7 +1752,11 @@
- 				  struct fib_result* res, 
- 				  struct in_device *in_dev, 
- 				  __be32 daddr, __be32 saddr, u32 tos,
--				  struct rtable **result) 
-+				  struct rtable **result
-+#ifdef CONFIG_IP_LEF
-+				  , int use_lef
-+#endif
-+				  )
- {
- 
- 	struct rtable *rth;
-@@ -1740,6 +1775,9 @@
- 		return -EINVAL;
- 	}
- 
-+#ifdef CONFIG_IP_LEF
-+	if (!use_lef || IN_DEV_RPFILTER(in_dev)) {
-+#endif
- 
- 	err = fib_validate_source(saddr, daddr, tos, FIB_RES_OIF(*res), 
- 				  in_dev->dev, &spec_dst, &itag);
-@@ -1758,6 +1796,9 @@
- 	    (IN_DEV_SHARED_MEDIA(out_dev) ||
- 	     inet_addr_onlink(out_dev, saddr, FIB_RES_GW(*res))))
- 		flags |= RTCF_DOREDIRECT;
-+#ifdef CONFIG_IP_LEF
-+	}
-+#endif
- 
- 	if (skb->protocol != htons(ETH_P_IP)) {
- 		/* Not IP (i.e. ARP). Do not create route, if it is
-@@ -1769,6 +1810,25 @@
- 		}
- 	}
- 
-+#ifdef CONFIG_IP_LEF
-+	if (use_lef) {
-+		if (likely(res->nh->neighbour)) {
-+			skb->lef.neighbour = res->nh->neighbour;
-+			atomic_inc(&skb->lef.neighbour->refcnt);
-+		} else {
-+			if (FIB_RES_GW(*res) &&
-+					FIB_RES_NH(*res).nh_scope == RT_SCOPE_LINK)
-+				skb->lef.gateway = FIB_RES_GW(*res);
-+			else
-+				skb->lef.gateway = daddr;
-+		}
-+		skb->lef.dev = (out_dev)->dev;
-+		dev_hold(skb->lef.dev);
-+		skb->lef.mtu = res->fi->fib_mtu ? res->fi->fib_mtu : skb->lef.dev->mtu;
-+		err = 0;
-+		goto cleanup;
-+	}
-+#endif
- 
- 	rth = dst_alloc(&ipv4_dst_ops);
- 	if (!rth) {
-@@ -1834,7 +1894,11 @@
- #endif
- 
- 	/* create a routing cache entry */
-+#ifdef CONFIG_IP_LEF
-+	err = __mkroute_input(skb, res, in_dev, daddr, saddr, tos, &rth, 0);
-+#else
- 	err = __mkroute_input(skb, res, in_dev, daddr, saddr, tos, &rth);
-+#endif
- 	if (err)
- 		return err;
- 
-@@ -1910,8 +1974,13 @@
-  *	2. IP spoofing attempts are filtered with 100% of guarantee.
-  */
- 
--static int ip_route_input_slow(struct sk_buff *skb, __be32 daddr, __be32 saddr,
-+#ifdef CONFIG_IP_LEF
-+static inline int ip_route_input_slow(struct sk_buff *skb, __be32 daddr, __be32 saddr,
-+			       u8 tos, struct net_device *dev, int use_lef)
-+#else
-+static inline int ip_route_input_slow(struct sk_buff *skb, __be32 daddr, __be32 saddr,
- 			       u8 tos, struct net_device *dev)
-+#endif
- {
- 	struct fib_result res;
- 	struct in_device *in_dev = in_dev_get(dev);
-@@ -1990,6 +2059,33 @@
- 	if (res.type != RTN_UNICAST)
- 		goto martian_destination;
- 
-+#ifdef CONFIG_IP_LEF
-+	if (likely(use_lef)) {
-+		if (likely((res.nh->neighbour) && !IN_DEV_RPFILTER(in_dev))) {
-+			skb->lef.neighbour = res.nh->neighbour;
-+			atomic_inc(&skb->lef.neighbour->refcnt);
-+			skb->lef.dev = FIB_RES_DEV(res);
-+			dev_hold(skb->lef.dev);
-+			skb->lef.mtu = res.fi->fib_mtu ? res.fi->fib_mtu : skb->lef.dev->mtu;
-+			goto done;
-+		}
-+
-+		err = __mkroute_input(skb, &res, in_dev, daddr, saddr, tos, NULL, 1);
-+		if (unlikely(err))
-+			goto done;
-+
-+		if (unlikely(!(skb->lef.neighbour))) {
-+			err = arp_bind_neighbour_lef(&skb->lef);
-+			if (unlikely(err))
-+				goto done;
-+			if (skb->lef.gateway && skb->lef.gateway != daddr) { // only store if it is a really gateway
-+				res.nh->neighbour = skb->lef.neighbour;
-+				atomic_inc(&res.nh->neighbour->refcnt);
-+			}
-+		}
-+		goto done;
-+	}
-+#endif
- 	err = ip_mkroute_input(skb, &res, &fl, in_dev, daddr, saddr, tos);
- 	if (err == -ENOBUFS)
- 		goto e_nobufs;
-@@ -2096,14 +2192,22 @@
- 	goto e_inval;
- }
- 
-+#ifdef CONFIG_IP_LEF
-+int ip_route_input_lef(struct sk_buff *skb, __be32 daddr, __be32 saddr,
-+		   u8 tos, struct net_device *dev, int use_lef)
-+#else
- int ip_route_input(struct sk_buff *skb, __be32 daddr, __be32 saddr,
- 		   u8 tos, struct net_device *dev)
-+#endif
- {
-+#ifndef CONFIG_IP_LEF
- 	struct rtable * rth;
- 	unsigned	hash;
- 	int iif = dev->ifindex;
-+#endif
- 
- 	tos &= IPTOS_RT_MASK;
-+#ifndef CONFIG_IP_LEF
- 	hash = rt_hash(daddr, saddr, iif);
- 
- 	rcu_read_lock();
-@@ -2128,6 +2232,7 @@
- 		RT_CACHE_STAT_INC(in_hlist_search);
- 	}
- 	rcu_read_unlock();
-+#endif /* !CONFIG_IP_LEF */
- 
- 	/* Multicast recognition logic is moved from route cache to here.
- 	   The problem was that too many Ethernet cards have broken/missing
-@@ -2160,8 +2265,21 @@
- 		rcu_read_unlock();
- 		return -EINVAL;
- 	}
-+#ifdef CONFIG_IP_LEF
-+	return ip_route_input_slow(skb, daddr, saddr, tos, dev, use_lef);
-+#else
- 	return ip_route_input_slow(skb, daddr, saddr, tos, dev);
-+#endif
-+}
-+
-+#ifdef CONFIG_IP_LEF
-+int ip_route_input(struct sk_buff *skb, u32 daddr, u32 saddr,
-+		   u8 tos, struct net_device *dev)
-+{
-+	return ip_route_input_lef(skb, daddr, saddr, tos, dev, 0);
- }
-+#endif
-+
- 
- static inline int __mkroute_output(struct rtable **result,
- 				   struct fib_result* res, 
-@@ -2571,6 +2689,7 @@
- 
- int __ip_route_output_key(struct rtable **rp, const struct flowi *flp)
- {
-+#ifndef CONFIG_IP_LEF
- 	unsigned hash;
- 	struct rtable *rth;
- 
-@@ -2610,6 +2729,7 @@
- 		RT_CACHE_STAT_INC(out_hlist_search);
- 	}
- 	rcu_read_unlock_bh();
-+#endif
- 
- 	return ip_route_output_slow(rp, flp);
- }
-@@ -3215,6 +3335,9 @@
- 	xfrm_init();
- 	xfrm4_init();
- #endif
-+#ifdef CONFIG_IP_LEF
-+	printk(KERN_DEBUG "IPv4: LEF v0.2 is active\n");
-+#endif
- 	return rc;
- }
  
 --- linux-2.6.18.orig/net/core/neighbour.c	2006-09-20 05:42:06.000000000 +0200
 +++ linux-2.6.18/net/core/neighbour.c	2006-11-14 13:33:31.000000000 +0100
@@ -777,73 +473,6 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
 +	kfree_skb(skb);
 +	return NET_RX_DROP;
 +}
---- linux-2.6.18.orig/net/ipv4/ip_input.c	2006-09-20 05:42:06.000000000 +0200
-+++ linux-2.6.18/net/ipv4/ip_input.c	2006-11-14 19:13:18.000000000 +0100
-@@ -146,6 +146,10 @@
- #include <linux/mroute.h>
- #include <linux/netlink.h>
- 
-+#ifdef CONFIG_IP_LEF
-+#include <net/lef.h>
-+#endif
-+
- /*
-  *	SNMP management statistics
-  */
-@@ -331,14 +335,22 @@
- static inline int ip_rcv_finish(struct sk_buff *skb)
- {
- 	struct iphdr *iph = skb->nh.iph;
-+	int ip_has_options = iph->ihl > 5;
- 
- 	/*
- 	 *	Initialise the virtual path cache for the packet. It describes
- 	 *	how the packet travels inside Linux networking.
-+	 *	Only packets without IP options can be handled by LEF, so
-+	 *	give the function this information.
- 	 */ 
- 	if (skb->dst == NULL) {
-+#ifdef CONFIG_IP_LEF
-+		int err = ip_route_input_lef(skb, iph->daddr, iph->saddr, iph->tos,
-+					 skb->dev, !ip_has_options);
-+#else
- 		int err = ip_route_input(skb, iph->daddr, iph->saddr, iph->tos,
- 					 skb->dev);
-+#endif
- 		if (unlikely(err)) {
- 			if (err == -EHOSTUNREACH)
- 				IP_INC_STATS_BH(IPSTATS_MIB_INADDRERRORS);
-@@ -347,6 +359,9 @@
- 	}
- 
- #ifdef CONFIG_NET_CLS_ROUTE
-+#ifdef CONFIG_IP_LEF
-+	if (skb->dst) {
-+#endif
- 	if (unlikely(skb->dst->tclassid)) {
- 		struct ip_rt_acct *st = ip_rt_acct + 256*smp_processor_id();
- 		u32 idx = skb->dst->tclassid;
-@@ -355,11 +370,19 @@
- 		st[(idx>>16)&0xFF].i_packets++;
- 		st[(idx>>16)&0xFF].i_bytes+=skb->len;
- 	}
-+#ifdef CONFIG_IP_LEF
-+	}
-+#endif
- #endif
- 
--	if (iph->ihl > 5 && ip_rcv_options(skb))
-+	if (ip_has_options && ip_rcv_options(skb))
- 		goto drop;
- 
-+#ifdef CONFIG_IP_LEF
-+	if (!skb->dst)
-+		return lef_forward(skb);
-+	else
-+#endif
- 	return dst_input(skb);
- 
- drop:
 --- linux-2.6.19.1.orig/net/ipv4/fib_semantics.c	2006-12-11 20:32:53.000000000 +0100
 +++ linux-2.6.19.1/net/ipv4/fib_semantics.c	2007-02-05 12:08:23.000000000 +0100
 @@ -153,6 +153,11 @@
@@ -1035,3 +664,374 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  #define FIB_RES_RESET(res)	((res).nh_sel = 0)
  
  #else /* CONFIG_IP_ROUTE_MULTIPATH */
+--- linux-2.6.21.5/net/ipv4/icmp.c.orig	2007-06-11 20:37:06.000000000 +0200
++++ linux-2.6.21.5/net/ipv4/icmp.c	2007-07-04 10:02:50.000000000 +0200
+@@ -440,8 +440,10 @@
+ 	__be32 saddr;
+ 	u8  tos;
+ 
++#ifndef CONFIG_IP_LEF
+ 	if (!rt)
+ 		goto out;
++#endif
+ 
+ 	/*
+ 	 *	Find the original header. It is expected to be valid, of course.
+@@ -462,7 +464,11 @@
+ 	/*
+ 	 *	Now check at the protocol level
+ 	 */
++#ifdef CONFIG_IP_LEF
++	if (rt && rt->rt_flags & (RTCF_BROADCAST | RTCF_MULTICAST))
++#else
+ 	if (rt->rt_flags & (RTCF_BROADCAST | RTCF_MULTICAST))
++#endif
+ 		goto out;
+ 
+ 	/*
+@@ -512,7 +518,11 @@
+ 	 */
+ 
+ 	saddr = iph->daddr;
++#ifdef CONFIG_IP_LEF
++	if (!rt || !(rt->rt_flags & RTCF_LOCAL)) {
++#else
+ 	if (!(rt->rt_flags & RTCF_LOCAL)) {
++#endif
+ 		struct net_device *dev = NULL;
+ 
+ 		if (rt->fl.iif && sysctl_icmp_errors_use_inbound_ifaddr)
+--- linux-2.6.21.5/net/ipv4/route.c.orig	2007-06-11 20:37:06.000000000 +0200
++++ linux-2.6.21.5/net/ipv4/route.c	2007-07-04 10:06:10.000000000 +0200
+@@ -107,6 +107,9 @@
+ #ifdef CONFIG_SYSCTL
+ #include <linux/sysctl.h>
+ #endif
++#ifdef CONFIG_IP_LEF
++#include <net/lef.h>
++#endif
+ 
+ #define RT_FL_TOS(oldflp) \
+     ((u32)(oldflp->fl4_tos & (IPTOS_RT_MASK | RTO_ONLINK)))
+@@ -251,6 +254,15 @@
+ #define RT_CACHE_STAT_INC(field) \
+ 	(__raw_get_cpu_var(rt_cache_stat).field++)
+ 
++#ifdef CONFIG_IP_LEF
++static inline int rt_intern_hash(unsigned hash, struct rtable *rth,
++				struct rtable **res);
++
++static inline unsigned int rt_hash_code(u32 daddr, u32 saddr)
++{
++	return 0;
++}
++#else
+ static int rt_intern_hash(unsigned hash, struct rtable *rth,
+ 				struct rtable **res);
+ 
+@@ -259,6 +271,7 @@
+ 	return (jhash_2words(daddr, saddr, rt_hash_rnd)
+ 		& rt_hash_mask);
+ }
++#endif
+ 
+ #define rt_hash(daddr, saddr, idx) \
+ 	rt_hash_code((__force u32)(__be32)(daddr),\
+@@ -919,6 +932,23 @@
+ out:	return 0;
+ }
+ 
++#ifdef CONFIG_IP_LEF
++static inline int rt_intern_hash(unsigned hash, struct rtable *rt, struct rtable **rp)
++{
++	int err;
++
++	err = arp_bind_neighbour(&rt->u.dst);
++	if (err) {
++		rt_drop(rt);
++		return err;
++	}
++
++	rt_free(rt);
++	*rp = rt;
++
++	return 0;
++}
++#else
+ static int rt_intern_hash(unsigned hash, struct rtable *rt, struct rtable **rp)
+ {
+ 	struct rtable	*rth, **rthp;
+@@ -1049,6 +1079,7 @@
+ 	*rp = rt;
+ 	return 0;
+ }
++#endif
+ 
+ void rt_bind_peer(struct rtable *rt, int create)
+ {
+@@ -1717,7 +1748,11 @@
+ 				  struct fib_result* res,
+ 				  struct in_device *in_dev,
+ 				  __be32 daddr, __be32 saddr, u32 tos,
+-				  struct rtable **result)
++				  struct rtable **result
++#ifdef CONFIG_IP_LEF
++				  , int use_lef
++#endif
++				  )
+ {
+ 
+ 	struct rtable *rth;
+@@ -1736,6 +1771,9 @@
+ 		return -EINVAL;
+ 	}
+ 
++#ifdef CONFIG_IP_LEF
++	if (!use_lef || IN_DEV_RPFILTER(in_dev)) {
++#endif
+ 
+ 	err = fib_validate_source(saddr, daddr, tos, FIB_RES_OIF(*res),
+ 				  in_dev->dev, &spec_dst, &itag);
+@@ -1754,6 +1792,9 @@
+ 	    (IN_DEV_SHARED_MEDIA(out_dev) ||
+ 	     inet_addr_onlink(out_dev, saddr, FIB_RES_GW(*res))))
+ 		flags |= RTCF_DOREDIRECT;
++#ifdef CONFIG_IP_LEF
++	}
++#endif
+ 
+ 	if (skb->protocol != htons(ETH_P_IP)) {
+ 		/* Not IP (i.e. ARP). Do not create route, if it is
+@@ -1765,6 +1806,25 @@
+ 		}
+ 	}
+ 
++#ifdef CONFIG_IP_LEF
++	if (use_lef) {
++		if (likely(res->nh->neighbour)) {
++			skb->lef.neighbour = res->nh->neighbour;
++			atomic_inc(&skb->lef.neighbour->refcnt);
++		} else {
++			if (FIB_RES_GW(*res) &&
++					FIB_RES_NH(*res).nh_scope == RT_SCOPE_LINK)
++				skb->lef.gateway = FIB_RES_GW(*res);
++			else
++				skb->lef.gateway = daddr;
++		}
++		skb->lef.dev = (out_dev)->dev;
++		dev_hold(skb->lef.dev);
++		skb->lef.mtu = res->fi->fib_mtu ? res->fi->fib_mtu : skb->lef.dev->mtu;
++		err = 0;
++		goto cleanup;
++	}
++#endif
+ 
+ 	rth = dst_alloc(&ipv4_dst_ops);
+ 	if (!rth) {
+@@ -1828,7 +1888,11 @@
+ #endif
+ 
+ 	/* create a routing cache entry */
++#ifdef CONFIG_IP_LEF
++	err = __mkroute_input(skb, res, in_dev, daddr, saddr, tos, &rth, 0);
++#else
+ 	err = __mkroute_input(skb, res, in_dev, daddr, saddr, tos, &rth);
++#endif
+ 	if (err)
+ 		return err;
+ 
+@@ -1904,8 +1968,13 @@
+  *	2. IP spoofing attempts are filtered with 100% of guarantee.
+  */
+ 
+-static int ip_route_input_slow(struct sk_buff *skb, __be32 daddr, __be32 saddr,
++#ifdef CONFIG_IP_LEF
++static inline int ip_route_input_slow(struct sk_buff *skb, __be32 daddr, __be32 saddr,
++			       u8 tos, struct net_device *dev, int use_lef)
++#else
++static inline int ip_route_input_slow(struct sk_buff *skb, __be32 daddr, __be32 saddr,
+ 			       u8 tos, struct net_device *dev)
++#endif
+ {
+ 	struct fib_result res;
+ 	struct in_device *in_dev = in_dev_get(dev);
+@@ -1982,6 +2051,33 @@
+ 	if (res.type != RTN_UNICAST)
+ 		goto martian_destination;
+ 
++#ifdef CONFIG_IP_LEF
++	if (likely(use_lef)) {
++		if (likely((res.nh->neighbour) && !IN_DEV_RPFILTER(in_dev))) {
++			skb->lef.neighbour = res.nh->neighbour;
++			atomic_inc(&skb->lef.neighbour->refcnt);
++			skb->lef.dev = FIB_RES_DEV(res);
++			dev_hold(skb->lef.dev);
++			skb->lef.mtu = res.fi->fib_mtu ? res.fi->fib_mtu : skb->lef.dev->mtu;
++			goto done;
++		}
++
++		err = __mkroute_input(skb, &res, in_dev, daddr, saddr, tos, NULL, 1);
++		if (unlikely(err))
++			goto done;
++
++		if (unlikely(!(skb->lef.neighbour))) {
++			err = arp_bind_neighbour_lef(&skb->lef);
++			if (unlikely(err))
++				goto done;
++			if (skb->lef.gateway && skb->lef.gateway != daddr) { // only store if it is a really gateway
++				res.nh->neighbour = skb->lef.neighbour;
++				atomic_inc(&res.nh->neighbour->refcnt);
++			}
++		}
++		goto done;
++	}
++#endif
+ 	err = ip_mkroute_input(skb, &res, &fl, in_dev, daddr, saddr, tos);
+ 	if (err == -ENOBUFS)
+ 		goto e_nobufs;
+@@ -2086,14 +2182,22 @@
+ 	goto e_inval;
+ }
+ 
++#ifdef CONFIG_IP_LEF
++int ip_route_input_lef(struct sk_buff *skb, __be32 daddr, __be32 saddr,
++		   u8 tos, struct net_device *dev, int use_lef)
++#else
+ int ip_route_input(struct sk_buff *skb, __be32 daddr, __be32 saddr,
+ 		   u8 tos, struct net_device *dev)
++#endif
+ {
++#ifndef CONFIG_IP_LEF
+ 	struct rtable * rth;
+ 	unsigned	hash;
+ 	int iif = dev->ifindex;
++#endif
+ 
+ 	tos &= IPTOS_RT_MASK;
++#ifndef CONFIG_IP_LEF
+ 	hash = rt_hash(daddr, saddr, iif);
+ 
+ 	rcu_read_lock();
+@@ -2116,6 +2220,7 @@
+ 		RT_CACHE_STAT_INC(in_hlist_search);
+ 	}
+ 	rcu_read_unlock();
++#endif /* !CONFIG_IP_LEF */
+ 
+ 	/* Multicast recognition logic is moved from route cache to here.
+ 	   The problem was that too many Ethernet cards have broken/missing
+@@ -2148,8 +2253,21 @@
+ 		rcu_read_unlock();
+ 		return -EINVAL;
+ 	}
++#ifdef CONFIG_IP_LEF
++	return ip_route_input_slow(skb, daddr, saddr, tos, dev, use_lef);
++#else
+ 	return ip_route_input_slow(skb, daddr, saddr, tos, dev);
++#endif
++}
++
++#ifdef CONFIG_IP_LEF
++int ip_route_input(struct sk_buff *skb, u32 daddr, u32 saddr,
++		   u8 tos, struct net_device *dev)
++{
++	return ip_route_input_lef(skb, daddr, saddr, tos, dev, 0);
+ }
++#endif
++
+ 
+ static inline int __mkroute_output(struct rtable **result,
+ 				   struct fib_result* res,
+@@ -2555,6 +2673,7 @@
+ 
+ int __ip_route_output_key(struct rtable **rp, const struct flowi *flp)
+ {
++#ifndef CONFIG_IP_LEF
+ 	unsigned hash;
+ 	struct rtable *rth;
+ 
+@@ -2592,6 +2711,7 @@
+ 		RT_CACHE_STAT_INC(out_hlist_search);
+ 	}
+ 	rcu_read_unlock_bh();
++#endif
+ 
+ 	return ip_route_output_slow(rp, flp);
+ }
+@@ -3193,6 +3313,9 @@
+ 	xfrm_init();
+ 	xfrm4_init();
+ #endif
++#ifdef CONFIG_IP_LEF
++	printk(KERN_DEBUG "IPv4: LEF v0.2 is active\n");
++#endif
+ 	return rc;
+ }
+ 
+--- linux-2.6.21.5/net/ipv4/ip_input.c.orig	2007-06-11 20:37:06.000000000 +0200
++++ linux-2.6.21.5/net/ipv4/ip_input.c	2007-07-04 10:09:02.000000000 +0200
+@@ -146,6 +146,10 @@
+ #include <linux/mroute.h>
+ #include <linux/netlink.h>
+ 
++#ifdef CONFIG_IP_LEF
++#include <net/lef.h>
++#endif
++
+ /*
+  *	SNMP management statistics
+  */
+@@ -331,14 +335,22 @@
+ static inline int ip_rcv_finish(struct sk_buff *skb)
+ {
+ 	struct iphdr *iph = skb->nh.iph;
++	int ip_has_options = iph->ihl > 5;
+ 
+ 	/*
+ 	 *	Initialise the virtual path cache for the packet. It describes
+ 	 *	how the packet travels inside Linux networking.
++	 *	Only packets without IP options can be handled by LEF, so
++	 *	give the function this information.
+ 	 */
+ 	if (skb->dst == NULL) {
++#ifdef CONFIG_IP_LEF
++		int err = ip_route_input_lef(skb, iph->daddr, iph->saddr, iph->tos,
++					 skb->dev, !ip_has_options);
++#else
+ 		int err = ip_route_input(skb, iph->daddr, iph->saddr, iph->tos,
+ 					 skb->dev);
++#endif
+ 		if (unlikely(err)) {
+ 			if (err == -EHOSTUNREACH)
+ 				IP_INC_STATS_BH(IPSTATS_MIB_INADDRERRORS);
+@@ -347,6 +359,9 @@
+ 	}
+ 
+ #ifdef CONFIG_NET_CLS_ROUTE
++#ifdef CONFIG_IP_LEF
++	if (skb->dst) {
++#endif
+ 	if (unlikely(skb->dst->tclassid)) {
+ 		struct ip_rt_acct *st = ip_rt_acct + 256*smp_processor_id();
+ 		u32 idx = skb->dst->tclassid;
+@@ -355,11 +370,19 @@
+ 		st[(idx>>16)&0xFF].i_packets++;
+ 		st[(idx>>16)&0xFF].i_bytes+=skb->len;
+ 	}
++#ifdef CONFIG_IP_LEF
++	}
++#endif
+ #endif
+ 
+-	if (iph->ihl > 5 && ip_rcv_options(skb))
++	if (ip_has_options && ip_rcv_options(skb))
+ 		goto drop;
+ 
++#ifdef CONFIG_IP_LEF
++	if (!skb->dst)
++		return lef_forward(skb);
++	else
++#endif
+ 	return dst_input(skb);
+ 
+ drop:
