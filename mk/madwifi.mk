@@ -18,10 +18,13 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := madwifi
-SRC_FILENAME = madwifi-r2143.tar.bz2
-EXTRACTED_DIR = madwifi-r2143
+SRC_FILENAME = madwifi-0.9.3.1.tar.bz2
+EXTRACTED_DIR = madwifi-0.9.3.1
 DOWNLOAD_SITES = \
-		$(CFLINUX_PACKAGES)
+	http://mesh.dl.sourceforge.net/sourceforge/madwifi/ \
+	http://superb-east.dl.sourceforge.net/sourceforge/madwifi/ \
+	http://optusnet.dl.sourceforge.net/sourceforge/madwifi/ \
+	$(CFLINUX_PACKAGES)
 PATCHES = madwifi.nodebug.patch
 
 # include the common package targets 
