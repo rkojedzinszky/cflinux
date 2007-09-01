@@ -30,14 +30,17 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT); $(UC_PATH) UC_ROOT=$(UC_ROOT) ./configure --prefix=/usr \
+	(cd $(PKG_ROOT); $(UC_PATH) ./configure --host=$(TARGET_HOST) \
+		--prefix=/usr \
 		--sysconfdir=/etc/zebra \
 		--disable-ipv6 --enable-netlink --enable-nssa \
 		--enable-ospf-te --enable-opaque-lsa \
 		--disable-ospfapi \
 		--enable-user=quagga --enable-group=quagga \
 		--enable-multipath=64 \
-		--localstatedir=/var/quagga )
+		--localstatedir=/var/quagga \
+		ac_cv_func_malloc_0_nonnull=yes \
+		ac_cv_func_realloc_0_nonnull=yes )
 	touch $(CONFIGURED_STAMP)
 
 clean:
