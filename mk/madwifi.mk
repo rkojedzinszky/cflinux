@@ -46,9 +46,10 @@ build: configure $(BUILT_STAMP)
 TOOLS = athchans athctrl athkey wlanconfig
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH) \
+	$(MAKE) -C $(PKG_ROOT) all \
 		KERNELPATH=$(BUILD_DIR)/kernel \
-		KERNELRELEASE=$(KERNEL_VERSION)
+		KERNELRELEASE=$(KERNEL_VERSION) CROSS_COMPILE=$(TARGET_HOST)- \
+		$(UC_PATH_CROSS)
 	$(MAKE) -C $(PKG_ROOT)/tools $(TOOLS) $(UC_PATH)
 	touch $(BUILT_STAMP)
 
