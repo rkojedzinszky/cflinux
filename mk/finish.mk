@@ -42,8 +42,7 @@ install:
 	rm -rf $(ROOTFS)/include
 	chown -R 0:0 $(FDEVEL_DIR)/fs_config
 	chown -R 0:0 $(ROOTFS)
-	chown -R 10:10 $(FDEVEL_DIR)/fs_config/zebra
-	chmod 700 $(FDEVEL_DIR)/fs_config/zebra
+	-install -o 10 -g 10 -m 750 -d $(FDEVEL_DIR)/fs_config/zebra
 	rm -rf $(ROOTFS)/etc/*
 	rm -rf $(ROOTFS)/sbin/rc?.d
 	find $(ROOTFS)/lib/modules/$(KERNEL_VERSION)/ -name '*.ko' -print0 | \
