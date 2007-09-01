@@ -40,7 +40,6 @@ $(CONFIGURED_STAMP):
 
 clean:
 	$(MAKE) -C $(PKG_ROOT) distclean
-	rm -f /lib/ld-uClibc*
 	rm -rf $(FDEVEL_DIR)/i386-linux-uclibc
 	rm -f $(BUILT_STAMP)
 	rm -f $(CONFIGURED_STAMP)
@@ -51,7 +50,6 @@ $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) all BUILD_DIR=$(BUILD_DIR)
 	$(MAKE) -C $(PKG_ROOT) install_dev install_toolchain RUNTIME_PREFIX_LIB_FROM_DEVEL_PREFIX_LIB=
 	$(MAKE) -C $(PKG_ROOT) install_runtime PREFIX=$(UC_ROOT)
-	cp -a $(PKG_ROOT)/lib/ld-uC* /lib/
 	ln -sf crt1.o $(UC_ROOT)/lib/crt0.o
 	$(MAKE) -C $(PKG_ROOT)/utils $(UC_PATH)
 	for i in include lib ; do rmdir $(UC_ROOT)/usr/$$i ; ln -sf ../$$i $(UC_ROOT)/usr/$$i ; done
