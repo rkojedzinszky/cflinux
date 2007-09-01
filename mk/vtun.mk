@@ -38,7 +38,8 @@ $(CONFIGURED_STAMP):
 	(cd $(PKG_ROOT) && $(UC_PATH) \
 	CFLAGS="-O2 -DHAVE_GETPT -DHAVE_GRANTPT \
 	-DHAVE_UNLOCKPT -DHAVE_PTSNAME" \
-	./configure --prefix=/usr \
+	./configure --host=$(TARGET_HOST) \
+	--prefix=/usr \
 	--sysconfdir=/etc --disable-lzo \
 	--with-ssl-headers=../openssl/include/openssl \
 	--with-ssl-libs=../openssl --localstatedir=/var)
