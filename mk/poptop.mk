@@ -33,7 +33,8 @@ configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
 	(cd $(PKG_ROOT); $(UC_PATH) \
-		./configure --sysconfdir=/etc \
+		./configure --host=$(TARGET_HOST) \
+		--sysconfdir=/etc \
 		--prefix=/usr)
 	touch $(CONFIGURED_STAMP)
 
