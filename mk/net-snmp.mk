@@ -32,7 +32,8 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT); $(UC_PATH) ./configure \
+	(cd $(PKG_ROOT); $(UC_PATH) ./configure --host=$(TARGET_HOST) \
+	 --with-endianness=little \
 	 --prefix=/usr \
 	 --sysconfdir=/etc \
 	 --disable-scripts \
@@ -61,7 +62,7 @@ build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH)
-	$(MAKE) -C $(PKG_ROOT) installheaders installlibs INSTALL_PREFIX=$(UC_ROOT)
+	$(MAKE) -C $(PKG_ROOT) installheaders installlibs INSTALL_PREFIX=$(UC_ROOT) $(UC_PATH)
 	touch $(BUILT_STAMP)
 
 install: build
