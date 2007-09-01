@@ -35,7 +35,7 @@ build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) all \
-		KERNEL_INCLUDE=$(BUILD_DIR)/kernel/include $(UC_PATH)
+		KERNEL_INCLUDE=$(BUILD_DIR)/kernel/include $(UC_PATH_CROSS) CC=$(TARGET_HOST)-cc
 	touch $(BUILT_STAMP)
 
 install: build

@@ -29,6 +29,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <netinet/in.h>
+#include <errno.h>
 #include "rootfs.h"
 
 extern int		errno;
