@@ -36,7 +36,7 @@ configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
 	(cd $(PKG_ROOT) && \
-	 $(UC_PATH) ./configure --prefix=/usr)
+	 $(UC_PATH) ./configure --prefix=/usr --host=$(TARGET_HOST))
 	touch $(CONFIGURED_STAMP)
 
 clean:
