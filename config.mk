@@ -43,11 +43,13 @@ export UC_ROOT=$(FDEVEL_DIR)/i386-linux-uclibc
 export ROOTFS:=$(FDEVEL_DIR)/fs_root
 
 # PATH where the uclibc's gcc is
-UC_PATH:= PATH=$(UC_ROOT)/usr/bin:$(UC_ROOT)/bin:$(PATH)
+UC_PATH		= PATH=$(UC_ROOT)/usr/bin:$(UC_ROOT)/bin:$(PATH)
+UC_PATH_CROSS	= PATH=$(UC_ROOT)/bin:$(PATH)
+export UC_PATH UC_PATH_CROSS
+
 UC_ENV := LD_LIBRARY_PATH=$(UC_ROOT)/lib
 UC_ENV += $(UC_PATH)
 export UC_ENV
-export UC_PATH
 
 # target host
 TARGET_HOST = i386-uclibc-linux-gnu
