@@ -30,7 +30,7 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT) && $(UC_PATH) ./configure --prefix=/usr \
+	(cd $(PKG_ROOT) && $(UC_PATH) ./configure --host=$(TARGET_HOST) --prefix=/usr \
 	--with-libnet-includes=$(UC_ROOT)/include \
 	--with-libnet-libraries=$(UC_ROOT)/lib)
 	touch $(CONFIGURED_STAMP)
