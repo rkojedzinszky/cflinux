@@ -38,7 +38,8 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT)/src ; ./configure --enable-plugin=$(BUILD_DIR)/ppp)
+	(cd $(PKG_ROOT)/src ; ./configure --host=$(TARGET_HOST) \
+		--enable-plugin=$(BUILD_DIR)/ppp)
 	touch $(CONFIGURED_STAMP)
 
 clean:
