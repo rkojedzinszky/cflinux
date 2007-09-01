@@ -1,0 +1,11 @@
+--- libnet/configure.orig	2007-09-01 13:28:54.000000000 +0200
++++ libnet/configure	2007-09-01 13:31:31.000000000 +0200
+@@ -1956,7 +1956,7 @@
+             elif test $result = "L"; then
+                 ac_cv_libnet_endianess=lil
+             else
+-                ac_cv_libnet_endianess=unknown
++                : #ac_cv_libnet_endianess=unknown
+             fi                                
+         fi
+         rm -f conftest* core core.conftest
