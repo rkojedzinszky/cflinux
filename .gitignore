@@ -1,3 +1,7 @@
 build
 sources
 i386-linux-uclibc
+topad
+fs_root
+fs_config/pcmcia
+.*
