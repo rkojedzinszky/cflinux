@@ -30,8 +30,10 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT); $(UC_PATH) ./configure --prefix=/usr \
-		--with-pcap=linux --disable-ipv6)
+	(cd $(PKG_ROOT); $(UC_PATH) ./configure --host=$(TARGET_HOST) \
+	 	--prefix=/usr \
+		--with-pcap=linux --disable-ipv6 \
+		ac_cv_linux_vers=2)
 	touch $(CONFIGURED_STAMP)
 
 clean:
