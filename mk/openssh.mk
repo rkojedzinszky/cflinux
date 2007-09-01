@@ -36,7 +36,7 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT) ; $(UC_PATH) ./configure \
+	(cd $(PKG_ROOT) ; $(UC_PATH) ./configure --host=$(TARGET_HOST) \
 	 	--prefix=/usr --sysconfdir=/etc/ssh \
 		--localstatedir=/var --without-shadow \
 		--with-pid-dir=/var/run \
