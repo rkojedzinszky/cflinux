@@ -22,7 +22,8 @@ SRC_FILENAME = libnet-1.0.2a.tar.gz
 EXTRACTED_DIR = Libnet-1.0.2a
 DOWNLOAD_SITES = http://www.packetfactory.net/libnet/dist/deprecated/ \
 		$(CFLINUX_PACKAGES)
-PATCHES = libnet.libnet_h.patch
+PATCHES = libnet.libnet_h.patch \
+	  libnet.configure.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -30,8 +31,8 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT) && $(UC_PATH) ./configure --prefix=/usr \
-	--enable-shared --disable-static)
+	(cd $(PKG_ROOT) && $(UC_PATH) ac_cv_libnet_endianess=lil ./configure --host=$(TARGET_HOST) \
+	 --prefix=/usr --enable-shared --disable-static)
 	touch $(CONFIGURED_STAMP)
 
 clean:
