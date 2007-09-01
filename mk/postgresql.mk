@@ -35,7 +35,7 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT); $(UC_PATH) ./configure \
+	(cd $(PKG_ROOT); $(UC_PATH) ./configure --host=$(TARGET_HOST) \
 	 --without-readline --disable-largefile --prefix=/usr \
 	 --libdir=/lib --includedir=/include --disable-static)
 	touch $(CONFIGURED_STAMP)
