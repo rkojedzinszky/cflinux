@@ -5,3 +5,4 @@ topad
 fs_root
 fs_config/pcmcia
 .*
+local.mk
