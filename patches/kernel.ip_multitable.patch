@@ -1,5 +1,5 @@
---- linux-2.6.20.3/include/net/ip_fib.h.orig	2007-04-09 10:59:51.000000000 +0200
-+++ linux-2.6.20.3/include/net/ip_fib.h	2007-04-09 13:22:00.000000000 +0200
+--- linux-2.6.21.5/include/net/ip_fib.h.orig	2007-09-02 19:25:13.000000000 +0200
++++ linux-2.6.21.5/include/net/ip_fib.h	2007-09-02 19:25:58.000000000 +0200
 @@ -179,14 +179,23 @@
  
  #ifndef CONFIG_IP_MULTIPLE_TABLES
@@ -28,18 +28,16 @@
  }
  
  static inline struct fib_table *fib_new_table(u32 id)
-@@ -196,10 +205,7 @@
+@@ -196,8 +205,7 @@
  
  static inline int fib_lookup(const struct flowi *flp, struct fib_result *res)
  {
 -	if (ip_fib_local_table->tb_lookup(ip_fib_local_table, flp, res) &&
 -	    ip_fib_main_table->tb_lookup(ip_fib_main_table, flp, res))
--		return -ENETUNREACH;
--	return 0;
-+	return _tb_lookup(ip_fib_main_table, flp, res);
++	if (_tb_lookup(ip_fib_main_table, flp, res))
+ 		return -ENETUNREACH;
+ 	return 0;
  }
- 
- static inline void fib_select_default(const struct flowi *flp, struct fib_result *res)
 --- linux-2.6.18.orig/net/ipv4/fib_hash.c	2006-09-20 05:42:06.000000000 +0200
 +++ linux-2.6.18/net/ipv4/fib_hash.c	2006-10-22 13:37:29.000000000 +0200
 @@ -242,7 +242,10 @@
