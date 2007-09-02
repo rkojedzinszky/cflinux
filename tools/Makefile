@@ -5,7 +5,7 @@ PROGS = mkcramfs write_helper rootfs-pack
 all: $(PROGS)
 
 mkcramfs: mkcramfs.c
-	$(HOSTCC) -o $@ -Wall -O2 -I$(KERNEL_INCLUDE) $< -lz
+	$(HOSTCC) -o $@ -Wall -O2 -I. $< -lz
 
 write_helper: write_helper.c
 	$(CC) -o $@ -Wall -Os -lssl $<

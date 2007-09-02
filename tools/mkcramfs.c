@@ -33,7 +33,7 @@
 #include <errno.h>
 #include <string.h>
 #include <stdarg.h>
-#include <cramfs_fs.h>
+#include <linux/cramfs_fs.h>
 #include <zlib.h>
 
 /* Exit codes used by mkfs-type programs */
