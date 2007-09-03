@@ -708,8 +708,8 @@ diff -ruNP uClibc-0.9.27.orig/extra/gcc-uClibc/gcc-uClibc.c uClibc-0.9.27/extra/
 +	exit(EXIT_FAILURE);
 +}
 --- uClibc-0.9.28.3/extra/gcc-uClibc/Makefile.orig	1970-01-01 01:00:00.000000000 +0100
-+++ uClibc-0.9.28.3/extra/gcc-uClibc/Makefile	2007-09-01 11:36:10.000000000 +0200
-@@ -0,0 +1,96 @@
++++ uClibc-0.9.28.3/extra/gcc-uClibc/Makefile	2007-09-03 23:23:00.000000000 +0200
+@@ -0,0 +1,97 @@
 +# Makefile for building a fake gcc/binutils toolchain
 +# that simply spoofs the location of the C library
 +#
@@ -777,9 +777,6 @@ diff -ruNP uClibc-0.9.27.orig/extra/gcc-uClibc/gcc-uClibc.c uClibc-0.9.27/extra/
 +	install -d $(PREFIX)$(DEVEL_PREFIX)/usr/bin;
 +	install -m 755 $(TARGET_ARCH)-uclibc-gcc $(PREFIX)$(DEVEL_PREFIX)/bin/
 +	install -m 755 $(TARGET_ARCH)-uclibc-ld $(PREFIX)$(DEVEL_PREFIX)/bin/
-+	ln -fs $(TARGET_ARCH)-uclibc-ld  $(PREFIX)$(DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-linux-gnu-ld
-+	ln -fs $(TARGET_ARCH)-uclibc-gcc $(PREFIX)$(DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-linux-gnu-gcc
-+	ln -fs $(TARGET_ARCH)-uclibc-gcc $(PREFIX)$(DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-linux-gnu-cc
 +	ln -fs $(TARGET_ARCH)-uclibc-gcc $(PREFIX)$(DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-cc
 +	ln -fs $(TARGET_ARCH)-uclibc-gcc $(PREFIX)$(DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-linux-gcc
 +	ln -fs $(TARGET_ARCH)-uclibc-gcc $(PREFIX)$(DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-linux-cc
@@ -800,6 +797,10 @@ diff -ruNP uClibc-0.9.27.orig/extra/gcc-uClibc/gcc-uClibc.c uClibc-0.9.27/extra/
 +	  ln -fs "$$APPNAME" $(PREFIX)$(DEVEL_PREFIX)/usr/bin/$${app}; \
 +	  ln -fs "$$APPNAME" $(PREFIX)$(DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-$${app}; \
 +	  fi; \
++	done
++	for app in cc gcc ld addr2line ar as cpp gasp nm objcopy \
++	    objdump ranlib size strings strip; do \
++	  ln -fs $(TARGET_ARCH)-uclibc-$${app} $(PREFIX)$(DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-linux-gnu-$${app}; \
 +	done
 +
 +clean:
