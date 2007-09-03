@@ -43,26 +43,30 @@ device=`get_fresh_and_valid`
 if [ -z "$device" ]; then
 	echo "no valid configuration found, using builtin defaults"
 	device=/usr/share/defaults/etc.img
+	mkfs.minix /dev/ram0 2047 > /dev/null
+	mount -nt minix /dev/ram0 /etc
+	tar xf /usr/share/defaults/etc.tar -C /etc
 else
 	echo -n "[found on $device] "
-fi
-dd if=$device of=/dev/ram0 bs=1k count=$conf_size 2>/dev/null
-fsck.minix -a /dev/ram0 >/dev/null 2>&1
-if [ $? -gt 2 ]
-then
-    echo -e "\n#"
-    echo "# Check failed - should not happen, good luck!"
-    echo "#"
-    /bin/sh
-    kill 1
-    exit 0
-fi
 
-# place a \n at the end of the line
-echo -ne "\n"
+	dd if=$device of=/dev/ram0 bs=1k count=$conf_size 2>/dev/null
+	fsck.minix -a /dev/ram0 >/dev/null 2>&1
+	if [ $? -gt 2 ]
+	then
+	    echo -e "\n#"
+	    echo "# Check failed - should not happen, good luck!"
+	    echo "#"
+	    /bin/sh
+	    kill 1
+	    exit 0
+	fi
 
-# Do the real mount
-mount -t minix /dev/ram0 /etc 2>/dev/null
+	# place a \n at the end of the line
+	echo -ne "\n"
+
+	# Do the real mount
+	mount -t minix /dev/ram0 /etc 2>/dev/null
+fi
 
 # Make /etc/mtab to be a symlink to /proc/mounts
 ln -sf /proc/mounts /etc/mtab

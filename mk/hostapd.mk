@@ -51,7 +51,7 @@ $(BUILT_STAMP):
 
 install: build
 	$(INSTALL_BIN) $(PKG_ROOT)/hostapd $(ROOTFS)/usr/sbin/
-	$(INSTALL) -o 0 -g 0 -m 444 $(PKG_ROOT)/hostapd.conf \
+	$(INSTALL) -m 444 $(PKG_ROOT)/hostapd.conf \
 		$(DEFAULTS_DIR)/etc/
 
 .PHONY: configure clean build install

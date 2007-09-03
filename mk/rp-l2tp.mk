@@ -51,12 +51,12 @@ $(BUILT_STAMP):
 install: build
 	$(INSTALL_BIN) $(PKG_ROOT)/l2tpd $(ROOTFS)/usr/sbin/
 	$(INSTALL_BIN) $(PKG_ROOT)/handlers/l2tp-control $(ROOTFS)/usr/sbin/
-	-$(INSTALL) -d -m 555 -o 0 -g 0 $(ROOTFS)/usr/lib/l2tp
-	-$(INSTALL) -d -m 555 -o 0 -g 0 $(ROOTFS)/usr/lib/l2tp/plugins/
+	-$(INSTALL) -d $(ROOTFS)/usr/lib/l2tp
+	-$(INSTALL) -d $(ROOTFS)/usr/lib/l2tp/plugins/
 	$(INSTALL_BIN) $(PKG_ROOT)/handlers/cmd.so $(ROOTFS)/usr/lib/l2tp/plugins/
 	$(INSTALL_BIN) $(PKG_ROOT)/handlers/sync-pppd.so $(ROOTFS)/usr/lib/l2tp/plugins/
 	
-	-$(INSTALL) -o 0 -g 0 -m 555 -d $(DEFAULTS_DIR)/etc/l2tp
-	$(INSTALL) -m 444 -o 0 -g 0 $(PKG_ROOT)/l2tp.conf $(DEFAULTS_DIR)/etc/l2tp/
+	-$(INSTALL) -d $(DEFAULTS_DIR)/etc/l2tp
+	$(INSTALL) -m 444 $(PKG_ROOT)/l2tp.conf $(DEFAULTS_DIR)/etc/l2tp/
 
 .PHONY: configure clean build install

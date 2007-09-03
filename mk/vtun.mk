@@ -58,6 +58,6 @@ $(BUILT_STAMP):
 
 install: build
 	$(INSTALL_BIN) $(PKG_ROOT)/vtund $(ROOTFS)/usr/sbin/
-	$(INSTALL) -o 0 -g 0 -m 444 $(PKG_ROOT)/vtund.conf $(DEFAULTS_DIR)/etc/
+	$(INSTALL) -m 444 $(PKG_ROOT)/vtund.conf $(DEFAULTS_DIR)/etc/
 
 .PHONY: configure clean build install

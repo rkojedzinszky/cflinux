@@ -214,6 +214,13 @@ for _daemon in zebra ripd ospfd bgpd ; do
 		[Yy][Ee][Ss])
 			_cfg="/etc/zebra/${_daemon}.conf"
 			eval "_flags=\"\$${_daemon}_flags\""
+
+			if ! [ -d /etc/zebra ] ; then
+				mkdir /etc/zebra
+				chown quagga:quagga /etc/zebra
+				chmod 750 /etc/zebra
+			fi
+
 			if ! [ -e "$_cfg" ] ; then
 				echo -e 'line vty\n no login\nservice advanced-vty' > "$_cfg"
 				chown quagga:quagga "$_cfg"

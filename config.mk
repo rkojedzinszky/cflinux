@@ -82,10 +82,9 @@ endif
 export MK := $(FDEVEL_DIR)/mk
 export CONFIGS := $(FDEVEL_DIR)/configs
 export INSTALL_BIN := $(TOP_DIR)/install_bin.sh
-export INSTALL_BIN_NS := install -s -o 0 -g 0 -m 555
-export INSTALL_SCRIPT := install -o 0 -g 0 -m 555
+export INSTALL_SCRIPT := install -m 555
 
-INSTALL := install -o 0 -g 0
+INSTALL := install
 
 MKCRAMFS := $(TOP_DIR)/tools/mkcramfs
 PACKROOT := $(TOP_DIR)/tools/rootfs-pack

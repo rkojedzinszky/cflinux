@@ -93,6 +93,7 @@ static int opt_pad = 0;
 static int opt_verbose = 0;
 static char *opt_image = NULL;
 static char *opt_name = NULL;
+static int opt_map = 0;
 
 static int warn_dev, warn_gid, warn_namelen, warn_skip, warn_size, warn_uid;
 
@@ -133,6 +134,7 @@ static void usage(int status)
 		" -s         sort directory entries (old option, ignored)\n"
 		" -v         be more verbose\n"
 		" -z         make explicit holes (requires >= 2.3.39)\n"
+		" -R         map user ids and devices\n"
 		" dirname    root of the directory tree to be compressed\n"
 		" outfile    output file\n", progname, PAD_SIZE);
 
@@ -267,6 +269,8 @@ static unsigned int parse_directory(struct entry *root_entry, const char *name, 
 					continue;
 			}
 		}
+		if (opt_map && dirent->d_name[0] == '@')
+		    continue;
 		namelen = strlen(dirent->d_name);
 		if (namelen > MAX_INPUT_NAMELEN) {
 			die(MKFS_ERROR, 0,
@@ -287,6 +291,50 @@ static unsigned int parse_directory(struct entry *root_entry, const char *name, 
 		entry->name = strdup(dirent->d_name);
 		if (!entry->name) {
 			die(MKFS_ERROR, 1, "strdup failed");
+		}
+		if (opt_map) {
+		    char *mappath;
+		    FILE *map;
+		    mappath = malloc(strlen(path) + 2);
+		    if (!mappath)
+			die(MKFS_ERROR, 1, "malloc failed");
+		    snprintf(mappath, strlen(path) + 2, "%s/@%s", name, dirent->d_name);
+		    st.st_uid = 0;
+		    st.st_gid = 0;
+		    map = fopen(mappath, "r");
+		    if (map) {
+			long st_uid = st.st_uid;
+			long st_gid = st.st_gid;
+			long st_mode = st.st_mode;
+			long major = 0, minor = 0;
+			char type = 0;
+			fscanf(map, "%li %li %li %c %li %li", &st_uid, &st_gid, &st_mode, &type, &major, &minor);
+			st.st_uid = st_uid;
+			st.st_gid = st_gid;
+			st.st_mode = st_mode;
+			st.st_rdev = makedev(major, minor);
+			switch(type) {
+			    case 0:
+				break;
+			    case 'c':
+				st.st_mode |= S_IFCHR;
+				st.st_size = 0;
+				break;
+			    case 'b':
+				st.st_mode |= S_IFBLK;
+				st.st_size = 0;
+				break;
+			    case 'p':
+				st.st_mode |= S_IFIFO;
+				st.st_size = 0;
+				break;
+			    default:
+				fprintf(stderr, "Invalid special file type '%c' in %s", type, mappath);
+				break;
+			}
+			fclose(map);
+		    }
+		    free(mappath);
 		}
 		/* truncate multi-byte UTF-8 filenames on character boundary */
 		if (namelen > CRAMFS_MAXPATHLEN) {
@@ -699,7 +747,7 @@ int main(int argc, char **argv)
 		progname = argv[0];
 
 	/* command line options */
-	while ((c = getopt(argc, argv, "hEe:i:n:psvz")) != EOF) {
+	while ((c = getopt(argc, argv, "hEe:i:n:psvzR")) != EOF) {
 		switch (c) {
 		case 'h':
 			usage(MKFS_OK);
@@ -735,6 +783,9 @@ int main(int argc, char **argv)
 			break;
 		case 'z':
 			opt_holes = 1;
+			break;
+		case 'R':
+			opt_map = 1;
 			break;
 		}
 	}

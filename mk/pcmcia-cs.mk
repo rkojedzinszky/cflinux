@@ -32,6 +32,7 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
+	rm -f $(PKG_ROOT)/config.in
 	sed -e "s/@LINUX_DIR@/$(subst /,\/,$(BUILD_DIR))\/kernel/g" \
 	    -e "s/@PREFIX_DIR@/$(subst /,\/,$(ROOTFS))/g" \
 	    $(CONFIGS)/pcmcia-cs.config \

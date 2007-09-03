@@ -46,19 +46,17 @@ install: $(INSTALL_STAMP)
 $(INSTALL_STAMP):
 	-mkdir $(ROOTFS)
 	-chmod 755 $(ROOTFS)
-	-chown 0:0 $(ROOTFS)
-	for i in bin boot dev/net etc lib mnt proc sbin usr var \
+	for i in bin boot dev etc lib mnt proc sbin usr var \
 		usr/bin usr/lib usr/sbin usr/local dev/pts \
 		usr/lib/cfmaint usr/lib/cflinux ; do \
 			mkdir -p $(ROOTFS)/$$i ; done
-	mkdir -p $(DEFAULTS_DIR)/etc
+	mkdir -p $(DEFAULTS_DIR)/etc/root
 	ln -s var/tmp $(ROOTFS)/tmp
 	ln -s etc/root $(ROOTFS)/root
-	(cd $(ROOTFS)/dev ; MAKEDEV std hda hdb hdc hdd \
-		console ptmx rtc ttyS0 ttyS1 ttyS2 ttyS3 ppp sda sdb; \
-		mknod watchdog c 10 130; \
-		mknod net/tun c 10 200)
-	$(INSTALL) -d -m 555 $(ROOTFS)/sbin/init.d
+	(cd $(ROOTFS)/dev ; $(PKG_ROOT)/MAKEDEV std hda hdb hdc hdd \
+		console ptmx rtc ttyS0 ttyS1 ttyS2 ttyS3 ppp sda sdb tun; \
+		echo -n '' > watchdog && echo '0 0 0600 c 10 130' > @watchdog)
+	$(INSTALL) -d $(ROOTFS)/sbin/init.d
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/init.d/rcS \
 		$(ROOTFS)/sbin/init.d/
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/shutdown \
@@ -79,13 +77,13 @@ $(INSTALL_STAMP):
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/udhcpc.events \
 		$(ROOTFS)/usr/share/udhcpc/default.script
 # installing cfpkg scripts
-	$(INSTALL) -d -m 555 $(ROOTFS)/usr/lib/cfpkg
+	$(INSTALL) -d $(ROOTFS)/usr/lib/cfpkg
 	$(INSTALL) -m 444 $(PKG_ROOT)/scripts/cfpkg/lib/cfpkg_common.sh \
 		$(ROOTFS)/usr/lib/cfpkg/
 	for i in cfpkg_add cfpkg_delete ; do \
 		$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/cfpkg/sbin/$$i \
 			$(ROOTFS)/usr/sbin/ ; done
-	$(INSTALL) -m 444 -o 0 -g 0 $(PKG_ROOT)/scripts/hackps.sh \
+	$(INSTALL) -m 444 $(PKG_ROOT)/scripts/hackps.sh \
 		$(ROOTFS)/usr/lib/cflinux/
 	touch $@
 
