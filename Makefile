@@ -95,17 +95,10 @@ install: all
 	 echo ")") > $(ROOTFS)/.release
 
 image:
+	if [ "$$(id -u)" -ne 0 ] ; then echo "You must be root or use fakeroot." ; exit 1 ; fi
 	cat bzpadder $(BUILD_DIR)/kernel/arch/i386/boot/bzImage > topad
-	dd if=/dev/zero of=/dev/ram0 bs=1k count=2k
-	mkfs.minix -v /dev/ram0 2047 >/dev/null 2>&1
-	mount -t minix /dev/ram0 /mnt
-	cp -a $(FDEVEL_DIR)/fs_config/* /mnt
-	find /mnt -type d -name .svn -print0 | xargs -r0 rm -rf
-	-mkdir /mnt/root /mnt/rc.d
-	umount /mnt
-	dd if=/dev/ram0 bs=1k of=$(ROOTFS)/usr/share/defaults/etc.img \
-		count=2047 >/dev/null 2>&1
-	$(MKCRAMFS) -i topad $(ROOTFS) rootfs.bin
+	cd $(FDEVEL_DIR)/fs_config && tar cf $(ROOTFS)/usr/share/defaults/etc.tar *
+	$(MKCRAMFS) -R -i topad $(ROOTFS) rootfs.bin
 	$(MAKE) -C cfbase/scripts/upgrade setup.tgz
 	$(PACKROOT) '$(VERSION_MAJOR)' '$(VERSION_MINOR)' '$(VERSION_PATCH)' '$(VERSION_EXTRA)' rootfs.bin cfbase/scripts/upgrade/setup.tgz cflinux-$(RELEASE_STRING).img
 	rm -f topad

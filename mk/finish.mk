@@ -40,14 +40,11 @@ install:
 	rm -rf $(ROOTFS)/usr/info
 	rm -rf $(ROOTFS)/man
 	rm -rf $(ROOTFS)/include
-	chown -R 0:0 $(FDEVEL_DIR)/fs_config
-	chown -R 0:0 $(ROOTFS)
-	-install -o 10 -g 10 -m 750 -d $(FDEVEL_DIR)/fs_config/zebra
 	rm -rf $(ROOTFS)/etc/*
 	rm -rf $(ROOTFS)/sbin/rc?.d
 	find $(ROOTFS)/lib/modules/$(KERNEL_VERSION)/ -name '*.ko' -print0 | \
 		xargs -r0 strip -g
-	depmod -raeb $(ROOTFS) -F $(BUILD_DIR)/kernel/System.map $(KERNEL_VERSION)
+	PATH=/bin:/sbin:/usr/bin:/usr/sbin depmod -raeb $(ROOTFS) -F $(BUILD_DIR)/kernel/System.map $(KERNEL_VERSION)
 	rm -f fs_config/modules.conf
 
 .PHONY: configure clean build install

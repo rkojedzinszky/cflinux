@@ -27,5 +27,5 @@
 if [ -L "$1" ]; then
 	cp -pd "$1" "$2"
 else
-	install -s -o 0 -g 0 -m 555 "$1" "$2"
+	install -s -m 555 "$1" "$2"
 fi
