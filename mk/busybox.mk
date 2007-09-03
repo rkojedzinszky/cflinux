@@ -31,7 +31,8 @@ PATCHES = busybox.init.patch \
 	busybox.wget_c.patch \
 	busybox.wget_c_no_excl.patch \
 	busybox.no_halt_poweroff.patch \
-	busybox.ps_opt_hack.patch
+	busybox.ps_opt_hack.patch \
+	busybox.no_pointer_sign_warning.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -51,12 +52,12 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH_CROSS) CROSS_COMPILE=$(TARGET_HOST)-
 	touch $(BUILT_STAMP)
 
 install: build
 	find $(ROOTFS) -lname '*busybox' -print0 | xargs -0 rm -f
 	-mkdir -p $(ROOTFS)/usr/share/udhcpc
-	$(MAKE) -C $(PKG_ROOT) install CONFIG_PREFIX=$(ROOTFS)
+	$(MAKE) -C $(PKG_ROOT) install CONFIG_PREFIX=$(ROOTFS) $(UC_PATH_CROSS) CROSS_COMPILE=$(TARGET_HOST)-
 
 .PHONY: configure clean build install
