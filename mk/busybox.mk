@@ -32,7 +32,7 @@ PATCHES = busybox.init.patch \
 	busybox.wget_c_no_excl.patch \
 	busybox.no_halt_poweroff.patch \
 	busybox.ps_opt_hack.patch \
-	busybox.no_pointer_sign_warning.patch
+	busybox.no_werror.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
