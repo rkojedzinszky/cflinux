@@ -66,8 +66,6 @@ DO_MK += tools
 DO_MK += finish
 endif
 
-REV := $(shell svnversion .)
-
 DISTFILES = AUTHOR BUILD LICENSE ChangeLog Makefile README UPGRADE bzpadder cfbase \
 	    config.mk configs fs_config install_bin.sh md5sums mk \
 	    packages.mk part_init.sh patches tools
@@ -98,9 +96,7 @@ scratch: distclean
 
 install: all
 	for i in $(DO_MK) ; do $(MAKE) -f $(MK)/$$i.mk install || exit ; done
-	(echo -n "$(RELEASE_STRING) ($(shell date "+%Y/%m/%d-%H.%M.%S %Z")" ; \
-	 [ "$(REV)" ] && echo -n " rev=$(REV)" ; \
-	 echo ")") > $(ROOTFS)/.release
+	echo "$(RELEASE_STRING) ($(shell date "+%Y/%m/%d-%H.%M.%S %Z"))" > $(ROOTFS)/.release
 
 image:
 	if [ "$$(id -u)" -ne 0 ] ; then echo "You must be root or use fakeroot." ; exit 1 ; fi
