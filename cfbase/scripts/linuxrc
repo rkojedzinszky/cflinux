@@ -43,7 +43,7 @@ device=`get_fresh_and_valid`
 if [ -z "$device" ]; then
 	echo "no valid configuration found, using builtin defaults"
 	device=/usr/share/defaults/etc.img
-	mkfs.minix /dev/ram0 2047 > /dev/null
+	mkfs.minix -v /dev/ram0 2047 > /dev/null
 	mount -nt minix /dev/ram0 /etc
 	tar xf /usr/share/defaults/etc.tar -C /etc
 else
