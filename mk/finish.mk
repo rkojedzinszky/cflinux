@@ -34,7 +34,9 @@ clean:
 build:
 
 install:
-	rm -rf $(ROOTFS)/usr/share/man $(ROOTFS)/usr/man
+	rm -rf $(ROOTFS)/usr/share/man
+	rm -rf $(ROOTFS)/usr/share/info
+	rm -rf $(ROOTFS)/usr/man
 	rm -rf $(ROOTFS)/usr/share/doc
 	rm -rf $(ROOTFS)/usr/local/*
 	rm -rf $(ROOTFS)/usr/info
