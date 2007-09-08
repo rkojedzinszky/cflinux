@@ -52,6 +52,7 @@ DO_MK += ltraf
 DO_MK += libnet
 DO_MK += nemesis
 DO_MK += ethtool
+DO_MK += e2fsprogs
 
 # Finish target is last
 DO_MK += tools
