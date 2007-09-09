@@ -6,3 +6,5 @@ fs_root
 fs_config/pcmcia
 .*
 local.mk
+rootfs.bin
+cflinux*img
