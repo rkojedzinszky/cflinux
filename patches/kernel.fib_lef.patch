@@ -1,5 +1,36 @@
---- linux-2.6.20.3/net/ipv4/fib_lef.c.orig	1970-01-01 01:00:00.000000000 +0100
-+++ linux-2.6.20.3/net/ipv4/fib_lef.c	2007-04-09 10:58:09.000000000 +0200
+diff --git a/net/ipv4/Kconfig b/net/ipv4/Kconfig
+index 6469de4..252533e 100644
+--- a/net/ipv4/Kconfig
++++ b/net/ipv4/Kconfig
+@@ -86,6 +86,11 @@ config IP_FIB_TRIE
+  	Stefan Nilsson and Matti Tikkanen. Algorithmica, 33(1):19-33, 2002.
+  	http://www.nada.kth.se/~snilsson/public/papers/dyntrie2/
+        
++config IP_FIB_LEF
++	bool "FIB_LEF"
++	---help---
++	An improved radix based IPv4 lookup algorithm. This needs much testing.
++
+ endchoice
+ 
+ config IP_FIB_HASH
+diff --git a/net/ipv4/Makefile b/net/ipv4/Makefile
+index 9ced7a2..20ad1f3 100644
+--- a/net/ipv4/Makefile
++++ b/net/ipv4/Makefile
+@@ -14,6 +14,7 @@ obj-y     := route.o inetpeer.o protocol.o \
+ 
+ obj-$(CONFIG_IP_FIB_HASH) += fib_hash.o
+ obj-$(CONFIG_IP_FIB_TRIE) += fib_trie.o
++obj-$(CONFIG_IP_FIB_LEF) += fib_lef.o
+ obj-$(CONFIG_PROC_FS) += proc.o
+ obj-$(CONFIG_IP_MULTIPLE_TABLES) += fib_rules.o
+ obj-$(CONFIG_IP_MROUTE) += ipmr.o
+diff --git a/net/ipv4/fib_lef.c b/net/ipv4/fib_lef.c
+new file mode 100644
+index 0000000..b945f4f
+--- /dev/null
++++ b/net/ipv4/fib_lef.c
 @@ -0,0 +1,967 @@
 +/*
 + *   This program is free software; you can redistribute it and/or
@@ -968,27 +999,3 @@
 +{
 +}
 +
---- linux-2.6.20.3/net/ipv4/Kconfig.orig	2007-03-13 19:27:08.000000000 +0100
-+++ linux-2.6.20.3/net/ipv4/Kconfig	2007-04-09 14:37:24.000000000 +0200
-@@ -80,6 +80,11 @@
-  	Stefan Nilsson and Matti Tikkanen. Algorithmica, 33(1):19-33, 2002.
-  	http://www.nada.kth.se/~snilsson/public/papers/dyntrie2/
-        
-+config IP_FIB_LEF
-+	bool "FIB_LEF"
-+	---help---
-+	An improved radix based IPv4 lookup algorithm. This needs much testing.
-+
- endchoice
- 
- config IP_FIB_HASH
---- linux-2.6.20.3/net/ipv4/Makefile.orig	2007-03-13 19:27:08.000000000 +0100
-+++ linux-2.6.20.3/net/ipv4/Makefile	2007-04-09 14:38:52.000000000 +0200
-@@ -14,6 +14,7 @@
- 
- obj-$(CONFIG_IP_FIB_HASH) += fib_hash.o
- obj-$(CONFIG_IP_FIB_TRIE) += fib_trie.o
-+obj-$(CONFIG_IP_FIB_LEF) += fib_lef.o
- obj-$(CONFIG_PROC_FS) += proc.o
- obj-$(CONFIG_IP_MULTIPLE_TABLES) += fib_rules.o
- obj-$(CONFIG_IP_MROUTE) += ipmr.o

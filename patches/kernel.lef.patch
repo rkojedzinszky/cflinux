@@ -1,8 +1,9 @@
-diff -ruNP linux-2.6.18.orig/include/linux/skbuff.h linux-2.6.18/include/linux/skbuff.h
---- linux-2.6.18.orig/include/linux/skbuff.h	2006-09-20 05:42:06.000000000 +0200
-+++ linux-2.6.18/include/linux/skbuff.h	2006-11-06 21:23:47.000000000 +0100
-@@ -30,6 +30,10 @@
- #include <net/checksum.h>
+diff --git a/include/linux/skbuff.h b/include/linux/skbuff.h
+index 5992f65..de217fd 100644
+--- a/include/linux/skbuff.h
++++ b/include/linux/skbuff.h
+@@ -28,6 +28,10 @@
+ #include <linux/rcupdate.h>
  #include <linux/dmaengine.h>
  
 +#ifdef CONFIG_IP_LEF
@@ -12,7 +13,7 @@ diff -ruNP linux-2.6.18.orig/include/linux/skbuff.h linux-2.6.18/include/linux/s
  #define HAVE_ALLOC_SKB		/* For the drivers to know */
  #define HAVE_ALIGNABLE_SKB	/* Ditto 8)		   */
  
-@@ -261,6 +265,9 @@
+@@ -261,6 +265,9 @@ struct sk_buff {
  
  	struct  dst_entry	*dst;
  	struct	sec_path	*sp;
@@ -22,10 +23,60 @@ diff -ruNP linux-2.6.18.orig/include/linux/skbuff.h linux-2.6.18/include/linux/s
  
  	/*
  	 * This is the control buffer. It is free to use for every
-diff -ruNP linux-2.6.18.orig/include/net/lef.h linux-2.6.18/include/net/lef.h
---- linux-2.6.18.orig/include/net/lef.h	1970-01-01 01:00:00.000000000 +0100
-+++ linux-2.6.18/include/net/lef.h	2006-11-06 21:48:26.000000000 +0100
-@@ -0,0 +1,64 @@
+diff --git a/include/net/arp.h b/include/net/arp.h
+index f026645..92e1e8b 100644
+--- a/include/net/arp.h
++++ b/include/net/arp.h
+@@ -16,6 +16,9 @@ extern void     arp_send(int type, int ptype, __be32 dest_ip,
+ 			 struct net_device *dev, __be32 src_ip,
+ 			 unsigned char *dest_hw, unsigned char *src_hw, unsigned char *th);
+ extern int	arp_bind_neighbour(struct dst_entry *dst);
++#ifdef CONFIG_IP_LEF
++extern int	arp_bind_neighbour_lef(struct lef *lef, __be32 nexthop);
++#endif
+ extern int	arp_mc_map(__be32 addr, u8 *haddr, struct net_device *dev, int dir);
+ extern void	arp_ifdown(struct net_device *dev);
+ 
+diff --git a/include/net/ip_fib.h b/include/net/ip_fib.h
+index 36c635c..09ab0c9 100644
+--- a/include/net/ip_fib.h
++++ b/include/net/ip_fib.h
+@@ -61,6 +61,9 @@ struct fib_nh {
+ #endif
+ 	int			nh_oif;
+ 	__be32			nh_gw;
++#ifdef CONFIG_IP_LEF
++	struct neighbour	*neighbour;
++#endif
+ };
+ 
+ /*
+@@ -111,6 +114,7 @@ struct fib_result {
+ #ifdef CONFIG_IP_MULTIPLE_TABLES
+ 	struct fib_rule	*r;
+ #endif
++	struct fib_nh	*nh;
+ };
+ 
+ struct fib_result_nl {
+@@ -130,7 +134,11 @@ struct fib_result_nl {
+ 
+ #ifdef CONFIG_IP_ROUTE_MULTIPATH
+ 
++#ifdef CONFIG_IP_LEF
++#define FIB_RES_NH(res)		(*((res).nh))
++#else
+ #define FIB_RES_NH(res)		((res).fi->fib_nh[(res).nh_sel])
++#endif
+ #define FIB_RES_RESET(res)	((res).nh_sel = 0)
+ 
+ #else /* CONFIG_IP_ROUTE_MULTIPATH */
+diff --git a/include/net/lef.h b/include/net/lef.h
+new file mode 100644
+index 0000000..2d03574
+--- /dev/null
++++ b/include/net/lef.h
+@@ -0,0 +1,63 @@
 +/*
 + * Linux express forwarding code
 + *
@@ -67,7 +118,6 @@ diff -ruNP linux-2.6.18.orig/include/net/lef.h linux-2.6.18/include/net/lef.h
 + */
 +static inline void		lef_init_copy(struct lef* l, const struct lef* o)
 +{
-+	l->gateway = o->gateway;
 +	if ((l->dev = o->dev))
 +		dev_hold(l->dev);
 +	l->mtu = o->mtu;
@@ -90,10 +140,12 @@ diff -ruNP linux-2.6.18.orig/include/net/lef.h linux-2.6.18/include/net/lef.h
 +extern int			lef_forward(struct sk_buff *);
 +
 +#endif /* _NET_LEF_H */
-diff -ruNP linux-2.6.18.orig/include/net/lef_struct.h linux-2.6.18/include/net/lef_struct.h
---- linux-2.6.18.orig/include/net/lef_struct.h	1970-01-01 01:00:00.000000000 +0100
-+++ linux-2.6.18/include/net/lef_struct.h	2006-11-06 21:23:37.000000000 +0100
-@@ -0,0 +1,27 @@
+diff --git a/include/net/lef_struct.h b/include/net/lef_struct.h
+new file mode 100644
+index 0000000..764e4fe
+--- /dev/null
++++ b/include/net/lef_struct.h
+@@ -0,0 +1,29 @@
 +/*
 + * Linux express forwarding code
 + *
@@ -114,183 +166,19 @@ diff -ruNP linux-2.6.18.orig/include/net/lef_struct.h linux-2.6.18/include/net/l
 +
 +// our express forwarding structure
 +struct lef {
-+	__u32			gateway;	// our gateway
 +	struct net_device	*dev;		// our device
-+	u32			mtu;		// our mtu
++	__u32			mtu;		// our mtu
 +	struct neighbour	*neighbour;	// our neigbour
++	int			flags;		// flags
 +};
 +
++#define	LEF_NEED		1		// we should use lef
++
 +#endif /* _NET_LEF_STRUCT_H */
---- linux-2.6.20.3/net/core/skbuff.c.orig	2007-03-20 21:40:26.000000000 +0100
-+++ linux-2.6.20.3/net/core/skbuff.c	2007-03-20 21:41:25.000000000 +0100
-@@ -66,6 +66,10 @@
- #include <asm/uaccess.h>
- #include <asm/system.h>
- 
-+#ifdef CONFIG_IP_LEF
-+#include <net/lef.h>
-+#endif
-+
- #include "kmap_skb.h"
- 
- static struct kmem_cache *skbuff_head_cache __read_mostly;
-@@ -373,6 +377,9 @@
- #ifdef CONFIG_XFRM
- 	secpath_put(skb->sp);
- #endif
-+#ifdef CONFIG_IP_LEF
-+	lef_destroy(&skb->lef);
-+#endif
- 	if (skb->destructor) {
- 		WARN_ON(in_irq());
- 		skb->destructor(skb);
-@@ -462,6 +469,9 @@
- #ifdef CONFIG_INET
- 	secpath_get(skb->sp);
- #endif
-+#ifdef CONFIG_IP_LEF
-+	lef_init_copy(&n->lef, &skb->lef);
-+#endif
- 	memcpy(n->cb, skb->cb, sizeof(skb->cb));
- 	C(len);
- 	C(data_len);
-@@ -529,6 +539,9 @@
- #ifdef CONFIG_INET
- 	new->sp		= secpath_get(old->sp);
- #endif
-+#ifdef CONFIG_IP_LEF
-+	lef_init_copy(&new->lef, &old->lef);
-+#endif
- 	new->h.raw	= old->h.raw + offset;
- 	new->nh.raw	= old->nh.raw + offset;
- 	new->mac.raw	= old->mac.raw + offset;
-@@ -1979,6 +1992,9 @@
- 		nskb->priority = skb->priority;
- 		nskb->protocol = skb->protocol;
- 		nskb->dst = dst_clone(skb->dst);
-+#ifdef CONFIG_IP_LEF
-+		lef_init_copy(&nskb->lef, &skb->lef);
-+#endif
- 		memcpy(nskb->cb, skb->cb, sizeof(skb->cb));
- 		nskb->pkt_type = skb->pkt_type;
- 		nskb->mac_len = skb->mac_len;
-diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
---- linux-2.6.18.orig/net/ipv4/arp.c	2006-09-20 05:42:06.000000000 +0200
-+++ linux-2.6.18/net/ipv4/arp.c	2006-11-06 20:15:27.000000000 +0100
-@@ -127,6 +127,10 @@
- 
- #include <linux/netfilter_arp.h>
- 
-+#ifdef CONFIG_IP_LEF
-+#include <net/lef.h>
-+#endif
-+
- /*
-  *	Interface to generic neighbour cache.
-  */
-@@ -526,6 +530,31 @@
- 	return 0;
- }
- 
-+#ifdef CONFIG_IP_LEF
-+int arp_bind_neighbour_lef(struct lef *lef)
-+{
-+	struct net_device *dev = lef->dev;
-+	struct neighbour *n = lef->neighbour;
-+
-+	if (dev == NULL)
-+		return -EINVAL;
-+	if (n == NULL) {
-+		u32 nexthop = lef->gateway;
-+		if (dev->flags&(IFF_LOOPBACK|IFF_POINTOPOINT))
-+			nexthop = 0;
-+		n = __neigh_lookup_errno(
-+#if defined(CONFIG_ATM_CLIP) || defined(CONFIG_ATM_CLIP_MODULE)
-+		    dev->type == ARPHRD_ATM ? clip_tbl_hook :
-+#endif
-+		    &arp_tbl, &nexthop, dev);
-+		if (IS_ERR(n))
-+			return PTR_ERR(n);
-+		lef->neighbour = n;
-+	}
-+	return 0;
-+}
-+#endif
-+
- /*
-  * Check if we can use proxy ARP for this path
-  */
---- linux-2.6.20.3/net/ipv4/Kconfig.orig	2007-03-20 21:40:26.000000000 +0100
-+++ linux-2.6.20.3/net/ipv4/Kconfig	2007-03-20 21:40:26.000000000 +0100
-@@ -51,6 +51,12 @@
- 
- 	  If unsure, say N here.
- 
-+config IP_LEF
-+	bool "IP: Linux express forwarding"
-+	depends on IP_ADVANCED_ROUTER && !SMP && PREEMPT_NONE
-+	---help---
-+	You should not turn this on
-+
- choice 
- 	prompt "Choose IP: FIB lookup algorithm (choose FIB_HASH if unsure)"
- 	depends on IP_ADVANCED_ROUTER
-@@ -123,7 +129,7 @@
- 
- config IP_ROUTE_MULTIPATH_CACHED
- 	bool "IP: equal cost multipath with caching support (EXPERIMENTAL)"
--	depends on IP_ROUTE_MULTIPATH
-+	depends on IP_ROUTE_MULTIPATH && !IP_LEF
- 	help
- 	  Normally, equal cost multipath routing is not supported by the
- 	  routing cache. If you say Y here, alternative routes are cached
---- a/net/ipv4/Makefile	2006-12-18 09:27:06.000000000 +0100
-+++ linux-2.6.19/net/ipv4/Makefile	2006-12-18 09:31:45.000000000 +0100
-@@ -50,6 +50,7 @@
- obj-$(CONFIG_TCP_CONG_SCALABLE) += tcp_scalable.o
- obj-$(CONFIG_TCP_CONG_LP) += tcp_lp.o
- obj-$(CONFIG_NETLABEL) += cipso_ipv4.o
-+obj-$(CONFIG_IP_LEF) += lef.o
- 
- obj-$(CONFIG_XFRM) += xfrm4_policy.o xfrm4_state.o xfrm4_input.o \
- 		      xfrm4_output.o
---- linux-2.6.20.3/include/net/arp.h.orig	2007-03-13 19:27:08.000000000 +0100
-+++ linux-2.6.20.3/include/net/arp.h	2007-03-20 21:48:48.000000000 +0100
-@@ -16,6 +16,9 @@
- 			 struct net_device *dev, __be32 src_ip,
- 			 unsigned char *dest_hw, unsigned char *src_hw, unsigned char *th);
- extern int	arp_bind_neighbour(struct dst_entry *dst);
-+#ifdef CONFIG_IP_LEF
-+extern int	arp_bind_neighbour_lef(struct lef *);
-+#endif
- extern int	arp_mc_map(__be32 addr, u8 *haddr, struct net_device *dev, int dir);
- extern void	arp_ifdown(struct net_device *dev);
- 
---- linux-2.6.20.3/net/ipv4/netfilter/Kconfig.orig	2007-03-13 19:27:08.000000000 +0100
-+++ linux-2.6.20.3/net/ipv4/netfilter/Kconfig	2007-03-20 21:46:59.000000000 +0100
-@@ -421,7 +421,7 @@
- 
- config IP_NF_TARGET_MASQUERADE
- 	tristate "MASQUERADE target support"
--	depends on (NF_NAT || IP_NF_NAT)
-+	depends on (NF_NAT || IP_NF_NAT) && !IP_LEF
- 	help
- 	  Masquerading is a special case of NAT: all outgoing connections are
- 	  changed to seem to come from a particular interface's address, and
---- linux-2.6.19/include/net/route.h.orig	2006-11-29 22:57:37.000000000 +0100
-+++ linux-2.6.19/include/net/route.h	2006-12-03 10:34:38.000000000 +0100
-@@ -117,6 +117,9 @@
- extern int		ip_route_output_key(struct rtable **, struct flowi *flp);
- extern int		ip_route_output_flow(struct rtable **rp, struct flowi *flp, struct sock *sk, int flags);
- extern int		ip_route_input(struct sk_buff*, __be32 dst, __be32 src, u8 tos, struct net_device *devin);
-+#ifdef CONFIG_IP_LEF
-+extern int		ip_route_input_lef(struct sk_buff*, __be32 dst, __be32 src, u8 tos, struct net_device *devin, int use_lef);
-+#endif
- extern unsigned short	ip_rt_frag_needed(struct iphdr *iph, unsigned short new_mtu);
- extern void		ip_rt_send_redirect(struct sk_buff *skb);
- 
---- linux-2.6.18.orig/net/core/neighbour.c	2006-09-20 05:42:06.000000000 +0200
-+++ linux-2.6.18/net/core/neighbour.c	2006-11-14 13:33:31.000000000 +0100
+diff --git a/net/core/neighbour.c b/net/core/neighbour.c
+index 841e3f3..3640ea7 100644
+--- a/net/core/neighbour.c
++++ b/net/core/neighbour.c
 @@ -34,6 +34,10 @@
  #include <linux/random.h>
  #include <linux/string.h>
@@ -302,7 +190,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  #define NEIGH_DEBUG 1
  
  #define NEIGH_PRINTK(x...) printk(x)
-@@ -1139,7 +1143,11 @@
+@@ -1144,7 +1148,11 @@ int neigh_resolve_output(struct sk_buff *skb)
  	struct neighbour *neigh;
  	int rc = 0;
  
@@ -314,7 +202,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  		goto discard;
  
  	__skb_pull(skb, skb->nh.raw - skb->data);
-@@ -1147,7 +1155,11 @@
+@@ -1152,7 +1160,11 @@ int neigh_resolve_output(struct sk_buff *skb)
  	if (!neigh_event_send(neigh, skb)) {
  		int err;
  		struct net_device *dev = neigh->dev;
@@ -326,7 +214,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  			write_lock_bh(&neigh->lock);
  			if (!dst->hh)
  				neigh_hh_init(neigh, dst, dst->ops->protocol);
-@@ -1182,8 +1194,17 @@
+@@ -1187,8 +1199,17 @@ int neigh_connected_output(struct sk_buff *skb)
  {
  	int err;
  	struct dst_entry *dst = skb->dst;
@@ -346,8 +234,374 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  
  	__skb_pull(skb, skb->nh.raw - skb->data);
  
---- linux-2.6.18.orig/net/ipv4/lef.c	1970-01-01 01:00:00.000000000 +0100
-+++ linux-2.6.18/net/ipv4/lef.c	2006-11-14 13:48:09.000000000 +0100
+diff --git a/net/core/skbuff.c b/net/core/skbuff.c
+index 336958f..5e10ada 100644
+--- a/net/core/skbuff.c
++++ b/net/core/skbuff.c
+@@ -65,6 +65,10 @@
+ #include <asm/uaccess.h>
+ #include <asm/system.h>
+ 
++#ifdef CONFIG_IP_LEF
++#include <net/lef.h>
++#endif
++
+ #include "kmap_skb.h"
+ 
+ static struct kmem_cache *skbuff_head_cache __read_mostly;
+@@ -317,6 +321,9 @@ void __kfree_skb(struct sk_buff *skb)
+ #ifdef CONFIG_XFRM
+ 	secpath_put(skb->sp);
+ #endif
++#ifdef CONFIG_IP_LEF
++	lef_destroy(&skb->lef);
++#endif
+ 	if (skb->destructor) {
+ 		WARN_ON(in_irq());
+ 		skb->destructor(skb);
+@@ -405,6 +412,9 @@ struct sk_buff *skb_clone(struct sk_buff *skb, gfp_t gfp_mask)
+ #ifdef CONFIG_INET
+ 	secpath_get(skb->sp);
+ #endif
++#ifdef CONFIG_IP_LEF
++	lef_init_copy(&n->lef, &skb->lef);
++#endif
+ 	memcpy(n->cb, skb->cb, sizeof(skb->cb));
+ 	C(len);
+ 	C(data_len);
+@@ -473,6 +483,9 @@ static void copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
+ #ifdef CONFIG_INET
+ 	new->sp		= secpath_get(old->sp);
+ #endif
++#ifdef CONFIG_IP_LEF
++	lef_init_copy(&new->lef, &old->lef);
++#endif
+ 	new->h.raw	= old->h.raw + offset;
+ 	new->nh.raw	= old->nh.raw + offset;
+ 	new->mac.raw	= old->mac.raw + offset;
+@@ -1923,6 +1936,9 @@ struct sk_buff *skb_segment(struct sk_buff *skb, int features)
+ 		nskb->priority = skb->priority;
+ 		nskb->protocol = skb->protocol;
+ 		nskb->dst = dst_clone(skb->dst);
++#ifdef CONFIG_IP_LEF
++		lef_init_copy(&nskb->lef, &skb->lef);
++#endif
+ 		memcpy(nskb->cb, skb->cb, sizeof(skb->cb));
+ 		nskb->pkt_type = skb->pkt_type;
+ 		nskb->mac_len = skb->mac_len;
+diff --git a/net/ipv4/Kconfig b/net/ipv4/Kconfig
+index 5fc4a05..6469de4 100644
+--- a/net/ipv4/Kconfig
++++ b/net/ipv4/Kconfig
+@@ -51,6 +51,12 @@ config IP_ADVANCED_ROUTER
+ 
+ 	  If unsure, say N here.
+ 
++config IP_LEF
++	bool "IP: Linux express forwarding"
++	depends on IP_ADVANCED_ROUTER && !SMP && PREEMPT_NONE
++	---help---
++	You should not turn this on
++
+ choice 
+ 	prompt "Choose IP: FIB lookup algorithm (choose FIB_HASH if unsure)"
+ 	depends on IP_ADVANCED_ROUTER
+@@ -118,7 +124,7 @@ config IP_ROUTE_MULTIPATH
+ 
+ config IP_ROUTE_MULTIPATH_CACHED
+ 	bool "IP: equal cost multipath with caching support (EXPERIMENTAL)"
+-	depends on IP_ROUTE_MULTIPATH
++	depends on IP_ROUTE_MULTIPATH && !IP_LEF
+ 	help
+ 	  Normally, equal cost multipath routing is not supported by the
+ 	  routing cache. If you say Y here, alternative routes are cached
+diff --git a/net/ipv4/Makefile b/net/ipv4/Makefile
+index 7a06862..9ced7a2 100644
+--- a/net/ipv4/Makefile
++++ b/net/ipv4/Makefile
+@@ -50,6 +50,7 @@ obj-$(CONFIG_TCP_CONG_VENO) += tcp_veno.o
+ obj-$(CONFIG_TCP_CONG_SCALABLE) += tcp_scalable.o
+ obj-$(CONFIG_TCP_CONG_LP) += tcp_lp.o
+ obj-$(CONFIG_NETLABEL) += cipso_ipv4.o
++obj-$(CONFIG_IP_LEF) += lef.o
+ 
+ obj-$(CONFIG_XFRM) += xfrm4_policy.o xfrm4_state.o xfrm4_input.o \
+ 		      xfrm4_output.o
+diff --git a/net/ipv4/arp.c b/net/ipv4/arp.c
+index 1a3488a..ecf6d58 100644
+--- a/net/ipv4/arp.c
++++ b/net/ipv4/arp.c
+@@ -126,6 +126,10 @@ struct neigh_table *clip_tbl_hook;
+ 
+ #include <linux/netfilter_arp.h>
+ 
++#ifdef CONFIG_IP_LEF
++#include <net/lef.h>
++#endif
++
+ /*
+  *	Interface to generic neighbour cache.
+  */
+@@ -525,6 +529,30 @@ int arp_bind_neighbour(struct dst_entry *dst)
+ 	return 0;
+ }
+ 
++#ifdef CONFIG_IP_LEF
++int arp_bind_neighbour_lef(struct lef *lef, __be32 nexthop)
++{
++	struct net_device *dev = lef->dev;
++	struct neighbour *n = lef->neighbour;
++
++	if (dev == NULL)
++		return -EINVAL;
++	if (n == NULL) {
++		if (dev->flags&(IFF_LOOPBACK|IFF_POINTOPOINT))
++			nexthop = 0;
++		n = __neigh_lookup_errno(
++#if defined(CONFIG_ATM_CLIP) || defined(CONFIG_ATM_CLIP_MODULE)
++		    dev->type == ARPHRD_ATM ? clip_tbl_hook :
++#endif
++		    &arp_tbl, &nexthop, dev);
++		if (IS_ERR(n))
++			return PTR_ERR(n);
++		lef->neighbour = n;
++	}
++	return 0;
++}
++#endif
++
+ /*
+  * Check if we can use proxy ARP for this path
+  */
+diff --git a/net/ipv4/fib_semantics.c b/net/ipv4/fib_semantics.c
+index 3dad12e..28f00f7 100644
+--- a/net/ipv4/fib_semantics.c
++++ b/net/ipv4/fib_semantics.c
+@@ -153,6 +153,11 @@ void free_fib_info(struct fib_info *fi)
+ 		if (nh->nh_dev)
+ 			dev_put(nh->nh_dev);
+ 		nh->nh_dev = NULL;
++#ifdef CONFIG_IP_LEF
++		if (nh->neighbour)
++			neigh_release(nh->neighbour);
++		nh->neighbour = NULL;
++#endif
+ 	} endfor_nexthops(fi);
+ 	fib_info_cnt--;
+ 	kfree(fi);
+@@ -872,13 +877,31 @@ failure:
+ 	return ERR_PTR(err);
+ }
+ 
++#ifdef CONFIG_IP_LEF
++/* dst_hash - for hashing a flowi */
++static inline unsigned char __ip4_hash(const unsigned char *ip)
++{
++	return ip[0] + ip[1] + ip[2] + ip[3];
++}
++
++static inline unsigned char __flowi_hash(const struct flowi *flp)
++{
++	return __ip4_hash((unsigned char*)&flp->fl4_dst) +
++		jiffies;
++}
++#endif
++
+ /* Note! fib_semantic_match intentionally uses  RCU list functions. */
+ int fib_semantic_match(struct list_head *head, const struct flowi *flp,
+ 		       struct fib_result *res, __be32 zone, __be32 mask,
+ 			int prefixlen)
+ {
+ 	struct fib_alias *fa;
+-	int nh_sel = 0;
++	int nh_sel;
++#ifdef CONFIG_IP_LEF
++	const struct fib_nh *_nh;
++	unsigned _fib_nhs;
++#endif
+ 
+ 	list_for_each_entry_rcu(fa, head, fa_list) {
+ 		int err;
+@@ -899,12 +922,51 @@ int fib_semantic_match(struct list_head *head, const struct flowi *flp,
+ 			if (fi->fib_flags & RTNH_F_DEAD)
+ 				continue;
+ 
++#ifdef CONFIG_IP_LEF
++			_fib_nhs = fi->fib_nhs;
++#endif
++
++#ifndef CONFIG_IP_LEF
+ 			switch (fa->fa_type) {
+ 			case RTN_UNICAST:
+ 			case RTN_LOCAL:
+ 			case RTN_BROADCAST:
+ 			case RTN_ANYCAST:
+ 			case RTN_MULTICAST:
++#endif
++#ifdef CONFIG_IP_LEF
++				{
++					int _nh_i;
++
++					if (likely(_fib_nhs == 1)) {
++						_nh = fi->fib_nh;
++						if (likely(!(_nh->nh_flags&RTNH_F_DEAD))) {
++							if (!flp->oif || flp->oif == _nh->nh_oif) {
++								nh_sel = 0;
++								goto out_fill_res;
++							}
++						}
++					} else {
++						nh_sel = ((unsigned)__flowi_hash(flp) % _fib_nhs);
++						for (_nh_i = 0; _nh_i < _fib_nhs; _nh_i++) {
++							_nh = fi->fib_nh + nh_sel;
++
++							if (likely(!(_nh->nh_flags&RTNH_F_DEAD))) {
++								if (!flp->oif || flp->oif == _nh->nh_oif)
++									break;
++							}
++							nh_sel = (nh_sel + 1) % _fib_nhs;
++						}
++					}
++#ifdef CONFIG_IP_ROUTE_MULTIPATH
++					if (_nh_i < _fib_nhs)
++						goto out_fill_res;
++#else
++					if (_nh_i < 1)
++						goto out_fill_res;
++#endif
++				}
++#else
+ 				for_nexthops(fi) {
+ 					if (nh->nh_flags&RTNH_F_DEAD)
+ 						continue;
+@@ -922,12 +984,15 @@ int fib_semantic_match(struct list_head *head, const struct flowi *flp,
+ 				}
+ #endif
+ 				endfor_nexthops(fi);
++#endif
+ 				continue;
++#ifndef CONFIG_IP_LEF
+ 
+ 			default:
+ 				printk(KERN_DEBUG "impossible 102\n");
+ 				return -EINVAL;
+ 			};
++#endif
+ 		}
+ 		return err;
+ 	}
+@@ -943,6 +1008,9 @@ out_fill_res:
+ 	res->netmask = mask;
+ 	res->network = zone & inet_make_mask(prefixlen);
+ #endif
++#ifdef CONFIG_IP_LEF
++	res->nh = (struct fib_nh*)_nh;
++#endif
+ 	atomic_inc(&res->fi->fib_clntref);
+ 	return 0;
+ }
+@@ -1073,6 +1141,9 @@ int fib_sync_down(__be32 local, struct net_device *dev, int force)
+ 		struct hlist_head *head = &fib_info_devhash[hash];
+ 		struct hlist_node *node;
+ 		struct fib_nh *nh;
++#ifdef CONFIG_IP_LEF
++		struct neighbour *neigh;
++#endif
+ 
+ 		hlist_for_each_entry(nh, node, head, nh_hash) {
+ 			struct fib_info *fi = nh->nh_parent;
+@@ -1095,6 +1166,12 @@ int fib_sync_down(__be32 local, struct net_device *dev, int force)
+ 					nh->nh_power = 0;
+ 					spin_unlock_bh(&fib_multipath_lock);
+ #endif
++#ifdef CONFIG_IP_LEF
++					if ((neigh = nh->neighbour)) {
++						nh->neighbour = NULL;
++						neigh_release(neigh);
++					}
++#endif
+ 					dead++;
+ 				}
+ #ifdef CONFIG_IP_ROUTE_MULTIPATH
+diff --git a/net/ipv4/icmp.c b/net/ipv4/icmp.c
+index 03d9659..55d99b2 100644
+--- a/net/ipv4/icmp.c
++++ b/net/ipv4/icmp.c
+@@ -440,8 +440,10 @@ void icmp_send(struct sk_buff *skb_in, int type, int code, __be32 info)
+ 	__be32 saddr;
+ 	u8  tos;
+ 
++#ifndef CONFIG_IP_LEF
+ 	if (!rt)
+ 		goto out;
++#endif
+ 
+ 	/*
+ 	 *	Find the original header. It is expected to be valid, of course.
+@@ -462,7 +464,11 @@ void icmp_send(struct sk_buff *skb_in, int type, int code, __be32 info)
+ 	/*
+ 	 *	Now check at the protocol level
+ 	 */
++#ifdef CONFIG_IP_LEF
++	if (rt && rt->rt_flags & (RTCF_BROADCAST | RTCF_MULTICAST))
++#else
+ 	if (rt->rt_flags & (RTCF_BROADCAST | RTCF_MULTICAST))
++#endif
+ 		goto out;
+ 
+ 	/*
+@@ -512,6 +518,11 @@ void icmp_send(struct sk_buff *skb_in, int type, int code, __be32 info)
+ 	 */
+ 
+ 	saddr = iph->daddr;
++#ifdef CONFIG_IP_LEF
++	if (!rt) {
++		saddr = 0;
++	} else
++#endif
+ 	if (!(rt->rt_flags & RTCF_LOCAL)) {
+ 		struct net_device *dev = NULL;
+ 
+diff --git a/net/ipv4/ip_input.c b/net/ipv4/ip_input.c
+index f38e976..2e3749a 100644
+--- a/net/ipv4/ip_input.c
++++ b/net/ipv4/ip_input.c
+@@ -145,6 +145,9 @@
+ #include <net/xfrm.h>
+ #include <linux/mroute.h>
+ #include <linux/netlink.h>
++#ifdef CONFIG_IP_LEF
++#include <net/lef.h>
++#endif
+ 
+ /*
+  *	SNMP management statistics
+@@ -337,6 +340,9 @@ static inline int ip_rcv_finish(struct sk_buff *skb)
+ 	 *	how the packet travels inside Linux networking.
+ 	 */
+ 	if (skb->dst == NULL) {
++#ifdef CONFIG_IP_LEF
++		skb->lef.flags |= LEF_NEED;
++#endif
+ 		int err = ip_route_input(skb, iph->daddr, iph->saddr, iph->tos,
+ 					 skb->dev);
+ 		if (unlikely(err)) {
+@@ -344,6 +350,10 @@ static inline int ip_rcv_finish(struct sk_buff *skb)
+ 				IP_INC_STATS_BH(IPSTATS_MIB_INADDRERRORS);
+ 			goto drop;
+ 		}
++#ifdef CONFIG_IP_LEF
++		if (!skb->dst)	// LEF has processed the packet
++			return lef_forward(skb);
++#endif
+ 	}
+ 
+ #ifdef CONFIG_NET_CLS_ROUTE
+diff --git a/net/ipv4/lef.c b/net/ipv4/lef.c
+new file mode 100644
+index 0000000..60aef35
+--- /dev/null
++++ b/net/ipv4/lef.c
 @@ -0,0 +1,124 @@
 +/*
 + * Linux express forwarding code
@@ -473,237 +727,23 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
 +	kfree_skb(skb);
 +	return NET_RX_DROP;
 +}
---- linux-2.6.19.1.orig/net/ipv4/fib_semantics.c	2006-12-11 20:32:53.000000000 +0100
-+++ linux-2.6.19.1/net/ipv4/fib_semantics.c	2007-02-05 12:08:23.000000000 +0100
-@@ -153,6 +153,11 @@
- 		if (nh->nh_dev)
- 			dev_put(nh->nh_dev);
- 		nh->nh_dev = NULL;
-+#ifdef CONFIG_IP_LEF
-+		if (nh->neighbour)
-+			neigh_release(nh->neighbour);
-+		nh->neighbour = NULL;
-+#endif
- 	} endfor_nexthops(fi);
- 	fib_info_cnt--;
- 	kfree(fi);
-@@ -845,13 +850,31 @@
- 	return ERR_PTR(err);
- }
+diff --git a/net/ipv4/netfilter/Kconfig b/net/ipv4/netfilter/Kconfig
+index 601808c..d3b4e2a 100644
+--- a/net/ipv4/netfilter/Kconfig
++++ b/net/ipv4/netfilter/Kconfig
+@@ -395,7 +395,7 @@ config NF_NAT_NEEDED
  
-+#ifdef CONFIG_IP_LEF
-+/* dst_hash - for hashing a flowi */
-+static inline unsigned char __ip4_hash(const unsigned char *ip)
-+{
-+	return ip[0] + ip[1] + ip[2] + ip[3];
-+}
-+
-+static inline unsigned char __flowi_hash(const struct flowi *flp)
-+{
-+	return __ip4_hash((unsigned char*)&flp->fl4_dst) +
-+		jiffies;
-+}
-+#endif
-+
- /* Note! fib_semantic_match intentionally uses  RCU list functions. */
- int fib_semantic_match(struct list_head *head, const struct flowi *flp,
- 		       struct fib_result *res, __be32 zone, __be32 mask,
- 			int prefixlen)
- {
- 	struct fib_alias *fa;
--	int nh_sel = 0;
-+	int nh_sel;
-+#ifdef CONFIG_IP_LEF
-+	const struct fib_nh *_nh;
-+	unsigned _fib_nhs;
-+#endif
- 
- 	list_for_each_entry_rcu(fa, head, fa_list) {
- 		int err;
-@@ -860,8 +883,10 @@
- 		    fa->fa_tos != flp->fl4_tos)
- 			continue;
- 
-+#ifndef CONFIG_IP_LEF
- 		if (fa->fa_scope < flp->fl4_scope)
- 			continue;
-+#endif
- 
- 		fa->fa_state |= FA_S_ACCESSED;
- 
-@@ -872,12 +897,51 @@
- 			if (fi->fib_flags & RTNH_F_DEAD)
- 				continue;
- 
-+#ifdef CONFIG_IP_LEF
-+			_fib_nhs = fi->fib_nhs;
-+#endif
-+
-+#ifndef CONFIG_IP_LEF
- 			switch (fa->fa_type) {
- 			case RTN_UNICAST:
- 			case RTN_LOCAL:
- 			case RTN_BROADCAST:
- 			case RTN_ANYCAST:
- 			case RTN_MULTICAST:
-+#endif
-+#ifdef CONFIG_IP_LEF
-+				{
-+					int _nh_i;
-+
-+					if (likely(_fib_nhs == 1)) {
-+						_nh = fi->fib_nh;
-+						if (likely(!(_nh->nh_flags&RTNH_F_DEAD))) {
-+							if (!flp->oif || flp->oif == _nh->nh_oif) {
-+								nh_sel = 0;
-+								goto out_fill_res;
-+							}
-+						}
-+					} else {
-+						nh_sel = ((unsigned)__flowi_hash(flp) % _fib_nhs);
-+						for (_nh_i = 0; _nh_i < _fib_nhs; _nh_i++) {
-+							_nh = fi->fib_nh + nh_sel;
-+
-+							if (likely(!(_nh->nh_flags&RTNH_F_DEAD))) {
-+								if (!flp->oif || flp->oif == _nh->nh_oif)
-+									break;
-+							}
-+							nh_sel = (nh_sel + 1) % _fib_nhs;
-+						}
-+					}
-+#ifdef CONFIG_IP_ROUTE_MULTIPATH
-+					if (_nh_i < _fib_nhs)
-+						goto out_fill_res;
-+#else
-+					if (_nh_i < 1)
-+						goto out_fill_res;
-+#endif
-+				}
-+#else
- 				for_nexthops(fi) {
- 					if (nh->nh_flags&RTNH_F_DEAD)
- 						continue;
-@@ -895,12 +959,15 @@
- 				}
- #endif
- 				endfor_nexthops(fi);
-+#endif
- 				continue;
-+#ifndef CONFIG_IP_LEF
- 
- 			default:
- 				printk(KERN_DEBUG "impossible 102\n");
- 				return -EINVAL;
- 			};
-+#endif
- 		}
- 		return err;
- 	}
-@@ -916,6 +983,9 @@
- 	res->netmask = mask;
- 	res->network = zone & inet_make_mask(prefixlen);
- #endif
-+#ifdef CONFIG_IP_LEF
-+	res->nh = (struct fib_nh*)_nh;
-+#endif
- 	atomic_inc(&res->fi->fib_clntref);
- 	return 0;
- }
-@@ -1045,6 +1115,9 @@
- 		struct hlist_head *head = &fib_info_devhash[hash];
- 		struct hlist_node *node;
- 		struct fib_nh *nh;
-+#ifdef CONFIG_IP_LEF
-+		struct neighbour *neigh;
-+#endif
- 
- 		hlist_for_each_entry(nh, node, head, nh_hash) {
- 			struct fib_info *fi = nh->nh_parent;
-@@ -1067,6 +1140,12 @@
- 					nh->nh_power = 0;
- 					spin_unlock_bh(&fib_multipath_lock);
- #endif
-+#ifdef CONFIG_IP_LEF
-+					if ((neigh = nh->neighbour)) {
-+						nh->neighbour = NULL;
-+						neigh_release(neigh);
-+					}
-+#endif
- 					dead++;
- 				}
- #ifdef CONFIG_IP_ROUTE_MULTIPATH
---- linux-2.6.20.3/include/net/ip_fib.h.orig	2007-03-13 19:27:08.000000000 +0100
-+++ linux-2.6.20.3/include/net/ip_fib.h	2007-04-09 10:50:47.000000000 +0200
-@@ -61,6 +61,9 @@
- #endif
- 	int			nh_oif;
- 	__be32			nh_gw;
-+#ifdef CONFIG_IP_LEF
-+	struct neighbour	*neighbour;
-+#endif
- };
- 
- /*
-@@ -111,6 +114,7 @@
- #ifdef CONFIG_IP_MULTIPLE_TABLES
- 	struct fib_rule	*r;
- #endif
-+	struct fib_nh	*nh;
- };
- 
- struct fib_result_nl {
-@@ -130,7 +134,11 @@
- 
- #ifdef CONFIG_IP_ROUTE_MULTIPATH
- 
-+#ifdef CONFIG_IP_LEF
-+#define FIB_RES_NH(res)		(*((res).nh))
-+#else
- #define FIB_RES_NH(res)		((res).fi->fib_nh[(res).nh_sel])
-+#endif
- #define FIB_RES_RESET(res)	((res).nh_sel = 0)
- 
- #else /* CONFIG_IP_ROUTE_MULTIPATH */
---- linux-2.6.21.5/net/ipv4/icmp.c.orig	2007-06-11 20:37:06.000000000 +0200
-+++ linux-2.6.21.5/net/ipv4/icmp.c	2007-07-10 15:28:52.000000000 +0200
-@@ -440,8 +440,10 @@
- 	__be32 saddr;
- 	u8  tos;
- 
-+#ifndef CONFIG_IP_LEF
- 	if (!rt)
- 		goto out;
-+#endif
- 
- 	/*
- 	 *	Find the original header. It is expected to be valid, of course.
-@@ -462,7 +464,11 @@
- 	/*
- 	 *	Now check at the protocol level
- 	 */
-+#ifdef CONFIG_IP_LEF
-+	if (rt && rt->rt_flags & (RTCF_BROADCAST | RTCF_MULTICAST))
-+#else
- 	if (rt->rt_flags & (RTCF_BROADCAST | RTCF_MULTICAST))
-+#endif
- 		goto out;
- 
- 	/*
-@@ -512,7 +518,12 @@
- 	 */
- 
- 	saddr = iph->daddr;
-+#ifdef CONFIG_IP_LEF
-+	if (!rt) {
-+		saddr = 0;
-+	} else
-+#endif
- 	if (!(rt->rt_flags & RTCF_LOCAL)) {
- 		struct net_device *dev = NULL;
- 
- 		if (rt->fl.iif && sysctl_icmp_errors_use_inbound_ifaddr)
---- linux-2.6.21.5/net/ipv4/route.c.orig	2007-06-11 20:37:06.000000000 +0200
-+++ linux-2.6.21.5/net/ipv4/route.c	2007-07-04 10:06:10.000000000 +0200
+ config IP_NF_TARGET_MASQUERADE
+ 	tristate "MASQUERADE target support"
+-	depends on (NF_NAT || IP_NF_NAT)
++	depends on (NF_NAT || IP_NF_NAT) && !IP_LEF
+ 	help
+ 	  Masquerading is a special case of NAT: all outgoing connections are
+ 	  changed to seem to come from a particular interface's address, and
+diff --git a/net/ipv4/route.c b/net/ipv4/route.c
+index 37e0d4d..13ee263 100644
+--- a/net/ipv4/route.c
++++ b/net/ipv4/route.c
 @@ -107,6 +107,9 @@
  #ifdef CONFIG_SYSCTL
  #include <linux/sysctl.h>
@@ -714,7 +754,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  
  #define RT_FL_TOS(oldflp) \
      ((u32)(oldflp->fl4_tos & (IPTOS_RT_MASK | RTO_ONLINK)))
-@@ -251,6 +254,15 @@
+@@ -251,6 +254,15 @@ static DEFINE_PER_CPU(struct rt_cache_stat, rt_cache_stat);
  #define RT_CACHE_STAT_INC(field) \
  	(__raw_get_cpu_var(rt_cache_stat).field++)
  
@@ -730,7 +770,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  static int rt_intern_hash(unsigned hash, struct rtable *rth,
  				struct rtable **res);
  
-@@ -259,6 +271,7 @@
+@@ -259,6 +271,7 @@ static unsigned int rt_hash_code(u32 daddr, u32 saddr)
  	return (jhash_2words(daddr, saddr, rt_hash_rnd)
  		& rt_hash_mask);
  }
@@ -738,7 +778,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  
  #define rt_hash(daddr, saddr, idx) \
  	rt_hash_code((__force u32)(__be32)(daddr),\
-@@ -919,6 +932,23 @@
+@@ -919,6 +932,23 @@ work_done:
  out:	return 0;
  }
  
@@ -762,7 +802,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  static int rt_intern_hash(unsigned hash, struct rtable *rt, struct rtable **rp)
  {
  	struct rtable	*rth, **rthp;
-@@ -1049,6 +1079,7 @@
+@@ -1049,6 +1079,7 @@ restart:
  	*rp = rt;
  	return 0;
  }
@@ -770,137 +810,83 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  
  void rt_bind_peer(struct rtable *rt, int create)
  {
-@@ -1717,7 +1748,11 @@
- 				  struct fib_result* res,
- 				  struct in_device *in_dev,
- 				  __be32 daddr, __be32 saddr, u32 tos,
--				  struct rtable **result)
-+				  struct rtable **result
-+#ifdef CONFIG_IP_LEF
-+				  , int use_lef
-+#endif
-+				  )
- {
- 
- 	struct rtable *rth;
-@@ -1736,6 +1771,9 @@
- 		return -EINVAL;
- 	}
+@@ -1893,6 +1924,52 @@ static inline int ip_mkroute_input(struct sk_buff *skb,
+ #endif /* CONFIG_IP_ROUTE_MULTIPATH_CACHED  */
+ }
  
 +#ifdef CONFIG_IP_LEF
-+	if (!use_lef || IN_DEV_RPFILTER(in_dev)) {
-+#endif
- 
- 	err = fib_validate_source(saddr, daddr, tos, FIB_RES_OIF(*res),
- 				  in_dev->dev, &spec_dst, &itag);
-@@ -1754,6 +1792,9 @@
- 	    (IN_DEV_SHARED_MEDIA(out_dev) ||
- 	     inet_addr_onlink(out_dev, saddr, FIB_RES_GW(*res))))
- 		flags |= RTCF_DOREDIRECT;
-+#ifdef CONFIG_IP_LEF
++static inline int __lef_mkroute_input(struct sk_buff *skb, struct fib_result *res, __be32 daddr)
++{
++	int	err;
++	__be32	gw;
++
++	if (FIB_RES_GW(*res) && FIB_RES_NH(*res).nh_scope == RT_SCOPE_LINK)
++		gw = FIB_RES_GW(*res);
++	else
++		gw = daddr;
++
++	err = arp_bind_neighbour_lef(&skb->lef, gw);
++	if (unlikely(err))
++		return err;
++
++	// TODO: not SMP safe
++	if (gw != daddr) { // only store if it is a real gateway
++		res->nh->neighbour = skb->lef.neighbour;
++		atomic_inc(&res->nh->neighbour->refcnt);
 +	}
-+#endif
- 
- 	if (skb->protocol != htons(ETH_P_IP)) {
- 		/* Not IP (i.e. ARP). Do not create route, if it is
-@@ -1765,6 +1806,25 @@
- 		}
- 	}
- 
-+#ifdef CONFIG_IP_LEF
-+	if (use_lef) {
++
++	return 0;
++}
++
++static inline int lef_mkroute_input(struct sk_buff *skb, struct fib_result *res, struct in_device *in_dev, __be32 daddr)
++{
++	if (unlikely(!(skb->lef.flags & LEF_NEED)))
++		return -EAGAIN;
++
++	if (likely(skb->nh.iph->ihl <= 5 && !IN_DEV_RPFILTER(in_dev))) {
++		skb->lef.dev = FIB_RES_DEV(*res);
++		dev_hold(skb->lef.dev);
++		skb->lef.mtu = res->fi->fib_mtu ? res->fi->fib_mtu : skb->lef.dev->mtu;
++
 +		if (likely(res->nh->neighbour)) {
 +			skb->lef.neighbour = res->nh->neighbour;
 +			atomic_inc(&skb->lef.neighbour->refcnt);
++			return 0;
 +		} else {
-+			if (FIB_RES_GW(*res) &&
-+					FIB_RES_NH(*res).nh_scope == RT_SCOPE_LINK)
-+				skb->lef.gateway = FIB_RES_GW(*res);
-+			else
-+				skb->lef.gateway = daddr;
++			return __lef_mkroute_input(skb, res, daddr);
 +		}
-+		skb->lef.dev = (out_dev)->dev;
-+		dev_hold(skb->lef.dev);
-+		skb->lef.mtu = res->fi->fib_mtu ? res->fi->fib_mtu : skb->lef.dev->mtu;
-+		err = 0;
-+		goto cleanup;
 +	}
++
++	return -EAGAIN;
++}
 +#endif
  
- 	rth = dst_alloc(&ipv4_dst_ops);
- 	if (!rth) {
-@@ -1828,7 +1888,11 @@
- #endif
- 
- 	/* create a routing cache entry */
-+#ifdef CONFIG_IP_LEF
-+	err = __mkroute_input(skb, res, in_dev, daddr, saddr, tos, &rth, 0);
-+#else
- 	err = __mkroute_input(skb, res, in_dev, daddr, saddr, tos, &rth);
-+#endif
- 	if (err)
- 		return err;
- 
-@@ -1904,8 +1968,13 @@
+ /*
+  *	NOTE. We drop all the packets that has local source
+@@ -1904,7 +1981,7 @@ static inline int ip_mkroute_input(struct sk_buff *skb,
   *	2. IP spoofing attempts are filtered with 100% of guarantee.
   */
  
 -static int ip_route_input_slow(struct sk_buff *skb, __be32 daddr, __be32 saddr,
-+#ifdef CONFIG_IP_LEF
-+static inline int ip_route_input_slow(struct sk_buff *skb, __be32 daddr, __be32 saddr,
-+			       u8 tos, struct net_device *dev, int use_lef)
-+#else
 +static inline int ip_route_input_slow(struct sk_buff *skb, __be32 daddr, __be32 saddr,
  			       u8 tos, struct net_device *dev)
-+#endif
  {
  	struct fib_result res;
- 	struct in_device *in_dev = in_dev_get(dev);
-@@ -1982,6 +2051,33 @@
+@@ -1982,6 +2059,11 @@ static int ip_route_input_slow(struct sk_buff *skb, __be32 daddr, __be32 saddr,
  	if (res.type != RTN_UNICAST)
  		goto martian_destination;
  
 +#ifdef CONFIG_IP_LEF
-+	if (likely(use_lef)) {
-+		if (likely((res.nh->neighbour) && !IN_DEV_RPFILTER(in_dev))) {
-+			skb->lef.neighbour = res.nh->neighbour;
-+			atomic_inc(&skb->lef.neighbour->refcnt);
-+			skb->lef.dev = FIB_RES_DEV(res);
-+			dev_hold(skb->lef.dev);
-+			skb->lef.mtu = res.fi->fib_mtu ? res.fi->fib_mtu : skb->lef.dev->mtu;
-+			goto done;
-+		}
-+
-+		err = __mkroute_input(skb, &res, in_dev, daddr, saddr, tos, NULL, 1);
-+		if (unlikely(err))
-+			goto done;
-+
-+		if (unlikely(!(skb->lef.neighbour))) {
-+			err = arp_bind_neighbour_lef(&skb->lef);
-+			if (unlikely(err))
-+				goto done;
-+			if (skb->lef.gateway && skb->lef.gateway != daddr) { // only store if it is a really gateway
-+				res.nh->neighbour = skb->lef.neighbour;
-+				atomic_inc(&res.nh->neighbour->refcnt);
-+			}
-+		}
++	err = lef_mkroute_input(skb, &res, in_dev, daddr);
++	if (likely(err != -EAGAIN))
 +		goto done;
-+	}
 +#endif
  	err = ip_mkroute_input(skb, &res, &fl, in_dev, daddr, saddr, tos);
  	if (err == -ENOBUFS)
  		goto e_nobufs;
-@@ -2086,14 +2182,22 @@
- 	goto e_inval;
- }
- 
-+#ifdef CONFIG_IP_LEF
-+int ip_route_input_lef(struct sk_buff *skb, __be32 daddr, __be32 saddr,
-+		   u8 tos, struct net_device *dev, int use_lef)
-+#else
+@@ -2089,11 +2171,14 @@ martian_source:
  int ip_route_input(struct sk_buff *skb, __be32 daddr, __be32 saddr,
  		   u8 tos, struct net_device *dev)
-+#endif
  {
 +#ifndef CONFIG_IP_LEF
  	struct rtable * rth;
@@ -913,7 +899,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  	hash = rt_hash(daddr, saddr, iif);
  
  	rcu_read_lock();
-@@ -2116,6 +2220,7 @@
+@@ -2116,6 +2201,7 @@ int ip_route_input(struct sk_buff *skb, __be32 daddr, __be32 saddr,
  		RT_CACHE_STAT_INC(in_hlist_search);
  	}
  	rcu_read_unlock();
@@ -921,29 +907,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  
  	/* Multicast recognition logic is moved from route cache to here.
  	   The problem was that too many Ethernet cards have broken/missing
-@@ -2148,8 +2253,21 @@
- 		rcu_read_unlock();
- 		return -EINVAL;
- 	}
-+#ifdef CONFIG_IP_LEF
-+	return ip_route_input_slow(skb, daddr, saddr, tos, dev, use_lef);
-+#else
- 	return ip_route_input_slow(skb, daddr, saddr, tos, dev);
-+#endif
-+}
-+
-+#ifdef CONFIG_IP_LEF
-+int ip_route_input(struct sk_buff *skb, u32 daddr, u32 saddr,
-+		   u8 tos, struct net_device *dev)
-+{
-+	return ip_route_input_lef(skb, daddr, saddr, tos, dev, 0);
- }
-+#endif
-+
- 
- static inline int __mkroute_output(struct rtable **result,
- 				   struct fib_result* res,
-@@ -2555,6 +2673,7 @@
+@@ -2555,6 +2641,7 @@ out:	return err;
  
  int __ip_route_output_key(struct rtable **rp, const struct flowi *flp)
  {
@@ -951,7 +915,7 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  	unsigned hash;
  	struct rtable *rth;
  
-@@ -2592,6 +2711,7 @@
+@@ -2592,6 +2679,7 @@ int __ip_route_output_key(struct rtable **rp, const struct flowi *flp)
  		RT_CACHE_STAT_INC(out_hlist_search);
  	}
  	rcu_read_unlock_bh();
@@ -959,80 +923,13 @@ diff -ruNP linux-2.6.18.orig/net/ipv4/arp.c linux-2.6.18/net/ipv4/arp.c
  
  	return ip_route_output_slow(rp, flp);
  }
-@@ -3193,6 +3313,9 @@
+@@ -3193,6 +3281,9 @@ int __init ip_rt_init(void)
  	xfrm_init();
  	xfrm4_init();
  #endif
 +#ifdef CONFIG_IP_LEF
-+	printk(KERN_DEBUG "IPv4: LEF v0.2 is active\n");
++	printk(KERN_DEBUG "IPv4: LEF v0.2.1 is active\n");
 +#endif
  	return rc;
  }
  
---- linux-2.6.21.5/net/ipv4/ip_input.c.orig	2007-06-11 20:37:06.000000000 +0200
-+++ linux-2.6.21.5/net/ipv4/ip_input.c	2007-07-04 10:09:02.000000000 +0200
-@@ -146,6 +146,10 @@
- #include <linux/mroute.h>
- #include <linux/netlink.h>
- 
-+#ifdef CONFIG_IP_LEF
-+#include <net/lef.h>
-+#endif
-+
- /*
-  *	SNMP management statistics
-  */
-@@ -331,14 +335,22 @@
- static inline int ip_rcv_finish(struct sk_buff *skb)
- {
- 	struct iphdr *iph = skb->nh.iph;
-+	int ip_has_options = iph->ihl > 5;
- 
- 	/*
- 	 *	Initialise the virtual path cache for the packet. It describes
- 	 *	how the packet travels inside Linux networking.
-+	 *	Only packets without IP options can be handled by LEF, so
-+	 *	give the function this information.
- 	 */
- 	if (skb->dst == NULL) {
-+#ifdef CONFIG_IP_LEF
-+		int err = ip_route_input_lef(skb, iph->daddr, iph->saddr, iph->tos,
-+					 skb->dev, !ip_has_options);
-+#else
- 		int err = ip_route_input(skb, iph->daddr, iph->saddr, iph->tos,
- 					 skb->dev);
-+#endif
- 		if (unlikely(err)) {
- 			if (err == -EHOSTUNREACH)
- 				IP_INC_STATS_BH(IPSTATS_MIB_INADDRERRORS);
-@@ -347,6 +359,9 @@
- 	}
- 
- #ifdef CONFIG_NET_CLS_ROUTE
-+#ifdef CONFIG_IP_LEF
-+	if (skb->dst) {
-+#endif
- 	if (unlikely(skb->dst->tclassid)) {
- 		struct ip_rt_acct *st = ip_rt_acct + 256*smp_processor_id();
- 		u32 idx = skb->dst->tclassid;
-@@ -355,11 +370,19 @@
- 		st[(idx>>16)&0xFF].i_packets++;
- 		st[(idx>>16)&0xFF].i_bytes+=skb->len;
- 	}
-+#ifdef CONFIG_IP_LEF
-+	}
-+#endif
- #endif
- 
--	if (iph->ihl > 5 && ip_rcv_options(skb))
-+	if (ip_has_options && ip_rcv_options(skb))
- 		goto drop;
- 
-+#ifdef CONFIG_IP_LEF
-+	if (!skb->dst)
-+		return lef_forward(skb);
-+	else
-+#endif
- 	return dst_input(skb);
- 
- drop:
