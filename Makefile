@@ -20,7 +20,8 @@
 #
 # $Id$
 
-ifndef DO_MK
+export TOP_DIR := $(shell pwd)
+
 DO_MK = base
 DO_MK += grsec
 DO_MK += kernel
@@ -61,23 +62,16 @@ DO_MK += libnet
 DO_MK += nemesis
 DO_MK += ethtool
 DO_MK += e2fsprogs
+DO_MK += tools
+
+include $(TOP_DIR)/config.mk
 
 # Finish target is last
-DO_MK += tools
 DO_MK += finish
-endif
 
 DISTFILES = AUTHOR BUILD LICENSE ChangeLog Makefile README UPGRADE bzpadder cfbase \
 	    config.mk configs fs_config install_bin.sh md5sums mk \
 	    packages.mk part_init.sh patches tools
-
-export TOP_DIR := $(shell pwd)
-
-ifeq (local.mk,$(wildcard local.mk))
-include local.mk
-endif
-
-include $(TOP_DIR)/config.mk
 
 all: build
 
@@ -97,7 +91,6 @@ scratch: distclean
 
 install: all
 	for i in $(DO_MK) ; do $(MAKE) -f $(MK)/$$i.mk install || exit ; done
-	echo "$(RELEASE_STRING) ($(shell date "+%Y/%m/%d-%H.%M.%S %Z"))" > $(ROOTFS)/.release
 
 image:
 	if [ "$$(id -u)" -ne 0 ] ; then echo "You must be root or use fakeroot." ; exit 1 ; fi
