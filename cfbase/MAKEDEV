@@ -149,23 +149,25 @@ makedev () {	# usage: makedev name [bcu] major minor owner group mode
 	case :$1:$2:$3:$4:$5:$6:$7: in
 		*::*) echo "Warning: MAKEDEV $@ is missing parameter(s)." >&2;;
 	esac
+	mf="./$1"
+	mf="${mf%/*}/@${1##*/}"
 	if [ ! "$opt_n" ]
 	then
 		if [ "$opt_d" ]
 		then
-			rm -f $1 @$1
+			rm -f $1 $mf
 		else
-			rm -f $1- @$1-
+			rm -f $1- $mf-
 			if echo -n '' > $1- &&
-				echo "$(uname_uid $5) $(gname_gid $6) $7 $2 $3 $4" > @$1- &&
+				echo "$(uname_uid $5) $(gname_gid $6) $7 $2 $3 $4" > $mf- &&
 				mv $1- $1 &&
-				mv @$1- @$1
+				mv $mf- $mf
 			then
 				:	# it worked
 			else
 					# Didn't work, clean up any mess...
 				echo "makedev $@: failed"
-				rm -f $1- @$1-
+				rm -f $1- $mf-
 			fi
 		fi
 	fi
