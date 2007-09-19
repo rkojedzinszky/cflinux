@@ -20,6 +20,10 @@
 # the top level dir
 #
 
+ifeq ($(wildcard $(TOP_DIR)/local.mk), $(TOP_DIR)/local.mk)
+include $(TOP_DIR)/local.mk
+endif
+
 # cflinux version
 VERSION_MAJOR = 2
 VERSION_MINOR = 0

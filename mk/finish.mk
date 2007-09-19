@@ -48,5 +48,8 @@ install:
 		xargs -r0 strip -g
 	PATH=/bin:/sbin:/usr/bin:/usr/sbin depmod -raeb $(ROOTFS) -F $(BUILD_DIR)/kernel/System.map $(KERNEL_VERSION)
 	rm -f fs_config/modules.conf
+	echo "$(RELEASE_STRING) ($(shell date "+%Y/%m/%d-%H.%M.%S %Z"))" > $(ROOTFS)/.release
+	echo "_cflinux_major=$(VERSION_MAJOR) _cflinux_minor=$(VERSION_MINOR) _cflinux_patch=$(VERSION_PATCH) _cflinux_extra=$(VERSION_EXTRA)" \
+		> $(ROOTFS)/usr/lib/cfpkg/cflinux_version
 
 .PHONY: configure clean build install
