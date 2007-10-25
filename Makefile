@@ -87,7 +87,9 @@ install: all
 image:
 	if [ "$$(id -u)" -ne 0 ] ; then echo "You must be root or use fakeroot." ; exit 1 ; fi
 	cat bzpadder $(BUILD_DIR)/kernel/arch/i386/boot/bzImage > topad
+	-mkdir $(FDEVEL_DIR)/fs_config/root
 	cd $(FDEVEL_DIR)/fs_config && tar cf $(ROOTFS)/usr/share/defaults/etc.tar *
+	rmdir $(FDEVEL_DIR)/fs_config/root
 	$(MKCRAMFS) -R -i topad $(ROOTFS) rootfs.bin
 	$(MAKE) -C cfbase/scripts/upgrade setup.tgz
 	$(PACKROOT) '$(VERSION_MAJOR)' '$(VERSION_MINOR)' '$(VERSION_PATCH)' '$(VERSION_EXTRA)' rootfs.bin cfbase/scripts/upgrade/setup.tgz cflinux-$(RELEASE_STRING).img
