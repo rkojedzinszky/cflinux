@@ -87,18 +87,12 @@ install: all
 image:
 	if [ "$$(id -u)" -ne 0 ] ; then echo "You must be root or use fakeroot." ; exit 1 ; fi
 	cat bzpadder $(BUILD_DIR)/kernel/arch/i386/boot/bzImage > topad
+	-mkdir $(FDEVEL_DIR)/fs_config/root
 	cd $(FDEVEL_DIR)/fs_config && tar cf $(ROOTFS)/usr/share/defaults/etc.tar *
+	rmdir $(FDEVEL_DIR)/fs_config/root
 	$(MKCRAMFS) -R -i topad $(ROOTFS) rootfs.bin
 	$(MAKE) -C cfbase/scripts/upgrade setup.tgz
 	$(PACKROOT) '$(VERSION_MAJOR)' '$(VERSION_MINOR)' '$(VERSION_PATCH)' '$(VERSION_EXTRA)' rootfs.bin cfbase/scripts/upgrade/setup.tgz cflinux-$(RELEASE_STRING).img
 	rm -f topad
-
-dist: scratch
-	rm -rf $(PACKAGE)-$(RELEASE_STRING)
-	mkdir $(PACKAGE)-$(RELEASE_STRING)
-	cp -R $(DISTFILES) $(PACKAGE)-$(RELEASE_STRING)
-	find $(PACKAGE)-$(RELEASE_STRING) -type d -name .svn -print0 | xargs -r0 rm -rf
-	tar czf $(PACKAGE)-$(RELEASE_STRING).tar.gz $(PACKAGE)-$(RELEASE_STRING)
-	rm -rf $(PACKAGE)-$(RELEASE_STRING)
 
 .PHONY: all build distclean clean install image scratch
