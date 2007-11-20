@@ -61,6 +61,8 @@ include $(TOP_DIR)/config.mk
 # Finish target is last
 DO_MK += finish
 
+all: build
+
 download patch check build:
 	for i in $(DO_MK) ; do $(MAKE) -f $(MK)/$$i.mk $@ || exit 1 ; done
 
