@@ -61,12 +61,6 @@ include $(TOP_DIR)/config.mk
 # Finish target is last
 DO_MK += finish
 
-DISTFILES = AUTHOR BUILD LICENSE ChangeLog Makefile README UPGRADE bzpadder cfbase \
-	    config.mk configs fs_config install_bin.sh md5sums mk \
-	    packages.mk part_init.sh patches tools
-
-all: build
-
 download patch check build:
 	for i in $(DO_MK) ; do $(MAKE) -f $(MK)/$$i.mk $@ || exit 1 ; done
 
