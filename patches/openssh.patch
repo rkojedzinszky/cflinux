@@ -1,6 +1,6 @@
---- openssh-4.5p1/Makefile.in.orig	2006-10-23 23:44:47.000000000 +0200
-+++ openssh-4.5p1/Makefile.in	2007-02-24 12:13:53.000000000 +0100
-@@ -131,45 +131,44 @@
+--- openssh-4.7p1/Makefile.in.orig	2007-06-11 06:01:42.000000000 +0200
++++ openssh-4.7p1/Makefile.in	2007-11-21 11:04:23.000000000 +0100
+@@ -128,45 +128,44 @@
  	(cd openbsd-compat && $(MAKE))
  always:
  
@@ -16,7 +16,7 @@
  
 -sshd$(EXEEXT): libssh.a	$(LIBCOMPAT) $(SSHDOBJS)
 +sshd$(EXEEXT): libssh.so	$(LIBCOMPAT) $(SSHDOBJS)
- 	$(LD) -o $@ $(SSHDOBJS) $(LDFLAGS) -lssh -lopenbsd-compat $(LIBWRAP) $(LIBPAM) $(LIBSELINUX) $(SSHDLIBS) $(LIBS)
+ 	$(LD) -o $@ $(SSHDOBJS) $(LDFLAGS) -lssh -lopenbsd-compat $(SSHDLIBS) $(LIBS)
  
 -scp$(EXEEXT): $(LIBCOMPAT) libssh.a scp.o progressmeter.o
 +scp$(EXEEXT): $(LIBCOMPAT) libssh.so scp.o progressmeter.o
