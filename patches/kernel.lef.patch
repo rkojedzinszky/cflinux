@@ -38,7 +38,7 @@ index f026645..92e1e8b 100644
  extern void	arp_ifdown(struct net_device *dev);
  
 diff --git a/include/net/ip_fib.h b/include/net/ip_fib.h
-index 36c635c..09ab0c9 100644
+index 36c635c..b81117d 100644
 --- a/include/net/ip_fib.h
 +++ b/include/net/ip_fib.h
 @@ -61,6 +61,9 @@ struct fib_nh {
@@ -71,6 +71,44 @@ index 36c635c..09ab0c9 100644
  #define FIB_RES_RESET(res)	((res).nh_sel = 0)
  
  #else /* CONFIG_IP_ROUTE_MULTIPATH */
+@@ -171,14 +179,23 @@ struct fib_table {
+ 
+ #ifndef CONFIG_IP_MULTIPLE_TABLES
+ 
+-extern struct fib_table *ip_fib_local_table;
+ extern struct fib_table *ip_fib_main_table;
+ 
++#ifdef CONFIG_IP_FIB_HASH
++#define _tb_lookup fn_hash_lookup
++#endif
++#ifdef CONFIG_IP_FIB_TRIE
++#define _tb_lookup fn_trie_lookup
++#endif
++#ifdef CONFIG_IP_FIB_LEF
++#define _tb_lookup fn_lef_lookup
++#endif
++
++extern int _tb_lookup(struct fib_table *, const struct flowi *, struct fib_result *);
++
+ static inline struct fib_table *fib_get_table(u32 id)
+ {
+-	if (id != RT_TABLE_LOCAL)
+-		return ip_fib_main_table;
+-	return ip_fib_local_table;
++	return ip_fib_main_table;
+ }
+ 
+ static inline struct fib_table *fib_new_table(u32 id)
+@@ -188,8 +205,7 @@ static inline struct fib_table *fib_new_table(u32 id)
+ 
+ static inline int fib_lookup(const struct flowi *flp, struct fib_result *res)
+ {
+-	if (ip_fib_local_table->tb_lookup(ip_fib_local_table, flp, res) &&
+-	    ip_fib_main_table->tb_lookup(ip_fib_main_table, flp, res))
++	if (_tb_lookup(ip_fib_main_table, flp, res))
+ 		return -ENETUNREACH;
+ 	return 0;
+ }
 diff --git a/include/net/lef.h b/include/net/lef.h
 new file mode 100644
 index 0000000..2d03574
@@ -142,7 +180,7 @@ index 0000000..2d03574
 +#endif /* _NET_LEF_H */
 diff --git a/include/net/lef_struct.h b/include/net/lef_struct.h
 new file mode 100644
-index 0000000..764e4fe
+index 0000000..5edce59
 --- /dev/null
 +++ b/include/net/lef_struct.h
 @@ -0,0 +1,29 @@
@@ -166,10 +204,10 @@ index 0000000..764e4fe
 +
 +// our express forwarding structure
 +struct lef {
++	int			flags;		// flags
 +	struct net_device	*dev;		// our device
 +	__u32			mtu;		// our mtu
 +	struct neighbour	*neighbour;	// our neigbour
-+	int			flags;		// flags
 +};
 +
 +#define	LEF_NEED		1		// we should use lef
@@ -290,7 +328,7 @@ index 336958f..5e10ada 100644
  		nskb->pkt_type = skb->pkt_type;
  		nskb->mac_len = skb->mac_len;
 diff --git a/net/ipv4/Kconfig b/net/ipv4/Kconfig
-index 5fc4a05..6469de4 100644
+index 5fc4a05..e0fe136 100644
 --- a/net/ipv4/Kconfig
 +++ b/net/ipv4/Kconfig
 @@ -51,6 +51,12 @@ config IP_ADVANCED_ROUTER
@@ -299,14 +337,26 @@ index 5fc4a05..6469de4 100644
  
 +config IP_LEF
 +	bool "IP: Linux express forwarding"
-+	depends on IP_ADVANCED_ROUTER && !SMP && PREEMPT_NONE
++	depends on IP_ADVANCED_ROUTER
 +	---help---
 +	You should not turn this on
 +
  choice 
  	prompt "Choose IP: FIB lookup algorithm (choose FIB_HASH if unsure)"
  	depends on IP_ADVANCED_ROUTER
-@@ -118,7 +124,7 @@ config IP_ROUTE_MULTIPATH
+@@ -80,6 +86,11 @@ config IP_FIB_TRIE
+  	Stefan Nilsson and Matti Tikkanen. Algorithmica, 33(1):19-33, 2002.
+  	http://www.nada.kth.se/~snilsson/public/papers/dyntrie2/
+        
++config IP_FIB_LEF
++	bool "FIB_LEF"
++	---help---
++	An improved radix based IPv4 lookup algorithm. This needs much testing.
++
+ endchoice
+ 
+ config IP_FIB_HASH
+@@ -118,7 +129,7 @@ config IP_ROUTE_MULTIPATH
  
  config IP_ROUTE_MULTIPATH_CACHED
  	bool "IP: equal cost multipath with caching support (EXPERIMENTAL)"
@@ -316,10 +366,18 @@ index 5fc4a05..6469de4 100644
  	  Normally, equal cost multipath routing is not supported by the
  	  routing cache. If you say Y here, alternative routes are cached
 diff --git a/net/ipv4/Makefile b/net/ipv4/Makefile
-index 7a06862..9ced7a2 100644
+index 7a06862..20ad1f3 100644
 --- a/net/ipv4/Makefile
 +++ b/net/ipv4/Makefile
-@@ -50,6 +50,7 @@ obj-$(CONFIG_TCP_CONG_VENO) += tcp_veno.o
+@@ -14,6 +14,7 @@ obj-y     := route.o inetpeer.o protocol.o \
+ 
+ obj-$(CONFIG_IP_FIB_HASH) += fib_hash.o
+ obj-$(CONFIG_IP_FIB_TRIE) += fib_trie.o
++obj-$(CONFIG_IP_FIB_LEF) += fib_lef.o
+ obj-$(CONFIG_PROC_FS) += proc.o
+ obj-$(CONFIG_IP_MULTIPLE_TABLES) += fib_rules.o
+ obj-$(CONFIG_IP_MROUTE) += ipmr.o
+@@ -50,6 +51,7 @@ obj-$(CONFIG_TCP_CONG_VENO) += tcp_veno.o
  obj-$(CONFIG_TCP_CONG_SCALABLE) += tcp_scalable.o
  obj-$(CONFIG_TCP_CONG_LP) += tcp_lp.o
  obj-$(CONFIG_NETLABEL) += cipso_ipv4.o
@@ -373,6 +431,1071 @@ index 1a3488a..ecf6d58 100644
  /*
   * Check if we can use proxy ARP for this path
   */
+diff --git a/net/ipv4/fib_frontend.c b/net/ipv4/fib_frontend.c
+index 444a56b..a0c1c34 100644
+--- a/net/ipv4/fib_frontend.c
++++ b/net/ipv4/fib_frontend.c
+@@ -51,7 +51,6 @@
+ 
+ #ifndef CONFIG_IP_MULTIPLE_TABLES
+ 
+-struct fib_table *ip_fib_local_table;
+ struct fib_table *ip_fib_main_table;
+ 
+ #define FIB_TABLE_HASHSZ 1
+@@ -131,8 +130,12 @@ struct net_device * ip_dev_find(__be32 addr)
+ 	res.r = NULL;
+ #endif
+ 
++#ifdef CONFIG_IP_MULTIPLE_TABLES
+ 	if (!ip_fib_local_table ||
+ 	    ip_fib_local_table->tb_lookup(ip_fib_local_table, &fl, &res))
++#else
++	if (ip_fib_main_table->tb_lookup(ip_fib_main_table, &fl, &res))
++#endif
+ 		return NULL;
+ 	if (res.type != RTN_LOCAL)
+ 		goto out;
+@@ -160,14 +163,20 @@ unsigned inet_addr_type(__be32 addr)
+ 	res.r = NULL;
+ #endif
+ 
++#ifdef CONFIG_IP_MULTIPLE_TABLES
+ 	if (ip_fib_local_table) {
+ 		ret = RTN_UNICAST;
+ 		if (!ip_fib_local_table->tb_lookup(ip_fib_local_table,
+ 						   &fl, &res)) {
++#else
++	if (!ip_fib_main_table->tb_lookup(ip_fib_main_table, &fl, &res)) {
++#endif
+ 			ret = res.type;
+ 			fib_res_put(&res);
+ 		}
++#ifdef CONFIG_IP_MULTIPLE_TABLES
+ 	}
++#endif
+ 	return ret;
+ }
+ 
+@@ -639,6 +648,7 @@ static void fib_magic(int cmd, int type, __be32 dst, int dst_len, struct in_ifad
+ 		.fc_nlflags = NLM_F_CREATE | NLM_F_APPEND,
+ 	};
+ 
++#ifdef CONFIG_IP_MULTIPLE_TABLES
+ 	if (type == RTN_UNICAST)
+ 		tb = fib_new_table(RT_TABLE_MAIN);
+ 	else
+@@ -646,6 +656,9 @@ static void fib_magic(int cmd, int type, __be32 dst, int dst_len, struct in_ifad
+ 
+ 	if (tb == NULL)
+ 		return;
++#else
++	tb = ip_fib_main_table;
++#endif
+ 
+ 	cfg.fc_table = tb->tb_id;
+ 
+@@ -918,8 +931,6 @@ void __init ip_fib_init(void)
+ 	for (i = 0; i < FIB_TABLE_HASHSZ; i++)
+ 		INIT_HLIST_HEAD(&fib_table_hash[i]);
+ #ifndef CONFIG_IP_MULTIPLE_TABLES
+-	ip_fib_local_table = fib_hash_init(RT_TABLE_LOCAL);
+-	hlist_add_head_rcu(&ip_fib_local_table->tb_hlist, &fib_table_hash[0]);
+ 	ip_fib_main_table  = fib_hash_init(RT_TABLE_MAIN);
+ 	hlist_add_head_rcu(&ip_fib_main_table->tb_hlist, &fib_table_hash[0]);
+ #else
+diff --git a/net/ipv4/fib_hash.c b/net/ipv4/fib_hash.c
+index a4949f9..6d6e19a 100644
+--- a/net/ipv4/fib_hash.c
++++ b/net/ipv4/fib_hash.c
+@@ -241,7 +241,10 @@ fn_new_zone(struct fn_hash *table, int z)
+ 	return fz;
+ }
+ 
+-static int
++#ifdef CONFIG_IP_MULTIPLE_TABLES
++static
++#endif
++int
+ fn_hash_lookup(struct fib_table *tb, const struct flowi *flp, struct fib_result *res)
+ {
+ 	int err;
+diff --git a/net/ipv4/fib_lef.c b/net/ipv4/fib_lef.c
+new file mode 100644
+index 0000000..45c7c3e
+--- /dev/null
++++ b/net/ipv4/fib_lef.c
+@@ -0,0 +1,970 @@
++/*
++ *   This program is free software; you can redistribute it and/or
++ *   modify it under the terms of the GNU General Public License
++ *   as published by the Free Software Foundation; either version
++ *   2 of the License, or (at your option) any later version.
++ *
++ *   A modified radix based FIB implemetation by krichy (LEF)
++ */
++
++#include <asm/uaccess.h>
++#include <asm/system.h>
++#include <asm/bitops.h>
++#include <linux/types.h>
++#include <linux/kernel.h>
++#include <linux/sched.h>
++#include <linux/mm.h>
++#include <linux/string.h>
++#include <linux/socket.h>
++#include <linux/sockios.h>
++#include <linux/errno.h>
++#include <linux/in.h>
++#include <linux/inet.h>
++#include <linux/inetdevice.h>
++#include <linux/netdevice.h>
++#include <linux/if_arp.h>
++#include <linux/proc_fs.h>
++#include <linux/rcupdate.h>
++#include <linux/skbuff.h>
++#include <linux/netlink.h>
++#include <linux/init.h>
++#include <linux/list.h>
++#include <net/ip.h>
++#include <net/protocol.h>
++#include <net/route.h>
++#include <net/tcp.h>
++#include <net/sock.h>
++#include <net/ip_fib.h>
++#include "fib_lookup.h"
++
++/*
++ * a modified radix tree implemetation
++ */
++
++
++/* many code is borrowed from fib_radix, please, forgive me :) */
++
++#define	HBIT		0x80000000	// high bit
++
++#define BPS		4		// Bits Per Subtree
++
++#if defined(LITTLE_ENDIAN)
++
++#elif defined(BIG_ENDIAN) /* defined(LITTLE_ENDIAN) */
++
++#endif /* defined(BIG_ENDIAN) */
++
++#ifndef	EX_KEY
++#define EX_KEY(k)	(((k) >> (32 - BPS)) & (~((~0) << BPS)))
++#endif
++
++static struct kmem_cache*	fn_alias_kmem __read_mostly;
++
++static void __alias_free_mem(struct rcu_head *head)
++{
++	struct fib_alias *fa = container_of(head, struct fib_alias, rcu);
++	kmem_cache_free(fn_alias_kmem, fa);
++}
++
++static inline void alias_free_mem_rcu(struct fib_alias *fa)
++{
++	call_rcu(&fa->rcu, __alias_free_mem);
++}
++
++// forward declare radix_node
++struct radix_node;
++
++typedef struct lef_node {
++	struct lef_node		*child[1 << BPS];
++	struct lef_node		*parent;	// parent lef_node
++	struct lef_node		**pp;		// the pointer to us
++	struct radix_node	*rnode;		// the radix_node root
++	u8			key;
++	struct rcu_head		rcu;
++} lef_t;
++
++typedef struct radix_node {
++	struct list_head	falh;
++	struct radix_node	*l_child;	// left child  (0)
++	struct radix_node	*r_child;	// right child (1)
++	struct radix_node	*parent;	// parent
++	struct radix_node	**pp;		// parent's pointer to us
++	struct lef_node		*lparent;	// lef parent
++	struct rcu_head		rcu;
++} radix_t;
++
++// create a new lef node
++static inline lef_t		*new_lef_node(void)
++{
++	lef_t			*nl = kmalloc(sizeof(lef_t), GFP_KERNEL);
++
++	if (likely(nl)) {
++		memset(nl->child, 0, sizeof(nl->child));
++		nl->parent = NULL;
++		nl->pp = NULL;
++		nl->rnode = NULL;
++		nl->key = 0;
++		INIT_RCU_HEAD(&nl->rcu);
++	}
++
++	return nl;
++}
++
++// create a new node
++static inline radix_t		*new_radix_node(void)
++{
++	radix_t			*nn = kmalloc(sizeof(radix_t), GFP_KERNEL);
++	if (likely(nn)) {
++		nn->l_child = NULL;
++		nn->r_child = NULL;
++		nn->parent = NULL;
++		nn->pp = NULL;
++		nn->lparent = NULL;
++		INIT_LIST_HEAD(&nn->falh);
++		INIT_RCU_HEAD(&nn->rcu);
++	}
++	return nn;
++}
++
++// get a node and possibly create it
++static radix_t			*get_node(lef_t** p, u32 k, int klen)
++{
++	lef_t			*lp = NULL;	// lef parent
++	lef_t			*ln;		// lef node
++	radix_t			*rp;		// radix parent
++	radix_t			**rpp;		// radix parent's pointer to us
++	radix_t			*rn;		// radix node
++	u8			lkey = 0;
++
++	if (klen < 0 || klen > 32)
++		return NULL;
++
++	while( 1 ) {
++		ln = *p;
++
++		// we create the node if it does not exist
++		if (!ln) {
++			ln = new_lef_node();
++			if (unlikely(!ln))
++				return NULL;
++			ln->pp = p;
++			ln->key = lkey;
++
++			rcu_assign_pointer(ln->parent, lp);
++			rcu_assign_pointer(*p, ln);
++		}
++
++		if (klen < BPS)
++			break;
++
++		lkey = EX_KEY(k);
++		k <<= BPS;
++		klen -= BPS;
++
++		p = &ln->child[lkey];
++		lp = ln;
++	}
++
++	rp = NULL;
++	rpp = &ln->rnode;
++	while( 1 ) {
++		rn = *rpp;
++
++		if (!rn) {
++			rn = new_radix_node();
++			if (unlikely(!rn))
++				return NULL;
++			rn->pp = rpp;
++			rn->lparent = ln;
++
++			rcu_assign_pointer(rn->parent, rp);
++			rcu_assign_pointer(*rpp, rn);
++		}
++
++		if (klen == 0)
++			break;
++
++		if (k & HBIT)
++			rpp = &rn->r_child;
++		else
++			rpp = &rn->l_child;
++
++		rp = rn;
++		k <<= 1;
++		klen--;
++	}
++
++	return rn;
++}
++
++// insert a routing entry
++static int
++fn_lef_insert(struct fib_table* tb, struct fib_config *cfg)
++{
++	struct fib_alias	*fa, *new_fa;
++	struct fib_info		*fi;
++
++	int			plen = cfg->fc_dst_len;
++	u8			tos = cfg->fc_tos;
++	u32			key, mask;
++	int			err = 0;
++	radix_t*		n;
++
++	if (plen > 32)
++		return -EINVAL;
++
++	key = 0;
++	if (cfg->fc_dst)
++		key = ntohl(cfg->fc_dst);
++
++	mask = ntohl(inet_make_mask(plen));
++
++	if (key & ~mask)
++		return -EINVAL;
++
++	fi = fib_create_info(cfg);
++
++	if (IS_ERR(fi)) {
++		err = PTR_ERR(fi);
++		goto err;
++	}
++
++	n = get_node((lef_t**)tb->tb_data, key, plen);
++
++	if (unlikely(!n)) {
++		err = -ENOBUFS;
++		goto out;
++	}
++
++	fa = fib_find_alias(&n->falh, tos, fi->fib_priority);
++
++	/* Now fa, if non-NULL, points to the first fib alias
++	 * with the same keys [prefix,tos,priority], if such key already
++	 * exists or to the node before which we will insert new one.
++	 *
++	 * If fa is NULL, we will need to allocate a new one and
++	 * insert to the head of f.
++	 *
++	 * If f is NULL, no fib node matched the destination key
++	 * and we need to allocate a new one of those as well.
++	 */
++
++	if (fa && fa->fa_info->fib_priority == fi->fib_priority) {
++		struct fib_alias *fa_orig;
++
++		err = -EEXIST;
++		if (cfg->fc_nlflags & NLM_F_EXCL)
++			goto out;
++
++		if (cfg->fc_nlflags & NLM_F_REPLACE) {
++			struct fib_info *fi_drop;
++			u8 state;
++
++			err = -ENOBUFS;
++			new_fa = kmem_cache_alloc(fn_alias_kmem, GFP_KERNEL);
++			if (new_fa == NULL)
++				goto out;
++
++			fi_drop = fa->fa_info;
++			new_fa->fa_tos = fa->fa_tos;
++			new_fa->fa_info = fi;
++			new_fa->fa_type = cfg->fc_type;
++			new_fa->fa_scope = cfg->fc_scope;
++			state = fa->fa_state;
++			new_fa->fa_state &= ~FA_S_ACCESSED;
++
++			list_replace_rcu(&fa->fa_list, &new_fa->fa_list);
++			alias_free_mem_rcu(fa);
++
++			if (state & FA_S_ACCESSED)
++				rt_cache_flush(-1);
++
++			goto succeeded;
++		}
++
++		/* Error if we find a perfect match which
++		 * uses the same scope, type, and nexthop
++		 * information.
++		 */
++		fa_orig = fa;
++		list_for_each_entry(fa, fa_orig->fa_list.prev, fa_list) {
++			if (fa->fa_tos != tos)
++				break;
++			if (fa->fa_info->fib_priority != fi->fib_priority)
++				break;
++			if (fa->fa_type == cfg->fc_type &&
++			    fa->fa_scope == cfg->fc_scope &&
++			    fa->fa_info == fi) {
++				goto out;
++			}
++		}
++		if (!(cfg->fc_nlflags & NLM_F_APPEND))
++			fa = fa_orig;
++	}
++	err = -ENOENT;
++	if (!(cfg->fc_nlflags & NLM_F_CREATE))
++		goto out;
++
++	err = -ENOBUFS;
++	new_fa = kmem_cache_alloc(fn_alias_kmem, GFP_KERNEL);
++	if (new_fa == NULL)
++		goto out;
++
++	new_fa->fa_info = fi;
++	new_fa->fa_tos = tos;
++	new_fa->fa_type = cfg->fc_type;
++	new_fa->fa_scope = cfg->fc_scope;
++	new_fa->fa_state = 0;
++
++	list_add_tail_rcu(&new_fa->fa_list, (fa ? &fa->fa_list : &n->falh));
++
++	rt_cache_flush(-1);
++	rtmsg_fib(RTM_NEWROUTE, htonl(key), new_fa, plen, tb->tb_id, &cfg->fc_nlinfo);
++succeeded:
++	return 0;
++
++out:
++	fib_release_info(fi);
++err:
++	return err;
++}
++
++#ifdef CONFIG_IP_MULTIPLE_TABLES
++static
++#endif
++int
++fn_lef_lookup(struct fib_table *tb, const struct flowi *flp, struct fib_result *res)
++{
++	lef_t			*ln;		// current lef node
++	radix_t			*rn;		// current node
++	int			plen = 0;
++	u32			key = ntohl(flp->fl4_dst);
++	struct list_head	*fas[BPS+1];	// we collect all possible points here and start matching backwards
++	int			plens[BPS+1];
++#ifdef CONFIG_IP_ROUTE_MULTIPATH_CACHED
++	u32			mask = 0;	// mask is only needed when multipath caching is enabled
++						// read fib_semantic_match in fib_semantics.c
++	u32			masks[BPS+1];	// the mask for each possible node
++#endif
++	int			fap;
++	struct list_head	*fah;
++	int			err;
++
++	rcu_read_lock();
++
++	ln = rcu_dereference(*((lef_t**)tb->tb_data));
++
++	// first we walk down as deep as much we can
++	while ( ln ) {
++		lef_t	*next = ln->child[EX_KEY(key)];
++		if (!next)
++			break;
++
++		ln = next;
++		key <<= BPS;
++#ifdef CONFIG_IP_ROUTE_MULTIPATH_CACHED
++		mask = ~((~mask) >> BPS);
++#endif
++		plen += BPS;
++	}
++
++	// then we start walking the tree upwards
++	while ( ln ) {
++		u32 okey = key;	// orig key
++		rn = ln->rnode;
++		fap = 0;
++
++		while ( rn ) {
++			fah = &rn->falh;
++
++			if (!list_empty(fah)) {
++#ifdef CONFIG_IP_ROUTE_MULTIPATH_CACHED
++				masks[fap] = mask;
++#endif
++				plens[fap] = plen;
++				fas[fap++] = fah;
++			}
++
++			if (key & HBIT)
++				rn = rcu_dereference(rn->r_child);
++			else
++				rn = rcu_dereference(rn->l_child);
++
++#ifdef CONFIG_IP_ROUTE_MULTIPATH_CACHED
++			mask >>= 1;
++			mask |= HBIT;
++#endif
++			plen++;
++			key <<= 1;
++		}
++
++		while( --fap >= 0 ) {
++#ifdef CONFIG_IP_ROUTE_MULTIPATH_CACHED
++			if ((err = fib_semantic_match(fas[fap], flp, res, ntohl(flp->fl4_dst), masks[fap], plens[fap])) <= 0)
++#else
++			if ((err = fib_semantic_match(fas[fap], flp, res, 0, 0, plens[fap])) <= 0)
++#endif
++			{
++				rcu_read_unlock();
++				return err;
++			}
++		}
++
++		// restore key and step one up
++		key = (ln->key << (32 - BPS)) | (okey >> BPS);
++		ln = rcu_dereference(ln->parent);
++		plen -= BPS;
++#ifdef CONFIG_IP_ROUTE_MULTIPATH_CACHED
++		mask <<= BPS;
++#endif
++	}
++	rcu_read_unlock();
++
++	return 1;
++}
++
++static inline int	radix_node_has_refs(radix_t* n)
++{
++	return !list_empty(&n->falh) || n->l_child || n->r_child;
++}
++
++static inline int	lef_node_has_refs(const lef_t* l)
++{
++	int		i;
++
++	if (l->rnode)
++		return 1;
++	for (i=0; i<(1 << BPS); i++) {
++		if (l->child[i])
++			return 1;
++	}
++
++	return 0;
++}
++
++static void		__lef_delete_node(struct rcu_head *head)
++{
++	lef_t		*l = container_of(head, lef_t, rcu);
++
++	BUG_ON(lef_node_has_refs(l));
++
++	kfree(l);
++}
++
++static void		__radix_delete_node(struct rcu_head *head)
++{
++	radix_t*	n = container_of(head, radix_t, rcu);
++
++	BUG_ON(radix_node_has_refs(n));
++
++	kfree(n);
++}
++
++static inline void	lef_delete_node(lef_t *l)
++{
++	call_rcu(&l->rcu, __lef_delete_node);
++}
++
++static inline void	radix_delete_node(radix_t *s)
++{
++	call_rcu(&s->rcu, __radix_delete_node);
++}
++
++static void		lef_remove_node(lef_t *l)
++{
++	BUG_ON(!l);
++
++	rcu_assign_pointer(*(l->pp), NULL);
++
++	if (l->parent && !lef_node_has_refs(l->parent))
++		lef_remove_node(l->parent);
++
++	lef_delete_node(l);
++}
++
++static void		radix_remove_node(radix_t *n)
++{
++	BUG_ON(!n);
++
++	rcu_assign_pointer(*(n->pp), NULL);
++
++	if (n->parent && !radix_node_has_refs(n->parent))
++		radix_remove_node(n->parent);
++	if (!n->parent && n->lparent && !lef_node_has_refs(n->lparent))
++		lef_remove_node(n->lparent);
++
++	radix_delete_node(n);
++}
++
++static int
++fn_lef_delete(struct fib_table *tb, struct fib_config *cfg)
++{
++	// we do a lookup here, but only for a maximum depth
++	lef_t			*ln = *((lef_t**)tb->tb_data);
++	radix_t			*rn;
++	int			plen = cfg->fc_dst_len;
++	u32			key, mask;
++	struct list_head	*fa_head;
++	struct fib_alias	*fa, *fa_to_delete;
++
++	if (plen > 32)
++		return -EINVAL;
++
++	key = 0;
++	if (cfg->fc_dst)
++		key = ntohl(cfg->fc_dst);
++
++	mask = ntohl(inet_make_mask(plen));
++
++	if (key & ~mask)
++		return -EINVAL;
++
++	while ( ln && plen >= BPS ) {
++		ln=ln->child[EX_KEY(key)];
++		key <<= BPS;
++		plen -= BPS;
++	}
++
++	if (!ln)
++		return -ESRCH;
++
++	rn = ln->rnode;
++
++	while ( plen && rn ) {
++		if (key & HBIT)
++			rn = rn->r_child;
++		else
++			rn = rn->l_child;
++
++		key <<= 1;
++		plen--;
++	}
++
++	if (plen || !rn)
++		return -ESRCH;
++
++	fa_to_delete = NULL;
++	fa_head = &rn->falh;
++
++	list_for_each_entry(fa, fa_head, fa_list) {
++		struct fib_info *fi = fa->fa_info;
++
++		if (fa->fa_tos != cfg->fc_tos)
++			break;
++
++		if ((!cfg->fc_type ||
++		     fa->fa_type == cfg->fc_type) &&
++		    (cfg->fc_scope == RT_SCOPE_NOWHERE ||
++		     fa->fa_scope == cfg->fc_scope) &&
++		    (!cfg->fc_protocol ||
++		     fi->fib_protocol == cfg->fc_protocol) &&
++		    fib_nh_match(cfg, fi) == 0) {
++			fa_to_delete = fa;
++			break;
++		}
++	}
++
++	if (!fa_to_delete)
++		return -ESRCH;
++
++	fa = fa_to_delete;
++	rtmsg_fib(RTM_DELROUTE, htonl(key), fa, plen, tb->tb_id, &cfg->fc_nlinfo);
++
++	list_del_rcu(&fa->fa_list);
++
++	// now the entry is removed, we must find the top-most node which can be removed
++	if (!radix_node_has_refs(rn))
++		radix_remove_node(rn);
++
++	if (fa->fa_state & FA_S_ACCESSED)
++		rt_cache_flush(-1);
++
++	fib_release_info(fa->fa_info);
++	alias_free_mem_rcu(fa);
++
++	return 0;
++}
++
++static int last_dflt = -1;
++
++static void
++fn_lef_select_default(struct fib_table *tb, const struct flowi *flp, struct fib_result *res)
++{
++	lef_t		*ln;
++	radix_t		*rn;
++	int order, last_idx;
++	struct fib_info *fi = NULL;
++	struct fib_info *last_resort;
++	struct fib_alias *fa = NULL;
++	struct list_head *fa_head;
++
++	last_idx = -1;
++	last_resort = NULL;
++	order = -1;
++
++	rcu_read_lock();
++
++	ln = rcu_dereference(*((lef_t**)tb->tb_data));
++	if (!ln)
++		goto out;
++
++	rn = rcu_dereference(ln->rnode);
++	if (!rn)
++		goto out;
++
++	fa_head = &rn->falh;
++
++	if (!fa_head)
++		goto out;
++
++	if (list_empty(fa_head))
++		goto out;
++
++	list_for_each_entry_rcu(fa, fa_head, fa_list) {
++		struct fib_info *next_fi = fa->fa_info;
++
++		if (fa->fa_scope != res->scope ||
++		    fa->fa_type != RTN_UNICAST)
++			continue;
++
++		if (next_fi->fib_priority > res->fi->fib_priority)
++			break;
++		if (!next_fi->fib_nh[0].nh_gw ||
++		    next_fi->fib_nh[0].nh_scope != RT_SCOPE_LINK)
++			continue;
++		fa->fa_state |= FA_S_ACCESSED;
++
++		if (fi == NULL) {
++			if (next_fi != res->fi)
++				break;
++		} else if (!fib_detect_death(fi, order, &last_resort,
++					     &last_idx, &last_dflt)) {
++			if (res->fi)
++				fib_info_put(res->fi);
++			res->fi = fi;
++			atomic_inc(&fi->fib_clntref);
++			last_dflt = order;
++			goto out;
++		}
++		fi = next_fi;
++		order++;
++	}
++	if (order <= 0 || fi == NULL) {
++		last_dflt = -1;
++		goto out;
++	}
++
++	if (!fib_detect_death(fi, order, &last_resort, &last_idx, &last_dflt)) {
++		if (res->fi)
++			fib_info_put(res->fi);
++		res->fi = fi;
++		atomic_inc(&fi->fib_clntref);
++		last_dflt = order;
++		goto out;
++	}
++	if (last_idx >= 0) {
++		if (res->fi)
++			fib_info_put(res->fi);
++		res->fi = last_resort;
++		if (last_resort)
++			atomic_inc(&last_resort->fib_clntref);
++	}
++	last_dflt = last_idx;
++ out:;
++	rcu_read_unlock();
++}
++
++#define BIT(i)  (HBIT >> (i-1))
++#define TB(v,i)	((v) & BIT(i))
++
++static int fn_lef_dump(struct fib_table *tb, struct sk_buff *skb, struct netlink_callback *cb)
++{
++	u32			key = cb->args[2];	// represents the actual key
++	u32			plen = cb->args[3];	// represents the actual key length
++	int			i;
++	struct list_head	*fah;
++	radix_t			*child;
++
++	radix_t			*rn;
++	radix_t			*nn;
++	lef_t			*ln;
++	lef_t			*lp;
++	u32			lef_key;
++	int			lpos = 0;
++
++	// pre-order tree traversal
++	rcu_read_lock();
++
++	// first of all we look for our node
++	ln = rcu_dereference(*((lef_t**)tb->tb_data));
++
++	i = 0;
++	lef_key = key;
++	while ( ln && (i+BPS <= plen) ) {
++		lef_t	*next = ln->child[EX_KEY(lef_key)];
++		if (!next)
++			break;
++
++		ln = next;
++		i += BPS;
++		lef_key <<= BPS;
++		lpos += BPS;
++	}
++
++	rn = ln ? ln->rnode : NULL;
++
++	if ( i+BPS <= plen || !rn ) { // unfortunately our node has disappeared
++		plen = i;
++	} else {
++		while( i < plen ) {
++			if (TB(key,i+1))
++				nn = rcu_dereference(rn->r_child);
++			else
++				nn = rcu_dereference(rn->l_child);
++			if (!nn)
++				break;
++			rn = nn;
++			i++;
++		}
++
++		plen = i;
++	}
++
++	key &= ntohl(inet_make_mask(plen));
++
++	// now we must continue pre-order traversal from n
++	while( ln ) {
++
++		while(rn) {
++			fah = &rn->falh;
++
++			if (!list_empty(fah)) {
++				int			fai = cb->args[4];
++				struct fib_alias	*fa;
++				u32			xkey = htonl(key);
++
++				i = 0;
++
++				list_for_each_entry_rcu(fa, fah, fa_list) {
++					if (i < fai) {
++						i++;
++						continue;
++					}
++
++					BUG_ON(!fa->fa_info);
++
++					if (fib_dump_info(skb, NETLINK_CB(cb->skb).pid,
++							  cb->nlh->nlmsg_seq,
++							  RTM_NEWROUTE,
++							  tb->tb_id,
++							  fa->fa_type,
++							  fa->fa_scope,
++							  xkey,
++							  plen,
++							  fa->fa_tos,
++							  fa->fa_info, 0) < 0) {
++
++						rcu_read_unlock();
++
++						cb->args[2] = key;
++						cb->args[3] = plen;
++						cb->args[4] = i;
++
++						return -1; // to indicate there is more data
++					}
++					i++;
++				}
++			}
++
++			// now must find next node to dump
++			cb->args[4] = 0;
++
++			if ((child = rcu_dereference(rn->l_child))) {
++				rn = child;
++				plen++;
++				WARN_ON(TB(key, plen));
++			} else if ((child = rcu_dereference(rn->r_child))) {
++				rn = child;
++				plen++;
++				WARN_ON(TB(key, plen));
++				key |= BIT(plen);	// set the last bit to 1
++			} else { // we must step upwards
++				radix_t*	p;
++				radix_t*	pr;
++
++				while((p = rcu_dereference(rn->parent))) {
++					pr = rcu_dereference(p->r_child);
++
++					if (pr != NULL && pr != rn)
++						break;
++
++					rn = p;
++					key &= ~BIT(plen); // set current bit to zero
++					plen--;
++				}
++
++				if (!p) {
++					break;
++				}
++
++				WARN_ON(TB(key, plen));	// it must be 0 now
++
++				rn = pr;
++				key |= BIT(plen);
++			}
++		}
++
++		WARN_ON(lpos != plen);
++
++		for (i = 0; i<(1 << BPS); i++) {
++			lef_t	*ch = rcu_dereference(ln->child[i]);
++
++			if (ch) {
++				// step down in lef tree
++				lpos += BPS;
++				plen += BPS;
++				key |= i << (32 - lpos);
++				ln = ch;
++				break;
++			}
++		}
++
++		if (i == (1 << BPS)) { // no child was found
++			while((lp = rcu_dereference(ln->parent))) {
++				key &= ~(((~0U) << (32-BPS)) >> (lpos - BPS));
++
++				WARN_ON(lp->child[ln->key] != ln);
++
++				for(i=ln->key + 1; i<(1 << BPS); i++) {
++					lef_t *ch = rcu_dereference(lp->child[i]);
++					if (ch) {
++						key |= i << (32 - lpos);
++						ln = ch;
++						break;
++					}
++				}
++				if (i < (1 << BPS))
++					break;
++
++				ln = lp;
++				lpos -= BPS;
++				plen -= BPS;
++			}
++			if (!lp)
++				break;
++		}
++
++		rn = ln->rnode;
++	}
++
++	rcu_read_unlock();
++
++	WARN_ON(plen != 0); // we should leave only if plen == 0
++
++	return skb->len;
++}
++
++static int	radix_flush_recursive(radix_t* n)
++{
++	struct fib_alias	*fa, *fa_node;
++	int			found = 0;
++
++	if (!n)
++		return 0;
++
++	found += radix_flush_recursive(n->l_child);
++	found += radix_flush_recursive(n->r_child);
++
++	list_for_each_entry_safe(fa, fa_node, &n->falh, fa_list) {
++		struct fib_info *fi = fa->fa_info;
++
++		if (fi && (fi->fib_flags & RTNH_F_DEAD)) {
++			list_del_rcu(&fa->fa_list);
++			fib_release_info(fa->fa_info);
++			alias_free_mem_rcu(fa);
++			found++;
++		}
++	}
++
++	if (!radix_node_has_refs(n)) { // dont delete parents, recursion will do that
++		rcu_assign_pointer(n->parent, NULL);
++		rcu_assign_pointer(n->lparent, NULL);
++		radix_remove_node(n);
++	}
++
++	return found;
++}
++
++static int	lef_flush_recursive(lef_t* l)
++{
++	int			i;
++	int			found = 0;
++
++	for (i=0; i<(1 << BPS); i++) {
++		if (l->child[i])
++			found += lef_flush_recursive(l->child[i]);
++	}
++	if (l->rnode)
++		found += radix_flush_recursive(l->rnode);
++
++	if (!lef_node_has_refs(l)) {
++		rcu_assign_pointer(l->parent, NULL); // skip recursion upwards
++		lef_remove_node(l);
++	}
++
++	return found;
++}
++
++static int	fn_lef_flush(struct fib_table *tb)
++{
++	lef_t*			l = *((lef_t**)tb->tb_data);
++	int			found = 0;
++
++	if (l)
++		found += lef_flush_recursive(l);
++
++	return found;
++}
++
++#ifdef CONFIG_IP_MULTIPLE_TABLES
++struct fib_table * fib_hash_init(u32 id)
++#else
++struct fib_table * __init fib_hash_init(u32 id)
++#endif
++{
++	struct fib_table *tb;
++
++	if (fn_alias_kmem == NULL)
++		fn_alias_kmem = kmem_cache_create("ip_fib_alias",
++						  sizeof(struct fib_alias),
++						  0, SLAB_HWCACHE_ALIGN,
++						  NULL, NULL);
++
++	tb = kmalloc(sizeof(struct fib_table) + sizeof(radix_t*),
++		     GFP_KERNEL);
++	if (tb == NULL)
++		return NULL;
++
++	tb->tb_id = id;
++	tb->tb_lookup = fn_lef_lookup;
++	tb->tb_insert = fn_lef_insert;
++	tb->tb_delete = fn_lef_delete;
++	tb->tb_flush = fn_lef_flush;
++	tb->tb_select_default = fn_lef_select_default;
++	tb->tb_dump = fn_lef_dump;
++	memset(tb->tb_data, 0, sizeof(radix_t*));
++
++	printk(KERN_INFO "IPv4 FIB: Using LEF for table %u\n", id);
++
++	return tb;
++}
++
++int __init fib_proc_init(void)
++{
++	return 0;
++}
++
++void __init fib_proc_exit(void)
++{
++}
++
 diff --git a/net/ipv4/fib_semantics.c b/net/ipv4/fib_semantics.c
 index 3dad12e..28f00f7 100644
 --- a/net/ipv4/fib_semantics.c
@@ -523,6 +1646,22 @@ index 3dad12e..28f00f7 100644
  					dead++;
  				}
  #ifdef CONFIG_IP_ROUTE_MULTIPATH
+diff --git a/net/ipv4/fib_trie.c b/net/ipv4/fib_trie.c
+index 214c347..0580b18 100644
+--- a/net/ipv4/fib_trie.c
++++ b/net/ipv4/fib_trie.c
+@@ -1303,7 +1303,10 @@ static inline int check_leaf(struct trie *t, struct leaf *l,
+ 	return 1;
+ }
+ 
+-static int
++#ifdef CONFIG_IP_MULTIPLE_TABLES
++static
++#endif
++int
+ fn_trie_lookup(struct fib_table *tb, const struct flowi *flp, struct fib_result *res)
+ {
+ 	struct trie *t = (struct trie *) tb->tb_data;
 diff --git a/net/ipv4/icmp.c b/net/ipv4/icmp.c
 index 03d9659..55d99b2 100644
 --- a/net/ipv4/icmp.c
@@ -563,7 +1702,7 @@ index 03d9659..55d99b2 100644
  		struct net_device *dev = NULL;
  
 diff --git a/net/ipv4/ip_input.c b/net/ipv4/ip_input.c
-index f38e976..2e3749a 100644
+index f38e976..a6a92a3 100644
 --- a/net/ipv4/ip_input.c
 +++ b/net/ipv4/ip_input.c
 @@ -145,6 +145,9 @@
@@ -576,17 +1715,19 @@ index f38e976..2e3749a 100644
  
  /*
   *	SNMP management statistics
-@@ -337,6 +340,9 @@ static inline int ip_rcv_finish(struct sk_buff *skb)
+@@ -337,13 +340,21 @@ static inline int ip_rcv_finish(struct sk_buff *skb)
  	 *	how the packet travels inside Linux networking.
  	 */
  	if (skb->dst == NULL) {
+-		int err = ip_route_input(skb, iph->daddr, iph->saddr, iph->tos,
++		int err;
 +#ifdef CONFIG_IP_LEF
 +		skb->lef.flags |= LEF_NEED;
 +#endif
- 		int err = ip_route_input(skb, iph->daddr, iph->saddr, iph->tos,
++		err = ip_route_input(skb, iph->daddr, iph->saddr, iph->tos,
  					 skb->dev);
  		if (unlikely(err)) {
-@@ -344,6 +350,10 @@ static inline int ip_rcv_finish(struct sk_buff *skb)
+ 			if (err == -EHOSTUNREACH)
  				IP_INC_STATS_BH(IPSTATS_MIB_INADDRERRORS);
  			goto drop;
  		}
@@ -741,7 +1882,7 @@ index 601808c..d3b4e2a 100644
  	  Masquerading is a special case of NAT: all outgoing connections are
  	  changed to seem to come from a particular interface's address, and
 diff --git a/net/ipv4/route.c b/net/ipv4/route.c
-index 37e0d4d..13ee263 100644
+index 37e0d4d..0e1e671 100644
 --- a/net/ipv4/route.c
 +++ b/net/ipv4/route.c
 @@ -107,6 +107,9 @@
@@ -754,7 +1895,22 @@ index 37e0d4d..13ee263 100644
  
  #define RT_FL_TOS(oldflp) \
      ((u32)(oldflp->fl4_tos & (IPTOS_RT_MASK | RTO_ONLINK)))
-@@ -251,6 +254,15 @@ static DEFINE_PER_CPU(struct rt_cache_stat, rt_cache_stat);
+@@ -237,9 +240,14 @@ static spinlock_t	*rt_hash_locks;
+ 		for (i = 0; i < RT_HASH_LOCK_SZ; i++) \
+ 			spin_lock_init(&rt_hash_locks[i]); \
+ 		}
++static spinlock_t	_lef_fi_lock;
++# define lef_fi_lock_init() spin_lock_init(&_lef_fi_lock);
++# define lef_fi_lock &_lef_fi_lock
+ #else
+ # define rt_hash_lock_addr(slot) NULL
+ # define rt_hash_lock_init()
++# define lef_fi_lock_init()
++# define lef_fi_lock NULL
+ #endif
+ 
+ static struct rt_hash_bucket 	*rt_hash_table;
+@@ -251,6 +259,15 @@ static DEFINE_PER_CPU(struct rt_cache_stat, rt_cache_stat);
  #define RT_CACHE_STAT_INC(field) \
  	(__raw_get_cpu_var(rt_cache_stat).field++)
  
@@ -770,7 +1926,7 @@ index 37e0d4d..13ee263 100644
  static int rt_intern_hash(unsigned hash, struct rtable *rth,
  				struct rtable **res);
  
-@@ -259,6 +271,7 @@ static unsigned int rt_hash_code(u32 daddr, u32 saddr)
+@@ -259,6 +276,7 @@ static unsigned int rt_hash_code(u32 daddr, u32 saddr)
  	return (jhash_2words(daddr, saddr, rt_hash_rnd)
  		& rt_hash_mask);
  }
@@ -778,7 +1934,7 @@ index 37e0d4d..13ee263 100644
  
  #define rt_hash(daddr, saddr, idx) \
  	rt_hash_code((__force u32)(__be32)(daddr),\
-@@ -919,6 +932,23 @@ work_done:
+@@ -919,6 +937,23 @@ work_done:
  out:	return 0;
  }
  
@@ -802,7 +1958,7 @@ index 37e0d4d..13ee263 100644
  static int rt_intern_hash(unsigned hash, struct rtable *rt, struct rtable **rp)
  {
  	struct rtable	*rth, **rthp;
-@@ -1049,6 +1079,7 @@ restart:
+@@ -1049,6 +1084,7 @@ restart:
  	*rp = rt;
  	return 0;
  }
@@ -810,7 +1966,7 @@ index 37e0d4d..13ee263 100644
  
  void rt_bind_peer(struct rtable *rt, int create)
  {
-@@ -1893,6 +1924,52 @@ static inline int ip_mkroute_input(struct sk_buff *skb,
+@@ -1893,6 +1929,61 @@ static inline int ip_mkroute_input(struct sk_buff *skb,
  #endif /* CONFIG_IP_ROUTE_MULTIPATH_CACHED  */
  }
  
@@ -829,10 +1985,13 @@ index 37e0d4d..13ee263 100644
 +	if (unlikely(err))
 +		return err;
 +
-+	// TODO: not SMP safe
 +	if (gw != daddr) { // only store if it is a real gateway
-+		res->nh->neighbour = skb->lef.neighbour;
-+		atomic_inc(&res->nh->neighbour->refcnt);
++		spin_lock_bh(lef_fi_lock);
++		if (!res->nh->neighbour) {
++			rcu_assign_pointer(res->nh->neighbour, skb->lef.neighbour);
++			atomic_inc(&res->nh->neighbour->refcnt);
++		}
++		spin_unlock_bh(lef_fi_lock);
 +	}
 +
 +	return 0;
@@ -844,15 +2003,21 @@ index 37e0d4d..13ee263 100644
 +		return -EAGAIN;
 +
 +	if (likely(skb->nh.iph->ihl <= 5 && !IN_DEV_RPFILTER(in_dev))) {
++		struct neighbour	*neigh;
++
 +		skb->lef.dev = FIB_RES_DEV(*res);
 +		dev_hold(skb->lef.dev);
 +		skb->lef.mtu = res->fi->fib_mtu ? res->fi->fib_mtu : skb->lef.dev->mtu;
 +
-+		if (likely(res->nh->neighbour)) {
-+			skb->lef.neighbour = res->nh->neighbour;
-+			atomic_inc(&skb->lef.neighbour->refcnt);
++		rcu_read_lock();
++		neigh = rcu_dereference(res->nh->neighbour);
++		if (likely(neigh)) {
++			skb->lef.neighbour = neigh;
++			atomic_inc(&neigh->refcnt);
++			rcu_read_unlock();
 +			return 0;
 +		} else {
++			rcu_read_unlock();
 +			return __lef_mkroute_input(skb, res, daddr);
 +		}
 +	}
@@ -863,7 +2028,7 @@ index 37e0d4d..13ee263 100644
  
  /*
   *	NOTE. We drop all the packets that has local source
-@@ -1904,7 +1981,7 @@ static inline int ip_mkroute_input(struct sk_buff *skb,
+@@ -1904,7 +1995,7 @@ static inline int ip_mkroute_input(struct sk_buff *skb,
   *	2. IP spoofing attempts are filtered with 100% of guarantee.
   */
  
@@ -872,7 +2037,7 @@ index 37e0d4d..13ee263 100644
  			       u8 tos, struct net_device *dev)
  {
  	struct fib_result res;
-@@ -1982,6 +2059,11 @@ static int ip_route_input_slow(struct sk_buff *skb, __be32 daddr, __be32 saddr,
+@@ -1982,6 +2073,11 @@ static int ip_route_input_slow(struct sk_buff *skb, __be32 daddr, __be32 saddr,
  	if (res.type != RTN_UNICAST)
  		goto martian_destination;
  
@@ -884,7 +2049,7 @@ index 37e0d4d..13ee263 100644
  	err = ip_mkroute_input(skb, &res, &fl, in_dev, daddr, saddr, tos);
  	if (err == -ENOBUFS)
  		goto e_nobufs;
-@@ -2089,11 +2171,14 @@ martian_source:
+@@ -2089,11 +2185,14 @@ martian_source:
  int ip_route_input(struct sk_buff *skb, __be32 daddr, __be32 saddr,
  		   u8 tos, struct net_device *dev)
  {
@@ -899,7 +2064,7 @@ index 37e0d4d..13ee263 100644
  	hash = rt_hash(daddr, saddr, iif);
  
  	rcu_read_lock();
-@@ -2116,6 +2201,7 @@ int ip_route_input(struct sk_buff *skb, __be32 daddr, __be32 saddr,
+@@ -2116,6 +2215,7 @@ int ip_route_input(struct sk_buff *skb, __be32 daddr, __be32 saddr,
  		RT_CACHE_STAT_INC(in_hlist_search);
  	}
  	rcu_read_unlock();
@@ -907,7 +2072,7 @@ index 37e0d4d..13ee263 100644
  
  	/* Multicast recognition logic is moved from route cache to here.
  	   The problem was that too many Ethernet cards have broken/missing
-@@ -2555,6 +2641,7 @@ out:	return err;
+@@ -2555,6 +2655,7 @@ out:	return err;
  
  int __ip_route_output_key(struct rtable **rp, const struct flowi *flp)
  {
@@ -915,7 +2080,7 @@ index 37e0d4d..13ee263 100644
  	unsigned hash;
  	struct rtable *rth;
  
-@@ -2592,6 +2679,7 @@ int __ip_route_output_key(struct rtable **rp, const struct flowi *flp)
+@@ -2592,6 +2693,7 @@ int __ip_route_output_key(struct rtable **rp, const struct flowi *flp)
  		RT_CACHE_STAT_INC(out_hlist_search);
  	}
  	rcu_read_unlock_bh();
@@ -923,11 +2088,12 @@ index 37e0d4d..13ee263 100644
  
  	return ip_route_output_slow(rp, flp);
  }
-@@ -3193,6 +3281,9 @@ int __init ip_rt_init(void)
+@@ -3193,6 +3295,10 @@ int __init ip_rt_init(void)
  	xfrm_init();
  	xfrm4_init();
  #endif
 +#ifdef CONFIG_IP_LEF
++	lef_fi_lock_init();
 +	printk(KERN_DEBUG "IPv4: LEF v0.2.1 is active\n");
 +#endif
  	return rc;

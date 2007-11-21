@@ -36,10 +36,8 @@ PATCHES = kernel.vlan_mtu.patch \
 	kernel.igmp.c.max_membership.patch \
 	kernel.dst_input_no_loop.patch \
 	kernel.inline_kfree_skb.patch \
-	kernel.fib_lef.patch \
-	kernel.lef.patch \
 	kernel.asm_types_h.patch \
-	kernel.ip_multitable.patch
+	kernel.lef.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
