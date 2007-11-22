@@ -1,49 +1,51 @@
---- busybox-1.4.2.orig/networking/wget.c	2007-03-18 19:00:17.000000000 +0100
-+++ busybox-1.4.2/networking/wget.c	2007-05-22 09:55:24.000000000 +0200
-@@ -92,10 +92,9 @@
+--- busybox/networking/wget.c.orig	2007-11-10 02:40:47.000000000 +0100
++++ busybox/networking/wget.c	2007-11-20 15:43:46.000000000 +0100
+@@ -397,11 +397,11 @@
+ 	char buf[512];
  	struct host_info server, target;
  	len_and_sockaddr *lsa;
- 	int n, status;
--	int port;
+-	int status;
++	int nn,status;
+ 	int port;
  	int try = 5;
  	unsigned opt;
--	char *s;
-+	char *s, *p;
+-	char *str;
++	char *str, *p;
  	char *proxy = 0;
  	char *dir_prefix = NULL;
  #if ENABLE_FEATURE_WGET_LONG_OPTIONS
-@@ -423,16 +422,24 @@
+@@ -713,16 +713,24 @@
  		// Response is "227 garbageN1,N2,N3,N4,P1,P2[)garbage]
  		// Server's IP is N1.N2.N3.N4 (we ignore it)
  		// Server's port for data connection is P1*256+P2
--		s = strrchr(buf, ')');
--		if (s) s[0] = '\0';
--		s = strrchr(buf, ',');
--		if (!s) goto pasv_error;
--		port = xatou_range(s+1, 0, 255);
--		*s = '\0';
--		s = strrchr(buf, ',');
--		if (!s) goto pasv_error;
--		port += xatou_range(s+1, 0, 255) * 256;
+-		str = strrchr(buf, ')');
+-		if (str) str[0] = '\0';
+-		str = strrchr(buf, ',');
+-		if (!str) goto pasv_error;
+-		port = xatou_range(str+1, 0, 255);
+-		*str = '\0';
+-		str = strrchr(buf, ',');
+-		if (!str) goto pasv_error;
+-		port += xatou_range(str+1, 0, 255) * 256;
 -		set_nport(lsa, htons(port));
-+		if (!(s = strrchr(buf, ')')))
-+			goto pasv_error;
-+		*s = 0;	// clear trailing '\0'
-+		if (!(s = strrchr(buf, '(')))
-+			goto pasv_error;
-+		p = ++s;
-+		for (n=0; n<4; n++) {
-+			if (!(s = strchr(s, ',')))
-+				goto pasv_error;
-+			*s++ = '.';
-+		}
-+		s[-1] = 0;
-+		if (inet_aton(p, &lsa->sin.sin_addr) == 0)
-+			goto pasv_error;
-+		if (!(s = strchr((p=s), ',')))
-+			goto pasv_error;
-+		*s++ = 0;
-+		set_nport(lsa, htons(xatou_range(p, 0, 255) * 256 + xatou_range(s, 0, 255)));
++		if (!(str = strrchr(buf, ')')))
++ 			goto pasv_error;
++ 		*str = 0;	// clear trailing '\0'
++ 		if (!(str = strrchr(buf, '(')))
++ 			goto pasv_error;
++ 		p = ++str;
++ 		for (nn=0; nn<4; nn++) {
++ 			if (!(str = strchr(str, ',')))
++ 				goto pasv_error;
++ 			*str++ = '.';
++ 		}
++ 		str[-1] = 0;
++ 		if (inet_aton(p, &lsa->sin.sin_addr) == 0)
++ 			goto pasv_error;
++ 		if (!(str = strchr((p=str), ',')))
++ 			goto pasv_error;
++ 		*str++ = 0;
++ 		set_nport(lsa, htons(xatou_range(p, 0, 255) * 256 + xatou_range(str, 0, 255)));
  		dfp = open_socket(lsa);
  
  		if (beg_range) {

@@ -1,11 +1,11 @@
---- busybox-1.4.2.orig/networking/wget.c	2007-03-18 19:00:17.000000000 +0100
-+++ busybox-1.4.2/networking/wget.c	2007-05-22 10:29:43.000000000 +0200
-@@ -465,7 +465,7 @@
- 	/* Do it before progressmeter (want to have nice error message) */
- 	if (output_fd < 0)
- 		output_fd = xopen(fname_out,
--			O_WRONLY|O_CREAT|O_EXCL|O_TRUNC);
-+			O_WRONLY|O_CREAT|O_TRUNC);
+--- busybox/networking/wget.c.orig	2007-11-20 14:59:03.000000000 +0100
++++ busybox/networking/wget.c	2007-11-20 15:00:54.000000000 +0100
+@@ -754,7 +754,7 @@
  
- 	if (!(opt & WGET_OPT_QUIET))
- 		progressmeter(-1);
+ 	/* Do it before progressmeter (want to have nice error message) */
+ 	if (output_fd < 0) {
+-		int o_flags = O_WRONLY | O_CREAT | O_TRUNC | O_EXCL;
++		int o_flags = O_WRONLY | O_CREAT | O_TRUNC;
+ 		/* compat with wget: -O FILE can overwrite */
+ 		if (opt & WGET_OPT_OUTNAME)
+ 			o_flags = O_WRONLY | O_CREAT | O_TRUNC;

@@ -1,63 +1,64 @@
---- busybox-1.4.2/networking/httpd.c.orig	2007-03-18 17:59:24.000000000 +0100
-+++ busybox-1.4.2/networking/httpd.c	2007-03-24 16:28:10.000000000 +0100
-@@ -1403,19 +1403,48 @@
+--- busybox/networking/httpd.c.orig	2007-11-10 02:40:47.000000000 +0100
++++ busybox/networking/httpd.c	2007-11-20 14:48:48.000000000 +0100
+@@ -1681,20 +1681,48 @@
  				char *cipher;
  				char *pp;
  
--				if (strncmp(p, request, u-request) != 0) {
--					/* user uncompared */
+-				if (strncmp(p, request, u - request) != 0) {
+-					/* user doesn't match */
 -					continue;
 -				}
  				pp = strchr(p, ':');
--				if (pp && pp[1] == '$' && pp[2] == '1' &&
--						pp[3] == '$' && pp[4]) {
+-				if (pp && pp[1] == '$' && pp[2] == '1'
+-				 && pp[3] == '$' && pp[4]
+-				) {
 -					pp++;
 -					cipher = pw_encrypt(u+1, pp);
 -					if (strcmp(cipher, pp) == 0)
 -						goto set_remoteuser_var;   /* Ok */
 -					/* unauthorized */
 -					continue;
-+				if (pp) {
++ 				if (pp) {
 +					if (strncmp(p, request, u-request) != 0) {
-+						/* user uncompared */
-+						continue;
-+					}
-+					if (pp && pp[1] == '$' && pp[2] == '1' &&
-+							pp[3] == '$' && pp[4]) {
-+						pp++;
-+						cipher = pw_encrypt(u+1, pp);
-+						if (strcmp(cipher, pp) == 0)
-+							goto set_remoteuser_var;   /* Ok */
-+						/* unauthorized */
-+						continue;
-+					}
-+				} else {
-+					/* a filename have been specified */
-+					FILE *f;
-+					char buf[1024];
-+					char *t1,*t2,*t3;
-+					int found=0;
-+
-+					if ((f=fopen(p,"r")) == NULL)
-+						continue;
-+					while( fgets(buf,sizeof(buf),f) == buf ) {
-+						/* remove the '\n' */
-+						if ((t1=strchr(buf,'\n')))
-+							*t1=0;
-+						t3=buf;
-+						t1=strtok_r(NULL,":",&t3);
-+						t2=strtok_r(NULL,":",&t3);
-+						if (!t1 || t1[0] == '#' || !t2)
-+							continue;
-+						if (strncmp(request,t1,u-request) == 0 &&
-+								strcmp(t2,crypt(u+1,t2)) == 0) {
-+							found=1;
-+							break;
-+						}
-+					}
-+					fclose(f);
-+					if (found)
-+						goto set_remoteuser_var;
++ 						/* user uncompared */
++ 						continue;
++ 					}
++ 					if (pp && pp[1] == '$' && pp[2] == '1' &&
++ 							pp[3] == '$' && pp[4]) {
++ 						pp++;
++ 						cipher = pw_encrypt(u+1, pp);
++ 						if (strcmp(cipher, pp) == 0)
++ 							goto set_remoteuser_var;   /* Ok */
++ 						/* unauthorized */
++ 						continue;
++ 					}
++ 				} else {
++ 					/* a filename have been specified */
++ 					FILE *f;
++ 					char buf[1024];
++ 					char *t1,*t2,*t3;
++ 					int found=0;
++ 
++ 					if ((f=fopen(p,"r")) == NULL)
++ 						continue;
++ 					while( fgets(buf,sizeof(buf),f) == buf ) {
++ 						/* remove the '\n' */
++ 						if ((t1=strchr(buf,'\n')))
++ 							*t1=0;
++ 						t3=buf;
++ 						t1=strtok_r(NULL,":",&t3);
++ 						t2=strtok_r(NULL,":",&t3);
++ 						if (!t1 || t1[0] == '#' || !t2)
++ 							continue;
++ 						if (strncmp(request,t1,u-request) == 0 &&
++ 								strcmp(t2,crypt(u+1,t2)) == 0) {
++ 							found=1;
++ 							break;
++ 						}
++ 					}
++ 					fclose(f);
++ 					if (found)
++ 						goto set_remoteuser_var;
  				}
  			}
  

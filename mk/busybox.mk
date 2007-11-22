@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := busybox
-SRC_FILENAME = busybox-1.4.2.tar.bz2
-EXTRACTED_DIR = busybox-1.4.2
+SRC_FILENAME = busybox-1.8.1.tar.bz2
+EXTRACTED_DIR = busybox-1.8.1
 DOWNLOAD_SITES = http://busybox.net/downloads/ \
 		$(CFLINUX_PACKAGES)
 
@@ -31,8 +31,7 @@ PATCHES = busybox.init.patch \
 	busybox.wget_c.patch \
 	busybox.wget_c_no_excl.patch \
 	busybox.no_halt_poweroff.patch \
-	busybox.ps_opt_hack.patch \
-	busybox.no_werror.patch
+	busybox.ps_opt_hack.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
