@@ -56,6 +56,6 @@ $(BUILT_STAMP):
 install: build
 	find $(ROOTFS) -lname '*busybox' -print0 | xargs -0 rm -f
 	-mkdir -p $(ROOTFS)/usr/share/udhcpc
-	$(MAKE) -C $(PKG_ROOT) install CONFIG_PREFIX=$(ROOTFS) $(UC_PATH_CROSS) CROSS_COMPILE=$(TARGET_HOST)-
+	$(UC_PATH_CROSS) $(MAKE) -C $(PKG_ROOT) install CONFIG_PREFIX=$(ROOTFS) CROSS_COMPILE=$(TARGET_HOST)-
 
 .PHONY: configure clean build install
