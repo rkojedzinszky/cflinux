@@ -22,8 +22,8 @@
  	unsigned long flags;
  
  	opt_complementary = "-1";
--	flags = getopt32(argc, argv, "sp");
-+	flags = getopt32(argc, argv, "spa");
+-	flags = getopt32(argv, "sp");
++	flags = getopt32(argv, "spa");
  
  	remote_time = askremotedate(argv[optind]);
  
