@@ -50,8 +50,7 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH_CROSS) CROSS_COMPILE=$(TARGET_HOST)- \
-		'cc-option=$$(call hostcc-option,$$(1),$$(2))'
+	$(UC_PATH_CROSS) $(MAKE) -C $(PKG_ROOT) all CROSS_COMPILE=$(TARGET_HOST)-
 	touch $(BUILT_STAMP)
 
 install: build
