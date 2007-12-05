@@ -1,0 +1,61 @@
+--- pciutils/Makefile.orig	2007-11-06 22:29:09.000000000 +0100
++++ pciutils/Makefile	2007-12-03 14:48:28.000000000 +0100
+@@ -7,7 +7,7 @@
+ VERSION=2.2.9
+ DATE=2007-11-06
+ 
+-PREFIX=/usr/local
++PREFIX=/usr
+ SBINDIR=$(PREFIX)/sbin
+ SHAREDIR=$(PREFIX)/share
+ IDSDIR=$(SHAREDIR)
+@@ -19,7 +19,7 @@
+ DIRINSTALL=install -d
+ AR=ar
+ RANLIB=ranlib
+-PCILIB=lib/libpci.a
++PCILIB=lib/libpci.so
+ PCILIBPC=lib/libpci.pc
+ PCIINC=lib/config.h lib/header.h lib/pci.h lib/types.h lib/sysdep.h
+ PCIINC_INS=lib/config.h lib/header.h lib/pci.h lib/types.h
+@@ -42,7 +42,9 @@
+ 	cd lib && ./configure "$(IDSDIR)" "$(VERSION)" "$(HOST)" "$(RELEASE)" "$(ZLIB)"
+ 
+ lspci: lspci.o common.o $(PCILIB)
++	$(CC) -o $@ lspci.o common.o -Llib -lpci $(LDLIBS)
+ setpci: setpci.o common.o $(PCILIB)
++	$(CC) -o $@ setpci.o common.o -Llib -lpci $(LDLIBS)
+ 
+ lspci.o: lspci.c pciutils.h $(PCIINC)
+ setpci.o: setpci.c pciutils.h $(PCIINC)
+--- pciutils/lib/Makefile.orig	2007-10-19 14:41:34.000000000 +0200
++++ pciutils/lib/Makefile	2007-11-30 16:36:37.000000000 +0100
+@@ -6,7 +6,7 @@
+ OBJS=access.o generic.o dump.o names.o filter.o
+ INCL=internal.h pci.h config.h header.h sysdep.h types.h
+ 
+-PCILIB=libpci.a
++PCILIB=libpci.so
+ PCILIBPC=libpci.pc
+ 
+ ifdef PCI_HAVE_PM_LINUX_SYSFS
+@@ -43,15 +43,16 @@
+ 
+ ifdef PCI_HAVE_PM_NBSD_LIBPCI
+ OBJS += nbsd-libpci.o
+-PCILIB=libpciutils.a
++PCILIB=libpciutils.so
+ endif
+ 
+ all: $(PCILIB) $(PCILIBPC)
+ 
+ $(PCILIB): $(OBJS)
+ 	rm -f $@
+-	$(AR) rcs $@ $^
+-	$(RANLIB) $@
++	$(CC) -o $@ -shared $^
++#	$(AR) rcs $@ $^
++#	$(RANLIB) $@
+ 
+ $(PCILIBPC): $(PCILIBPC).in
+ 	sed <$< >$@ -e 's,@PREFIX@,$(PREFIX),' \

@@ -50,6 +50,7 @@ DO_MK += mcom
 DO_MK += poptop
 DO_MK += vtun
 DO_MK += ltraf
+DO_MK += pciutils
 DO_MK += libnet
 DO_MK += nemesis
 DO_MK += ethtool
