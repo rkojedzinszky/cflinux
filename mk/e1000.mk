@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := e1000
-SRC_FILENAME = e1000-7.3.15.tar.gz
-EXTRACTED_DIR = e1000-7.3.15
+SRC_FILENAME = e1000-7.6.12.tar.gz
+EXTRACTED_DIR = e1000-7.6.12
 DOWNLOAD_SITES = \
 	http://downloadmirror.intel.com/df-support/9180/eng/ \
 	$(CFLINUX_PACKAGES)

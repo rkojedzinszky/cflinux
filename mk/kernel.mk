@@ -66,8 +66,11 @@ $(GRSEC_STAMP): $(BUILD_DIR)/grsec/.grsec.patched
 	touch $@
 
 $(E1000_STAMP): $(BUILD_DIR)/e1000/.e1000.patched
+	rm -f $(PKG_ROOT)/drivers/net/e1000/*.[ch]
 	cp $(BUILD_DIR)/e1000/src/*.[ch] $(PKG_ROOT)/drivers/net/e1000/
-	sed -i"" -e '/^obj-y/a\obj-y	+= kcompat.o' $(PKG_ROOT)/drivers/net/e1000/Makefile
+	sed -i"" -e '/^obj-y/d' \
+		-e "/^obj-m/a\\obj-y	+= $$(cd $(PKG_ROOT)/drivers/net/e1000 && echo *.c|sed 's/\.c/\.o/g')" \
+		$(PKG_ROOT)/drivers/net/e1000/Makefile
 	touch $@
 
 $(BUILD_DIR)/grsec/.grsec.patched:
