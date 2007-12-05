@@ -56,6 +56,7 @@ DO_MK += nemesis
 DO_MK += ethtool
 DO_MK += e2fsprogs
 DO_MK += tools
+DO_MK += beep
 
 include $(TOP_DIR)/config.mk
 

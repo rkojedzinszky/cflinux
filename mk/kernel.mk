@@ -42,7 +42,21 @@ PATCHES = kernel.vlan_mtu.patch \
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
 
-configure: patch $(CONFIGURED_STAMP)
+E1000_STAMP=$(PKG_ROOT)/.e1000_applied
+
+configure: patch e1000patch $(CONFIGURED_STAMP)
+
+e1000patch: $(E1000_STAMP)
+
+$(E1000_STAMP): $(BUILD_DIR)/e1000/.e1000.patched
+	rm -f $(PKG_ROOT)/drivers/net/e1000/*.[ch]
+	cp $(BUILD_DIR)/e1000/src/*.[ch] $(PKG_ROOT)/drivers/net/e1000/
+	sed -i"" -e "s/^e1000-objs.*$$/e1000-objs	:= $$(cd $(PKG_ROOT)/drivers/net/e1000 && echo *.c|sed 's/\.c/\.o/g')/" \
+		$(PKG_ROOT)/drivers/net/e1000/Makefile
+	touch $@
+
+$(BUILD_DIR)/e1000/.e1000.patched:
+	$(MAKE) -f mk/e1000.mk patch
 
 ifeq ($(wildcard $(CONFIGS)/$(PKG).config.patch),$(CONFIGS)/$(PKG).config.patch)
 CFGPATCH = $(CONFIGS)/$(PKG).config.patch
