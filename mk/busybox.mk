@@ -31,6 +31,7 @@ PATCHES = busybox.init.patch \
 	busybox.wget_c.patch \
 	busybox.no_halt_poweroff.patch \
 	busybox.ps_opt_hack.patch \
+	busybox.1.8.1-tar_z.patch \
 	busybox.syslogd_c_use__path_log.patch
 
 # include the common package targets 
