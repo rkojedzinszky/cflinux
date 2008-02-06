@@ -16,7 +16,9 @@ case "$dev_tmpfs_enable" in
 		mount tmpfs -t tmpfs -o size=$dev_tmpfs_size,mode=755 /dev
 		mkdir /dev/.ro
 		mount --move /mnt /dev/.ro
+		p_umask=$(umask 0)
 		tar cf - -C /dev/.ro . | tar xf - -C /dev
+		umask $p_umask > /dev/null
 		echo "done."
 	;;
 esac
