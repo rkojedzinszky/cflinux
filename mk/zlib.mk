@@ -42,7 +42,7 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all $(UC_ENV)
+	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH)
 	cp -a $(PKG_ROOT)/libz.so* $(UC_ROOT)/lib/
 	cp -a $(PKG_ROOT)/zlib.h $(PKG_ROOT)/zconf.h $(PKG_ROOT)/zutil.h \
 		$(UC_ROOT)/include/
