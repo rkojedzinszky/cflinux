@@ -1,10 +1,16 @@
+commit 3ae965bb9da3cf570f2f550d61f5da49f34254aa
+Author: Richard Kojedzinszky <krichy@cflinux.hu>
+Date:   Sat Feb 2 23:19:18 2008 +0100
+
+    Applied a770e63fd0..67acd9283a
+
 diff --git a/include/linux/skbuff.h b/include/linux/skbuff.h
-index 5992f65..de217fd 100644
+index ed2c458..b948059 100644
 --- a/include/linux/skbuff.h
 +++ b/include/linux/skbuff.h
-@@ -28,6 +28,10 @@
- #include <linux/rcupdate.h>
+@@ -29,6 +29,10 @@
  #include <linux/dmaengine.h>
+ #include <linux/hrtimer.h>
  
 +#ifdef CONFIG_IP_LEF
 +#include <net/lef_struct.h>
@@ -13,7 +19,7 @@ index 5992f65..de217fd 100644
  #define HAVE_ALLOC_SKB		/* For the drivers to know */
  #define HAVE_ALIGNABLE_SKB	/* Ditto 8)		   */
  
-@@ -261,6 +265,9 @@ struct sk_buff {
+@@ -258,6 +262,9 @@ struct sk_buff {
  
  	struct  dst_entry	*dst;
  	struct	sec_path	*sp;
@@ -38,10 +44,10 @@ index f026645..92e1e8b 100644
  extern void	arp_ifdown(struct net_device *dev);
  
 diff --git a/include/net/ip_fib.h b/include/net/ip_fib.h
-index 36c635c..b81117d 100644
+index 8cadc77..d47161c 100644
 --- a/include/net/ip_fib.h
 +++ b/include/net/ip_fib.h
-@@ -61,6 +61,9 @@ struct fib_nh {
+@@ -60,6 +60,9 @@ struct fib_nh {
  #endif
  	int			nh_oif;
  	__be32			nh_gw;
@@ -51,7 +57,7 @@ index 36c635c..b81117d 100644
  };
  
  /*
-@@ -111,6 +114,7 @@ struct fib_result {
+@@ -103,6 +106,7 @@ struct fib_result {
  #ifdef CONFIG_IP_MULTIPLE_TABLES
  	struct fib_rule	*r;
  #endif
@@ -59,7 +65,7 @@ index 36c635c..b81117d 100644
  };
  
  struct fib_result_nl {
-@@ -130,7 +134,11 @@ struct fib_result_nl {
+@@ -122,7 +126,11 @@ struct fib_result_nl {
  
  #ifdef CONFIG_IP_ROUTE_MULTIPATH
  
@@ -71,7 +77,7 @@ index 36c635c..b81117d 100644
  #define FIB_RES_RESET(res)	((res).nh_sel = 0)
  
  #else /* CONFIG_IP_ROUTE_MULTIPATH */
-@@ -171,14 +179,23 @@ struct fib_table {
+@@ -155,14 +163,23 @@ struct fib_table {
  
  #ifndef CONFIG_IP_MULTIPLE_TABLES
  
@@ -99,7 +105,7 @@ index 36c635c..b81117d 100644
  }
  
  static inline struct fib_table *fib_new_table(u32 id)
-@@ -188,8 +205,7 @@ static inline struct fib_table *fib_new_table(u32 id)
+@@ -172,8 +189,7 @@ static inline struct fib_table *fib_new_table(u32 id)
  
  static inline int fib_lookup(const struct flowi *flp, struct fib_result *res)
  {
@@ -214,12 +220,12 @@ index 0000000..5edce59
 +
 +#endif /* _NET_LEF_STRUCT_H */
 diff --git a/net/core/neighbour.c b/net/core/neighbour.c
-index 841e3f3..3640ea7 100644
+index f7de8f2..1c2b0e5 100644
 --- a/net/core/neighbour.c
 +++ b/net/core/neighbour.c
-@@ -34,6 +34,10 @@
- #include <linux/random.h>
+@@ -35,6 +35,10 @@
  #include <linux/string.h>
+ #include <linux/log2.h>
  
 +#ifdef CONFIG_IP_LEF
 +#include <net/lef.h>
@@ -228,7 +234,7 @@ index 841e3f3..3640ea7 100644
  #define NEIGH_DEBUG 1
  
  #define NEIGH_PRINTK(x...) printk(x)
-@@ -1144,7 +1148,11 @@ int neigh_resolve_output(struct sk_buff *skb)
+@@ -1145,7 +1149,11 @@ int neigh_resolve_output(struct sk_buff *skb)
  	struct neighbour *neigh;
  	int rc = 0;
  
@@ -239,8 +245,8 @@ index 841e3f3..3640ea7 100644
 +#endif
  		goto discard;
  
- 	__skb_pull(skb, skb->nh.raw - skb->data);
-@@ -1152,7 +1160,11 @@ int neigh_resolve_output(struct sk_buff *skb)
+ 	__skb_pull(skb, skb_network_offset(skb));
+@@ -1153,7 +1161,11 @@ int neigh_resolve_output(struct sk_buff *skb)
  	if (!neigh_event_send(neigh, skb)) {
  		int err;
  		struct net_device *dev = neigh->dev;
@@ -252,7 +258,7 @@ index 841e3f3..3640ea7 100644
  			write_lock_bh(&neigh->lock);
  			if (!dst->hh)
  				neigh_hh_init(neigh, dst, dst->ops->protocol);
-@@ -1187,8 +1199,17 @@ int neigh_connected_output(struct sk_buff *skb)
+@@ -1188,8 +1200,17 @@ int neigh_connected_output(struct sk_buff *skb)
  {
  	int err;
  	struct dst_entry *dst = skb->dst;
@@ -270,13 +276,13 @@ index 841e3f3..3640ea7 100644
 +
 +	dev = neigh->dev;
  
- 	__skb_pull(skb, skb->nh.raw - skb->data);
+ 	__skb_pull(skb, skb_network_offset(skb));
  
 diff --git a/net/core/skbuff.c b/net/core/skbuff.c
-index 336958f..5e10ada 100644
+index 35021eb..ed22cc2 100644
 --- a/net/core/skbuff.c
 +++ b/net/core/skbuff.c
-@@ -65,6 +65,10 @@
+@@ -66,6 +66,10 @@
  #include <asm/uaccess.h>
  #include <asm/system.h>
  
@@ -287,7 +293,7 @@ index 336958f..5e10ada 100644
  #include "kmap_skb.h"
  
  static struct kmem_cache *skbuff_head_cache __read_mostly;
-@@ -317,6 +321,9 @@ void __kfree_skb(struct sk_buff *skb)
+@@ -322,6 +326,9 @@ void __kfree_skb(struct sk_buff *skb)
  #ifdef CONFIG_XFRM
  	secpath_put(skb->sp);
  #endif
@@ -297,7 +303,7 @@ index 336958f..5e10ada 100644
  	if (skb->destructor) {
  		WARN_ON(in_irq());
  		skb->destructor(skb);
-@@ -405,6 +412,9 @@ struct sk_buff *skb_clone(struct sk_buff *skb, gfp_t gfp_mask)
+@@ -408,6 +415,9 @@ struct sk_buff *skb_clone(struct sk_buff *skb, gfp_t gfp_mask)
  #ifdef CONFIG_INET
  	secpath_get(skb->sp);
  #endif
@@ -307,17 +313,17 @@ index 336958f..5e10ada 100644
  	memcpy(n->cb, skb->cb, sizeof(skb->cb));
  	C(len);
  	C(data_len);
-@@ -473,6 +483,9 @@ static void copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
- #ifdef CONFIG_INET
- 	new->sp		= secpath_get(old->sp);
+@@ -481,6 +491,9 @@ static void copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
+ 	new->network_header   += offset;
+ 	new->mac_header	      += offset;
  #endif
 +#ifdef CONFIG_IP_LEF
 +	lef_init_copy(&new->lef, &old->lef);
 +#endif
- 	new->h.raw	= old->h.raw + offset;
- 	new->nh.raw	= old->nh.raw + offset;
- 	new->mac.raw	= old->mac.raw + offset;
-@@ -1923,6 +1936,9 @@ struct sk_buff *skb_segment(struct sk_buff *skb, int features)
+ 	memcpy(new->cb, old->cb, sizeof(old->cb));
+ 	new->local_df	= old->local_df;
+ 	new->fclone	= SKB_FCLONE_UNAVAILABLE;
+@@ -1946,6 +1959,9 @@ struct sk_buff *skb_segment(struct sk_buff *skb, int features)
  		nskb->priority = skb->priority;
  		nskb->protocol = skb->protocol;
  		nskb->dst = dst_clone(skb->dst);
@@ -328,7 +334,7 @@ index 336958f..5e10ada 100644
  		nskb->pkt_type = skb->pkt_type;
  		nskb->mac_len = skb->mac_len;
 diff --git a/net/ipv4/Kconfig b/net/ipv4/Kconfig
-index 5fc4a05..e0fe136 100644
+index fb79097..6e0c02c 100644
 --- a/net/ipv4/Kconfig
 +++ b/net/ipv4/Kconfig
 @@ -51,6 +51,12 @@ config IP_ADVANCED_ROUTER
@@ -356,17 +362,8 @@ index 5fc4a05..e0fe136 100644
  endchoice
  
  config IP_FIB_HASH
-@@ -118,7 +129,7 @@ config IP_ROUTE_MULTIPATH
- 
- config IP_ROUTE_MULTIPATH_CACHED
- 	bool "IP: equal cost multipath with caching support (EXPERIMENTAL)"
--	depends on IP_ROUTE_MULTIPATH
-+	depends on IP_ROUTE_MULTIPATH && !IP_LEF
- 	help
- 	  Normally, equal cost multipath routing is not supported by the
- 	  routing cache. If you say Y here, alternative routes are cached
 diff --git a/net/ipv4/Makefile b/net/ipv4/Makefile
-index 7a06862..20ad1f3 100644
+index fbf1674..5dd60d7 100644
 --- a/net/ipv4/Makefile
 +++ b/net/ipv4/Makefile
 @@ -14,6 +14,7 @@ obj-y     := route.o inetpeer.o protocol.o \
@@ -377,19 +374,19 @@ index 7a06862..20ad1f3 100644
  obj-$(CONFIG_PROC_FS) += proc.o
  obj-$(CONFIG_IP_MULTIPLE_TABLES) += fib_rules.o
  obj-$(CONFIG_IP_MROUTE) += ipmr.o
-@@ -50,6 +51,7 @@ obj-$(CONFIG_TCP_CONG_VENO) += tcp_veno.o
- obj-$(CONFIG_TCP_CONG_SCALABLE) += tcp_scalable.o
- obj-$(CONFIG_TCP_CONG_LP) += tcp_lp.o
+@@ -47,6 +48,7 @@ obj-$(CONFIG_TCP_CONG_LP) += tcp_lp.o
+ obj-$(CONFIG_TCP_CONG_YEAH) += tcp_yeah.o
+ obj-$(CONFIG_TCP_CONG_ILLINOIS) += tcp_illinois.o
  obj-$(CONFIG_NETLABEL) += cipso_ipv4.o
 +obj-$(CONFIG_IP_LEF) += lef.o
  
  obj-$(CONFIG_XFRM) += xfrm4_policy.o xfrm4_state.o xfrm4_input.o \
  		      xfrm4_output.o
 diff --git a/net/ipv4/arp.c b/net/ipv4/arp.c
-index 1a3488a..ecf6d58 100644
+index 652da8e..b36dde7 100644
 --- a/net/ipv4/arp.c
 +++ b/net/ipv4/arp.c
-@@ -126,6 +126,10 @@ struct neigh_table *clip_tbl_hook;
+@@ -122,6 +122,10 @@ struct neigh_table *clip_tbl_hook;
  
  #include <linux/netfilter_arp.h>
  
@@ -400,7 +397,7 @@ index 1a3488a..ecf6d58 100644
  /*
   *	Interface to generic neighbour cache.
   */
-@@ -525,6 +529,30 @@ int arp_bind_neighbour(struct dst_entry *dst)
+@@ -521,6 +525,30 @@ int arp_bind_neighbour(struct dst_entry *dst)
  	return 0;
  }
  
@@ -432,7 +429,7 @@ index 1a3488a..ecf6d58 100644
   * Check if we can use proxy ARP for this path
   */
 diff --git a/net/ipv4/fib_frontend.c b/net/ipv4/fib_frontend.c
-index 444a56b..a0c1c34 100644
+index eff6bce..ced36cd 100644
 --- a/net/ipv4/fib_frontend.c
 +++ b/net/ipv4/fib_frontend.c
 @@ -51,7 +51,6 @@
@@ -477,7 +474,7 @@ index 444a56b..a0c1c34 100644
  	return ret;
  }
  
-@@ -639,6 +648,7 @@ static void fib_magic(int cmd, int type, __be32 dst, int dst_len, struct in_ifad
+@@ -624,6 +633,7 @@ static void fib_magic(int cmd, int type, __be32 dst, int dst_len, struct in_ifad
  		.fc_nlflags = NLM_F_CREATE | NLM_F_APPEND,
  	};
  
@@ -485,7 +482,7 @@ index 444a56b..a0c1c34 100644
  	if (type == RTN_UNICAST)
  		tb = fib_new_table(RT_TABLE_MAIN);
  	else
-@@ -646,6 +656,9 @@ static void fib_magic(int cmd, int type, __be32 dst, int dst_len, struct in_ifad
+@@ -631,6 +641,9 @@ static void fib_magic(int cmd, int type, __be32 dst, int dst_len, struct in_ifad
  
  	if (tb == NULL)
  		return;
@@ -495,7 +492,7 @@ index 444a56b..a0c1c34 100644
  
  	cfg.fc_table = tb->tb_id;
  
-@@ -918,8 +931,6 @@ void __init ip_fib_init(void)
+@@ -904,8 +917,6 @@ void __init ip_fib_init(void)
  	for (i = 0; i < FIB_TABLE_HASHSZ; i++)
  		INIT_HLIST_HEAD(&fib_table_hash[i]);
  #ifndef CONFIG_IP_MULTIPLE_TABLES
@@ -505,7 +502,7 @@ index 444a56b..a0c1c34 100644
  	hlist_add_head_rcu(&ip_fib_main_table->tb_hlist, &fib_table_hash[0]);
  #else
 diff --git a/net/ipv4/fib_hash.c b/net/ipv4/fib_hash.c
-index a4949f9..6d6e19a 100644
+index 9ad1d9f..5dfadab 100644
 --- a/net/ipv4/fib_hash.c
 +++ b/net/ipv4/fib_hash.c
 @@ -241,7 +241,10 @@ fn_new_zone(struct fn_hash *table, int z)
@@ -522,10 +519,10 @@ index a4949f9..6d6e19a 100644
  	int err;
 diff --git a/net/ipv4/fib_lef.c b/net/ipv4/fib_lef.c
 new file mode 100644
-index 0000000..45c7c3e
+index 0000000..677f7b5
 --- /dev/null
 +++ b/net/ipv4/fib_lef.c
-@@ -0,0 +1,970 @@
+@@ -0,0 +1,972 @@
 +/*
 + *   This program is free software; you can redistribute it and/or
 + *   modify it under the terms of the GNU General Public License
@@ -806,6 +803,8 @@ index 0000000..45c7c3e
 +
 +			if (state & FA_S_ACCESSED)
 +				rt_cache_flush(-1);
++			rtmsg_fib(RTM_NEWROUTE, htonl(key), new_fa, plen,
++				tb->tb_id, &cfg->fc_nlinfo, NLM_F_REPLACE);
 +
 +			goto succeeded;
 +		}
@@ -847,7 +846,7 @@ index 0000000..45c7c3e
 +	list_add_tail_rcu(&new_fa->fa_list, (fa ? &fa->fa_list : &n->falh));
 +
 +	rt_cache_flush(-1);
-+	rtmsg_fib(RTM_NEWROUTE, htonl(key), new_fa, plen, tb->tb_id, &cfg->fc_nlinfo);
++	rtmsg_fib(RTM_NEWROUTE, htonl(key), new_fa, plen, tb->tb_id, &cfg->fc_nlinfo, 0);
 +succeeded:
 +	return 0;
 +
@@ -1096,7 +1095,7 @@ index 0000000..45c7c3e
 +		return -ESRCH;
 +
 +	fa = fa_to_delete;
-+	rtmsg_fib(RTM_DELROUTE, htonl(key), fa, plen, tb->tb_id, &cfg->fc_nlinfo);
++	rtmsg_fib(RTM_DELROUTE, htonl(key), fa, plen, tb->tb_id, &cfg->fc_nlinfo, 0);
 +
 +	list_del_rcu(&fa->fa_list);
 +
@@ -1466,7 +1465,7 @@ index 0000000..45c7c3e
 +		fn_alias_kmem = kmem_cache_create("ip_fib_alias",
 +						  sizeof(struct fib_alias),
 +						  0, SLAB_HWCACHE_ALIGN,
-+						  NULL, NULL);
++						  NULL);
 +
 +	tb = kmalloc(sizeof(struct fib_table) + sizeof(radix_t*),
 +		     GFP_KERNEL);
@@ -1497,10 +1496,10 @@ index 0000000..45c7c3e
 +}
 +
 diff --git a/net/ipv4/fib_semantics.c b/net/ipv4/fib_semantics.c
-index 3dad12e..28f00f7 100644
+index c434119..dbdec07 100644
 --- a/net/ipv4/fib_semantics.c
 +++ b/net/ipv4/fib_semantics.c
-@@ -153,6 +153,11 @@ void free_fib_info(struct fib_info *fi)
+@@ -152,6 +152,11 @@ void free_fib_info(struct fib_info *fi)
  		if (nh->nh_dev)
  			dev_put(nh->nh_dev);
  		nh->nh_dev = NULL;
@@ -1512,7 +1511,7 @@ index 3dad12e..28f00f7 100644
  	} endfor_nexthops(fi);
  	fib_info_cnt--;
  	kfree(fi);
-@@ -872,13 +877,31 @@ failure:
+@@ -861,13 +866,31 @@ failure:
  	return ERR_PTR(err);
  }
  
@@ -1545,7 +1544,7 @@ index 3dad12e..28f00f7 100644
  
  	list_for_each_entry_rcu(fa, head, fa_list) {
  		int err;
-@@ -899,12 +922,51 @@ int fib_semantic_match(struct list_head *head, const struct flowi *flp,
+@@ -888,12 +911,51 @@ int fib_semantic_match(struct list_head *head, const struct flowi *flp,
  			if (fi->fib_flags & RTNH_F_DEAD)
  				continue;
  
@@ -1597,7 +1596,7 @@ index 3dad12e..28f00f7 100644
  				for_nexthops(fi) {
  					if (nh->nh_flags&RTNH_F_DEAD)
  						continue;
-@@ -922,12 +984,15 @@ int fib_semantic_match(struct list_head *head, const struct flowi *flp,
+@@ -911,12 +973,15 @@ int fib_semantic_match(struct list_head *head, const struct flowi *flp,
  				}
  #endif
  				endfor_nexthops(fi);
@@ -1608,22 +1607,22 @@ index 3dad12e..28f00f7 100644
  			default:
  				printk(KERN_DEBUG "impossible 102\n");
  				return -EINVAL;
- 			};
+ 			}
 +#endif
  		}
  		return err;
  	}
-@@ -943,6 +1008,9 @@ out_fill_res:
- 	res->netmask = mask;
- 	res->network = zone & inet_make_mask(prefixlen);
- #endif
+@@ -928,6 +993,9 @@ out_fill_res:
+ 	res->type = fa->fa_type;
+ 	res->scope = fa->fa_scope;
+ 	res->fi = fa->fa_info;
 +#ifdef CONFIG_IP_LEF
 +	res->nh = (struct fib_nh*)_nh;
 +#endif
  	atomic_inc(&res->fi->fib_clntref);
  	return 0;
  }
-@@ -1073,6 +1141,9 @@ int fib_sync_down(__be32 local, struct net_device *dev, int force)
+@@ -1058,6 +1126,9 @@ int fib_sync_down(__be32 local, struct net_device *dev, int force)
  		struct hlist_head *head = &fib_info_devhash[hash];
  		struct hlist_node *node;
  		struct fib_nh *nh;
@@ -1633,7 +1632,7 @@ index 3dad12e..28f00f7 100644
  
  		hlist_for_each_entry(nh, node, head, nh_hash) {
  			struct fib_info *fi = nh->nh_parent;
-@@ -1095,6 +1166,12 @@ int fib_sync_down(__be32 local, struct net_device *dev, int force)
+@@ -1080,6 +1151,12 @@ int fib_sync_down(__be32 local, struct net_device *dev, int force)
  					nh->nh_power = 0;
  					spin_unlock_bh(&fib_multipath_lock);
  #endif
@@ -1647,10 +1646,10 @@ index 3dad12e..28f00f7 100644
  				}
  #ifdef CONFIG_IP_ROUTE_MULTIPATH
 diff --git a/net/ipv4/fib_trie.c b/net/ipv4/fib_trie.c
-index 214c347..0580b18 100644
+index 9ca786a..c759fd6 100644
 --- a/net/ipv4/fib_trie.c
 +++ b/net/ipv4/fib_trie.c
-@@ -1303,7 +1303,10 @@ static inline int check_leaf(struct trie *t, struct leaf *l,
+@@ -1324,7 +1324,10 @@ static inline int check_leaf(struct trie *t, struct leaf *l,
  	return 1;
  }
  
@@ -1663,7 +1662,7 @@ index 214c347..0580b18 100644
  {
  	struct trie *t = (struct trie *) tb->tb_data;
 diff --git a/net/ipv4/icmp.c b/net/ipv4/icmp.c
-index 03d9659..55d99b2 100644
+index 02a899b..799575a 100644
 --- a/net/ipv4/icmp.c
 +++ b/net/ipv4/icmp.c
 @@ -440,8 +440,10 @@ void icmp_send(struct sk_buff *skb_in, int type, int code, __be32 info)
@@ -1677,7 +1676,7 @@ index 03d9659..55d99b2 100644
  
  	/*
  	 *	Find the original header. It is expected to be valid, of course.
-@@ -462,7 +464,11 @@ void icmp_send(struct sk_buff *skb_in, int type, int code, __be32 info)
+@@ -463,7 +465,11 @@ void icmp_send(struct sk_buff *skb_in, int type, int code, __be32 info)
  	/*
  	 *	Now check at the protocol level
  	 */
@@ -1689,7 +1688,7 @@ index 03d9659..55d99b2 100644
  		goto out;
  
  	/*
-@@ -512,6 +518,11 @@ void icmp_send(struct sk_buff *skb_in, int type, int code, __be32 info)
+@@ -513,6 +519,11 @@ void icmp_send(struct sk_buff *skb_in, int type, int code, __be32 info)
  	 */
  
  	saddr = iph->daddr;
@@ -1702,7 +1701,7 @@ index 03d9659..55d99b2 100644
  		struct net_device *dev = NULL;
  
 diff --git a/net/ipv4/ip_input.c b/net/ipv4/ip_input.c
-index f38e976..a6a92a3 100644
+index 9706939..45c751b 100644
 --- a/net/ipv4/ip_input.c
 +++ b/net/ipv4/ip_input.c
 @@ -145,6 +145,9 @@
@@ -1715,7 +1714,7 @@ index f38e976..a6a92a3 100644
  
  /*
   *	SNMP management statistics
-@@ -337,13 +340,21 @@ static inline int ip_rcv_finish(struct sk_buff *skb)
+@@ -336,7 +339,11 @@ static inline int ip_rcv_finish(struct sk_buff *skb)
  	 *	how the packet travels inside Linux networking.
  	 */
  	if (skb->dst == NULL) {
@@ -1728,7 +1727,8 @@ index f38e976..a6a92a3 100644
  					 skb->dev);
  		if (unlikely(err)) {
  			if (err == -EHOSTUNREACH)
- 				IP_INC_STATS_BH(IPSTATS_MIB_INADDRERRORS);
+@@ -345,6 +352,10 @@ static inline int ip_rcv_finish(struct sk_buff *skb)
+ 				IP_INC_STATS_BH(IPSTATS_MIB_INNOROUTES);
  			goto drop;
  		}
 +#ifdef CONFIG_IP_LEF
@@ -1740,7 +1740,7 @@ index f38e976..a6a92a3 100644
  #ifdef CONFIG_NET_CLS_ROUTE
 diff --git a/net/ipv4/lef.c b/net/ipv4/lef.c
 new file mode 100644
-index 0000000..60aef35
+index 0000000..b461f47
 --- /dev/null
 +++ b/net/ipv4/lef.c
 @@ -0,0 +1,124 @@
@@ -1838,7 +1838,7 @@ index 0000000..60aef35
 +		goto drop;
 +
 +	skb->ip_summed = CHECKSUM_NONE;
-+	iph = skb->nh.iph;
++	iph = ip_hdr(skb);
 +
 +	/*
 +	 *	According to the RFC, we must first decrease the TTL field. If
@@ -1869,23 +1869,23 @@ index 0000000..60aef35
 +	return NET_RX_DROP;
 +}
 diff --git a/net/ipv4/netfilter/Kconfig b/net/ipv4/netfilter/Kconfig
-index 601808c..d3b4e2a 100644
+index fa97947..774dd5b 100644
 --- a/net/ipv4/netfilter/Kconfig
 +++ b/net/ipv4/netfilter/Kconfig
-@@ -395,7 +395,7 @@ config NF_NAT_NEEDED
+@@ -197,7 +197,7 @@ config NF_NAT_NEEDED
  
  config IP_NF_TARGET_MASQUERADE
  	tristate "MASQUERADE target support"
--	depends on (NF_NAT || IP_NF_NAT)
-+	depends on (NF_NAT || IP_NF_NAT) && !IP_LEF
+-	depends on NF_NAT
++	depends on NF_NAT && !IP_LEF
  	help
  	  Masquerading is a special case of NAT: all outgoing connections are
  	  changed to seem to come from a particular interface's address, and
 diff --git a/net/ipv4/route.c b/net/ipv4/route.c
-index 37e0d4d..0e1e671 100644
+index 198b732..3749df2 100644
 --- a/net/ipv4/route.c
 +++ b/net/ipv4/route.c
-@@ -107,6 +107,9 @@
+@@ -106,6 +106,9 @@
  #ifdef CONFIG_SYSCTL
  #include <linux/sysctl.h>
  #endif
@@ -1895,7 +1895,7 @@ index 37e0d4d..0e1e671 100644
  
  #define RT_FL_TOS(oldflp) \
      ((u32)(oldflp->fl4_tos & (IPTOS_RT_MASK | RTO_ONLINK)))
-@@ -237,9 +240,14 @@ static spinlock_t	*rt_hash_locks;
+@@ -236,9 +239,14 @@ static spinlock_t	*rt_hash_locks;
  		for (i = 0; i < RT_HASH_LOCK_SZ; i++) \
  			spin_lock_init(&rt_hash_locks[i]); \
  		}
@@ -1910,7 +1910,7 @@ index 37e0d4d..0e1e671 100644
  #endif
  
  static struct rt_hash_bucket 	*rt_hash_table;
-@@ -251,6 +259,15 @@ static DEFINE_PER_CPU(struct rt_cache_stat, rt_cache_stat);
+@@ -250,6 +258,15 @@ static DEFINE_PER_CPU(struct rt_cache_stat, rt_cache_stat);
  #define RT_CACHE_STAT_INC(field) \
  	(__raw_get_cpu_var(rt_cache_stat).field++)
  
@@ -1926,7 +1926,7 @@ index 37e0d4d..0e1e671 100644
  static int rt_intern_hash(unsigned hash, struct rtable *rth,
  				struct rtable **res);
  
-@@ -259,6 +276,7 @@ static unsigned int rt_hash_code(u32 daddr, u32 saddr)
+@@ -258,6 +275,7 @@ static unsigned int rt_hash_code(u32 daddr, u32 saddr)
  	return (jhash_2words(daddr, saddr, rt_hash_rnd)
  		& rt_hash_mask);
  }
@@ -1934,7 +1934,7 @@ index 37e0d4d..0e1e671 100644
  
  #define rt_hash(daddr, saddr, idx) \
  	rt_hash_code((__force u32)(__be32)(daddr),\
-@@ -919,6 +937,23 @@ work_done:
+@@ -832,6 +850,23 @@ work_done:
  out:	return 0;
  }
  
@@ -1958,7 +1958,7 @@ index 37e0d4d..0e1e671 100644
  static int rt_intern_hash(unsigned hash, struct rtable *rt, struct rtable **rp)
  {
  	struct rtable	*rth, **rthp;
-@@ -1049,6 +1084,7 @@ restart:
+@@ -957,6 +992,7 @@ restart:
  	*rp = rt;
  	return 0;
  }
@@ -1966,8 +1966,8 @@ index 37e0d4d..0e1e671 100644
  
  void rt_bind_peer(struct rtable *rt, int create)
  {
-@@ -1893,6 +1929,61 @@ static inline int ip_mkroute_input(struct sk_buff *skb,
- #endif /* CONFIG_IP_ROUTE_MULTIPATH_CACHED  */
+@@ -1741,6 +1777,62 @@ static inline int ip_mkroute_input(struct sk_buff *skb,
+ 	return rt_intern_hash(hash, rth, (struct rtable**)&skb->dst);
  }
  
 +#ifdef CONFIG_IP_LEF
@@ -2002,7 +2002,7 @@ index 37e0d4d..0e1e671 100644
 +	if (unlikely(!(skb->lef.flags & LEF_NEED)))
 +		return -EAGAIN;
 +
-+	if (likely(skb->nh.iph->ihl <= 5 && !IN_DEV_RPFILTER(in_dev))) {
++	if (likely(ip_hdr(skb)->ihl <= 5 && !IN_DEV_RPFILTER(in_dev))) {
 +		struct neighbour	*neigh;
 +
 +		skb->lef.dev = FIB_RES_DEV(*res);
@@ -2025,10 +2025,11 @@ index 37e0d4d..0e1e671 100644
 +	return -EAGAIN;
 +}
 +#endif
- 
++
  /*
   *	NOTE. We drop all the packets that has local source
-@@ -1904,7 +1995,7 @@ static inline int ip_mkroute_input(struct sk_buff *skb,
+  *	addresses, because every properly looped back packet
+@@ -1751,7 +1843,7 @@ static inline int ip_mkroute_input(struct sk_buff *skb,
   *	2. IP spoofing attempts are filtered with 100% of guarantee.
   */
  
@@ -2037,7 +2038,7 @@ index 37e0d4d..0e1e671 100644
  			       u8 tos, struct net_device *dev)
  {
  	struct fib_result res;
-@@ -1982,6 +2073,11 @@ static int ip_route_input_slow(struct sk_buff *skb, __be32 daddr, __be32 saddr,
+@@ -1829,6 +1921,11 @@ static int ip_route_input_slow(struct sk_buff *skb, __be32 daddr, __be32 saddr,
  	if (res.type != RTN_UNICAST)
  		goto martian_destination;
  
@@ -2049,7 +2050,7 @@ index 37e0d4d..0e1e671 100644
  	err = ip_mkroute_input(skb, &res, &fl, in_dev, daddr, saddr, tos);
  	if (err == -ENOBUFS)
  		goto e_nobufs;
-@@ -2089,11 +2185,14 @@ martian_source:
+@@ -1936,11 +2033,14 @@ martian_source:
  int ip_route_input(struct sk_buff *skb, __be32 daddr, __be32 saddr,
  		   u8 tos, struct net_device *dev)
  {
@@ -2064,7 +2065,7 @@ index 37e0d4d..0e1e671 100644
  	hash = rt_hash(daddr, saddr, iif);
  
  	rcu_read_lock();
-@@ -2116,6 +2215,7 @@ int ip_route_input(struct sk_buff *skb, __be32 daddr, __be32 saddr,
+@@ -1963,6 +2063,7 @@ int ip_route_input(struct sk_buff *skb, __be32 daddr, __be32 saddr,
  		RT_CACHE_STAT_INC(in_hlist_search);
  	}
  	rcu_read_unlock();
@@ -2072,7 +2073,7 @@ index 37e0d4d..0e1e671 100644
  
  	/* Multicast recognition logic is moved from route cache to here.
  	   The problem was that too many Ethernet cards have broken/missing
-@@ -2555,6 +2655,7 @@ out:	return err;
+@@ -2333,6 +2434,7 @@ out:	return err;
  
  int __ip_route_output_key(struct rtable **rp, const struct flowi *flp)
  {
@@ -2080,7 +2081,7 @@ index 37e0d4d..0e1e671 100644
  	unsigned hash;
  	struct rtable *rth;
  
-@@ -2592,6 +2693,7 @@ int __ip_route_output_key(struct rtable **rp, const struct flowi *flp)
+@@ -2359,6 +2461,7 @@ int __ip_route_output_key(struct rtable **rp, const struct flowi *flp)
  		RT_CACHE_STAT_INC(out_hlist_search);
  	}
  	rcu_read_unlock_bh();
@@ -2088,10 +2089,10 @@ index 37e0d4d..0e1e671 100644
  
  	return ip_route_output_slow(rp, flp);
  }
-@@ -3193,6 +3295,10 @@ int __init ip_rt_init(void)
- 	xfrm_init();
- 	xfrm4_init();
+@@ -3024,6 +3127,10 @@ int __init ip_rt_init(void)
  #endif
+ 	rtnl_register(PF_INET, RTM_GETROUTE, inet_rtm_getroute, NULL);
+ 
 +#ifdef CONFIG_IP_LEF
 +	lef_fi_lock_init();
 +	printk(KERN_DEBUG "IPv4: LEF v0.2.1 is active\n");
