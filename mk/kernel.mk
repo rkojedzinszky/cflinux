@@ -34,7 +34,6 @@ PATCHES = kernel.vlan_mtu.patch \
 	kernel.blackhole.patch \
 	kernel.usb_root.patch \
 	kernel.igmp.c.max_membership.patch \
-	kernel.dst_input_no_loop.patch \
 	kernel.inline_kfree_skb.patch \
 	kernel.asm_types_h.patch \
 	kernel.lef.patch
