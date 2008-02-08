@@ -18,15 +18,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := iptables
-SRC_FILENAME = iptables-1.3.6.tar.bz2
-EXTRACTED_DIR = iptables-1.3.6
+SRC_FILENAME = iptables-1.4.0.tar.bz2
+EXTRACTED_DIR = iptables-1.4.0
 DOWNLOAD_SITES = http://www.netfilter.org/projects/iptables/files \
 		$(CFLINUX_PACKAGES)
-
-PATCHES = \
-	  iptables.multiport_v1.patch \
-	  iptables.MARK_v1.patch \
-	  iptables.libipt_iprange_c.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -46,6 +41,7 @@ build: configure $(BUILT_STAMP)
 $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) iptables $(UC_PATH) \
 		KERNEL_DIR=$(BUILD_DIR)/kernel \
+		KBUILD_OUTPUT=$(BUILD_DIR)/kernel \
 		NO_SHARED_LIBS=1 \
 		DO_IPV6=0 \
 		LDFLAGS=
