@@ -1,0 +1,12 @@
+--- iptables-1.4.0.orig/include/xtables.h	2007-12-22 13:44:18.000000000 +0100
++++ iptables-1.4.0/include/xtables.h	2008-02-08 10:55:57.000000000 +0100
+@@ -6,6 +6,9 @@
+ #include <linux/netfilter/x_tables.h>
+ #include <libiptc/libxtc.h>
+ 
++typedef __u32 __be32;
++typedef __u16 __be16;
++
+ #ifndef XT_LIB_DIR
+ #define XT_LIB_DIR "/usr/local/lib/iptables"
+ #endif
