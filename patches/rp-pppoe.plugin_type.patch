@@ -1,0 +1,11 @@
+--- rp-pppoe-3.5.orig/src/plugin.c	2002-07-08 16:38:24.000000000 +0200
++++ rp-pppoe-3.5/src/plugin.c	2008-02-08 18:52:41.000000000 +0100
+@@ -37,6 +37,8 @@
+ #include "pppd/ccp.h"
+ #include "pppd/pathnames.h"
+ 
++#define	aligned_u64 unsigned long long
++
+ #include <linux/types.h>
+ #include <syslog.h>
+ #include <sys/ioctl.h>
