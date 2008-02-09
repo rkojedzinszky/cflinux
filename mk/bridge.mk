@@ -21,10 +21,7 @@ PKG := bridge
 SRC_FILENAME = bridge-utils-0.9.6.tar.gz
 EXTRACTED_DIR = bridge-utils
 DOWNLOAD_SITES = \
-		http://cesnet.dl.sourceforge.net/sourceforge/bridge/ \
-		http://umn.dl.sourceforge.net/sourceforge/bridge/ \
-		http://switch.dl.sourceforge.net/sourceforge/bridge/ \
-		http://aleron.dl.sourceforge.net/sourceforge/bridge/ \
+		http://downloads.sourceforge.net/sourceforge/bridge \
 		$(CFLINUX_PACKAGES)
 
 # include the common package targets 
