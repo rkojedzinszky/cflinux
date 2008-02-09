@@ -21,9 +21,7 @@ PKG := rp-l2tp
 SRC_FILENAME = rp-l2tp-0.4.tar.gz
 EXTRACTED_DIR = rp-l2tp-0.4
 DOWNLOAD_SITES = \
-		http://switch.dl.sourceforge.net/sourceforge/rp-l2tp/ \
-		http://kent.dl.sourceforge.net/sourceforge/rp-l2tp/ \
-		http://easynews.dl.sourceforge.net/sourceforge/ \
+		http://downloads.sourceforge.net/rp-l2tp \
 		$(CFLINUX_PACKAGES)
 PATCHES = rp-l2tp.close-on-exec.patch
 
