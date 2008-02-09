@@ -21,11 +21,7 @@ PKG := vtun
 SRC_FILENAME = vtun-2.6.tar.gz
 EXTRACTED_DIR = vtun
 DOWNLOAD_SITES = \
-		http://switch.dl.sourceforge.net/sourceforge/vtun/ \
-		http://keihanna.dl.sourceforge.net/sourceforge/vtun/ \
-		http://belnet.dl.sourceforge.net/sourceforge/vtun/ \
-		http://cesnet.dl.sourceforge.net/sourceforge/vtun/ \
-		http://aleron.dl.sourceforge.net/sourceforge/vtun/ \
+		http://downloads.sourceforge.net/vtun \
 		$(CFLINUX_PACKAGES)
 PATCHES = vtun.configure.patch
 
