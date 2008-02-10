@@ -1,25 +1,26 @@
 --- linux-2.6.19/init/do_mounts.c.orig	2006-11-29 22:57:37.000000000 +0100
-+++ linux-2.6.19/init/do_mounts.c	2006-12-03 10:19:44.000000000 +0100
-@@ -311,11 +311,25 @@
++++ linux-2.6.19/init/do_mounts.c	2008-02-07 10:14:58.000000000 +0100
+@@ -325,12 +325,26 @@
  #ifdef CONFIG_BLOCK
  		__bdevname(ROOT_DEV, b);
  #endif
 -		printk("VFS: Cannot open root device \"%s\" or %s\n",
 +		printk("VFS: Cannot open root device \"%s\" or %s, retrying in 1 second.\n",
  				root_device_name, b);
--		printk("Please append a correct \"root=\" boot option\n");
- 
--		panic("VFS: Unable to mount root fs on %s", b);
+-		printk("Please append a correct \"root=\" boot option; here are the available partitions:\n");
 +		printk("You may need to append a correct \"root=\" boot option\n");
 +		printk("or wait for the root device to become ready.\n");
-+  
++		printk("Here are the available partitions:\n");
+ 
+ 		printk_all_partitions();
+-		panic("VFS: Unable to mount root fs on %s", b);
 +		/* wait 1 second and try again,
-+		 * allowing time for hubs/devices to become ready */
++		* allowing time for hubs/devices to become ready */
 +		set_current_state(TASK_INTERRUPTIBLE);
 +		schedule_timeout(HZ);
 +
 +		/* re-calculate the ROOT_DEV here, possibly after some
-+		 * device has been initialized */
++		* device has been initialized */
 +		if (saved_root_name[0]) {
 +			ROOT_DEV = name_to_dev_t(saved_root_name);
 +			create_dev("/dev/root", ROOT_DEV);
@@ -28,4 +29,4 @@
 +		goto retry;
  	}
  
- 	printk("No filesystem could mount root, tried: ");
+ 	printk("List of all partitions:\n");
