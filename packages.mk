@@ -66,11 +66,12 @@ $(EXTRACTED_STAMP):
 patch: extract $(PATCHED_STAMP)
 
 $(PATCHED_STAMP):
-	@echo -n "Patching $(PKG): "
+	@echo "Patching $(PKG): "
 ifneq ($(PATCHES),)
 	@cd $(PKG_ROOT); for i in $(PATCHES); do \
-		patch -p1 < "$(PATCHES_DIR)/$$i" >/dev/null || exit 1 ; \
-		echo -n " [$$i]" ; done
+		echo -n "Applying patch: [$$i] ... " ; \
+		patch -p1 < "$(PATCHES_DIR)/$$i" >/dev/null || { echo "FAILED" ; exit 1 ; } ; \
+		echo "OK" ; done
 endif
 ifeq ($(wildcard $(PKG_PATCHES_DIR)),$(PKG_PATCHES_DIR))
 	@cd $(PKG_ROOT) && for i in $(PKG_PATCHES_DIR)/*.patch ; do \
