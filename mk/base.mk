@@ -68,6 +68,8 @@ $(INSTALL_STAMP):
 	cp -v $(PKG_ROOT)/scripts/common.sh $(ROOTFS)/usr/lib/cfmaint/
 	cp -v $(PKG_ROOT)/defaults/modules \
 		$(DEFAULTS_DIR)/etc/modules
+	cp -v $(PKG_ROOT)/defaults/fstab.template \
+		$(DEFAULTS_DIR)/etc/
 	cp -v $(PKG_ROOT)/scripts/rc.conf.defaults \
 		$(DEFAULTS_DIR)/etc/rc.conf
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/savedata $(ROOTFS)/sbin/

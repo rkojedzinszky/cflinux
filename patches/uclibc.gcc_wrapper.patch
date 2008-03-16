@@ -781,14 +781,14 @@ diff -ruNP uClibc-0.9.27.orig/extra/gcc-uClibc/gcc-uClibc.c uClibc-0.9.27/extra/
 +	ln -fs $(TARGET_ARCH)-uclibc-gcc $(PREFIX)$(DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-linux-gcc
 +	ln -fs $(TARGET_ARCH)-uclibc-gcc $(PREFIX)$(DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-linux-cc
 +	ln -fs $(TARGET_ARCH)-uclibc-ld $(PREFIX)$(DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-linux-ld
-+	ln -fs $(PREFIX)$(DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-gcc $(PREFIX)$(DEVEL_PREFIX)/usr/bin/gcc
-+	ln -fs $(PREFIX)$(DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-gcc $(PREFIX)$(DEVEL_PREFIX)/usr/bin/cc
-+	ln -fs $(PREFIX)$(DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-ld  $(PREFIX)$(DEVEL_PREFIX)/usr/bin/ld
++	ln -fs $(DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-gcc $(PREFIX)$(DEVEL_PREFIX)/usr/bin/gcc
++	ln -fs $(DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-gcc $(PREFIX)$(DEVEL_PREFIX)/usr/bin/cc
++	ln -fs $(DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-ld  $(PREFIX)$(DEVEL_PREFIX)/usr/bin/ld
 +ifeq ($(strip $(UCLIBC_CTOR_DTOR)),y)
-+	ln -fs $(TARGET_ARCH)-uclibc-gcc $(PREFIX)$(SYSTEM_DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-g++
-+	ln -fs $(TARGET_ARCH)-uclibc-gcc $(PREFIX)$(SYSTEM_DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-c++
-+	ln -fs $(SYSTEM_DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-gcc $(PREFIX)$(DEVEL_TOOL_PREFIX)/bin/c++
-+	ln -fs $(SYSTEM_DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-gcc $(PREFIX)$(DEVEL_TOOL_PREFIX)/bin/g++
++	ln -fs $(TARGET_ARCH)-uclibc-gcc $(PREFIX)$(DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-g++
++	ln -fs $(TARGET_ARCH)-uclibc-gcc $(PREFIX)$(DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-c++
++	ln -fs $(DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-gcc $(PREFIX)$(DEVEL_PREFIX)/usr/bin/c++
++	ln -fs $(DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-gcc $(PREFIX)$(DEVEL_PREFIX)/usr/bin/g++
 +endif
 +	for app in addr2line ar as cpp gasp nm objcopy \
 +	    objdump ranlib size strings strip; do \
@@ -800,7 +800,7 @@ diff -ruNP uClibc-0.9.27.orig/extra/gcc-uClibc/gcc-uClibc.c uClibc-0.9.27/extra/
 +	done
 +	for app in cc gcc ld addr2line ar as cpp gasp nm objcopy \
 +	    objdump ranlib size strings strip; do \
-+	  ln -fs $(TARGET_ARCH)-uclibc-$${app} $(PREFIX)$(DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-linux-gnu-$${app}; \
++	  ln -fs $(TARGET_ARCH)-uclibc-$${app} $(DEVEL_PREFIX)/bin/$(TARGET_ARCH)-uclibc-linux-gnu-$${app}; \
 +	done
 +
 +clean:
