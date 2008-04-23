@@ -39,7 +39,8 @@ PATCHES = kernel.vlan_mtu.patch \
 	kernel.pcmcia-ti-routing-10_v24.patch \
 	kernel.ipt_random.patch \
 	kernel.igmp.c.max_membership.patch \
-	kernel.proc_fs_h.patch
+	kernel.proc_fs_h.patch \
+	kernel.pppoe-key-ifindex-backport.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
