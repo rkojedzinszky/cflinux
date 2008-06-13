@@ -36,7 +36,8 @@ PATCHES = kernel.vlan_mtu.patch \
 	kernel.igmp.c.max_membership.patch \
 	kernel.inline_kfree_skb.patch \
 	kernel.asm_types_h.patch \
-	kernel.lef.patch
+	kernel.lef.patch \
+	kernel.vlan_multicast_fix.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
