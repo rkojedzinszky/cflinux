@@ -60,7 +60,7 @@ TARGET_HOST = i386-uclibc-linux-gnu
 export TARGET_HOST
 
 # The version of the used kernel
-KERNEL_VERSION := 2.4.35.4
+KERNEL_VERSION := 2.4.36.6
 
 # the downloads dir, where the sources will reside
 SOURCES_DIR ?= $(TOP_DIR)/sources
