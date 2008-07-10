@@ -40,7 +40,7 @@
 + 			*str++ = '.';
 + 		}
 + 		str[-1] = 0;
-+ 		if (inet_aton(p, &lsa->sin.sin_addr) == 0)
++ 		if (inet_aton(p, &lsa->u.sin.sin_addr) == 0)
 + 			goto pasv_error;
 + 		if (!(str = strchr((p=str), ',')))
 + 			goto pasv_error;

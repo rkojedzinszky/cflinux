@@ -1,20 +1,26 @@
---- busybox-1.00-pre7/init/init.c	Fri Sep 26 12:45:55 2003
-+++ busybox-1.00-pre7-p/init/init.c	Fri Feb  6 09:41:23 2004
-@@ -110,6 +110,7 @@
- #define KERNEL_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))
+--- busybox-1.10.4/init/init.c.orig	2008-06-25 12:55:32.000000000 +0200
++++ busybox-1.10.4/init/init.c	2008-07-08 19:13:18.000000000 +0200
+@@ -28,6 +28,7 @@
+ #include <sys/resource.h>
  
  #define INITTAB      "/etc/inittab"	/* inittab file location */
 +#define INITTAB_FB	 "/usr/share/defaults/etc/inittab" /* fallback inittab */
  #ifndef INIT_SCRIPT
  #define INIT_SCRIPT  "/etc/init.d/rcS"	/* Default sysinit script. */
  #endif
-@@ -949,7 +950,8 @@
- 	const struct init_action_type *a = actions;
+@@ -703,10 +704,12 @@
+ 	FILE *file;
+ 	char buf[COMMAND_SIZE];
  
+-	if (ENABLE_FEATURE_USE_INITTAB)
+-		file = fopen(INITTAB, "r");
+-	else
++	if (ENABLE_FEATURE_USE_INITTAB) {
++		if ( (file = fopen(INITTAB, "r")) == NULL )
++			file = fopen(INITTAB_FB, "r");
++	} else {
+ 		file = NULL;
++	}
  
--	file = fopen(INITTAB, "r");
-+	if ( (file = fopen(INITTAB, "r")) == NULL )
-+		file = fopen(INITTAB_FB,"r");
+ 	/* No inittab file -- set up some default behavior */
  	if (file == NULL) {
- 		/* No inittab file -- set up some default behavior */
- #endif
