@@ -1,0 +1,86 @@
+--- rp-pppoe-3.5.orig/src/pppoe-server.c	2002-07-08 16:38:24.000000000 +0200
++++ rp-pppoe-3.5/src/pppoe-server.c	2008-07-22 13:56:20.000000000 +0200
+@@ -166,6 +166,9 @@
+ /* Do we pass the "unit" option to pppd?  (2.4 or greater) */
+ int PassUnitOptionToPPPD = 0;
+ 
++/* Should we accept any Service-Name? */
++int AcceptAnyServiceName = 0;
++
+ static PPPoETag hostUniq;
+ static PPPoETag relayId;
+ static PPPoETag receivedCookie;
+@@ -590,7 +593,7 @@
+ 
+     /* If PADI specified non-default service name, and we do not offer
+        that service, DO NOT send PADO */
+-    if (requestedService.type) {
++    if (!AcceptAnyServiceName && requestedService.type) {
+ 	int slen = ntohs(requestedService.length);
+ 	if (slen) {
+ 	    for (i=0; i<NumServiceNames; i++) {
+@@ -604,7 +607,7 @@
+ 	    ok = 1;		/* Default service requested */
+ 	}
+     } else {
+-	ok = 1;			/* No Service-Name tag in PADI */
++	ok = 1;			/* No Service-Name tag in PADI or called with '-A' */
+     }
+ 
+     if (!ok) {
+@@ -634,6 +637,16 @@
+     /* If no service-names specified on command-line, just send default
+        zero-length name.  Otherwise, add all service-name tags */
+     servname.type = htons(TAG_SERVICE_NAME);
++    /* Unconditionally add the requested service name if invoked with '-A' */
++    if (AcceptAnyServiceName && requestedService.type) {
++	    int slen = ntohs(requestedService.length);
++	    servname.length = htons(slen);
++	    CHECK_ROOM(cursor, pado.payload, TAG_HDR_SIZE+slen);
++	    memcpy(cursor, &servname, TAG_HDR_SIZE);
++	    memcpy(cursor+TAG_HDR_SIZE, requestedService.payload, slen);
++	    cursor += TAG_HDR_SIZE+slen;
++	    plen += TAG_HDR_SIZE+slen;
++    }
+     if (!NumServiceNames) {
+ 	servname.length = 0;
+ 	CHECK_ROOM(cursor, pado.payload, TAG_HDR_SIZE);
+@@ -804,7 +817,7 @@
+     }
+ 
+     slen = ntohs(requestedService.length);
+-    if (slen) {
++    if (!AcceptAnyServiceName && slen) {
+ 	/* Check supported services */
+ 	for(i=0; i<NumServiceNames; i++) {
+ 	    if (slen == strlen(ServiceNames[i]) &&
+@@ -1012,6 +1025,7 @@
+     fprintf(stderr, "   -c secret:if:port -- Enable clustering on interface 'if'.\n");
+     fprintf(stderr, "   -1             -- Allow only one session per user.\n");
+ #endif
++    fprintf(stderr, "   -A             -- Accept any Service-Name.\n");
+ 
+     fprintf(stderr, "   -h             -- Print usage information.\n\n");
+     fprintf(stderr, "PPPoE-Server Version %s, Copyright (C) 2001 Roaring Penguin Software Inc.\n", VERSION);
+@@ -1051,9 +1065,9 @@
+ #endif
+ 
+ #ifndef HAVE_LINUX_KERNEL_PPPOE
+-    char *options = "hI:C:L:R:T:m:FN:f:o:sp:lrudPc:S:1";
++    char *options = "hI:C:L:R:T:m:FN:f:o:sp:lrudPc:S:1A";
+ #else
+-    char *options = "hI:C:L:R:T:m:FN:f:o:skp:lrudPc:S:1";
++    char *options = "hI:C:L:R:T:m:FN:f:o:skp:lrudPc:S:1A";
+ #endif
+ 
+     memset(interfaces, 0, sizeof(interfaces));
+@@ -1218,6 +1232,9 @@
+ 		     " -%c %s", opt, optarg);
+ 	    break;
+ 
++	case 'A':
++	    AcceptAnyServiceName = 1;
++	    break;
+ 	case 'h':
+ 	    usage(argv[0]);
+ 	    exit(EXIT_SUCCESS);
