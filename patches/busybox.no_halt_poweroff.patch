@@ -1,14 +1,14 @@
---- busybox/include/applets.h.orig	2007-11-20 15:01:39.000000000 +0100
-+++ busybox/include/applets.h	2007-11-20 15:03:05.000000000 +0100
-@@ -170,7 +170,6 @@
+--- busybox-1.10.4/include/applets.h.orig	2008-06-25 12:55:31.000000000 +0200
++++ busybox-1.10.4/include/applets.h	2008-07-09 10:10:11.000000000 +0200
+@@ -173,7 +173,6 @@
  USE_GREP(APPLET(grep, _BB_DIR_BIN, _BB_SUID_NEVER))
  USE_GUNZIP(APPLET(gunzip, _BB_DIR_BIN, _BB_SUID_NEVER))
  USE_GZIP(APPLET(gzip, _BB_DIR_BIN, _BB_SUID_NEVER))
 -USE_HALT(APPLET(halt, _BB_DIR_SBIN, _BB_SUID_NEVER))
+ USE_HD(APPLET_ODDNAME(hd, hexdump, _BB_DIR_USR_BIN, _BB_SUID_NEVER, hd))
  USE_HDPARM(APPLET(hdparm, _BB_DIR_SBIN, _BB_SUID_NEVER))
  USE_HEAD(APPLET(head, _BB_DIR_USR_BIN, _BB_SUID_NEVER))
- USE_HEXDUMP(APPLET_NOEXEC(hexdump, hexdump, _BB_DIR_USR_BIN, _BB_SUID_NEVER, hexdump))
-@@ -268,7 +267,6 @@
+@@ -275,7 +274,6 @@
  USE_PIPE_PROGRESS(APPLET_NOUSAGE(pipe_progress, pipe_progress, _BB_DIR_BIN, _BB_SUID_NEVER))
  USE_PIVOT_ROOT(APPLET(pivot_root, _BB_DIR_SBIN, _BB_SUID_NEVER))
  USE_PKILL(APPLET_ODDNAME(pkill, pgrep, _BB_DIR_USR_BIN, _BB_SUID_NEVER, pkill))
