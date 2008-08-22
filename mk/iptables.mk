@@ -23,6 +23,9 @@ EXTRACTED_DIR = iptables-1.4.0
 DOWNLOAD_SITES = http://www.netfilter.org/projects/iptables/files \
 		$(CFLINUX_PACKAGES)
 
+PATCHES = \
+	iptables.stdbool.patch
+
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
 

@@ -54,15 +54,6 @@ diff -ruNP linux-2.4.25.orig/drivers/net/tulip/interrupt.c linux-2.4.25/drivers/
  	RxWholePkt   = 0x00000300,
  };
  
-@@ -267,7 +267,7 @@
- #define RX_RING_SIZE	128
- #define MEDIA_MASK     31
- 
--#define PKT_BUF_SZ		1536	/* Size of each temporary Rx buffer. */
-+#define PKT_BUF_SZ		1540	/* Size of each temporary Rx buffer. */
- 
- #define TULIP_MIN_CACHE_LINE	8	/* in units of 32-bit words */
- 
 --- linux-2.6.17.13/drivers/net/tulip/tulip_core.c.orig	2006-09-09 05:23:25.000000000 +0200
 +++ linux-2.6.17.13/drivers/net/tulip/tulip_core.c	2006-09-12 20:44:59.000000000 +0200
 @@ -70,7 +70,7 @@
