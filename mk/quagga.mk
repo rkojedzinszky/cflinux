@@ -22,7 +22,9 @@ SRC_FILENAME = quagga-0.99.9.tar.gz
 EXTRACTED_DIR = quagga-0.99.9
 DOWNLOAD_SITES = http://www.quagga.net/download/ \
 		$(CFLINUX_PACKAGES)
-PATCHES = quagga.patch
+PATCHES = \
+	quagga.patch \
+	quagga.md5_linux_v10.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -39,6 +41,7 @@ $(CONFIGURED_STAMP):
 		--enable-user=quagga --enable-group=quagga \
 		--enable-multipath=64 \
 		--localstatedir=/var/quagga \
+		--enable-tcp-md5 \
 		ac_cv_func_malloc_0_nonnull=yes \
 		ac_cv_func_realloc_0_nonnull=yes )
 	touch $(CONFIGURED_STAMP)
