@@ -1,0 +1,11 @@
+--- busybox-1.10.4/Makefile.flags.orig	2008-09-01 14:33:00.000000000 +0200
++++ busybox-1.10.4/Makefile.flags	2008-09-01 14:33:06.000000000 +0200
+@@ -46,7 +46,7 @@
+ # -fno-guess-branch-probability: prohibit pseudo-random guessing
+ # of branch probabilities (hopefully makes bloatcheck more stable):
+ CFLAGS += $(call cc-option,-fno-guess-branch-probability,)
+-CFLAGS += $(call cc-option,-funsigned-char -static-libgcc,)
++CFLAGS += $(call cc-option,-funsigned-char,)
+ CFLAGS += $(call cc-option,-falign-functions=1 -falign-jumps=1 -falign-labels=1 -falign-loops=1,)
+ 
+ # FIXME: These warnings are at least partially to be concerned about and should
