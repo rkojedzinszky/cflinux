@@ -24,6 +24,7 @@ DOWNLOAD_SITES = http://busybox.net/downloads/ \
 		$(CFLINUX_PACKAGES)
 
 PATCHES = busybox.init.patch \
+	busybox.no_static_libgcc.patch \
 	busybox.crond.patch \
 	busybox.rdate.patch \
 	busybox.ifenslave.patch \
