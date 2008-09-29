@@ -1,5 +1,6 @@
 # /etc/modules file
 # the list of modules to be loaded at startup
+e1000e
 e1000
 sk98lin
 3c59x
