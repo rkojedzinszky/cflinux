@@ -18,9 +18,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := ltraf
-SRC_FILENAME = ltraf-0.2.5.tar.gz
-EXTRACTED_DIR = ltraf-0.2.5
-DOWNLOAD_SITES = http://www.klamzi.hu/ltraf/downloads/ \
+SRC_FILENAME = ltraf-r241.tar.bz2
+EXTRACTED_DIR = ltraf-r241
+DOWNLOAD_SITES = \
 		$(CFLINUX_PACKAGES)
 
 # include the common package targets 
