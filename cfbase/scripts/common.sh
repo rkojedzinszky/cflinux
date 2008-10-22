@@ -60,3 +60,17 @@ get_fresh_and_valid () {
 	fi
 	return
 }
+
+# new style config variables
+config_prefix="etc.tar.gz"
+config_part="/config"
+
+# get_last_valid_idx
+get_last_valid_idx () {
+	ls -1 $config_part/$config_prefix.* 2>/dev/null | sed -n 's/^.*\.\([0-9]\+\)$/\1/p' | sort -nr | while read idx ; do
+		if md5sum -c $config_part/$config_prefix.$idx.md5 < $config_part/$config_prefix.$idx > /dev/null 2>&1 ; then
+			echo "$idx"
+			break
+		fi
+	done
+}

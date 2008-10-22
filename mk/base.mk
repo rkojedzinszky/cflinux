@@ -46,7 +46,7 @@ install: $(INSTALL_STAMP)
 $(INSTALL_STAMP):
 	-mkdir $(ROOTFS)
 	-chmod 755 $(ROOTFS)
-	for i in bin boot dev etc lib mnt proc sbin usr var \
+	for i in bin boot config dev etc lib mnt proc sbin usr var \
 		usr/bin usr/lib usr/sbin usr/local dev/pts \
 		usr/lib/cfmaint usr/lib/cflinux ; do \
 			mkdir -p $(ROOTFS)/$$i ; done
@@ -66,6 +66,7 @@ $(INSTALL_STAMP):
 	cp -v $(PKG_ROOT)/defaults/inittab \
 		$(DEFAULTS_DIR)/etc/inittab
 	cp -v $(PKG_ROOT)/scripts/common.sh $(ROOTFS)/usr/lib/cfmaint/
+	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/upgrade_config $(ROOTFS)/usr/lib/cfmaint/
 	cp -v $(PKG_ROOT)/defaults/modules \
 		$(DEFAULTS_DIR)/etc/modules
 	cp -v $(PKG_ROOT)/defaults/fstab.template \
@@ -73,7 +74,6 @@ $(INSTALL_STAMP):
 	cp -v $(PKG_ROOT)/scripts/rc.conf.defaults \
 		$(DEFAULTS_DIR)/etc/rc.conf
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/savedata $(ROOTFS)/sbin/
-	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/eraseconf.sh $(ROOTFS)/sbin/
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/reflash $(ROOTFS)/sbin/
 	$(INSTALL) -d $(ROOTFS)/usr/share/udhcpc
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/udhcpc.events \
