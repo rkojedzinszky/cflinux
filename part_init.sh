@@ -22,7 +22,7 @@
 # it partitions /dev/hdc, and assumes that the target system will be on
 # /dev/hdc (eg the cf card is at secondary/master)
 
-# $Id$
+export LC_ALL=C
 
 maindev="/dev/hdc"
 backup="part.$$"
@@ -122,6 +122,7 @@ cd /mnt/grub
 cp ${grubsrc}/stage1 .
 cp ${grubsrc}/stage2 .
 cp ${grubsrc}/e2fs_stage1_5 .
+st_1_5_blocks=$[($(stat -c '%s' e2fs_stage1_5) + 511) / 512]
 cat > menu.lst <<EOF
 timeout 5
 
@@ -132,7 +133,7 @@ cat <<EOF | grub --batch
 device (hd0) $maindev
 root (hd0,2)
 embed /grub/e2fs_stage1_5 (hd0)
-install /grub/stage1 (hd0) (hd0)1+16 p (hd0,2)/grub/stage2 /grub/menu.lst
+install /grub/stage1 (hd0) (hd0)1+$st_1_5_blocks p (hd0,2)/grub/stage2 /grub/menu.lst
 EOF
 echo ""
 cd /
