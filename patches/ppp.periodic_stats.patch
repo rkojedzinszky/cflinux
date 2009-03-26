@@ -1,0 +1,49 @@
+--- ppp-cvs-20050725-p1/pppd/sys-linux.c.orig	2009-03-26 22:25:43.000000000 +0100
++++ ppp-cvs-20050725-p1/pppd/sys-linux.c	2009-03-26 22:30:55.000000000 +0100
+@@ -239,6 +239,7 @@
+ static int set_kdebugflag(int level);
+ static int ppp_registered(void);
+ static int make_ppp_unit(void);
++static void _ppp_stats_updater(void);
+ 
+ extern u_char	inpacket_buf[];	/* borrowed from main.c */
+ 
+@@ -2244,6 +2245,19 @@
+ 
+ /********************************************************************
+  *
++ * _ppp_stats_updater - periodically query the interface stats
++ */
++static void _ppp_stats_updater()
++{
++    struct pppd_stats stats;
++
++    get_ppp_stats(0, &stats);
++
++    TIMEOUT(_ppp_stats_updater, NULL, 60);
++}
++
++/********************************************************************
++ *
+  * sifup - Config the interface up and enable IP packets to pass.
+  */
+ 
+@@ -2272,6 +2286,9 @@
+     }
+     if_is_up++;
+ 
++    if (if_is_up == 1)
++	    TIMEOUT(_ppp_stats_updater, NULL, 60);
++
+     return 1;
+ }
+ 
+@@ -2288,6 +2305,8 @@
+     if (if_is_up && --if_is_up > 0)
+ 	return 1;
+ 
++    UNTIMEOUT(_ppp_stats_updater, NULL);
++
+     memset (&ifr, '\0', sizeof (ifr));
+     strlcpy(ifr.ifr_name, ifname, sizeof (ifr.ifr_name));
+     if (ioctl(sock_fd, SIOCGIFFLAGS, (caddr_t) &ifr) < 0) {
