@@ -25,7 +25,8 @@ DOWNLOAD_SITES = \
 
 PATCHES = ppp.patch \
 	ppp.pathnames_h_connect_errors.patch \
-	ppp.radius_untimeout.patch
+	ppp.radius_untimeout.patch \
+	ppp.periodic_stats.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
