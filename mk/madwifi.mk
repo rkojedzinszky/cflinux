@@ -60,12 +60,10 @@ install: build
 		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
 	cp $(PKG_ROOT)/ath/ath_pci.o \
 		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
-	cp $(PKG_ROOT)/net80211/wlan_scan_ap.o \
-		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
-	cp $(PKG_ROOT)/net80211/wlan_scan_sta.o \
-		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
-	cp $(PKG_ROOT)/net80211/wlan_wep.o \
-		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia
+	for i in wlan_scan_ap wlan_scan_sta wlan_wep wlan_tkip wlan_xauth wlan_ccmp ; do \
+		cp $(PKG_ROOT)/net80211/$$i.o \
+			$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia ; \
+	done
 	for rate in onoe sample amrr ; do cp $(PKG_ROOT)/ath_rate/$$rate/ath_rate_$$rate.o \
 		$(ROOTFS)/lib/modules/$(KERNEL_VERSION)/pcmcia ; done
 	$(MAKE) -C $(PKG_ROOT)/tools install BINDIR=/sbin DESTDIR=$(ROOTFS) \
