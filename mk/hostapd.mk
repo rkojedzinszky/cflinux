@@ -32,7 +32,7 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	perl -ne 's/^#(?=(CONFIG_(RADIUS_SERVER)|CONFIG_DRIVER_MADWIFI))//;' \
+	perl -ne 's/^#(?=(CONFIG_(RADIUS_SERVER|IEEE80211W)|CONFIG_DRIVER_MADWIFI))//;' \
 		-e 's/^(?=(CONFIG_(IPV6)))/#/;' \
 		-e 's/^#CFLAGS.*$$/CFLAGS += -I..\/..\/madwifi/;' \
 		-e 'print;' $(PKG_ROOT)/hostapd/defconfig > $(PKG_ROOT)/hostapd/.config
