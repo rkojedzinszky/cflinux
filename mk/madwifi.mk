@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := madwifi
-SRC_FILENAME = madwifi-0.9.3.1.tar.bz2
-EXTRACTED_DIR = madwifi-0.9.3.1
+SRC_FILENAME = madwifi-0.9.4.tar.bz2
+EXTRACTED_DIR = madwifi-0.9.4
 DOWNLOAD_SITES = \
 	http://mesh.dl.sourceforge.net/sourceforge/madwifi/ \
 	http://superb-east.dl.sourceforge.net/sourceforge/madwifi/ \
