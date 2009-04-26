@@ -24,7 +24,8 @@ DOWNLOAD_SITES = http://www.quagga.net/download/ \
 		$(CFLINUX_PACKAGES)
 PATCHES = \
 	quagga.patch \
-	quagga.md5_linux_v10.patch
+	quagga.md5_linux_v10.patch \
+	quagga-0.99.1-forward_sysctl-2.6.14.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
