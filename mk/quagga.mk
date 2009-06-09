@@ -22,7 +22,8 @@ SRC_FILENAME = quagga-0.99.9.tar.gz
 EXTRACTED_DIR = quagga-0.99.9
 DOWNLOAD_SITES = http://www.quagga.net/download/ \
 		$(CFLINUX_PACKAGES)
-PATCHES = quagga.patch
+PATCHES = quagga.patch \
+	quagga-0.99.1-forward_sysctl-2.6.14.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
