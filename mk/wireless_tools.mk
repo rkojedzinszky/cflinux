@@ -18,9 +18,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := wireless_tools
-SRC_FILENAME = wireless_tools.28.tar.gz
-EXTRACTED_DIR = wireless_tools.28
-DOWNLOAD_SITES = http://pcmcia-cs.sourceforge.net/ftp/contrib/ \
+SRC_FILENAME = wireless_tools.29.tar.gz
+EXTRACTED_DIR = wireless_tools.29
+DOWNLOAD_SITES = http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/ \
 		$(CFLINUX_PACKAGES)
 
 # include the common package targets 

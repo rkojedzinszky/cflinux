@@ -20,8 +20,8 @@
 # $Id$
 
 PKG := hostapd
-SRC_FILENAME = hostapd-0.5.7.tar.gz
-EXTRACTED_DIR = hostapd-0.5.7
+SRC_FILENAME = hostapd-0.6.9.tar.gz
+EXTRACTED_DIR = hostapd-0.6.9
 DOWNLOAD_SITES = http://hostap.epitest.fi/releases/ \
 		$(CFLINUX_PACKAGES)
 PATCHES =
@@ -32,26 +32,26 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	perl -ne 's/^#(?=(CONFIG_(RADIUS_SERVER)|CONFIG_DRIVER_MADWIFI))//;' \
-		-e 's/^(?=(CONFIG_(IAPP|RSN|IPV6)))/#/;' \
-		-e 's/^#CFLAGS.*$$/CFLAGS += -I..\/madwifi/;' \
-		-e 'print;' $(PKG_ROOT)/defconfig > $(PKG_ROOT)/.config
+	perl -ne 's/^#(?=(CONFIG_(RADIUS_SERVER|IEEE80211W)|CONFIG_DRIVER_MADWIFI))//;' \
+		-e 's/^(?=(CONFIG_(IPV6)))/#/;' \
+		-e 's/^#CFLAGS.*$$/CFLAGS += -I..\/..\/madwifi/;' \
+		-e 'print;' $(PKG_ROOT)/hostapd/defconfig > $(PKG_ROOT)/hostapd/.config
 	touch $(CONFIGURED_STAMP)
 
 clean:
-	$(MAKE) -C $(PKG_ROOT) distclean
+	$(MAKE) -C $(PKG_ROOT)/hostapd distclean
 	rm -f $(BUILT_STAMP)
 	rm -f $(CONFIGURED_STAMP)
 
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT)/hostapd all $(UC_PATH)
 	touch $(BUILT_STAMP)
 
 install: build
-	$(INSTALL_BIN) $(PKG_ROOT)/hostapd $(ROOTFS)/usr/sbin/
-	$(INSTALL) -m 444 $(PKG_ROOT)/hostapd.conf \
+	$(INSTALL_BIN) $(PKG_ROOT)/hostapd/hostapd $(ROOTFS)/usr/sbin/
+	$(INSTALL) -m 444 $(PKG_ROOT)/hostapd/hostapd.conf \
 		$(DEFAULTS_DIR)/etc/
 
 .PHONY: configure clean build install
