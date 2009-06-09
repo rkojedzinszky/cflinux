@@ -1,0 +1,28 @@
+--- rp-pppoe-3.5/src/pppoe-server.c.orig	2009-06-09 09:44:27.000000000 +0200
++++ rp-pppoe-3.5/src/pppoe-server.c	2009-06-09 09:42:49.000000000 +0200
+@@ -711,14 +711,17 @@
+     i = ntohs(packet->session) - 1 - SessOffset;
+     if (i >= NumSessionSlots) return;
+     if (Sessions[i].sess != packet->session) {
++/*
+ 	syslog(LOG_ERR, "Session index %u doesn't match session number %u",
+ 	       (unsigned int) i, (unsigned int) ntohs(packet->session));
++*/
+ 	return;
+     }
+ 
+ 
+     /* If source MAC does not match, do not kill session */
+     if (memcmp(packet->ethHdr.h_source, Sessions[i].eth, ETH_ALEN)) {
++/*
+ 	syslog(LOG_WARNING, "PADT for session %u received from "
+ 	       "%02X:%02X:%02X:%02X:%02X:%02X; should be from "
+ 	       "%02X:%02X:%02X:%02X:%02X:%02X",
+@@ -735,6 +738,7 @@
+ 	       Sessions[i].eth[3],
+ 	       Sessions[i].eth[4],
+ 	       Sessions[i].eth[5]);
++*/
+ 	return;
+     }
+     Sessions[i].flags |= FLAG_RECVD_PADT;

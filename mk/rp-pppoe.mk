@@ -32,7 +32,8 @@ PATCHES = rp-pppoe.patch \
 	rp-pppoe.relay_h_maxinterfaces.patch \
 	rp-pppoe.pppoe-server_any_service_name.patch \
 	rp-pppoe.relay_stat.patch \
-	rp-pppoe.plugin_type.patch
+	rp-pppoe.plugin_type.patch \
+	rp-pppoe.padt_nolog.patch \
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
