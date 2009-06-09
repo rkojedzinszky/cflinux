@@ -213,7 +213,7 @@ substr () {
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#
 
 devices=
-if [ ! -f $procfs/devices ]
+if [ ! -r $procfs/devices ]
 then
 	echo "$0: warning: can't read $procfs/devices" >&2
 else
