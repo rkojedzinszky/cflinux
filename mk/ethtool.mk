@@ -35,8 +35,8 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT) && \
-	 $(UC_PATH) ./configure --prefix=/usr --host=$(TARGET_HOST))
+	cd $(PKG_ROOT) && \
+	 ./configure --prefix=/usr --host=$(TARGET_HOST)
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -47,7 +47,7 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT) all
 	touch $(BUILT_STAMP)
 
 install: build

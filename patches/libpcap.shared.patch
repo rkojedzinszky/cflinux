@@ -5,7 +5,7 @@
  libpcap.so: $(OBJ)
  	@rm -f $@
 -	ld -shared -o $@.`cat VERSION` $(OBJ)
-+	ld -shared -o $@ $(OBJ)
++	$(CC) -shared -o $@ $(OBJ)
  
  # the following rule succeeds, but the result is untested.
  libpcap.dylib: $(OBJ)

@@ -24,7 +24,7 @@ DOWNLOAD_SITES = \
 		$(CFLINUX_PACKAGES)
 PATCHES = rp-pppoe.patch \
 	rp-pppoe.relay_c_nonblock_io.patch \
-	rp-pppoe.configure.patch \
+	rp-pppoe.configure.in.patch \
 	rp-pppoe.wild_ifname.patch \
 	rp-pppoe.relay.patch \
 	rp-pppoe.dont_close_fds.patch \
@@ -34,6 +34,8 @@ PATCHES = rp-pppoe.patch \
 	rp-pppoe.relay_stat.patch \
 	rp-pppoe.plugin_type.patch \
 	rp-pppoe.padt_nolog.patch \
+	rp-pppoe.cross-fix.patch \
+
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -41,8 +43,14 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT)/src ; ./configure --host=$(TARGET_HOST) \
-		--enable-plugin=$(BUILD_DIR)/ppp)
+	cd $(PKG_ROOT)/src && \
+		autoconf && \
+		ac_cv_func_setvbuf_reversed=no \
+		ac_cv_sizeof_unsigned_short=2 \
+		ac_cv_sizeof_unsigned_int=4 \
+		ac_cv_sizeof_unsigned_long=4 \
+		./configure --host=$(TARGET_HOST) \
+			--enable-plugin=$(BUILD_DIR)/ppp
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -53,7 +61,7 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT)/src all $(UC_PATH) PLUGIN_DIR=/usr/lib/pppd \
+	$(MAKE) -C $(PKG_ROOT)/src all PLUGIN_DIR=/usr/lib/pppd \
 		PPPD_PATH=/usr/sbin/pppd
 	touch $(BUILT_STAMP)
 

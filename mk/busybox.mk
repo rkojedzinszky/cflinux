@@ -52,12 +52,12 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(UC_PATH_CROSS) $(MAKE) -C $(PKG_ROOT) all CROSS_COMPILE=$(TARGET_HOST)-
+	$(MAKE) -C $(PKG_ROOT) all CROSS_COMPILE=$(TARGET_HOST)-
 	touch $(BUILT_STAMP)
 
 install: build
 	find $(ROOTFS) -lname '*busybox' -print0 | xargs -0 rm -f
 	-mkdir -p $(ROOTFS)/usr/share/udhcpc
-	$(UC_PATH_CROSS) $(MAKE) -C $(PKG_ROOT) install CONFIG_PREFIX=$(ROOTFS) CROSS_COMPILE=$(TARGET_HOST)-
+	$(MAKE) -C $(PKG_ROOT) install CONFIG_PREFIX=$(ROOTFS) CROSS_COMPILE=$(TARGET_HOST)-
 
 .PHONY: configure clean build install

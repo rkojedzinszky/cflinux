@@ -22,6 +22,7 @@ SRC_FILENAME = ltraf-r241.tar.bz2
 EXTRACTED_DIR = ltraf-r241
 DOWNLOAD_SITES = \
 		$(CFLINUX_PACKAGES)
+PATCHES = ltraf.depend.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -39,7 +40,7 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT) all CC=$(TARGET_CC)
 	touch $(BUILT_STAMP)
 
 install: build

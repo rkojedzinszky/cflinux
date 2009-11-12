@@ -24,7 +24,8 @@ DOWNLOAD_SITES = \
 		http://heanet.dl.sourceforge.net/sourceforge/net-snmp/ \
 		http://unc.dl.sourceforge.net/sourceforge/net-snmp/ \
 		$(CFLINUX_PACKAGES)
-PATCHES = net-snmp.vmstat.patch
+PATCHES = net-snmp.vmstat.patch \
+	net-snmp.configure.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -32,7 +33,8 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT); $(UC_PATH) ./configure --host=$(TARGET_HOST) \
+	cp $(TOP_DIR)/cfbase/config.sub $(PKG_ROOT)/
+	cd $(PKG_ROOT) && ./configure --host=$(TARGET_HOST) \
 	 --with-endianness=little \
 	 --prefix=/usr \
 	 --sysconfdir=/etc \
@@ -50,7 +52,7 @@ $(CONFIGURED_STAMP):
 	 --localstatedir=/var/run \
 	 --enable-local-smux \
 	 --without-rpm \
-	 --enable-ucd-snmp-compatibility )
+	 --enable-ucd-snmp-compatibility
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -61,8 +63,8 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH)
-	$(MAKE) -C $(PKG_ROOT) installheaders installlibs INSTALL_PREFIX=$(UC_ROOT) $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT) all
+	$(MAKE) -C $(PKG_ROOT) installheaders installlibs INSTALL_PREFIX=$(UC_ROOT)
 	touch $(BUILT_STAMP)
 
 install: build

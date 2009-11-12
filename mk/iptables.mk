@@ -42,7 +42,7 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) iptables $(UC_PATH) \
+	$(MAKE) -C $(PKG_ROOT) iptables CC=$(TARGET_CC) \
 		KERNEL_DIR=$(BUILD_DIR)/kernel \
 		KBUILD_OUTPUT=$(BUILD_DIR)/kernel \
 		NO_SHARED_LIBS=1 \

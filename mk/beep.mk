@@ -39,7 +39,7 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) $(UC_PATH) FLAGS=-Os
+	$(MAKE) -C $(PKG_ROOT) FLAGS=-Os CC=$(TARGET_CC)
 	touch $(BUILT_STAMP)
 
 install: build

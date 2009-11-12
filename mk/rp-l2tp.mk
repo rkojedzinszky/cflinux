@@ -23,7 +23,9 @@ EXTRACTED_DIR = rp-l2tp-0.4
 DOWNLOAD_SITES = \
 		http://downloads.sourceforge.net/rp-l2tp \
 		$(CFLINUX_PACKAGES)
-PATCHES = rp-l2tp.close-on-exec.patch
+PATCHES = \
+	rp-l2tp.close-on-exec.patch \
+	rp-l2tp.cross-fix.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -31,8 +33,7 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT) && $(UC_PATH) ./configure --host=$(TARGET_HOST) \
-	 --prefix=/usr)
+	cd $(PKG_ROOT) && CC=$(TARGET_CC) ./configure --host=$(TARGET_HOST) --prefix=/usr
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -43,7 +44,7 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT) all
 	touch $(BUILT_STAMP)
 
 install: build

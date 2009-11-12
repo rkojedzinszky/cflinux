@@ -34,9 +34,9 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT); $(UC_PATH_CROSS) ./configure --host=$(TARGET_HOST) \
+	cd $(PKG_ROOT) && ./configure --host=$(TARGET_HOST) \
 	 --prefix=/ \
-	 --disable-static --enable-shared --with-pic --with-gnu-ld)
+	 --disable-static --enable-shared --with-pic --with-gnu-ld
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -47,7 +47,7 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH_CROSS)
+	$(MAKE) -C $(PKG_ROOT) all
 	$(MAKE) -C $(PKG_ROOT) install DESTDIR=$(UC_ROOT)
 	touch $(BUILT_STAMP)
 

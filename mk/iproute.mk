@@ -42,7 +42,7 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH) \
+	$(MAKE) -C $(PKG_ROOT) all CC=$(TARGET_CC) \
 		KERNEL_INCLUDE=$(BUILD_DIR)/kernel/include \
 		LIBC_INCLUDE=$(UC_ROOT)/include \
 		SUBDIRS="lib ip"

@@ -1,0 +1,10 @@
+--- nemesis-1.4beta3.orig/src/nemesis-functions.c	2003-06-07 11:09:34.000000000 +0000
++++ nemesis-1.4beta3/src/nemesis-functions.c	2009-11-13 10:13:20.000000000 +0000
+@@ -36,6 +36,7 @@
+ #endif
+ #include <libnet.h>
+ #include <nemesis.h>
++#include <net/ethernet.h>
+ 
+ #if defined(WIN32)
+     static int winstrerror(LPSTR, int);

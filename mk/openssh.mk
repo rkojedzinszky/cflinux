@@ -36,12 +36,13 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT) ; $(UC_PATH) ./configure --host=$(TARGET_HOST) \
+	cd $(PKG_ROOT) && ./configure --host=$(TARGET_HOST) \
 	 	--prefix=/usr --sysconfdir=/etc/ssh \
 		--localstatedir=/var --without-shadow \
 		--with-pid-dir=/var/run \
 		--with-zlib=../zlib --with-ssl-dir=../openssl \
-		--with-md5-passwords --disable-largefile)
+		--with-cflags=-fPIC \
+		--with-md5-passwords --disable-largefile
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -52,7 +53,7 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT) all
 	touch $(BUILT_STAMP)
 
 install: build

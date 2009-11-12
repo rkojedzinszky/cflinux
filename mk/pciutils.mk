@@ -41,7 +41,7 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH) PREFIX=/usr
+	$(MAKE) -C $(PKG_ROOT) all CC=$(TARGET_CC) PREFIX=/usr
 	touch $(BUILT_STAMP)
 
 install: build

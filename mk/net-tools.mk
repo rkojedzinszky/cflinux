@@ -41,7 +41,7 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) mii-tool $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT) mii-tool CC=$(TARGET_CC)
 	touch $(BUILT_STAMP)
 
 install: build

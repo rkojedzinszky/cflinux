@@ -29,7 +29,7 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT); ./Configure linux-elf)
+	cd $(PKG_ROOT) && ./Configure linux-pentium
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -40,11 +40,11 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all "DIRS=crypto ssl" $(UC_PATH)
-	$(MAKE) -C $(PKG_ROOT) build-shared $(UC_PATH)
-	cp -a $(PKG_ROOT)/libcrypto.so* $(UC_ROOT)/lib
-	cp -a $(PKG_ROOT)/libssl.so* $(UC_ROOT)/lib
-	cp -vLr $(PKG_ROOT)/include/openssl $(UC_ROOT)/include
+	$(MAKE) -C $(PKG_ROOT) all "DIRS=crypto ssl" CC=$(TARGET_CC) MAKEDEPPROG=$(TARGET_CC) RANLIB=$(TARGET_RANLIB)
+	$(MAKE) -C $(PKG_ROOT) build-shared CC=$(TARGET_CC) MAKEDEPPROG=$(TARGET_CC) RANLIB=$(TARGET_RANLIB)
+	cp -a $(PKG_ROOT)/libcrypto.so* $(UC_ROOT)/usr/lib
+	cp -a $(PKG_ROOT)/libssl.so* $(UC_ROOT)/usr/lib
+	cp -vLr $(PKG_ROOT)/include/openssl $(UC_ROOT)/usr/include
 	touch $(BUILT_STAMP)
 
 install: build

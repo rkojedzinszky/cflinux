@@ -52,21 +52,21 @@ endif
 $(CONFIGURED_STAMP):
 	cp $(CONFIGS)/$(PKG).config $(PKG_ROOT)/.config
 	(cd $(PKG_ROOT) && for i in $(CFGPATCH) ; do patch < $$i ; done)
-	$(MAKE) -C $(PKG_ROOT) oldconfig
+	$(MAKE) -C $(PKG_ROOT) oldconfig ARCH=$(TARGET_ARCH) CROSS_COMPILE=$(TARGET_HOST)-
 	touch $@
 
 clean:
-	$(MAKE) -C $(PKG_ROOT) clean
+	$(MAKE) -C $(PKG_ROOT) clean ARCH=$(TARGET_ARCH) CROSS_COMPILE=$(TARGET_HOST)-
 	rm -f $(CONFIGURED_STAMP) $(BUILT_STAMP)
 
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) bzImage modules -j4
+	$(MAKE) -C $(PKG_ROOT) bzImage modules -j4 ARCH=$(TARGET_ARCH) CROSS_COMPILE=$(TARGET_HOST)-
 	touch $(BUILT_STAMP)
 
 install: build
-	$(MAKE) -C $(PKG_ROOT) modules_install INSTALL_MOD_PATH=$(ROOTFS)
+	$(MAKE) -C $(PKG_ROOT) modules_install INSTALL_MOD_PATH=$(ROOTFS) ARCH=$(TARGET_ARCH) CROSS_COMPILE=$(TARGET_HOST)-
 
 .PHONY: configure clean build install
 

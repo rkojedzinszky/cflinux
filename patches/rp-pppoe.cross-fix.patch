@@ -1,0 +1,29 @@
+--- rp-pppoe-3.5.orig/src/libevent/Makefile.in	2002-07-08 14:38:24.000000000 +0000
++++ rp-pppoe-3.5/src/libevent/Makefile.in	2009-11-13 07:46:38.000000000 +0000
+@@ -22,20 +22,20 @@
+ 	@RANLIB@ libevent.a
+ 
+ event.o: event.c $(HDRS)
+-	gcc $(CFLAGS) -c -o event.o event.c
++	@CC@ $(CFLAGS) -c -o event.o event.c
+ 
+ hash.o: hash.c $(HDRS)
+-	gcc $(CFLAGS) -c -o hash.o hash.c
++	@CC@ $(CFLAGS) -c -o hash.o hash.c
+ 
+ event_sig.o: event_sig.c $(HDRS)
+-	gcc $(CFLAGS) -c -o event_sig.o event_sig.c
++	@CC@ $(CFLAGS) -c -o event_sig.o event_sig.c
+ 
+ event_tcp.o: event_tcp.c $(HDRS)
+-	gcc $(CFLAGS) -c -o event_tcp.o event_tcp.c
++	@CC@ $(CFLAGS) -c -o event_tcp.o event_tcp.c
+ 
+ clean: FORCE
+ 	rm -f *.a *.o *~
+ 
+ FORCE:
+ 
+-.phony: FORCE
+\ No newline at end of file
++.phony: FORCE

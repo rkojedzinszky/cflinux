@@ -22,7 +22,7 @@ SRC_FILENAME = nemesis-1.4beta3.tar.gz
 EXTRACTED_DIR = nemesis-1.4beta3
 DOWNLOAD_SITES = http://www.packetfactory.net/projects/nemesis/ \
 		$(CFLINUX_PACKAGES)
-#PATCHES = skel.patch
+PATCHES = nemesis.include.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -30,9 +30,10 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT) && $(UC_PATH) ./configure --host=$(TARGET_HOST) --prefix=/usr \
-	--with-libnet-includes=$(UC_ROOT)/include \
-	--with-libnet-libraries=$(UC_ROOT)/lib)
+	cp -f $(TOP_DIR)/cfbase/config.sub $(PKG_ROOT)/
+	cd $(PKG_ROOT) && ./configure --host=$(TARGET_HOST) --prefix=/usr \
+	--with-libnet-includes=$(UC_ROOT)/usr/include \
+	--with-libnet-libraries=$(UC_ROOT)/usr/lib
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -43,7 +44,7 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT) all
 	touch $(BUILT_STAMP)
 
 install: build
