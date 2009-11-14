@@ -49,7 +49,7 @@ TARGET_AR = $(TARGET_HOST)-ar
 TARGET_RANLIB = $(TARGET_HOST)-ranlib
 
 # The version of the used kernel
-KERNEL_VERSION := 2.6.26.2
+KERNEL_VERSION := 2.6.31.6
 
 # the directory where uclibc will be installed
 UC_ROOT=$(FDEVEL_DIR)/$(TARGET_HOST)

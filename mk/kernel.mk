@@ -29,14 +29,11 @@ DOWNLOAD_SITES = \
 		ftp://ftp.sm.kernel.org/pub/linux/kernel/v2.6/ \
 		ftp://ftp.kernel.org/pub/linux/kernel/v2.6/ \
 		$(CFLINUX_PACKAGES)
-PATCHES = kernel.vlan_mtu.patch \
+PATCHES = \
 	kernel.init.patch \
 	kernel.blackhole.patch \
 	kernel.usb_root.patch \
-	kernel.igmp.c.max_membership.patch \
-	kernel.inline_kfree_skb.patch \
-	kernel.nort_cache.patch \
-	kernel.fib_lef.patch
+	kernel.igmp.c.max_membership.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
