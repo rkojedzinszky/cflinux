@@ -1,20 +1,20 @@
---- busybox-1.10.4/include/usage.h.orig	2008-06-25 12:55:31.000000000 +0200
-+++ busybox-1.10.4/include/usage.h	2008-07-08 19:14:35.000000000 +0200
-@@ -3048,12 +3048,13 @@
+--- busybox-1.15.2/include/usage.h.orig	2009-10-08 00:59:09.000000000 +0000
++++ busybox-1.15.2/include/usage.h	2009-11-14 21:44:38.000000000 +0000
+@@ -3478,12 +3478,13 @@
         "$ raidautorun /dev/md0"
  
  #define rdate_trivial_usage \
 -       "[-sp] HOST"
 +       "[-spa] HOST"
- #define rdate_full_usage \
+ #define rdate_full_usage "\n\n" \
         "Get and possibly set the system date and time from a remote HOST\n" \
       "\nOptions:" \
       "\n	-s	Set the system date and time (default)" \
       "\n	-p	Print the date and time" \
 +     "\n	-a	Skew the time instead of just hopping it" \
  
- #define readahead_trivial_usage \
-        "[FILE]..."
+ #define rdev_trivial_usage \
+        ""
 --- busybox-1.4.2/util-linux/rdate.c.orig	2007-03-18 17:59:37.000000000 +0100
 +++ busybox-1.4.2/util-linux/rdate.c	2007-03-23 20:05:08.000000000 +0100
 @@ -48,7 +48,7 @@
