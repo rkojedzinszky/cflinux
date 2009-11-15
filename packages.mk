@@ -31,10 +31,10 @@ include $(TOP_DIR)/config.mk
 
 PKG_ROOT ?= $(BUILD_DIR)/$(EXTRACTED_DIR)
 
-EXTRACTED_STAMP = $(BUILD_DIR)/.$(PKG).extracted
-PATCHED_STAMP ?= $(PKG_ROOT)/.$(PKG).patched
-CONFIGURED_STAMP ?= $(PKG_ROOT)/.$(PKG).configured
-BUILT_STAMP ?= $(PKG_ROOT)/.$(PKG).built
+EXTRACTED_STAMP = $(PKG_ROOT)/.extracted
+PATCHED_STAMP ?= $(PKG_ROOT)/.patched
+CONFIGURED_STAMP ?= $(PKG_ROOT)/.configured
+BUILT_STAMP ?= $(PKG_ROOT)/.built
 
 download: $(SOURCES_DIR)/$(SRC_FILENAME)
 
