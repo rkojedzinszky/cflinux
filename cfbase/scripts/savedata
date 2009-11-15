@@ -1,41 +1,33 @@
 #!/bin/sh
 
+umask 077
+set -e
+
 . /usr/lib/cfmaint/common.sh
-echo -n "Saving data "
 
-rd=`sed -n 's/^\(.*\) \/etc.*$/\1/p' /proc/mounts`
+echo -n "Mounting /config rw "
+mount -o remount,rw,sync,dirsync /config
+cd /config
+echo "done"
 
-if [ -z "$rd" ]; then
-	echo "Cannot determine which ramdisk to save"
-	exit
+echo -n "Creating new archive "
+idx=`get_last_valid_idx`
+if [ -z "$idx" ]; then
+	idx=1
+else
+	let 'idx=idx+1'
 fi
-tempd=/tmp/config.bin
-if ! mount -no remount,ro "$rd" >/dev/null 2>&1 ; then
-	echo "FATAL: Failed to remount /etc read-only!" >&2
-	exit 1
-fi
-if ! dd if="$rd" of="$tempd" bs=1k count=$conf_size >/dev/null 2>&1; then
-	echo "FATAL: Failed to save image to $tempd. Is disk full?" >&2
-	mount -no remount,rw "$rd"
-	rm -f "$tempd"
-	exit 2
-fi
-mount -no remount,rw "$rd"
-md5sum=`md5sum < $tempd`
+echo -n "[idx=$idx] "
 
-fresh=`get_fresh_and_valid`
-echo -n "[fresher is $fresh,"
-older=`other_dev $fresh`
-echo -n " to $older]"
-ts=0
-[ -n "$fresh" ] && ts=`get_timestamp $fresh`
-ts=`expr $ts + 1`
-timestamp=`printf "%011d" $ts`
-echo -n " [ts: $timestamp]"
+t="$config_prefix.$idx"
+f="$config_prefix.tmp"
+tar cf - -C / etc | gzip -c9 > "$f"
+md5sum < "$f" > "$f.md5"
 
-dd if=$tempd of=$older bs=1k count=$conf_size 2>/dev/null
-echo -n "$md5sum" | dd of=$older bs=1 seek=$md5_offset count=32 2>/dev/null
-echo -n "$timestamp" | dd of=$older bs=1 seek=$time_offset \
-	count=$time_length 2>/dev/null
-rm $tempd
-echo " done"
+mv "$f.md5" "$t.md5"
+mv "$f" "$t"
+echo "done"
+
+echo -n "Mounting /config ro "
+mount -o remount,ro /config
+echo "done"

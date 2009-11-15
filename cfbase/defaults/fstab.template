@@ -2,6 +2,6 @@
 @DEV@3	/boot		ext2	ro			0	0
 @DEV@5	/		cramfs	ro			0	0
 tmpfs		/var		tmpfs	rw,size=64M,mode=755	0	0
-/dev/ram0	/etc		minix	defaults		0	0
 proc		/proc		proc	defaults		0	0
 @DEV@6	/usr/local	ext2	ro			0	0
+@DEV@1	/config		ext2	ro			0	0
