@@ -27,3 +27,16 @@
 -.phony: FORCE
 \ No newline at end of file
 +.phony: FORCE
+--- rp-pppoe-3.5/src/pppoe.h.orig	2009-11-15 23:26:58.000000000 +0100
++++ rp-pppoe-3.5/src/pppoe.h	2009-11-15 23:28:25.000000000 +0100
+@@ -21,6 +21,10 @@
+ #define _POSIX_SOURCE 1 /* For sigaction defines */
+ #endif
+ 
++#if defined(HAVE_NET_IF_H) || defined(HAVE_LINUX_IF_H)
++#define _SVID_SOURCE 1  /* For struct defines */
++#endif
++
+ #include <stdio.h>		/* For FILE */
+ #include <sys/types.h>		/* For pid_t */
+ 
