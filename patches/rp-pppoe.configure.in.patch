@@ -1,0 +1,29 @@
+--- rp-pppoe-3.5.orig/src/configure.in	2002-07-08 14:38:24.000000000 +0000
++++ rp-pppoe-3.5/src/configure.in	2009-11-13 08:04:00.000000000 +0000
+@@ -146,7 +146,7 @@
+ {
+ 	if (socket(AF_PPPOX, SOCK_DGRAM, PX_PROTO_OE) >= 0) return 0; else return 1;
+ }
+-], ac_cv_linux_kernel_pppoe=yes, ac_cv_linux_kernel_pppoe=no)
++], ac_cv_linux_kernel_pppoe=yes, ac_cv_linux_kernel_pppoe=no, ac_cv_linux_kernel_pppoe=yes)
+ else
+ 	ac_cv_linux_kernel_pppoe=no
+ fi
+@@ -161,7 +161,7 @@
+ 
+ dnl GCC warning level
+ if test "$GCC" = yes; then
+-	CFLAGS="$CFLAGS -Wall -Wstrict-prototypes -ansi -pedantic"
++	CFLAGS="$CFLAGS -Wall -Wstrict-prototypes"
+ fi
+ 
+ dnl If we couldn't find pppd, die
+@@ -231,7 +231,7 @@
+     } else {
+ 	return 2;
+     }
+-}], PACK=normal, PACK=rev)
++}], PACK=normal, PACK=rev, PACK=normal)
+ 
+ if test "$PACK" = "rev" ; then
+ 	$ECHO "reversed"

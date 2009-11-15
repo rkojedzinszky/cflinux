@@ -18,11 +18,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := iputils
-SRC_FILENAME = iputils-p1.tar.bz2
-EXTRACTED_DIR = iputils
+SRC_FILENAME = iputils-20071127.tar.bz2
+EXTRACTED_DIR = iputils-20071127
 DOWNLOAD_SITES = $(CFLINUX_PACKAGES)
-
-PATCHES = iputils.tracepath_c.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -40,7 +38,7 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) tracepath ping $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT) tracepath ping CC=$(TARGET_CC)
 	touch $(BUILT_STAMP)
 
 install: build

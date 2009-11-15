@@ -33,11 +33,11 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT) ; $(UC_PATH_CROSS) ./configure --host=$(TARGET_HOST) \
-	 --with-cc=$(TARGET_HOST)-cc --with-linker=$(TARGET_HOST)-ld \
+	cd $(PKG_ROOT) && ./configure --host=$(TARGET_HOST) \
+	 --with-cc=$(TARGET_CC) --with-linker=$(TARGET_LD) \
 	 --disable-imager \
 	 --enable-dynamic-e2fsck --disable-nls \
-	 --without-libintl-prefix --disable-evms --enable-elf-shlibs)
+	 --without-libintl-prefix --disable-evms --enable-elf-shlibs
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -48,10 +48,10 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH_CROSS)
+	$(MAKE) -C $(PKG_ROOT) all
 	touch $(BUILT_STAMP)
 
 install: build
-	$(MAKE) -C $(PKG_ROOT) install-strip DESTDIR=$(ROOTFS) $(UC_PATH_CROSS)
+	$(MAKE) -C $(PKG_ROOT) install-strip DESTDIR=$(ROOTFS)
 
 .PHONY: configure clean build install

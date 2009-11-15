@@ -38,7 +38,7 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT) all CC=$(TARGET_CC)
 	touch $(BUILT_STAMP)
 
 install: build

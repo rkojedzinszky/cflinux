@@ -18,15 +18,14 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := postgres
-POSTGRES_VER = 7.4.13
-SRC_FILENAME = postgresql-base-$(POSTGRES_VER).tar.bz2
+POSTGRES_VER = 8.4.1
+SRC_FILENAME = postgresql-$(POSTGRES_VER).tar.bz2
 EXTRACTED_DIR = postgresql-$(POSTGRES_VER)
 DOWNLOAD_SITES = \
-		ftp://ftp3.hu.postgresql.org/pub/postgresql/source/v$(POSTGRES_VER)/ \
-		ftp://ftp2.is.postgresql.org/pub/postgresql/source/v$(POSTGRES_VER)/ \
-		ftp://ftp3.us.postgresql.org/pub/postgresql/source/v$(POSTGRES_VER)/ \
-		ftp://ftp15.us.postgresql.org/source/v$(POSTGRES_VER)/ \
-		ftp://ftp.at.postgresql.org/db/www.postgresql.org/pub/source/v$(POSTGRES_VER)/ \
+		http://wwwmaster.postgresql.org/redir/53/h/source/v$(POSTGRES_VER)/ \
+		http://wwwmaster.postgresql.org/redir/56/h/source/v$(POSTGRES_VER)/ \
+		http://wwwmaster.postgresql.org/redir/198/h/source/v$(POSTGRES_VER)/ \
+		http://wwwmaster.postgresql.org/redir/170/h/source/v$(POSTGRES_VER)/ \
 		$(CFLINUX_PACKAGES)
 
 # include the common package targets 
@@ -35,9 +34,10 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT); $(UC_PATH) ./configure --host=$(TARGET_HOST) \
+	cd $(PKG_ROOT) && ZIC=/usr/sbin/zic ./configure --host=$(TARGET_HOST) \
 	 --without-readline --disable-largefile --prefix=/usr \
-	 --libdir=/lib --includedir=/include --disable-static)
+	 --libdir=/lib --includedir=/include --disable-static \
+	 --with-system-tzdata=""
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -48,12 +48,13 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT)/src/bin/psql all $(UC_PATH)
-	$(MAKE) -C $(PKG_ROOT)/src/bin/pg_config all $(UC_PATH)
-	$(MAKE) -C $(PKG_ROOT)/src/interfaces/libpq all $(UC_PATH)
-	$(MAKE) -C $(PKG_ROOT)/src/include install DESTDIR=$(UC_ROOT)
-	$(MAKE) -C $(PKG_ROOT)/src/interfaces/libpq install DESTDIR=$(UC_ROOT)
-	$(MAKE) -C $(PKG_ROOT)/src/bin/pg_config install DESTDIR=$(UC_ROOT) bindir=/bin
+	$(MAKE) -C $(PKG_ROOT)/src/bin/psql all
+	$(MAKE) -C $(PKG_ROOT)/src/bin/pg_config all
+	$(MAKE) -C $(PKG_ROOT)/src/interfaces/libpq all
+	$(MAKE) -C $(PKG_ROOT)/src/backend/utils fmgroids.h
+	-$(MAKE) -C $(PKG_ROOT)/src/include install DESTDIR=$(UC_ROOT)/usr
+	$(MAKE) -C $(PKG_ROOT)/src/interfaces/libpq install DESTDIR=$(UC_ROOT)/usr
+	$(MAKE) -C $(PKG_ROOT)/src/bin/pg_config install DESTDIR=$(UC_ROOT)/usr bindir=/bin
 	touch $(BUILT_STAMP)
 
 install: build

@@ -31,8 +31,8 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT) && $(UC_PATH) ac_cv_libnet_endianess=lil ./configure --host=$(TARGET_HOST) \
-	 --prefix=/usr --enable-shared --disable-static)
+	cd $(PKG_ROOT) && CC=$(TARGET_CC) ac_cv_libnet_endianess=lil ./configure --host=$(TARGET_HOST) \
+	 --prefix=/usr --enable-shared --disable-static
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -43,10 +43,10 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH)
-	cp $(PKG_ROOT)/lib/libnet.a $(UC_ROOT)/lib/
+	$(MAKE) -C $(PKG_ROOT) all
+	cp $(PKG_ROOT)/lib/libnet.a $(UC_ROOT)/usr/lib/
 	cp -R $(PKG_ROOT)/include/libnet.h $(PKG_ROOT)/include/libnet \
-		$(UC_ROOT)/include/
+		$(UC_ROOT)/usr/include/
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/libnet-config $(UC_ROOT)/usr/bin/
 	touch $(BUILT_STAMP)
 

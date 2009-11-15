@@ -38,29 +38,28 @@ RELEASE_STRING := $(RELEASE_STRING)-$(VERSION_EXTRA)
 endif
 PACKAGE = cflinux
 
-export FDEVEL_DIR := $(TOP_DIR)
-
-# the directory where uclibc will be installed
-export UC_ROOT=$(FDEVEL_DIR)/i386-linux-uclibc
-
-# the root of the target fs
-export ROOTFS:=$(FDEVEL_DIR)/fs_root
-
-# PATH where the uclibc's gcc is
-UC_PATH		= PATH=$(UC_ROOT)/usr/bin:$(UC_ROOT)/bin:$(PATH)
-UC_PATH_CROSS	= PATH=$(UC_ROOT)/bin:$(PATH)
-export UC_PATH UC_PATH_CROSS
-
-UC_ENV := LD_LIBRARY_PATH=$(UC_ROOT)/lib
-UC_ENV += $(UC_PATH)
-export UC_ENV
+FDEVEL_DIR = $(TOP_DIR)
 
 # target host
-TARGET_HOST = i386-uclibc-linux-gnu
-export TARGET_HOST
+TARGET_HOST = i686-linux-uclibc
+TARGET_ARCH = x86
+TARGET_CC = $(TARGET_HOST)-gcc
+TARGET_LD = $(TARGET_HOST)-ld
+TARGET_AR = $(TARGET_HOST)-ar
+TARGET_RANLIB = $(TARGET_HOST)-ranlib
 
 # The version of the used kernel
-KERNEL_VERSION := 2.6.26.2
+KERNEL_VERSION := 2.6.31.6
+
+# the directory where uclibc will be installed
+UC_ROOT=$(FDEVEL_DIR)/$(TARGET_HOST)
+
+# the root of the target fs
+ROOTFS:=$(FDEVEL_DIR)/fs_root
+
+# PATH where the cross compiler is
+UC_PATH		= PATH=$(UC_ROOT)/usr/bin:$(PATH)
+UC_PATH_CROSS	= PATH=$(UC_ROOT)/bin:$(PATH)
 
 # the downloads dir, where the sources will reside
 SOURCES_DIR ?= $(TOP_DIR)/sources
@@ -83,10 +82,10 @@ CFLINUX_PACKAGES = ftp://ftp.cflinux.hu/pub/cflinux/packages/
 ifeq ($(TOP_DIR),)
 export TOP_DIR := $(shell pwd)
 endif
-export MK := $(FDEVEL_DIR)/mk
-export CONFIGS := $(FDEVEL_DIR)/configs
-export INSTALL_BIN := $(TOP_DIR)/install_bin.sh
-export INSTALL_SCRIPT := install -m 555
+MK := $(FDEVEL_DIR)/mk
+CONFIGS := $(FDEVEL_DIR)/configs
+INSTALL_BIN := $(TOP_DIR)/install_bin.sh
+INSTALL_SCRIPT := install -m 555
 
 INSTALL := install
 

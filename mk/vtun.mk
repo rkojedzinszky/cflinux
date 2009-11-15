@@ -31,14 +31,14 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT) && $(UC_PATH) \
-	CFLAGS="-O2 -DHAVE_GETPT -DHAVE_GRANTPT \
-	-DHAVE_UNLOCKPT -DHAVE_PTSNAME" \
-	./configure --host=$(TARGET_HOST) \
+	cd $(PKG_ROOT) && \
+	CC=$(TARGET_CC) \
+	CFLAGS="-O2 -DHAVE_PTSNAME" \
+	./configure \
 	--prefix=/usr \
 	--sysconfdir=/etc --disable-lzo \
 	--with-ssl-headers=../openssl/include/openssl \
-	--with-ssl-libs=../openssl --localstatedir=/var)
+	--with-ssl-libs=../openssl --localstatedir=/var
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -49,7 +49,7 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT)
 	touch $(BUILT_STAMP)
 
 install: build

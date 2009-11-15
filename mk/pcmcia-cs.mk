@@ -37,7 +37,7 @@ $(CONFIGURED_STAMP):
 	    -e "s/@PREFIX_DIR@/$(subst /,\/,$(ROOTFS))/g" \
 	    $(CONFIGS)/pcmcia-cs.config \
 	    > $(PKG_ROOT)/config.in
-	$(MAKE) -C $(PKG_ROOT) oldconfig $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT) oldconfig CC=$(TARGET_CC)
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -49,12 +49,12 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT) all
 	touch $(BUILT_STAMP)
 
 install: build
 	for i in etc cardmgr wireless ; do \
-		$(MAKE) -C $(PKG_ROOT)/$$i install $(UC_PATH) \
+		$(MAKE) -C $(PKG_ROOT)/$$i install \
 		ETC_PREFIX=$(FDEVEL_DIR)/fs_config ; done
 
 .PHONY: configure clean build install

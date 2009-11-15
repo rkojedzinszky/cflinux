@@ -18,13 +18,12 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := iptables
-SRC_FILENAME = iptables-1.4.0.tar.bz2
-EXTRACTED_DIR = iptables-1.4.0
+SRC_FILENAME = iptables-1.4.5.tar.bz2
+EXTRACTED_DIR = iptables-1.4.5
 DOWNLOAD_SITES = http://www.netfilter.org/projects/iptables/files \
 		$(CFLINUX_PACKAGES)
 
 PATCHES = \
-	iptables.stdbool.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -32,6 +31,11 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
+	cd $(PKG_ROOT) && ./configure --host=$(TARGET_HOST) \
+		--prefix=/ \
+		--disable-ipv6 \
+		--enable-static \
+		--disable-shared
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -42,15 +46,10 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) iptables $(UC_PATH) \
-		KERNEL_DIR=$(BUILD_DIR)/kernel \
-		KBUILD_OUTPUT=$(BUILD_DIR)/kernel \
-		NO_SHARED_LIBS=1 \
-		DO_IPV6=0 \
-		LDFLAGS=
+	$(MAKE) -C $(PKG_ROOT) all
 	touch $(BUILT_STAMP)
 
 install: build
-	$(INSTALL_BIN) $(PKG_ROOT)/iptables $(ROOTFS)/sbin
+	$(INSTALL_BIN) $(PKG_ROOT)/iptables-multi $(ROOTFS)/sbin/iptables
 
 .PHONY: configure clean build install

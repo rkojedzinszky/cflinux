@@ -39,11 +39,11 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT)/common farutil fartest $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT)/common farutil CC=$(TARGET_CC)
 	touch $(BUILT_STAMP)
 
 install: build
-	for i in farutil fartest ; do \
+	for i in farutil ; do \
 		$(INSTALL_BIN) $(PKG_ROOT)/common/$$i $(ROOTFS)/sbin/ ; \
 	done
 	-test -d $(ROOTFS)/usr/share/farsync && \

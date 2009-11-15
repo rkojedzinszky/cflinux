@@ -18,20 +18,16 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := busybox
-SRC_FILENAME = busybox-1.10.4.tar.bz2
-EXTRACTED_DIR = busybox-1.10.4
+SRC_FILENAME = busybox-1.15.2.tar.bz2
+EXTRACTED_DIR = busybox-1.15.2
 DOWNLOAD_SITES = http://busybox.net/downloads/ \
 		$(CFLINUX_PACKAGES)
 
 PATCHES = busybox.init.patch \
 	busybox.no_static_libgcc.patch \
-	busybox.crond.patch \
 	busybox.rdate.patch \
-	busybox.ifenslave.patch \
-	busybox.httpd_c.patch \
 	busybox.wget_c.patch \
 	busybox.no_halt_poweroff.patch \
-	busybox.ps_opt_hack.patch \
 	busybox.syslogd_c_use__path_log.patch
 
 # include the common package targets 
@@ -52,12 +48,12 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(UC_PATH_CROSS) $(MAKE) -C $(PKG_ROOT) all CROSS_COMPILE=$(TARGET_HOST)-
+	$(MAKE) -C $(PKG_ROOT) all CROSS_COMPILE=$(TARGET_HOST)-
 	touch $(BUILT_STAMP)
 
 install: build
 	find $(ROOTFS) -lname '*busybox' -print0 | xargs -0 rm -f
 	-mkdir -p $(ROOTFS)/usr/share/udhcpc
-	$(UC_PATH_CROSS) $(MAKE) -C $(PKG_ROOT) install CONFIG_PREFIX=$(ROOTFS) CROSS_COMPILE=$(TARGET_HOST)-
+	$(MAKE) -C $(PKG_ROOT) install CONFIG_PREFIX=$(ROOTFS) CROSS_COMPILE=$(TARGET_HOST)-
 
 .PHONY: configure clean build install

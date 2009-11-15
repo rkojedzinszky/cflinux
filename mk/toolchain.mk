@@ -1,4 +1,4 @@
-# Makefile for ltraf
+# Makefile for skeleton
 #
 # Copyright (C) 2004 Richard Kojedzinszky <krichy@tvnetwork.hu>
 # All rights reserved.
@@ -17,32 +17,35 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-PKG := beep
-SRC_FILENAME = beep-1.2.2.tar.gz
-EXTRACTED_DIR = beep-1.2.2
-DOWNLOAD_SITES = http://www.johnath.com/beep/ \
-		$(CFLINUX_PACKAGES)
+PKG := toolchain
+
+PKG_ROOT := $(TOP_DIR)/toolchain
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
 
-configure: patch $(CONFIGURED_STAMP)
+configure: $(CONFIGURED_STAMP)
 
-$(CONFIGURED_STAMP):
+$(CONFIGURED_STAMP): $(PKG_ROOT)/Makefile
+	$(MAKE) DO_MK=kernel patch
 	touch $(CONFIGURED_STAMP)
 
+$(PKG_ROOT)/Makefile:
+	git submodule update
+
 clean:
-	$(MAKE) -C $(PKG_ROOT) distclean
+	$(MAKE) -C $(PKG_ROOT) clean
 	rm -f $(BUILT_STAMP)
 	rm -f $(CONFIGURED_STAMP)
 
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) $(UC_PATH) FLAGS=-Os
+	$(MAKE) -j2 -C $(PKG_ROOT) all TARGET=$(TARGET_HOST) TROOT=$(UC_ROOT) KSRC=$(TOP_DIR)/build/kernel SRC=$(SOURCES_DIR)
 	touch $(BUILT_STAMP)
 
 install: build
-	$(INSTALL_BIN) $(PKG_ROOT)/beep $(ROOTFS)/usr/sbin/
+	$(MAKE) -C $(PKG_ROOT) install_runtime TARGET=$(TARGET_HOST) TROOT=$(UC_ROOT) KSRC=$(TOP_DIR)/build/kernel SRC=$(SOURCES_DIR) DESTDIR=$(ROOTFS)
 
 .PHONY: configure clean build install
+

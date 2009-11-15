@@ -23,6 +23,7 @@
 #ifndef _ROOTFS_H
 #define _ROOTFS_H
 
+#include <linux/types.h>
 #include <openssl/sha.h>
 
 #ifdef __cplusplus
@@ -42,17 +43,17 @@ extern "C" {
  
 /* the rootfs header struct */
 struct rootfs_hdr_t {
-	char					magic[16];		/* contains 'cflinux-rootfs' */
-	long					header_v;			/* rootfs.bin's header version */
-	long					v_major;			/* major version */
-	long					v_minor;			/* minor version */
-	long					v_patch;			/* patch version */
-	unsigned char v_extra[16];	/* extra version string */
-	unsigned long	rootfs_l;			/* the length of the root filesystem */
-	unsigned long tar_l;				/* the length of the tar file */
-	unsigned char md[SHA_DIGEST_LENGTH];
-															/* the sha1 sum of the whole archive
-															 * this MUST be the last */
+	__s8					magic[16];			/* contains 'cflinux-rootfs' */
+	__s32					header_v;			/* rootfs.bin's header version */
+	__s32					v_major;			/* major version */
+	__s32					v_minor;			/* minor version */
+	__s32					v_patch;			/* patch version */
+	__u8					v_extra[16];			/* extra version string */
+	__u32					rootfs_l;			/* the length of the root filesystem */
+	__u32					tar_l;				/* the length of the tar file */
+	__u8					md[SHA_DIGEST_LENGTH];
+										/* the sha1 sum of the whole archive
+										 * this MUST be the last */
 };
 #ifdef __cplusplus
 }

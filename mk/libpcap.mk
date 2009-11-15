@@ -30,10 +30,10 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT); $(UC_PATH) ./configure --host=$(TARGET_HOST) \
+	cd $(PKG_ROOT) && ./configure --host=$(TARGET_HOST) \
 	 	--prefix=/usr \
 		--with-pcap=linux --disable-ipv6 \
-		ac_cv_linux_vers=2)
+		ac_cv_linux_vers=2
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -44,11 +44,11 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) shared $(UC_PATH)
-	$(INSTALL_BIN) $(PKG_ROOT)/libpcap.so $(UC_ROOT)/lib
-	cp $(PKG_ROOT)/pcap.h $(UC_ROOT)/include
-	cp $(PKG_ROOT)/pcap-namedb.h $(UC_ROOT)/include
-	cp $(PKG_ROOT)/pcap-bpf.h $(UC_ROOT)/include
+	$(MAKE) -C $(PKG_ROOT) shared
+	$(INSTALL_BIN) $(PKG_ROOT)/libpcap.so $(UC_ROOT)/usr/lib/
+	cp $(PKG_ROOT)/pcap.h $(UC_ROOT)/usr/include/
+	cp $(PKG_ROOT)/pcap-namedb.h $(UC_ROOT)/usr/include/
+	cp $(PKG_ROOT)/pcap-bpf.h $(UC_ROOT)/usr/include/
 	touch $(BUILT_STAMP)
 
 install: build

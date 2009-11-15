@@ -33,7 +33,7 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT); $(UC_PATH) ./configure --host=$(TARGET_HOST) \
+	cd $(PKG_ROOT) && ./configure --host=$(TARGET_HOST) \
 		--prefix=/usr \
 		--sysconfdir=/etc/zebra \
 		--disable-ipv6 --enable-netlink --enable-nssa \
@@ -44,7 +44,7 @@ $(CONFIGURED_STAMP):
 		--localstatedir=/var/quagga \
 		--enable-tcp-md5 \
 		ac_cv_func_malloc_0_nonnull=yes \
-		ac_cv_func_realloc_0_nonnull=yes )
+		ac_cv_func_realloc_0_nonnull=yes
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -55,7 +55,7 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH)
+	$(MAKE) -C $(PKG_ROOT) all
 	touch $(BUILT_STAMP)
 
 install: build

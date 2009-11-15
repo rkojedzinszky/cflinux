@@ -21,6 +21,7 @@ PKG := db
 SRC_FILENAME = db.1.86p4.tar.bz2
 EXTRACTED_DIR = db.1.86p4
 DOWNLOAD_SITES = $(CFLINUX_PACKAGES)
+PATCHES = db.cross.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -38,9 +39,9 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT)/PORT/linux $(UC_PATH)
-	cp $(PKG_ROOT)/PORT/linux/libdb.a $(UC_ROOT)/lib/
-	cp $(PKG_ROOT)/PORT/linux/include/* $(UC_ROOT)/include/
+	$(MAKE) -C $(PKG_ROOT)/PORT/linux CC=$(TARGET_CC) AR=$(TARGET_AR) RANLIB=$(TARGET_RANLIB)
+	cp $(PKG_ROOT)/PORT/linux/libdb.a $(UC_ROOT)/usr/lib/
+	cp $(PKG_ROOT)/PORT/linux/include/*.h $(UC_ROOT)/usr/include/
 	touch $(BUILT_STAMP)
 
 install: build

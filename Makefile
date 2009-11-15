@@ -23,8 +23,8 @@
 export TOP_DIR := $(shell pwd)
 
 DO_MK = base
+DO_MK += toolchain
 DO_MK += kernel
-DO_MK += uclibc
 DO_MK += db
 DO_MK += busybox
 DO_MK += mawk
@@ -56,7 +56,6 @@ DO_MK += nemesis
 DO_MK += ethtool
 DO_MK += e2fsprogs
 DO_MK += tools
-DO_MK += beep
 
 include $(TOP_DIR)/config.mk
 
@@ -66,10 +65,10 @@ DO_MK += finish
 all: build
 
 download patch check build:
-	for i in $(DO_MK) ; do $(MAKE) -f $(MK)/$$i.mk $@ || exit 1 ; done
+	for i in $(DO_MK) ; do $(UC_PATH) $(MAKE) -f $(MK)/$$i.mk $@ || exit 1 ; done
 
 clean:
-	-for i in $(DO_MK) ; do $(MAKE) -f $(MK)/$$i.mk clean ; done
+	-for i in $(DO_MK) ; do $(UC_PATH) $(MAKE) -f $(MK)/$$i.mk clean ; done
 	rm -f rootfs*.bin
 
 distclean: clean
@@ -80,7 +79,7 @@ scratch: distclean
 	rm -rf $(ROOTFS)
 
 install: all
-	for i in $(DO_MK) ; do $(MAKE) -f $(MK)/$$i.mk install || exit ; done
+	for i in $(DO_MK) ; do $(UC_PATH) $(MAKE) -f $(MK)/$$i.mk install || exit ; done
 
 image:
 	if [ "$$(id -u)" -ne 0 ] ; then echo "You must be root or use fakeroot." ; exit 1 ; fi

@@ -31,7 +31,7 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	(cd $(PKG_ROOT); $(UC_PATH) ./configure --shared)
+	cd $(PKG_ROOT) && CC=$(TARGET_CC) ./configure --shared
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -42,10 +42,10 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH)
-	cp -a $(PKG_ROOT)/libz.so* $(UC_ROOT)/lib/
+	$(MAKE) -C $(PKG_ROOT) all CC=$(TARGET_CC)
+	cp -a $(PKG_ROOT)/libz.so* $(UC_ROOT)/usr/lib/
 	cp -a $(PKG_ROOT)/zlib.h $(PKG_ROOT)/zconf.h $(PKG_ROOT)/zutil.h \
-		$(UC_ROOT)/include/
+		$(UC_ROOT)/usr/include/
 	touch $(BUILT_STAMP)
 
 install: build
