@@ -46,6 +46,8 @@ install:
 	rm -rf $(ROOTFS)/sbin/rc?.d
 	find $(ROOTFS)/lib/modules/$(KERNEL_VERSION)/ -name '*.ko' -print0 | \
 		xargs -r0 strip -g
+	-cd $(ROOTFS) && find bin sbin usr/bin usr/sbin -type f -print0 | xargs -r0 $(TARGET_STRIP)
+	-cd $(ROOTFS) && find lib usr/lib -name '*.so*' -type f -print0 | xargs -r0 $(TARGET_STRIP)
 	PATH=/bin:/sbin:/usr/bin:/usr/sbin depmod -raeb $(ROOTFS) -F $(BUILD_DIR)/kernel/System.map $(KERNEL_VERSION)
 	rm -f fs_config/modules.conf
 	echo "$(RELEASE_STRING) ($(shell date "+%Y/%m/%d-%H.%M.%S %Z"))" > $(ROOTFS)/.release
