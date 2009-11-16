@@ -35,7 +35,7 @@ $(PKG_ROOT)/Makefile:
 	git submodule update
 
 clean:
-	$(MAKE) -C $(PKG_ROOT) clean
+	$(MAKE) -C $(PKG_ROOT) clean TARGET=$(TARGET_HOST) TROOT=$(UC_ROOT) KSRC=$(TOP_DIR)/build/kernel SRC=$(SOURCES_DIR)
 	rm -f $(BUILT_STAMP)
 	rm -f $(CONFIGURED_STAMP)
 
