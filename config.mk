@@ -47,6 +47,7 @@ TARGET_CC = $(TARGET_HOST)-gcc
 TARGET_LD = $(TARGET_HOST)-ld
 TARGET_AR = $(TARGET_HOST)-ar
 TARGET_RANLIB = $(TARGET_HOST)-ranlib
+TARGET_STRIP = $(TARGET_HOST)-strip -s
 
 # The version of the used kernel
 KERNEL_VERSION := 2.6.31.6
@@ -85,7 +86,7 @@ endif
 MK := $(FDEVEL_DIR)/mk
 CONFIGS := $(FDEVEL_DIR)/configs
 INSTALL_BIN := $(TOP_DIR)/install_bin.sh
-INSTALL_SCRIPT := install -m 555
+INSTALL_SCRIPT := install
 
 INSTALL := install
 
