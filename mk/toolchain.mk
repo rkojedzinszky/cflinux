@@ -31,6 +31,7 @@ $(CONFIGURED_STAMP): $(PKG_ROOT)/Makefile
 	touch $(CONFIGURED_STAMP)
 
 $(PKG_ROOT)/Makefile:
+	git submodule init
 	git submodule update
 
 clean:
