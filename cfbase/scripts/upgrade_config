@@ -45,9 +45,10 @@ umount /mnt
 umount $config_part
 
 part3_st=$(fdisk -l $__system_device | grep "^${__system_device}3" | awk '{print $2}')
+part1_t_start=$(fdisk -l $__system_device | grep "^${__system_device}1" | awk '{print $2}')
 part1_t_end=$(expr $part3_st - 1)
 
-echo -e "d\n2\nd\n1\nn\np\n1\n1\n$part1_t_end\nw" | fdisk "${__system_device}" > /dev/null 2>&1
+echo -e "d\n2\nd\n1\nn\np\n1\n$part1_t_start\n$part1_t_end\nw" | fdisk "${__system_device}" > /dev/null 2>&1
 
 sync
 
