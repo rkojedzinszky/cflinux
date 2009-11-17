@@ -27,7 +27,7 @@ include $(TOP_DIR)/packages.mk
 configure: $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP): $(PKG_ROOT)/Makefile
-	$(MAKE) DO_MK=kernel patch
+	$(MAKE) -f mk/kernel.mk patch
 	touch $(CONFIGURED_STAMP)
 
 $(PKG_ROOT)/Makefile:
