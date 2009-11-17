@@ -23,7 +23,6 @@
 export TOP_DIR := $(shell pwd)
 
 DO_MK = base
-DO_MK += toolchain
 DO_MK += kernel
 DO_MK += db
 DO_MK += busybox
@@ -62,16 +61,25 @@ include $(TOP_DIR)/config.mk
 # Finish target is last
 DO_MK += finish
 
+TOOLCHAIN = $(TOP_DIR)/$(TARGET_HOST)/usr/bin/$(TARGET_HOST)-gcc
+
 all: build
 
-download patch check build:
+download patch check:
 	for i in $(DO_MK) ; do $(UC_PATH) $(MAKE) -f $(MK)/$$i.mk $@ || exit 1 ; done
+
+build: $(TOOLCHAIN)
+	for i in $(DO_MK) ; do $(UC_PATH) $(MAKE) -f $(MK)/$$i.mk $@ || exit 1 ; done
+
+$(TOOLCHAIN):
+	$(MAKE) -f mk/toolchain.mk build
 
 clean:
 	-for i in $(DO_MK) ; do $(UC_PATH) $(MAKE) -f $(MK)/$$i.mk clean ; done
 	rm -f rootfs*.bin
 
 distclean: clean
+	$(MAKE) -f mk/toolchain.mk clean
 	rm -rf $(BUILD_DIR)
 
 scratch: distclean

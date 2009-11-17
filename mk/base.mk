@@ -87,6 +87,7 @@ $(INSTALL_STAMP):
 			$(ROOTFS)/usr/sbin/ ; done
 	$(INSTALL) -m 444 $(PKG_ROOT)/scripts/hackps.sh \
 		$(ROOTFS)/usr/lib/cflinux/
+	$(MAKE) -f mk/toolchain.mk install
 	touch $@
 
 .PHONY: configure clean build install
