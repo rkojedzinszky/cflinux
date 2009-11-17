@@ -1,6 +1,26 @@
---- rp-pppoe-3.5.orig/src/configure.in	2002-07-08 14:38:24.000000000 +0000
-+++ rp-pppoe-3.5/src/configure.in	2009-11-13 08:04:00.000000000 +0000
-@@ -146,7 +146,7 @@
+--- rp-pppoe-3.5.orig/src/configure.in	2002-07-08 16:38:24.000000000 +0200
++++ rp-pppoe-3.5/src/configure.in	2009-11-17 21:47:16.000000000 +0100
+@@ -18,7 +18,18 @@
+ dnl Checks for header files.
+ AC_HEADER_STDC
+ AC_HEADER_SYS_WAIT
+-AC_CHECK_HEADERS(fcntl.h sys/dlpi.h sys/ioctl.h sys/time.h syslog.h unistd.h net/if_arp.h netinet/if_ether.h getopt.h sys/uio.h sys/param.h fcntl.h net/bpf.h netpacket/packet.h net/ethernet.h asm/types.h linux/if_packet.h linux/if_ether.h linux/if_pppox.h sys/socket.h sys/cdefs.h linux/if.h net/if.h net/if_dl.h net/if_ether.h net/if_types.h netinet/if_ether.h net/if_types.h net/if_dl.h )
++AC_CHECK_HEADERS(fcntl.h sys/dlpi.h sys/ioctl.h sys/time.h syslog.h unistd.h net/if_arp.h netinet/if_ether.h getopt.h sys/uio.h sys/param.h fcntl.h net/bpf.h netpacket/packet.h net/ethernet.h asm/types.h linux/if_packet.h linux/if_ether.h netinet/in.h sys/socket.h sys/cdefs.h linux/if.h net/if.h net/if_dl.h net/if_ether.h net/if_types.h netinet/if_ether.h net/if_types.h net/if_dl.h )
++AC_CHECK_HEADER([linux/if_pppox.h], [], [], [
++#if defined(HAVE_NET_IF_H)
++#include <net/if.h>
++#endif
++#if defined(HAVE_LINUX_IF_ETHER_H)
++#include <linux/if_ether.h>
++#endif
++#if defined(HAVE_NETINET_IN_H)
++#include <netinet/in.h>
++#endif
++])
+ 
+ dnl Checks for typedefs, structures, and compiler characteristics.
+ AC_C_CONST
+@@ -146,7 +157,7 @@
  {
  	if (socket(AF_PPPOX, SOCK_DGRAM, PX_PROTO_OE) >= 0) return 0; else return 1;
  }
@@ -9,7 +29,7 @@
  else
  	ac_cv_linux_kernel_pppoe=no
  fi
-@@ -161,7 +161,7 @@
+@@ -161,7 +172,7 @@
  
  dnl GCC warning level
  if test "$GCC" = yes; then
@@ -18,7 +38,7 @@
  fi
  
  dnl If we couldn't find pppd, die
-@@ -231,7 +231,7 @@
+@@ -231,7 +242,7 @@
      } else {
  	return 2;
      }
