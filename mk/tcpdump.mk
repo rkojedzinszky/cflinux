@@ -18,11 +18,14 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := tcpdump
-SRC_FILENAME = tcpdump-3.9.4.tar.gz
-EXTRACTED_DIR = tcpdump-3.9.4
+PKG_VERSION = 4.0.0
+SRC_FILENAME = tcpdump-$(PKG_VERSION).tar.gz
+EXTRACTED_DIR = tcpdump-$(PKG_VERSION)
 DOWNLOAD_SITES = http://www.tcpdump.org/release/ \
 		$(CFLINUX_PACKAGES)
-PATCHES = tcpdump.configure.no_ssleay.patch
+PATCHES = \
+	tcpdump.print-enc.c.no_ipv6.patch \
+
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -30,10 +33,11 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	cd $(PKG_ROOT) && ./configure --host=$(TARGET_HOST) \
-	 	--prefix=/usr \
-		--disable-ipv6 --enable-smb \
-		ac_cv_linux_vers=2
+	cd $(PKG_ROOT) && \
+		ac_cv_linux_vers=2 \
+		./configure --host=$(TARGET_HOST) \
+		--prefix=/usr \
+		--with-crypto=$(UC_ROOT)/usr
 	touch $(CONFIGURED_STAMP)
 
 clean:

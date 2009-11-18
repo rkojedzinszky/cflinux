@@ -1,0 +1,14 @@
+--- tcpdump-4.0.0/print-enc.c.orig	2009-11-18 15:50:00.000000000 +0100
++++ tcpdump-4.0.0/print-enc.c	2009-11-18 15:50:26.000000000 +0100
+@@ -77,9 +77,11 @@
+ 	case AF_INET:
+ 		ip_print(gndo, p, length);
+ 		break;
++#ifdef INET6
+ 	case AF_INET6:
+ 		ip6_print(p, length);
+ 		break;
++#endif
+ 	}
+ 
+ out:
