@@ -1,0 +1,20 @@
+--- busybox/procps/ps.c.orig	2009-11-18 15:31:01.000000000 +0100
++++ busybox/procps/ps.c	2009-11-18 15:31:21.000000000 +0100
+@@ -525,7 +525,7 @@
+ #if ENABLE_FEATURE_PS_WIDE || ENABLE_SELINUX
+ #if ENABLE_FEATURE_PS_WIDE
+ 	opt_complementary = "-:ww";
+-	IF_SELINUX(i =) getopt32(argv, IF_SELINUX("Z") "w", &w_count);
++	IF_SELINUX(i =) getopt32(argv, IF_SELINUX("Z") "wafnrstuvx", &w_count);
+ 	/* if w is given once, GNU ps sets the width to 132,
+ 	 * if w is given more than once, it is "unlimited"
+ 	 */
+@@ -538,7 +538,7 @@
+ 			terminal_width = MAX_WIDTH;
+ 	}
+ #else /* only ENABLE_SELINUX */
+-	i = getopt32(argv, "Z");
++	i = getopt32(argv, "Zafnrstuvx");
+ #endif
+ #if ENABLE_SELINUX
+ 	if ((i & 1) && is_selinux_enabled())
