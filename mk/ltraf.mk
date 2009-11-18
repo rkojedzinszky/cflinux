@@ -18,11 +18,11 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := ltraf
-SRC_FILENAME = ltraf-r241.tar.bz2
-EXTRACTED_DIR = ltraf-r241
+PKG_VERSION = r252-p1
+SRC_FILENAME = ltraf-$(PKG_VERSION).tar.bz2
+EXTRACTED_DIR = ltraf-$(PKG_VERSION)
 DOWNLOAD_SITES = \
 		$(CFLINUX_PACKAGES)
-PATCHES = ltraf.depend.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
