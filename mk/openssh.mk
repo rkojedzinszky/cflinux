@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := openssh
-SRC_FILENAME = openssh-4.7p1.tar.gz
-EXTRACTED_DIR = openssh-4.7p1
+SRC_FILENAME = openssh-5.3p1.tar.gz
+EXTRACTED_DIR = openssh-5.3p1
 DOWNLOAD_SITES = \
 		ftp://ftp.fsn.hu/pub/openbsd/OpenSSH/portable/ \
 		ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/ \
@@ -27,7 +27,7 @@ DOWNLOAD_SITES = \
 		ftp://ftp.iij.ad.jp/pub/OpenBSD/OpenSSH/portable/ \
 		ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/ \
 		$(CFLINUX_PACKAGES)
-PATCHES = openssh.patch \
+PATCHES = \
 	openssh.session_c_terminal_flush.patch
 
 # include the common package targets 
@@ -61,7 +61,6 @@ install: build
 	$(INSTALL_BIN) $(PKG_ROOT)/sshd $(ROOTFS)/usr/sbin
 	$(INSTALL_BIN) $(PKG_ROOT)/ssh-keygen $(ROOTFS)/usr/sbin
 	$(INSTALL_BIN) $(PKG_ROOT)/scp $(ROOTFS)/usr/bin
-	$(INSTALL_BIN) $(PKG_ROOT)/libssh.so $(ROOTFS)/usr/lib
 	mkdir -p $(DEFAULTS_DIR)/etc/ssh
 	for i in ssh_config moduli; do \
 		cp $(PKG_ROOT)/$$i $(DEFAULTS_DIR)/etc/ssh/ ; done
