@@ -28,7 +28,8 @@ PATCHES = busybox.init.patch \
 	busybox.rdate.patch \
 	busybox.wget_c.patch \
 	busybox.no_halt_poweroff.patch \
-	busybox.syslogd_c_use__path_log.patch
+	busybox.syslogd_c_use__path_log.patch \
+	busybox.ps_opt_hack.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
