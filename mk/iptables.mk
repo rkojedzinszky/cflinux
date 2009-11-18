@@ -32,10 +32,11 @@ configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
 	cd $(PKG_ROOT) && ./configure --host=$(TARGET_HOST) \
-		--prefix=/ \
+		--prefix=/usr \
+		--sbindir=/sbin \
 		--disable-ipv6 \
-		--enable-static \
-		--disable-shared
+		--disable-static \
+		--enable-shared
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -50,6 +51,6 @@ $(BUILT_STAMP):
 	touch $(BUILT_STAMP)
 
 install: build
-	$(INSTALL_BIN) $(PKG_ROOT)/iptables-multi $(ROOTFS)/sbin/iptables
+	$(MAKE) -C $(PKG_ROOT) install DESTDIR=$(ROOTFS)
 
 .PHONY: configure clean build install
