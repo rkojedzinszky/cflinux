@@ -18,11 +18,11 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := libpcap
-SRC_FILENAME = libpcap-0.9.4.tar.gz
-EXTRACTED_DIR = libpcap-0.9.4
+PKG_VERSION = 1.0.0
+SRC_FILENAME = libpcap-$(PKG_VERSION).tar.gz
+EXTRACTED_DIR = libpcap-$(PKG_VERSION)
 DOWNLOAD_SITES = http://www.tcpdump.org/release/ \
 		$(CFLINUX_PACKAGES)
-PATCHES = libpcap.shared.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -45,13 +45,17 @@ build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) shared
-	$(INSTALL_BIN) $(PKG_ROOT)/libpcap.so $(UC_ROOT)/usr/lib/
-	cp $(PKG_ROOT)/pcap.h $(UC_ROOT)/usr/include/
-	cp $(PKG_ROOT)/pcap-namedb.h $(UC_ROOT)/usr/include/
-	cp $(PKG_ROOT)/pcap-bpf.h $(UC_ROOT)/usr/include/
+	$(MAKE) -C $(PKG_ROOT) install-shared DESTDIR=$(UC_ROOT)
+	ln -s $(PKG).so.$(PKG_VERSION) $(UC_ROOT)/usr/lib/$(PKG).so
+	$(INSTALL) -d $(UC_ROOT)/usr/include/pcap
+	$(INSTALL) $(PKG_ROOT)/pcap/*.h $(UC_ROOT)/usr/include/pcap/
+	for f in pcap.h pcap-bpf.h pcap-namedb.h ; do \
+		$(INSTALL) $(PKG_ROOT)/$$f $(UC_ROOT)/usr/include/ ; \
+	done
 	touch $(BUILT_STAMP)
 
 install: build
-	$(INSTALL_BIN) $(PKG_ROOT)/libpcap.so $(ROOTFS)/usr/lib/
+	$(MAKE) -C $(PKG_ROOT) install-shared DESTDIR=$(ROOTFS)
+	ln -s $(PKG).so.$(PKG_VERSION) $(ROOTFS)/usr/lib/$(PKG).so.1
 
 .PHONY: configure clean build install
