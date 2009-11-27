@@ -18,14 +18,12 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := net-snmp
-SRC_FILENAME = net-snmp-5.2.3.tar.gz
-EXTRACTED_DIR = net-snmp-5.2.3
+SRC_FILENAME = net-snmp-5.5.tar.gz
+EXTRACTED_DIR = net-snmp-5.5
 DOWNLOAD_SITES = \
 		http://heanet.dl.sourceforge.net/sourceforge/net-snmp/ \
 		http://unc.dl.sourceforge.net/sourceforge/net-snmp/ \
 		$(CFLINUX_PACKAGES)
-PATCHES = net-snmp.vmstat.patch \
-	net-snmp.configure.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -33,26 +31,33 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	cp $(TOP_DIR)/cfbase/config.sub $(PKG_ROOT)/
 	cd $(PKG_ROOT) && ./configure --host=$(TARGET_HOST) \
 	 --with-endianness=little \
 	 --prefix=/usr \
 	 --sysconfdir=/etc \
+	 --disable-applications \
+	 --disable-manuals \
 	 --disable-scripts \
+	 --disable-mibs \
+	 --disable-scripts \
+	 --disable-embedded-perl \
+	 --disable-mib-loading \
+	 --with-perl-modules= \
+	 --with-python-modules= \
 	 --disable-debugging \
 	 --enable-shared \
-	 --with-openssl=../openssl \
+	 --disable-static \
 	 --without-root-access \
-	 --with-sys-contact="net-admin@" \
-	 --with-mib-modules="host smux disman/event-mib" \
+	 --without-kmem-usage \
+	 --with-mib-modules="smux" \
 	 --with-default-snmp-version=3 \
+	 --with-sys-contact="net-admin@" \
 	 --with-sys-location="default" \
 	 --with-logfile=/var/log/snmpd.log \
 	 --with-persistent-directory=/var/lib/net-snmp \
 	 --localstatedir=/var/run \
 	 --enable-local-smux \
-	 --without-rpm \
-	 --enable-ucd-snmp-compatibility
+	 --without-rpm
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -63,26 +68,34 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all
-	$(MAKE) -C $(PKG_ROOT) installheaders installlibs INSTALL_PREFIX=$(UC_ROOT)
+	$(MAKE) -C $(PKG_ROOT) sedscript standardall
+	$(MAKE) -C $(PKG_ROOT) installheaders INSTALL_PREFIX=$(UC_ROOT)
+	for i in agent mibs ; do \
+		for j in $(PKG_ROOT)/agent/.libs/libnetsnmp$${i}.so.* ; do \
+			$(INSTALL_BIN) $${j} \
+				$(UC_ROOT)/usr/lib/ ; done ; done
+	for i in helpers ; do \
+		for j in $(PKG_ROOT)/agent/helpers/.libs/libnetsnmp$${i}.so.* ; do \
+			$(INSTALL_BIN) $${j} \
+				$(UC_ROOT)/usr/lib/ ; done ; done
+	for i in $(PKG_ROOT)/snmplib/.libs/libnetsnmp.so.* ; do \
+		$(INSTALL_BIN) $${i} \
+			$(UC_ROOT)/usr/lib/ ; done
 	touch $(BUILT_STAMP)
 
 install: build
+	$(INSTALL_BIN) $(PKG_ROOT)/agent/.libs/snmpd \
+		$(ROOTFS)/usr/sbin/
 	for i in agent mibs ; do \
-		for j in $(PKG_ROOT)/agent/.libs/libnetsnmp$${i}.so.9* ; do \
+		for j in $(PKG_ROOT)/agent/.libs/libnetsnmp$${i}.so.* ; do \
 			$(INSTALL_BIN) $${j} \
 				$(ROOTFS)/usr/lib/ ; done ; done
 	for i in helpers ; do \
-		for j in $(PKG_ROOT)/agent/helpers/.libs/libnetsnmp$${i}.so.9* ; do \
+		for j in $(PKG_ROOT)/agent/helpers/.libs/libnetsnmp$${i}.so.* ; do \
 			$(INSTALL_BIN) $${j} \
 				$(ROOTFS)/usr/lib/ ; done ; done
-	for i in $(PKG_ROOT)/snmplib/.libs/libnetsnmp.so.9* ; do \
+	for i in $(PKG_ROOT)/snmplib/.libs/libnetsnmp.so.* ; do \
 		$(INSTALL_BIN) $${i} \
 			$(ROOTFS)/usr/lib/ ; done
-#	$(INSTALL_BIN) $(PKG_ROOT)/apps/.libs/snmptrap \
-#		$(ROOTFS)/usr/bin/
-	$(INSTALL_BIN) $(PKG_ROOT)/agent/.libs/snmpd \
-		$(ROOTFS)/usr/sbin/
-#	$(MAKE) -C $(PKG_ROOT)/mibs mibsinstall INSTALL_PREFIX=$(ROOTFS)
 
 .PHONY: configure clean build install
