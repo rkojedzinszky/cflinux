@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := gmp
-SRC_FILENAME = gmp-4.2.1.tar.gz
-EXTRACTED_DIR = gmp-4.2.1
+SRC_FILENAME = gmp-4.3.2.tar.gz
+EXTRACTED_DIR = gmp-4.3.2
 DOWNLOAD_SITES = \
 		ftp://ftp.sunet.se/pub/gnu/gmp/ \
 		ftp://ftp.funet.fi/pub/gnu/prep/gmp/ \
