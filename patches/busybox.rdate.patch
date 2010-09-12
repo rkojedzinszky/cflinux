@@ -1,6 +1,29 @@
---- busybox-1.15.2/include/usage.h.orig	2009-10-08 00:59:09.000000000 +0000
-+++ busybox-1.15.2/include/usage.h	2009-11-14 21:44:38.000000000 +0000
-@@ -3478,12 +3478,13 @@
+--- busybox-1.17.2/util-linux/rdate.c.orig	2010-08-23 02:44:36.000000000 +0200
++++ busybox-1.17.2/util-linux/rdate.c	2010-09-12 17:53:40.000000000 +0200
+@@ -49,7 +49,7 @@
+ 	unsigned long flags;
+ 
+ 	opt_complementary = "-1";
+-	flags = getopt32(argv, "sp");
++	flags = getopt32(argv, "spa");
+ 
+ 	remote_time = askremotedate(argv[optind]);
+ 
+@@ -60,6 +60,11 @@
+ 		if (current_time == remote_time)
+ 			bb_error_msg("current time matches remote time");
+ 		else
++		if (flags & 4) {
++			struct timeval tv = { .tv_sec = remote_time - current_time, .tv_usec = 0 };
++			if (adjtime(&tv, NULL) == -1)
++				bb_perror_msg_and_die("cannot adjust time of day");
++		} else
+ 			if (stime(&remote_time) < 0)
+ 				bb_perror_msg_and_die("can't set time of day");
+ 	}
+--- busybox-1.17.2/include/usage.src.h.orig	2010-09-12 17:55:59.000000000 +0200
++++ busybox-1.17.2/include/usage.src.h	2010-09-12 17:56:18.000000000 +0200
+@@ -3364,12 +3364,13 @@
         "$ raidautorun /dev/md0"
  
  #define rdate_trivial_usage \
@@ -15,28 +38,3 @@
  
  #define rdev_trivial_usage \
         ""
---- busybox-1.4.2/util-linux/rdate.c.orig	2007-03-18 17:59:37.000000000 +0100
-+++ busybox-1.4.2/util-linux/rdate.c	2007-03-23 20:05:08.000000000 +0100
-@@ -48,7 +48,7 @@
- 	unsigned long flags;
- 
- 	opt_complementary = "-1";
--	flags = getopt32(argv, "sp");
-+	flags = getopt32(argv, "spa");
- 
- 	remote_time = askremotedate(argv[optind]);
- 
-@@ -58,8 +58,11 @@
- 		time(&current_time);
- 		if (current_time == remote_time)
- 			bb_error_msg("current time matches remote time");
--		else
--			if (stime(&remote_time) < 0)
-+		else if (flags & 4) {
-+			struct timeval tv = { .tv_sec = remote_time - current_time, .tv_usec = 0 };
-+			if (adjtime(&tv, NULL) == -1)
-+				bb_perror_msg_and_die("cannot adjust time of day");
-+		} else if (stime(&remote_time) < 0)
- 				bb_perror_msg_and_die("cannot set time of day");
- 	}
- 
