@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := e2fsprogs
-SRC_FILENAME = e2fsprogs-1.40.2.tar.gz
-EXTRACTED_DIR = e2fsprogs-1.40.2
+SRC_FILENAME = e2fsprogs-1.41.12.tar.gz
+EXTRACTED_DIR = e2fsprogs-1.41.12
 DOWNLOAD_SITES = \
 		http://heanet.dl.sourceforge.net/sourceforge/e2fsprogs/ \
 		http://keihanna.dl.sourceforge.net/sourceforge/e2fsprogs/ \
@@ -34,7 +34,6 @@ configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
 	cd $(PKG_ROOT) && ./configure --host=$(TARGET_HOST) \
-	 --with-cc=$(TARGET_CC) --with-linker=$(TARGET_LD) \
 	 --disable-imager \
 	 --enable-dynamic-e2fsck --disable-nls \
 	 --without-libintl-prefix --disable-evms --enable-elf-shlibs
