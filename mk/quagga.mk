@@ -18,13 +18,12 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := quagga
-SRC_FILENAME = quagga-0.99.9.tar.gz
-EXTRACTED_DIR = quagga-0.99.9
+SRC_FILENAME = quagga-0.99.17.tar.gz
+EXTRACTED_DIR = quagga-0.99.17
 DOWNLOAD_SITES = http://www.quagga.net/download/ \
 		$(CFLINUX_PACKAGES)
 PATCHES = \
 	quagga.patch \
-	quagga.md5_linux_v10.patch \
 	quagga-0.99.1-forward_sysctl-2.6.14.patch
 
 # include the common package targets 
