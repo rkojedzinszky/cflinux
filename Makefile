@@ -27,7 +27,6 @@ DO_MK += kernel
 DO_MK += db
 DO_MK += busybox
 DO_MK += mawk
-DO_MK += farsync
 DO_MK += zlib
 DO_MK += openssl
 DO_MK += openssh

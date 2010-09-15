@@ -31,9 +31,7 @@ DOWNLOAD_SITES = \
 		$(CFLINUX_PACKAGES)
 PATCHES = \
 	kernel.init.patch \
-	kernel.blackhole.patch \
-	kernel.usb_root.patch \
-	kernel.igmp.c.max_membership.patch
+	kernel.usb_root.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -46,24 +44,26 @@ else
 CFGPATCH =
 endif
 
+KERNEL_COMMON = LOCALVERSION= ARCH=$(TARGET_ARCH) CROSS_COMPILE=$(TARGET_HOST)-
+
 $(CONFIGURED_STAMP):
 	cp $(CONFIGS)/$(PKG).config $(PKG_ROOT)/.config
 	(cd $(PKG_ROOT) && for i in $(CFGPATCH) ; do patch < $$i ; done)
-	$(MAKE) -C $(PKG_ROOT) oldconfig ARCH=$(TARGET_ARCH) CROSS_COMPILE=$(TARGET_HOST)-
+	$(MAKE) -C $(PKG_ROOT) oldconfig $(KERNEL_COMMON)
 	touch $@
 
 clean:
-	$(MAKE) -C $(PKG_ROOT) clean ARCH=$(TARGET_ARCH) CROSS_COMPILE=$(TARGET_HOST)-
+	$(MAKE) -C $(PKG_ROOT) clean $(KERNEL_COMMON)
 	rm -f $(CONFIGURED_STAMP) $(BUILT_STAMP)
 
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) bzImage modules -j4 ARCH=$(TARGET_ARCH) CROSS_COMPILE=$(TARGET_HOST)-
+	$(MAKE) -C $(PKG_ROOT) bzImage modules -j4 $(KERNEL_COMMON)
 	touch $(BUILT_STAMP)
 
 install: build
-	$(MAKE) -C $(PKG_ROOT) modules_install INSTALL_MOD_PATH=$(ROOTFS) ARCH=$(TARGET_ARCH) CROSS_COMPILE=$(TARGET_HOST)-
+	$(MAKE) -C $(PKG_ROOT) modules_install INSTALL_MOD_PATH=$(ROOTFS) $(KERNEL_COMMON)
 
 .PHONY: configure clean build install
 

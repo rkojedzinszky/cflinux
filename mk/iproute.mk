@@ -18,13 +18,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := iproute
-SRC_FILENAME = iproute2-2.6.18-061002.tar.gz
-EXTRACTED_DIR = iproute2-2.6.18-061002
-DOWNLOAD_SITES = http://developer.osdl.org/dev/iproute2/download/ \
+SRC_FILENAME = iproute2-2.6.35.tar.bz2
+EXTRACTED_DIR = iproute2-2.6.35
+DOWNLOAD_SITES = http://devresources.linuxfoundation.org/dev/iproute2/download/ \
 	$(CFLINUX_PACKAGES)
-
-PATCHES = \
-	iproute.makefile.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -43,8 +40,8 @@ build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) all CC=$(TARGET_CC) \
-		KERNEL_INCLUDE=$(BUILD_DIR)/kernel/include \
-		LIBC_INCLUDE=$(UC_ROOT)/include
+		SUBDIRS="lib ip tc" \
+		KERNEL_INCLUDE=$(BUILD_DIR)/kernel/include
 	touch $(BUILT_STAMP)
 
 install: build
