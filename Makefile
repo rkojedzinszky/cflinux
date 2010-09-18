@@ -56,6 +56,7 @@ DO_MK += e2fsprogs
 DO_MK += tools
 DO_MK += wireless_tools
 DO_MK += libnl
+DO_MK += hostapd
 
 include $(TOP_DIR)/config.mk
 
