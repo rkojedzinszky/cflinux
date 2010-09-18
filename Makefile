@@ -55,6 +55,7 @@ DO_MK += ethtool
 DO_MK += e2fsprogs
 DO_MK += tools
 DO_MK += wireless_tools
+DO_MK += libnl
 
 include $(TOP_DIR)/config.mk
 
