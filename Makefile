@@ -54,6 +54,7 @@ DO_MK += nemesis
 DO_MK += ethtool
 DO_MK += e2fsprogs
 DO_MK += tools
+DO_MK += wireless_tools
 
 include $(TOP_DIR)/config.mk
 
