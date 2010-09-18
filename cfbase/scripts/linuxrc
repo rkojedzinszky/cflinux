@@ -37,9 +37,6 @@ if [ -z "$__system_device" ]; then
 	__system_device="/dev/hdc"
 fi
 
-# upgrade config
-__system_device="$__system_device" /usr/lib/cfmaint/upgrade_config
-
 # create /etc
 mount tmpfs -nt tmpfs -o size=16M,mode=0755 /etc
 e2fsck -p "${__system_device}1" 2>/dev/null

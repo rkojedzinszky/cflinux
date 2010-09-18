@@ -66,7 +66,6 @@ $(INSTALL_STAMP):
 	cp -v $(PKG_ROOT)/defaults/inittab \
 		$(DEFAULTS_DIR)/etc/inittab
 	cp -v $(PKG_ROOT)/scripts/common.sh $(ROOTFS)/usr/lib/cfmaint/
-	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/upgrade_config $(ROOTFS)/usr/lib/cfmaint/
 	cp -v $(PKG_ROOT)/defaults/modules \
 		$(DEFAULTS_DIR)/etc/modules
 	cp -v $(PKG_ROOT)/defaults/fstab.template \
