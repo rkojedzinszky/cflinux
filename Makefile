@@ -58,6 +58,7 @@ DO_MK += libnl
 DO_MK += wireless_tools
 DO_MK += iw
 DO_MK += hostapd
+DO_MK += flex
 
 include $(TOP_DIR)/config.mk
 
