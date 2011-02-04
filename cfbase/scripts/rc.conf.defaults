@@ -27,7 +27,7 @@ bgpd_enable="NO"		# bgpd
 bgpd_flags="-A 127.0.0.1"
 
 radvd_enable="NO"		# Router ADVertisement Daemon
-radvd_flags="-u radvd -p /var/run/radvd/radvd.pid -t /var/empty"
+radvd_flags="-u radvd -p /var/run/radvd/radvd.pid"
 
 snmpd_enable="NO"		# snmp daemon
 snmpd_flags="-Lsd -u snmpd"	# default flags, log to syslog using facility daemon
