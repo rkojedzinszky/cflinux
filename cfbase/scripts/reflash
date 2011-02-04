@@ -1,7 +1,7 @@
 #!/bin/sh
 
 set -e
-rootdev="$(cat /var/run/__system_device)5"	# default root device
+rootdev="$(cat /var/run/__system_device)3"	# default root device
 
 if [ "$1" ]
 then
