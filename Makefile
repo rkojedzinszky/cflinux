@@ -60,6 +60,7 @@ DO_MK += iw
 DO_MK += hostapd
 DO_MK += flex
 DO_MK += ipsec-tools
+DO_MK += radvd
 
 include $(TOP_DIR)/config.mk
 

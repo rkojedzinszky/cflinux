@@ -259,6 +259,18 @@ case "$ipsec_enable" in
 esac
 echo "."
 
+case "$radvd_enable" in
+	[Yy][Ee][Ss])
+		if ! grep -q "^radvd:" /etc/passwd ; then
+			echo -n " [adding user radvd"
+			adduser -h /var/empty -g "radvd daemon user" -s /bin/false -D -H radvd && echo -n "]"
+		fi
+		mkdir /var/run/radvd
+		chown radvd: /var/run/radvd
+		chmod 700 /var/run/radvd
+		/usr/sbin/radvd $radvd_flags && echo -n " radvd"
+esac
+
 echo -n "Local initialization: "
 for rcdir in $rc_dirs; do
 	if [ -d "$rcdir" ]; then
