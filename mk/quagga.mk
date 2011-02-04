@@ -35,7 +35,7 @@ $(CONFIGURED_STAMP):
 	cd $(PKG_ROOT) && ./configure --host=$(TARGET_HOST) \
 		--prefix=/usr \
 		--sysconfdir=/etc/zebra \
-		--disable-ipv6 --enable-netlink --enable-nssa \
+		--enable-netlink --enable-nssa \
 		--enable-ospf-te --enable-opaque-lsa \
 		--disable-ospfapi \
 		--enable-user=quagga --enable-group=quagga \
@@ -60,7 +60,7 @@ $(BUILT_STAMP):
 install: build
 	for i in $(PKG_ROOT)/lib/.libs/libzebra.so* ; do \
 		$(INSTALL_BIN) $$i $(ROOTFS)/usr/lib/ ; done
-	for i in zebra ospfd ripd bgpd ; do \
+	for i in zebra ospfd ospf6d ripd bgpd ; do \
 		$(MAKE) -C $(PKG_ROOT)/$$i install-sbinPROGRAMS \
 		DESTDIR=$(ROOTFS) INSTALL_STRIP_FLAG=-s ; \
 		strip -s $(ROOTFS)/usr/sbin/$$i ; done

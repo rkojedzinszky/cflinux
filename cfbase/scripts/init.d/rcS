@@ -211,7 +211,7 @@ if [ ! -d /var/quagga ]; then
 fi
 
 # start up quagga daemons
-for _daemon in zebra ripd ospfd bgpd ; do
+for _daemon in zebra ripd ospfd ospf6d bgpd ; do
 	eval "_enable=\"\$${_daemon}_enable\""
 	case "$_enable" in
 		[Yy][Ee][Ss])

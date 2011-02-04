@@ -23,9 +23,6 @@ SRC_FILENAME = tcpdump-$(PKG_VERSION).tar.gz
 EXTRACTED_DIR = tcpdump-$(PKG_VERSION)
 DOWNLOAD_SITES = http://www.tcpdump.org/release/ \
 		$(CFLINUX_PACKAGES)
-PATCHES = \
-	tcpdump.print-enc.c.no_ipv6.patch \
-
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -35,8 +32,10 @@ configure: patch $(CONFIGURED_STAMP)
 $(CONFIGURED_STAMP):
 	cd $(PKG_ROOT) && \
 		ac_cv_linux_vers=2 \
+		td_cv_buggygetaddrinfo=no \
 		./configure --host=$(TARGET_HOST) \
 		--prefix=/usr \
+		--enable-ipv6 \
 		--with-crypto=$(UC_ROOT)/usr
 	touch $(CONFIGURED_STAMP)
 

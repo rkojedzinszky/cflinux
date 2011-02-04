@@ -36,7 +36,6 @@ $(CONFIGURED_STAMP):
 			--prefix=/usr \
 			--sysconfdir=/etc \
 			--enable-shared \
-			--disable-ipv6 \
 			--enable-frag \
 			--enable-natt \
 			--enable-dpd \

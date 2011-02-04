@@ -34,7 +34,6 @@ $(CONFIGURED_STAMP):
 	cd $(PKG_ROOT) && ./configure --host=$(TARGET_HOST) \
 		--prefix=/usr \
 		--sbindir=/sbin \
-		--disable-ipv6 \
 		--disable-static \
 		--enable-shared
 	touch $(CONFIGURED_STAMP)
