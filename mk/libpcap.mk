@@ -57,6 +57,6 @@ $(BUILT_STAMP):
 
 install: build
 	$(MAKE) -C $(PKG_ROOT) install-shared DESTDIR=$(ROOTFS)
-	ln -s $(PKG).so.$(PKG_VERSION) $(ROOTFS)/usr/lib/$(PKG).so.1
+	ln -fs $(PKG).so.$(PKG_VERSION) $(ROOTFS)/usr/lib/$(PKG).so.1
 
 .PHONY: configure clean build install
