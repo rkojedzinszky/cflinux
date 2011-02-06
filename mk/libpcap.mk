@@ -38,6 +38,7 @@ $(CONFIGURED_STAMP):
 
 clean:
 	$(MAKE) -C $(PKG_ROOT) distclean
+	rm -f $(PKG_VERSION) $(UC_ROOT)/usr/lib/$(PKG).so
 	rm -f $(BUILT_STAMP)
 	rm -f $(CONFIGURED_STAMP)
 
