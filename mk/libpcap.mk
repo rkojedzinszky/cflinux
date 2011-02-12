@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := libpcap
-PKG_VERSION = 1.0.0
+PKG_VERSION = 1.1.1
 SRC_FILENAME = libpcap-$(PKG_VERSION).tar.gz
 EXTRACTED_DIR = libpcap-$(PKG_VERSION)
 DOWNLOAD_SITES = http://www.tcpdump.org/release/ \
