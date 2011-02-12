@@ -47,7 +47,7 @@ build: configure $(BUILT_STAMP)
 $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) shared
 	$(MAKE) -C $(PKG_ROOT) install-shared DESTDIR=$(UC_ROOT)
-	ln -s $(PKG).so.$(PKG_VERSION) $(UC_ROOT)/usr/lib/$(PKG).so
+	ln -fs $(PKG).so.$(PKG_VERSION) $(UC_ROOT)/usr/lib/$(PKG).so
 	$(INSTALL) -d $(UC_ROOT)/usr/include/pcap
 	$(INSTALL) $(PKG_ROOT)/pcap/*.h $(UC_ROOT)/usr/include/pcap/
 	for f in pcap.h pcap-bpf.h pcap-namedb.h ; do \
