@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := iproute
-SRC_FILENAME = iproute2-2.6.35.tar.bz2
-EXTRACTED_DIR = iproute2-2.6.35
+SRC_FILENAME = iproute2-2.6.37.tar.bz2
+EXTRACTED_DIR = iproute2-2.6.37
 DOWNLOAD_SITES = http://devresources.linuxfoundation.org/dev/iproute2/download/ \
 	$(CFLINUX_PACKAGES)
 
@@ -29,6 +29,7 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
+	echo -e "TC_CONFIG_XT:=n\nIPT_LIB_DIR:=/lib/xtables" > $(PKG_ROOT)/Config
 	touch $(CONFIGURED_STAMP)
 
 clean:
