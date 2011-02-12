@@ -18,12 +18,14 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := ppp
-SRC_FILENAME = ppp-cvs-20050725-p1.tar.bz2
-EXTRACTED_DIR = ppp-cvs-20050725-p1
+SRC_FILENAME = ppp-2.4.5.tar.gz
+EXTRACTED_DIR = ppp-2.4.5
 DOWNLOAD_SITES = \
+	ftp://ftp.samba.org/pub/ppp \
 	$(CFLINUX_PACKAGES)
 
 PATCHES = ppp.patch \
+	ppp.plugins.patch \
 	ppp.pathnames_h_connect_errors.patch \
 	ppp.radius_untimeout.patch \
 	ppp.periodic_stats.patch
@@ -56,6 +58,10 @@ install: build
 	$(INSTALL_BIN) $(PKG_ROOT)/pppd/plugins/radius/radattr.so \
 		$(ROOTFS)/usr/lib/pppd/
 	$(INSTALL_BIN) $(PKG_ROOT)/pppd/plugins/rp-pppoe/rp-pppoe.so \
+		$(ROOTFS)/usr/lib/pppd/
+	$(INSTALL_BIN) $(PKG_ROOT)/pppd/plugins/pppol2tp/openl2tp.so \
+		$(ROOTFS)/usr/lib/pppd/
+	$(INSTALL_BIN) $(PKG_ROOT)/pppd/plugins/pppol2tp/pppol2tp.so \
 		$(ROOTFS)/usr/lib/pppd/
 
 .PHONY: configure clean build install

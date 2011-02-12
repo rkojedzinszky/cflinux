@@ -1,0 +1,21 @@
+--- ppp-2.4.5.orig/pppd/plugins/rp-pppoe/Makefile.linux	2009-11-16 23:26:07.000000000 +0100
++++ ppp-2.4.5/pppd/plugins/rp-pppoe/Makefile.linux	2011-03-08 00:19:56.187764245 +0100
+@@ -26,7 +26,7 @@
+ RP_VERSION=3.8p
+ 
+ COPTS=-O2 -g
+-CFLAGS=$(COPTS) -I../../../include '-DRP_VERSION="$(RP_VERSION)"'
++CFLAGS=$(COPTS) '-DRP_VERSION="$(RP_VERSION)"' -Daligned_u64=__aligned_u64
+ all: rp-pppoe.so pppoe-discovery
+ 
+ pppoe-discovery: pppoe-discovery.o debug.o
+--- ppp-2.4.5.orig/pppd/plugins/pppol2tp/Makefile.linux	2009-11-16 23:26:07.000000000 +0100
++++ ppp-2.4.5/pppd/plugins/pppol2tp/Makefile.linux	2011-03-08 00:21:10.847264694 +0100
+@@ -1,6 +1,6 @@
+ #CC	= gcc
+ COPTS	= -O2 -g
+-CFLAGS	= $(COPTS) -I. -I../.. -I../../../include -fPIC
++CFLAGS	= $(COPTS) -I. -I../.. -fPIC -Daligned_u64=__aligned_u64
+ LDFLAGS	= -shared
+ INSTALL	= install
+ 

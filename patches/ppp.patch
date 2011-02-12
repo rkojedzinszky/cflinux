@@ -169,15 +169,6 @@ diff -ru ppp.orig/pppd/sys-linux.c ppp-cvs-20050725/pppd/sys-linux.c
      if (ioctl(sock_fd, SIOCGIFFLAGS, (caddr_t) &ifr) < 0) {
 --- ppp-cvs-20050725.orig/pppd/Makefile.linux	2005-07-12 03:50:23.000000000 +0200
 +++ ppp-cvs-20050725/pppd/Makefile.linux	2005-10-22 16:31:00.000000000 +0200
-@@ -48,7 +48,7 @@
- # Uncomment the next line to include support for PPP packet filtering.
- # This requires that the libpcap library and headers be installed
- # and that the kernel driver support PPP packet filtering.
--FILTER=y
-+#FILTER=y
- 
- # Uncomment the next line to enable multilink PPP (enabled by default)
- # Linux distributions: Please leave multilink ENABLED in your builds
 @@ -58,9 +58,9 @@
  # Uncomment the next line to enable the TDB database (enabled by default.)
  # If you enable multilink, then TDB is automatically enabled also.
