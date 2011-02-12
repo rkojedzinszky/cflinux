@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := iptables
-SRC_FILENAME = iptables-1.4.9.1.tar.bz2
-EXTRACTED_DIR = iptables-1.4.9.1
+SRC_FILENAME = iptables-1.4.10.tar.bz2
+EXTRACTED_DIR = iptables-1.4.10
 DOWNLOAD_SITES = http://www.netfilter.org/projects/iptables/files \
 		$(CFLINUX_PACKAGES)
 
@@ -35,7 +35,8 @@ $(CONFIGURED_STAMP):
 		--prefix=/usr \
 		--sbindir=/sbin \
 		--disable-static \
-		--enable-shared
+		--enable-shared \
+		PKG_CONFIG=
 	touch $(CONFIGURED_STAMP)
 
 clean:
