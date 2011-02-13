@@ -18,12 +18,13 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := pciutils
-SRC_FILENAME = pciutils-2.2.9.tar.gz
-EXTRACTED_DIR = pciutils-2.2.9
+SRC_FILENAME = pciutils-3.1.7.tar.gz
+EXTRACTED_DIR = pciutils-3.1.7
 DOWNLOAD_SITES = ftp://atrey.karlin.mff.cuni.cz/pub/linux/pci/ \
 		$(CFLINUX_PACKAGES)
 
-PATCHES = pciutils.so.patch
+PATCHES =
+# pciutils.so.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -47,7 +48,6 @@ $(BUILT_STAMP):
 install: build
 	$(INSTALL_BIN) $(PKG_ROOT)/lspci $(ROOTFS)/usr/sbin/
 	$(INSTALL_BIN) $(PKG_ROOT)/setpci $(ROOTFS)/usr/sbin/
-	$(INSTALL_BIN) $(PKG_ROOT)/lib/libpci.so $(ROOTFS)/usr/lib
 	$(INSTALL) $(PKG_ROOT)/pci.ids.gz $(ROOTFS)/usr/share
 
 .PHONY: configure clean build install
