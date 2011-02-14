@@ -18,15 +18,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := ethtool
-SRC_FILENAME = ethtool-3.tar.gz
-EXTRACTED_DIR = ethtool-3
+SRC_FILENAME = ethtool-2.6.37.tar.bz2
+EXTRACTED_DIR = ethtool-2.6.37
 DOWNLOAD_SITES = \
-	http://kent.dl.sourceforge.net/sourceforge/gkernel/ \
-	http://easynews.dl.sourceforge.net/sourceforge/gkernel/ \
-	http://belnet.dl.sourceforge.net/sourceforge/gkernel/ \
-	http://heanet.dl.sourceforge.net/sourceforge/gkernel/ \
-	http://voxel.dl.sourceforge.net/sourceforge/gkernel/ \
-	http://nchc.dl.sourceforge.net/sourceforge/gkernel/ \
+	http://www.kernel.org/pub/software/network/ethtool \
 	$(CFLINUX_PACKAGES)
 
 # include the common package targets 
