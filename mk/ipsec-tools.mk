@@ -32,7 +32,7 @@ configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
 	cd $(PKG_ROOT) && ./configure --host=$(TARGET_HOST) \
-			--with-kernel-headers=$(BUILD_DIR)/kernel/include \
+			--with-kernel-headers=$(UC_ROOT)/usr/include/ \
 			--prefix=/usr \
 			--sysconfdir=/etc \
 			--enable-shared \
