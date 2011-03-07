@@ -35,6 +35,7 @@
 #include <sys/reboot.h>
 #include <openssl/sha.h>
 #include <netinet/in.h>
+#include <limits.h>
 #include "rootfs.h"
 
 extern int		errno;
