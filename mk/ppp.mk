@@ -57,6 +57,8 @@ install: build
 		$(ROOTFS)/usr/lib/pppd/
 	$(INSTALL_BIN) $(PKG_ROOT)/pppd/plugins/radius/radattr.so \
 		$(ROOTFS)/usr/lib/pppd/
+	$(INSTALL_BIN) $(PKG_ROOT)/pppd/plugins/radius/radrealms.so \
+		$(ROOTFS)/usr/lib/pppd/
 	$(INSTALL_BIN) $(PKG_ROOT)/pppd/plugins/rp-pppoe/rp-pppoe.so \
 		$(ROOTFS)/usr/lib/pppd/
 	$(INSTALL_BIN) $(PKG_ROOT)/pppd/plugins/pppol2tp/openl2tp.so \
