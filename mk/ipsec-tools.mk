@@ -34,7 +34,7 @@ $(CONFIGURED_STAMP):
 	cd $(PKG_ROOT) && ./configure --host=$(TARGET_HOST) \
 			--with-kernel-headers=$(UC_ROOT)/usr/include/ \
 			--prefix=/usr \
-			--sysconfdir=/etc \
+			--sysconfdir=/etc/racoon \
 			--enable-shared \
 			--enable-frag \
 			--enable-natt \
