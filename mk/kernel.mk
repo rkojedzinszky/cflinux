@@ -22,12 +22,14 @@
 PKG := kernel
 SRC_FILENAME = linux-$(KERNEL_VERSION).tar.bz2
 EXTRACTED_DIR = linux-$(KERNEL_VERSION)
+KERNEL_DIR = $(shell echo $(KERNEL_VERSION) | sed 's/^2\.6\..*$$/v2.6/;s/^3\..*$$/v3.x/')
+
 DOWNLOAD_SITES = \
-		ftp://ftp.hu.kernel.org/pub/linux/kernel/v2.6/ \
-		ftp://ftp.nl.kernel.org/pub/linux/kernel/v2.6/ \
-		ftp://ftp.se.kernel.org/pub/linux/kernel/v2.6/ \
-		ftp://ftp.sm.kernel.org/pub/linux/kernel/v2.6/ \
-		ftp://ftp.kernel.org/pub/linux/kernel/v2.6/ \
+		ftp://ftp.hu.kernel.org/pub/linux/kernel/$(KERNEL_DIR) \
+		ftp://ftp.nl.kernel.org/pub/linux/kernel/$(KERNEL_DIR) \
+		ftp://ftp.se.kernel.org/pub/linux/kernel/$(KERNEL_DIR) \
+		ftp://ftp.sm.kernel.org/pub/linux/kernel/$(KERNEL_DIR) \
+		ftp://ftp.kernel.org/pub/linux/kernel/$(KERNEL_DIR) \
 		$(CFLINUX_PACKAGES)
 PATCHES = \
 	kernel.init.patch \
