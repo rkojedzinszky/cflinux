@@ -18,9 +18,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := iputils
-SRC_FILENAME = iputils-20071127.tar.bz2
-EXTRACTED_DIR = iputils-20071127
-DOWNLOAD_SITES = $(CFLINUX_PACKAGES)
+SRC_FILENAME = iputils-s20101006.tar.bz2
+EXTRACTED_DIR = iputils-s20101006
+DOWNLOAD_SITES = http://www.skbuff.net/iputils \
+	$(CFLINUX_PACKAGES)
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -28,6 +29,7 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
+	touch $(PKG_ROOT)/-lresolv $(PKG_ROOT)/-lcrypto
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -38,11 +40,12 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) tracepath ping CC=$(TARGET_CC)
+	$(MAKE) -C $(PKG_ROOT) ping tracepath tracepath6 CC=$(TARGET_CC)
 	touch $(BUILT_STAMP)
 
 install: build
 	$(INSTALL_BIN) $(PKG_ROOT)/ping $(ROOTFS)/bin
 	$(INSTALL_BIN) $(PKG_ROOT)/tracepath $(ROOTFS)/usr/sbin
+	$(INSTALL_BIN) $(PKG_ROOT)/tracepath6 $(ROOTFS)/usr/sbin
 
 .PHONY: configure clean build install
