@@ -18,15 +18,14 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := zlib
-SRC_FILENAME = zlib-1.2.3.tar.gz
-EXTRACTED_DIR = zlib-1.2.3
+SRC_FILENAME = zlib-1.2.5.tar.gz
+EXTRACTED_DIR = zlib-1.2.5
 DOWNLOAD_SITES = \
-		http://www.gzip.org/zlib/ \
 		http://www.zlib.net/ \
 		$(CFLINUX_PACKAGES)
 
-# include the common package targets 
-include $(TOP_DIR)/packages.mk 
+# include the common package targets
+include $(TOP_DIR)/packages.mk
 
 configure: patch $(CONFIGURED_STAMP)
 
