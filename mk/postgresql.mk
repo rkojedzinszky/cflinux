@@ -18,15 +18,11 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := postgres
-POSTGRES_VER = 9.0.3
+POSTGRES_VER = 9.1.2
 SRC_FILENAME = postgresql-$(POSTGRES_VER).tar.bz2
 EXTRACTED_DIR = postgresql-$(POSTGRES_VER)
 DOWNLOAD_SITES = \
-		http://wwwmaster.postgresql.org/redir/33/h/source/v$(POSTGRES_VER)/ \
-		http://wwwmaster.postgresql.org/redir/53/h/source/v$(POSTGRES_VER)/ \
-		http://wwwmaster.postgresql.org/redir/56/h/source/v$(POSTGRES_VER)/ \
-		http://wwwmaster.postgresql.org/redir/198/h/source/v$(POSTGRES_VER)/ \
-		http://wwwmaster.postgresql.org/redir/170/h/source/v$(POSTGRES_VER)/ \
+		http://ftp.postgresql.org/pub/source/v$(POSTGRES_VER) \
 		$(CFLINUX_PACKAGES)
 
 # include the common package targets 
