@@ -18,11 +18,13 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := tcpdump
-PKG_VERSION = 4.1.1
+PKG_VERSION = 4.2.0
 SRC_FILENAME = tcpdump-$(PKG_VERSION).tar.gz
 EXTRACTED_DIR = tcpdump-$(PKG_VERSION)
 DOWNLOAD_SITES = http://www.tcpdump.org/release/ \
 		$(CFLINUX_PACKAGES)
+
+PATCHES = tcpdump.ppi.h.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
