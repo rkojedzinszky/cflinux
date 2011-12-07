@@ -18,19 +18,18 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := busybox
-SRC_FILENAME = busybox-1.17.2.tar.bz2
-EXTRACTED_DIR = busybox-1.17.2
+SRC_FILENAME = busybox-1.19.3.tar.bz2
+EXTRACTED_DIR = busybox-1.19.3
 DOWNLOAD_SITES = http://busybox.net/downloads/ \
 		$(CFLINUX_PACKAGES)
 
 PATCHES = busybox.init.patch \
 	busybox.no_static_libgcc.patch \
 	busybox.rdate.patch \
-	busybox.wget_c.patch \
 	busybox.syslogd_c_use__path_log.patch \
 
-# include the common package targets 
-include $(TOP_DIR)/packages.mk 
+# include the common package targets
+include $(TOP_DIR)/packages.mk
 
 configure: patch $(CONFIGURED_STAMP)
 

@@ -1,6 +1,20 @@
---- busybox-1.17.2/util-linux/rdate.c.orig	2010-08-23 02:44:36.000000000 +0200
-+++ busybox-1.17.2/util-linux/rdate.c	2010-09-12 17:53:40.000000000 +0200
-@@ -49,7 +49,7 @@
+--- busybox-1.19.3/util-linux/rdate.c.orig	2011-09-06 04:35:17.000000000 +0200
++++ busybox-1.19.3/util-linux/rdate.c	2011-12-07 14:18:57.351679473 +0100
+@@ -9,11 +9,12 @@
+ */
+ 
+ //usage:#define rdate_trivial_usage
+-//usage:       "[-sp] HOST"
++//usage:       "[-spa] HOST"
+ //usage:#define rdate_full_usage "\n\n"
+ //usage:       "Get and possibly set the system date and time from a remote HOST\n"
+ //usage:     "\n	-s	Set the system date and time (default)"
+ //usage:     "\n	-p	Print the date and time"
++//usage:     "\n	-a	Skew the time instead of just hopping it"
+ 
+ #include "libbb.h"
+ 
+@@ -56,7 +57,7 @@
  	unsigned long flags;
  
  	opt_complementary = "-1";
@@ -9,7 +23,7 @@
  
  	remote_time = askremotedate(argv[optind]);
  
-@@ -60,6 +60,11 @@
+@@ -67,6 +68,11 @@
  		if (current_time == remote_time)
  			bb_error_msg("current time matches remote time");
  		else
@@ -21,20 +35,3 @@
  			if (stime(&remote_time) < 0)
  				bb_perror_msg_and_die("can't set time of day");
  	}
---- busybox-1.17.2/include/usage.src.h.orig	2010-09-12 17:55:59.000000000 +0200
-+++ busybox-1.17.2/include/usage.src.h	2010-09-12 17:56:18.000000000 +0200
-@@ -3364,12 +3364,13 @@
-        "$ raidautorun /dev/md0"
- 
- #define rdate_trivial_usage \
--       "[-sp] HOST"
-+       "[-spa] HOST"
- #define rdate_full_usage "\n\n" \
-        "Get and possibly set the system date and time from a remote HOST\n" \
-      "\nOptions:" \
-      "\n	-s	Set the system date and time (default)" \
-      "\n	-p	Print the date and time" \
-+     "\n	-a	Skew the time instead of just hopping it" \
- 
- #define rdev_trivial_usage \
-        ""
