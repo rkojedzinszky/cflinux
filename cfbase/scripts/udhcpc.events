@@ -9,17 +9,17 @@ case "$1" in
 	bound)
 	    [ -n "$broadcast" ] && BROADCAST="brd $broadcast"
 
-	    /sbin/ip addr add dev "$interface" $ip/$mask $BROADCAST
+	    /sbin/ip -4 addr add dev "$interface" $ip/$mask $BROADCAST
 
 	    if [ -n "$router" ]
 	    then
-		while /sbin/ip route del default dev "$interface"
+		while /sbin/ip -4 route del default dev "$interface"
 		do :
 		done
 
 		for i in $router
 		do
-		    /sbin/ip route add default via $i dev "$interface"
+		    /sbin/ip -4 route add default via $i dev "$interface"
 		done
 	    fi
 	    [ -n "$domain" ] && [ -n "$dns" ] && setup_dns > /etc/resolv.conf
@@ -29,6 +29,6 @@ case "$1" in
 	;;
 	deconfig)
 	    /sbin/ip link set "$interface" up
-	    /sbin/ip addr flush dev "$interface"
+	    /sbin/ip -4 addr flush dev "$interface"
 	;;
 esac
