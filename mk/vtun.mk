@@ -18,12 +18,11 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := vtun
-SRC_FILENAME = vtun-2.6.tar.gz
-EXTRACTED_DIR = vtun
+SRC_FILENAME = vtun-3.0.1.tar.gz
+EXTRACTED_DIR = vtun-3.0.1
 DOWNLOAD_SITES = \
 		http://downloads.sourceforge.net/vtun \
 		$(CFLINUX_PACKAGES)
-PATCHES = vtun.configure.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -31,14 +30,15 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	cd $(PKG_ROOT) && \
-	CC=$(TARGET_CC) \
-	CFLAGS="-O2 -DHAVE_PTSNAME" \
-	./configure \
+	cp $(TOP_DIR)/toolchain/esrc/binutils-*/config.sub \
+		$(TOP_DIR)/toolchain/esrc/binutils-*/config.guess \
+		$(PKG_ROOT)/
+	cd $(PKG_ROOT) && ./configure --host=$(TARGET_HOST) \
 	--prefix=/usr \
 	--sysconfdir=/etc --disable-lzo \
 	--with-ssl-headers=../openssl/include/openssl \
-	--with-ssl-libs=../openssl --localstatedir=/var
+	--with-blowfish-headers=../openssl/include/openssl \
+	--with-ssl-lib=../openssl --localstatedir=/var
 	touch $(CONFIGURED_STAMP)
 
 clean:
