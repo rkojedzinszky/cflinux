@@ -18,18 +18,18 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := openssl
-SRC_FILENAME = openssl-0.9.8o.tar.gz
-EXTRACTED_DIR = openssl-0.9.8o
+SRC_FILENAME = openssl-1.0.0e.tar.gz
+EXTRACTED_DIR = openssl-1.0.0e
 DOWNLOAD_SITES = http://www.openssl.org/source/ \
 		$(CFLINUX_PACKAGES)
 
-# include the common package targets 
-include $(TOP_DIR)/packages.mk 
+# include the common package targets
+include $(TOP_DIR)/packages.mk
 
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
-	cd $(PKG_ROOT) && ./Configure no-hw linux-elf
+	cd $(PKG_ROOT) && ./Configure no-hw no-engine linux-elf
 	touch $(CONFIGURED_STAMP)
 
 clean:
