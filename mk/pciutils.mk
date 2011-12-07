@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := pciutils
-SRC_FILENAME = pciutils-3.1.7.tar.gz
-EXTRACTED_DIR = pciutils-3.1.7
+SRC_FILENAME = pciutils-3.1.8.tar.gz
+EXTRACTED_DIR = pciutils-3.1.8
 DOWNLOAD_SITES = ftp://atrey.karlin.mff.cuni.cz/pub/linux/pci/ \
 		$(CFLINUX_PACKAGES)
 
