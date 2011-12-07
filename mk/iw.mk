@@ -23,7 +23,8 @@ EXTRACTED_DIR = iw-0.9.20
 DOWNLOAD_SITES = http://wireless.kernel.org/download/iw/ \
 		$(CFLINUX_PACKAGES)
 
-PATCHES = iw.version.sh.patch
+PATCHES = iw.version.sh.patch \
+	  iw.Makefile.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 

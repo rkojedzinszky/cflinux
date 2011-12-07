@@ -1,0 +1,11 @@
+--- iw-0.9.20/Makefile.orig	2011-12-07 16:07:25.177389915 +0100
++++ iw-0.9.20/Makefile	2011-12-07 16:07:37.529438881 +0100
+@@ -30,7 +30,7 @@
+ 
+ ifeq ($(NL2FOUND),Y)
+ CFLAGS += -DCONFIG_LIBNL20
+-LIBS += -lnl-genl
++LIBS += -lnl -lnl-genl
+ NLLIBNAME = libnl-2.0
+ endif
+ 
