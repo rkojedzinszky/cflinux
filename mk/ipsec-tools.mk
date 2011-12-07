@@ -18,11 +18,11 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := ipsec-tools
-SRC_FILENAME = ipsec-tools-0.8-alpha20090422.tar.bz2
-EXTRACTED_DIR = ipsec-tools-0.8-alpha20090422
+SRC_FILENAME = ipsec-tools-0.8.0.tar.bz2
+EXTRACTED_DIR = ipsec-tools-0.8.0
 DOWNLOAD_SITES = \
-		http://softlayer.dl.sourceforge.net/project/ipsec-tools/snapshots/0.8-alpha20090422/ \
-		http://heanet.dl.sourceforge.net/project/ipsec-tools/snapshots/0.8-alpha20090422 \
+		http://netcologne.dl.sourceforge.net/project/ipsec-tools/ipsec-tools/0.8.0 \
+		http://ignum.dl.sourceforge.net/project/ipsec-tools/ipsec-tools/0.8.0 \
 		$(CFLINUX_PACKAGES)
 
 # include the common package targets 
