@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := net-snmp
-SRC_FILENAME = net-snmp-5.5.tar.gz
-EXTRACTED_DIR = net-snmp-5.5
+SRC_FILENAME = net-snmp-5.7.1.tar.gz
+EXTRACTED_DIR = net-snmp-5.7.1
 DOWNLOAD_SITES = \
 		http://heanet.dl.sourceforge.net/sourceforge/net-snmp/ \
 		http://unc.dl.sourceforge.net/sourceforge/net-snmp/ \
@@ -49,6 +49,8 @@ $(CONFIGURED_STAMP):
 	 --disable-static \
 	 --without-root-access \
 	 --without-kmem-usage \
+	 --with-nl=no \
+	 --enable-ipv6 \
 	 --with-mib-modules="smux" \
 	 --with-default-snmp-version=3 \
 	 --with-sys-contact="net-admin@" \

@@ -20,6 +20,9 @@ zebra_flags="-A 127.0.0.1"	# to bind on lo
 ospfd_enable="NO"		# ospfd
 ospfd_flags="-A 127.0.0.1"
 
+ospf6d_enable="NO"		# ospf6d
+ospf6d_flags="-A 127.0.0.1"
+
 ripd_enable="NO"		# ripd
 ripd_flags="-A 127.0.0.1"
 
