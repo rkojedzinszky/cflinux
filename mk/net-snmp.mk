@@ -50,6 +50,7 @@ $(CONFIGURED_STAMP):
 	 --without-root-access \
 	 --without-kmem-usage \
 	 --with-nl=no \
+	 --enable-ipv6 \
 	 --with-mib-modules="smux" \
 	 --with-default-snmp-version=3 \
 	 --with-sys-contact="net-admin@" \
