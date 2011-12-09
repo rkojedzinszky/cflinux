@@ -187,9 +187,10 @@ case "$crond_enable" in
 esac
 case "$sshd_enable" in
 	[Yy][Ee][Ss])
-		for i in rsa dsa ; do
+		for i in rsa dsa ecdsa ; do
 			if ! [ -f /etc/ssh/ssh_host_${i}_key ]; then
 				case "$i" in
+					ecdsa)	__bits=521  ;;
 					dsa)	__bits=1024 ;;
 					*)	__bits=2048 ;;
 				esac
