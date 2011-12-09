@@ -1,7 +1,8 @@
 #!/bin/sh
 
 set -e
-rootdev="$(cat /var/run/__system_device)3"	# default root device
+
+rootdev=$(sed -n 's/^.*root=\([\/a-zA-Z0-9]\+\).*$/\1/p' /proc/cmdline)	# extract from /proc/cmdline
 
 if [ "$1" ]
 then
