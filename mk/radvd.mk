@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := radvd
-SRC_FILENAME = radvd-1.7.tar.gz
-EXTRACTED_DIR = radvd-1.7
+SRC_FILENAME = radvd-1.8.3.tar.gz
+EXTRACTED_DIR = radvd-1.8.3
 DOWNLOAD_SITES = http://www.litech.org/radvd/dist/
 
 # include the common package targets 
