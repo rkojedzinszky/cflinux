@@ -21,6 +21,7 @@ PKG := net-snmp
 SRC_FILENAME = net-snmp-5.7.1.tar.gz
 EXTRACTED_DIR = net-snmp-5.7.1
 DOWNLOAD_SITES = \
+		http://switch.dl.sourceforge.net/project/net-snmp/net-snmp/5.7.1/ \
 		http://heanet.dl.sourceforge.net/sourceforge/net-snmp/ \
 		http://unc.dl.sourceforge.net/sourceforge/net-snmp/ \
 		$(CFLINUX_PACKAGES)
