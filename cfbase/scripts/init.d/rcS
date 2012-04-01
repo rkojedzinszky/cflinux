@@ -9,34 +9,15 @@ set +e
 # if available, read local configuration
 [ -r /etc/rc.conf ] && . /etc/rc.conf
 
-case "$dev_tmpfs_enable" in
-	[Yy][Ee][Ss])
-		echo -n "Setting up tmpfs on /dev: "
-		mount --bind /dev /mnt
-		mount tmpfs -t tmpfs -o size=$dev_tmpfs_size,mode=755 /dev
-		mkdir /dev/.ro
-		mount --move /mnt /dev/.ro
-		p_umask=$(umask 0)
-		tar cf - -C /dev/.ro . | tar xf - -C /dev
-		umask $p_umask > /dev/null
-		echo "done."
-	;;
-esac
-
 # Mounting all filesystems
 echo -n "Mounting filesystems: "
 mount -a
 echo "done"
 
 echo -n "Mounting /dev/pts: "
+mkdir /dev/pts
 mount devpts /dev/pts -t devpts
 echo "done"
-
-if grep -q 'sysfs' /proc/filesystems ; then
-	echo -n "Mounting /sys: "
-	mount sysfs -t sysfs /sys
-	echo "done"
-fi
 
 # invoking ldconfig
 /sbin/ldconfig

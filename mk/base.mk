@@ -53,9 +53,6 @@ $(INSTALL_STAMP):
 	mkdir -p $(DEFAULTS_DIR)/etc/root
 	ln -s var/tmp $(ROOTFS)/tmp
 	ln -s etc/root $(ROOTFS)/root
-	(cd $(ROOTFS)/dev ; $(PKG_ROOT)/MAKEDEV std hda hdb hdc hdd \
-		console ptmx rtc ttyS0 ttyS1 ttyS2 ttyS3 ppp sda sdb tun; \
-		echo -n '' > watchdog && echo '0 0 0600 c 10 130' > @watchdog)
 	$(INSTALL) -d $(ROOTFS)/sbin/init.d
 	$(INSTALL_SCRIPT) $(PKG_ROOT)/scripts/init.d/rcS \
 		$(ROOTFS)/sbin/init.d/

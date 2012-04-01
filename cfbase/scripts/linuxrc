@@ -12,16 +12,18 @@ set +e
 # set the default path
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin
 
+mount proc -t proc /proc
+
+if grep -q 'sysfs' /proc/filesystems ; then
+	mount sysfs -t sysfs /sys
+fi
+
+echo /sbin/mdev > /proc/sys/kernel/hotplug
+
 # try to guess the real system device
 # if it is set through the kernel command line, accept that
 if [ -z "$__system_device" ]; then
 	# else try to guess it
-	mount -n proc -t proc /proc
-	if [ $? -ne 0 ]; then
-		echo "Unable to mount proc, this is a big-big problem!"
-		echo "Starting an emergency shell anyway..."
-		exec /bin/sh
-	fi
 	if [ -f /proc/cmdline ]; then
 		__system_device=$(sed -n \
 			's/^.*root=\([\/a-zA-Z]\+\)[0-9].*$/\1/p' /proc/cmdline)
@@ -30,7 +32,6 @@ if [ -z "$__system_device" ]; then
 		echo "Starting an emergency shell anyway..."
 		exec /bin/sh
 	fi
-	umount -n /proc >/dev/null 2>&1
 fi
 if [ -z "$__system_device" ]; then
 	# if it is still undefined, set it to the default /dev/hdc
