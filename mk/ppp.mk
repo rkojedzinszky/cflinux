@@ -27,7 +27,7 @@ DOWNLOAD_SITES = \
 PATCHES = ppp.patch \
 	ppp.plugins.patch \
 	ppp.pathnames_h_connect_errors.patch \
-	ppp.radius_untimeout.patch \
+	ppp.radius.acctsessionid.patch \
 	ppp.periodic_stats.patch
 
 # include the common package targets 

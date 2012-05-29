@@ -1,0 +1,39 @@
+--- ppp-2.4.5/pppd/plugins/radius/radius.c.orig	2012-04-13 20:54:51.987730714 +0200
++++ ppp-2.4.5/pppd/plugins/radius/radius.c	2012-05-29 11:57:28.514997440 +0200
+@@ -167,6 +167,8 @@
+ 
+     add_options(Options);
+ 
++    strncpy(rstate.session_id, rc_mksid(), sizeof(rstate.session_id));
++
+     info("RADIUS plugin initialized.");
+ }
+ 
+@@ -269,6 +271,8 @@
+     send = NULL;
+     received = NULL;
+ 
++    rc_avpair_add(&send, PW_ACCT_SESSION_ID,
++		   rstate.session_id, 0, VENDOR_NONE);
+     /* Hack... the "port" is the ppp interface number.  Should really be
+        the tty */
+     rstate.client_port = get_client_port(portnummap ? devnam : ifname);
+@@ -381,6 +385,9 @@
+ 
+     send = received = NULL;
+ 
++    rc_avpair_add(&send, PW_ACCT_SESSION_ID,
++		   rstate.session_id, 0, VENDOR_NONE);
++
+     av_type = PW_FRAMED;
+     rc_avpair_add (&send, PW_SERVICE_TYPE, &av_type, 0, VENDOR_NONE);
+ 
+@@ -854,8 +861,6 @@
+ 
+     rstate.start_time = time(NULL);
+ 
+-    strncpy(rstate.session_id, rc_mksid(), sizeof(rstate.session_id));
+-
+     rc_avpair_add(&send, PW_ACCT_SESSION_ID,
+ 		   rstate.session_id, 0, VENDOR_NONE);
+     rc_avpair_add(&send, PW_USER_NAME,
