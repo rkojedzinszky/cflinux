@@ -61,6 +61,7 @@ DO_MK += hostapd
 DO_MK += flex
 DO_MK += ipsec-tools
 DO_MK += radvd
+DO_MK += l2tpv3tun
 
 include $(TOP_DIR)/config.mk
 

@@ -1,0 +1,28 @@
+--- l2tpv3tun-0.2/Makefile.orig	2012-08-22 17:34:57.493149039 +0200
++++ l2tpv3tun-0.2/Makefile	2012-08-22 17:35:03.109149173 +0200
+@@ -1,4 +1,4 @@
+-LDFLAGS=		-lnl
++LDFLAGS=		-lnl -lnl-genl
+ 
+ CFLAGS=			-g -I. -MMD \
+ 			-Wall -Werror -DL2TP_CMD_ROOT=\"l2tpv3tun\"
+--- l2tpv3tun-0.2/main.c.orig	2012-08-22 17:24:41.625133378 +0200
++++ l2tpv3tun-0.2/main.c	2012-08-22 17:31:20.961144426 +0200
+@@ -100,7 +100,7 @@
+ };
+ 
+ /* netlink socket */
+-static struct nl_handle *nl_sock;
++static struct nl_sock *nl_sock;
+ static int nl_family;
+ 
+ /*****************************************************************************
+@@ -784,7 +784,7 @@
+ 
+ int do_ipl2tp(int argc, char **argv)
+ {
+-	nl_sock = nl_handle_alloc();
++	nl_sock = nl_socket_alloc();
+ 	if (!nl_sock) {
+ 		perror("nl_handle_alloc");
+ 		return 1;
