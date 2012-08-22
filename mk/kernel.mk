@@ -32,8 +32,8 @@ DOWNLOAD_SITES = \
 		ftp://ftp.kernel.org/pub/linux/kernel/$(KERNEL_DIR) \
 		$(CFLINUX_PACKAGES)
 PATCHES = \
-	kernel.init.patch \
-	kernel.usb_root.patch
+	kernel.wireless_regulatory.patch \
+	kernel.init.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
