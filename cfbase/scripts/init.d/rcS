@@ -23,7 +23,7 @@ echo "done"
 /sbin/ldconfig
 
 echo -n "Creating /var structure: "
-mkdir /var/lock /var/run /var/lib /var/tmp /var/log /var/empty
+mkdir /var/lock /var/lock/subsys /var/run /var/lib /var/tmp /var/log /var/empty
 chmod 1777 /var/tmp
 echo -n "" > /var/log/lastlog
 echo -n "" > /var/log/wtmp
