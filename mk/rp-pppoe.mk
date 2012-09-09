@@ -18,23 +18,15 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := rp-pppoe
-SRC_FILENAME = rp-pppoe-3.5.tar.gz
-EXTRACTED_DIR = rp-pppoe-3.5
-DOWNLOAD_SITES = \
+SRC_FILENAME = rp-pppoe-3.11.tar.gz
+EXTRACTED_DIR = rp-pppoe-3.11
+DOWNLOAD_SITES = http://www.roaringpenguin.com/files/download \
 		$(CFLINUX_PACKAGES)
-PATCHES = rp-pppoe.patch \
+PATCHES = \
 	rp-pppoe.relay_c_nonblock_io.patch \
-	rp-pppoe.configure.in.patch \
-	rp-pppoe.wild_ifname.patch \
-	rp-pppoe.relay.patch \
-	rp-pppoe.dont_close_fds.patch \
-	rp-pppoe.relay.c_padi_no_warn.patch \
 	rp-pppoe.relay_h_maxinterfaces.patch \
-	rp-pppoe.pppoe-server_any_service_name.patch \
-	rp-pppoe.relay_stat.patch \
 	rp-pppoe.plugin_type.patch \
-	rp-pppoe.padt_nolog.patch \
-	rp-pppoe.cross-fix.patch \
+	rp-pppoe.padt_nolog.patch
 
 
 # include the common package targets 
@@ -49,6 +41,7 @@ $(CONFIGURED_STAMP):
 		ac_cv_sizeof_unsigned_short=2 \
 		ac_cv_sizeof_unsigned_int=4 \
 		ac_cv_sizeof_unsigned_long=4 \
+		rpppoe_cv_pack_bitfields=normal \
 		./configure --host=$(TARGET_HOST) \
 			--enable-plugin=$(BUILD_DIR)/ppp
 	touch $(CONFIGURED_STAMP)
