@@ -20,8 +20,8 @@
 # $Id$
 
 PKG := hostapd
-SRC_FILENAME = hostapd-0.7.3.tar.gz
-EXTRACTED_DIR = hostapd-0.7.3
+SRC_FILENAME = hostapd-1.0.tar.gz
+EXTRACTED_DIR = hostapd-1.0
 DOWNLOAD_SITES = http://hostap.epitest.fi/releases/ \
 		$(CFLINUX_PACKAGES)
 PATCHES =
