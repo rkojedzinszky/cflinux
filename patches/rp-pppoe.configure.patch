@@ -1,0 +1,31 @@
+--- rp-pppoe-3.11/src/configure.in.orig	2012-09-10 09:21:43.609322085 +0200
++++ rp-pppoe-3.11/src/configure.in	2012-09-10 09:24:13.613691697 +0200
+@@ -25,7 +25,7 @@
+ #include<sys/socket.h>
+ #include<net/ethernet.h>
+ #include<linux/if.h>
+-#include<linux/in.h>
++#include<netinet/in.h>
+ ])
+ 
+ dnl Checks for typedefs, structures, and compiler characteristics.
+--- rp-pppoe-3.11/src/Makefile.in.orig	2012-09-10 09:36:21.279584429 +0200
++++ rp-pppoe-3.11/src/Makefile.in	2012-09-10 09:38:08.331861967 +0200
+@@ -83,7 +83,7 @@
+ 	@CC@ $(CFLAGS) '-DVERSION="$(VERSION)"' -c -o $@ $<
+ 
+ discovery.o: discovery.c pppoe.h
+-	@CC@ $(CFLAGS) '-DVERSION="$(VERSION)"' -c -o $@ $<
++	@CC@ $(CFLAGS) '-DVERSION="$(VERSION)"' -I$(PPPD_INCDIR) -c -o $@ $<
+ 
+ ppp.o: ppp.c pppoe.h
+ 	@CC@ $(CFLAGS) '-DVERSION="$(VERSION)"' -c -o $@ $<
+@@ -123,7 +123,7 @@
+ 	ar -rc $@ $^
+ 
+ plugin/discovery.o: discovery.c
+-	@CC@ -DPLUGIN=1 $(CFLAGS) '-DVERSION="$(VERSION)"' -c -o $@ -fPIC $<
++	@CC@ -DPLUGIN=1 $(CFLAGS) '-DVERSION="$(VERSION)"' -I$(PPPD_INCDIR) -c -o $@ -fPIC $<
+ 
+ plugin/if.o: if.c
+ 	@CC@ -DPLUGIN=1 $(CFLAGS) '-DVERSION="$(VERSION)"' -c -o $@ -fPIC $<

@@ -23,6 +23,7 @@ EXTRACTED_DIR = rp-pppoe-3.11
 DOWNLOAD_SITES = http://www.roaringpenguin.com/files/download \
 		$(CFLINUX_PACKAGES)
 PATCHES = \
+	rp-pppoe.configure.patch \
 	rp-pppoe.relay_c_nonblock_io.patch \
 	rp-pppoe.relay_h_maxinterfaces.patch \
 	rp-pppoe.plugin_type.patch \
