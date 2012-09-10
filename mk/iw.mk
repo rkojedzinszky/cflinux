@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := iw
-SRC_FILENAME = iw-0.9.20.tar.bz2
-EXTRACTED_DIR = iw-0.9.20
+SRC_FILENAME = iw-3.6.tar.bz2
+EXTRACTED_DIR = iw-3.6
 DOWNLOAD_SITES = http://wireless.kernel.org/download/iw/ \
 		$(CFLINUX_PACKAGES)
 
