@@ -25,17 +25,12 @@ include $(TOP_DIR)/local.mk
 endif
 
 # cflinux version
-VERSION_MAJOR = 2
-VERSION_MINOR = 2
-VERSION_PATCH =
+RELEASE_STRING := $(shell $(TOP_DIR)/tools/GIT_VERSION_GEN)
+VERSION_MAJOR = $(shell echo $(RELEASE_STRING) | cut -d . -f 1)
+VERSION_MINOR = $(shell echo $(RELEASE_STRING) | cut -d . -f 2- | cut -d p -f 1)
+VERSION_PATCH = $(shell echo $(RELEASE_STRING) | cut -d . -f 2- | cut -d p -f 2- | cut -d - -f 1)
+VERSION_EXTRA = $(shell echo $(RELEASE_STRING) | cut -d . -f 2- | cut -d p -f 2- | cut -d - -f 2-)
 
-RELEASE_STRING := $(VERSION_MAJOR).$(VERSION_MINOR)
-ifneq ($(VERSION_PATCH),)
-RELEASE_STRING := $(RELEASE_STRING)p$(VERSION_PATCH)
-endif
-ifneq ($(VERSION_EXTRA),)
-RELEASE_STRING := $(RELEASE_STRING)-$(VERSION_EXTRA)
-endif
 PACKAGE = cflinux
 
 FDEVEL_DIR = $(TOP_DIR)
@@ -50,7 +45,7 @@ TARGET_RANLIB = $(TARGET_HOST)-ranlib
 TARGET_STRIP = $(TARGET_HOST)-strip -s
 
 # The version of the used kernel
-KERNEL_VERSION := 3.5.2
+KERNEL_VERSION := 3.5.4
 
 # the directory where uclibc will be installed
 UC_ROOT=$(FDEVEL_DIR)/$(TARGET_HOST)

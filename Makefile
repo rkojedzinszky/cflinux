@@ -58,11 +58,13 @@ DO_MK += libnl
 DO_MK += wireless_tools
 DO_MK += iw
 DO_MK += hostapd
+DO_MK += wpa_supplicant
 DO_MK += flex
 DO_MK += ipsec-tools
 DO_MK += radvd
 DO_MK += l2tpv3tun
 DO_MK += mstpd
+DO_MK += dnsmasq
 
 include $(TOP_DIR)/config.mk
 

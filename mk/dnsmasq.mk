@@ -1,6 +1,6 @@
-# Makefile for iw
+# Makefile for dnsmasq
 #
-# Copyright (C) 2010 Richard Kojedzinszky <krichy@tvnetwork.hu>
+# Copyright (C) 2004 Richard Kojedzinszky <krichy@tvnetwork.hu>
 # All rights reserved.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -17,14 +17,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-PKG := iw
-SRC_FILENAME = iw-3.6.tar.bz2
-EXTRACTED_DIR = iw-3.6
-DOWNLOAD_SITES = http://wireless.kernel.org/download/iw/ \
+PKG := dnsmasq
+PKG_VERSION = 2.63
+SRC_FILENAME = dnsmasq-$(PKG_VERSION).tar.gz
+EXTRACTED_DIR = dnsmasq-$(PKG_VERSION)
+DOWNLOAD_SITES = http://www.thekelleys.org.uk/dnsmasq/ \
 		$(CFLINUX_PACKAGES)
-
-PATCHES = iw.version.sh.patch \
-	  iw.Makefile.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -35,20 +33,19 @@ $(CONFIGURED_STAMP):
 	touch $(CONFIGURED_STAMP)
 
 clean:
-	$(MAKE) -C $(PKG_ROOT) realclean
+	$(MAKE) -C $(PKG_ROOT) distclean
 	rm -f $(BUILT_STAMP)
 	rm -f $(CONFIGURED_STAMP)
 
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH) \
-		CC=$(TARGET_HOST)-gcc \
-		NL2FOUND=Y
+	$(MAKE) -C $(PKG_ROOT) all CC=$(TARGET_CC)
 	touch $(BUILT_STAMP)
 
 install: build
-	$(INSTALL_BIN) $(PKG_ROOT)/iw $(ROOTFS)/sbin/
-
+	$(INSTALL_BIN) $(PKG_ROOT)/src/dnsmasq $(ROOTFS)/usr/sbin/
+	$(INSTALL) -m 444 $(PKG_ROOT)/dnsmasq.conf.example \
+			                $(DEFAULTS_DIR)/etc/dnsmasq.conf.example
 
 .PHONY: configure clean build install

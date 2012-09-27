@@ -18,9 +18,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := iproute
-SRC_FILENAME = iproute2-2.6.37.tar.bz2
-EXTRACTED_DIR = iproute2-2.6.37
-DOWNLOAD_SITES = http://devresources.linuxfoundation.org/dev/iproute2/download/ \
+SRC_FILENAME = iproute2-3.5.1.tar.bz2
+EXTRACTED_DIR = iproute2-3.5.1
+DOWNLOAD_SITES = http://www.kernel.org/pub/linux/utils/net/iproute2/ \
 	$(CFLINUX_PACKAGES)
 
 # include the common package targets 
