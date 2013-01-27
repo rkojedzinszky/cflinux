@@ -39,6 +39,7 @@ $(CONFIGURED_STAMP):
 			--enable-frag \
 			--enable-natt \
 			--enable-dpd \
+			--enable-ipv6 \
 			--with-readline=no \
 			--enable-security-context=no \
 			CFLAGS=-Wno-strict-aliasing
