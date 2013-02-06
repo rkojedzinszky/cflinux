@@ -1,0 +1,10 @@
+--- pptp-1.7.2/pptp_compat.c.orig	2013-02-06 15:49:44.363526000 +0100
++++ pptp-1.7.2/pptp_compat.c	2013-02-06 15:49:51.795111000 +0100
+@@ -7,7 +7,6 @@
+ #include <fcntl.h>
+ #include <sys/types.h>
+ #include <unistd.h>
+-#include <stropts.h>
+ #include <stdlib.h>
+ #include <strings.h>
+ #include "pptp_compat.h"

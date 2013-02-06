@@ -65,6 +65,7 @@ DO_MK += radvd
 DO_MK += l2tpv3tun
 DO_MK += mstpd
 DO_MK += dnsmasq
+DO_MK += pptp
 
 include $(TOP_DIR)/config.mk
 
