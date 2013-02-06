@@ -18,8 +18,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := skeleton
-SRC_FILENAME = skeleton-0.1.tar.gz
-EXTRACTED_DIR = skeleton-0.1
+PKG_VERSION = 1
+SRC_FILENAME = $(PKG)-$(PKG_VERSION).tar.gz
+EXTRACTED_DIR = $(PKG)-$(PKG_VERSION)
 DOWNLOAD_SITES = http://www.skel.eton.org/download/	# look at \
 							# the ending \
 							# dash
