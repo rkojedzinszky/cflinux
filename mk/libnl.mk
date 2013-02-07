@@ -18,9 +18,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := libnl
-SRC_FILENAME = libnl-d378220c96c3c8b6f27dca33e7d8ba03318f9c2d.tar.bz2
-EXTRACTED_DIR = libnl-d378220c96c3c8b6f27dca33e7d8ba03318f9c2d
-DOWNLOAD_SITES = $(CFLINUX_PACKAGES)
+PKG_VERSION = 3.2.19
+SRC_FILENAME = $(PKG)-$(PKG_VERSION).tar.gz
+EXTRACTED_DIR = $(PKG)-$(PKG_VERSION)
+DOWNLOAD_SITES = http://www.infradead.org/~tgr/libnl/files/
 
 # include the common package targets
 include $(TOP_DIR)/packages.mk
