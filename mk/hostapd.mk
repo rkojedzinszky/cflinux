@@ -34,7 +34,8 @@ configure: patch $(CONFIGURED_STAMP)
 $(CONFIGURED_STAMP):
 	perl -ne 's/^#(?=(CONFIG_(RADIUS_SERVER|IEEE80211W|DRIVER_NL80211)))//;' \
 		-e 'print;' $(PKG_ROOT)/hostapd/defconfig > $(PKG_ROOT)/hostapd/.config
-	echo "CONFIG_LIBNL20=y" >> $(PKG_ROOT)/hostapd/.config
+	echo "CONFIG_LIBNL32=y" >> $(PKG_ROOT)/hostapd/.config
+	echo "CFLAGS += -I$(UC_ROOT)/usr/include/libnl3" >> $(PKG_ROOT)/hostapd/.config
 	touch $(CONFIGURED_STAMP)
 
 clean:
