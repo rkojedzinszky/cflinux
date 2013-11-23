@@ -45,6 +45,8 @@ $(BUILT_STAMP):
 	touch $(BUILT_STAMP)
 
 install: build
-	for i in mstpd mstpctl bridge-stp ; do $(INSTALL_BIN) $(PKG_ROOT)/$$i $(ROOTFS)/sbin/ ; done
+	$(INSTALL_BIN) $(PKG_ROOT)/mstpd $(ROOTFS)/sbin/
+	$(INSTALL_BIN) $(PKG_ROOT)/mstpctl $(ROOTFS)/sbin/
+	$(INSTALL_SCRIPT) $(PKG_ROOT)/bridge-stp $(ROOTFS)/sbin/
 
 .PHONY: configure clean build install
