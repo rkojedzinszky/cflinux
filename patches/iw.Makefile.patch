@@ -1,11 +1,20 @@
---- iw-0.9.20/Makefile.orig	2011-12-07 16:07:25.177389915 +0100
-+++ iw-0.9.20/Makefile	2011-12-07 16:07:37.529438881 +0100
-@@ -30,7 +30,7 @@
+--- iw-3.11/Makefile.orig	2013-11-23 22:15:52.471789459 +0100
++++ iw-3.11/Makefile	2013-11-23 22:16:02.103789804 +0100
+@@ -9,7 +9,7 @@
+ INSTALL ?= install
+ CC ?= "gcc"
  
- ifeq ($(NL2FOUND),Y)
- CFLAGS += -DCONFIG_LIBNL20
--LIBS += -lnl-genl
-+LIBS += -lnl -lnl-genl
- NLLIBNAME = libnl-2.0
+-CFLAGS ?= -O2 -g
++CFLAGS ?= -O2 -g $(EXTRA_INCLUDES)
+ CFLAGS += -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration
+ 
+ OBJS = iw.o genl.o event.o info.o phy.o \
+@@ -54,7 +54,7 @@
+ # libnl 3.2 might be found as 3.2 and 3.0
+ NL3FOUND = N
+ CFLAGS += -DCONFIG_LIBNL30
+-LIBS += -lnl-genl-3
++LIBS += -lnl-3 -lnl-genl-3
+ NLLIBNAME = libnl-3.0
  endif
  

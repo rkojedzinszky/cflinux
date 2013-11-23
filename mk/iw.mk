@@ -18,9 +18,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := iw
-SRC_FILENAME = iw-3.6.tar.bz2
-EXTRACTED_DIR = iw-3.6
-DOWNLOAD_SITES = http://wireless.kernel.org/download/iw/ \
+SRC_FILENAME = iw-3.11.tar.bz2
+EXTRACTED_DIR = iw-3.11
+DOWNLOAD_SITES = https://www.kernel.org/pub/software/network/iw/ \
 		$(CFLINUX_PACKAGES)
 
 PATCHES = iw.version.sh.patch \
@@ -44,7 +44,8 @@ build: configure $(BUILT_STAMP)
 $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) all $(UC_PATH) \
 		CC=$(TARGET_HOST)-gcc \
-		NL2FOUND=Y
+		PKG_CONFIG=/bin/true \
+		EXTRA_INCLUDES=-I$(UC_ROOT)/usr/include/libnl3
 	touch $(BUILT_STAMP)
 
 install: build
