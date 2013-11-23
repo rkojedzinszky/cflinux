@@ -42,7 +42,7 @@ clean:
 build: configure $(BUILT_STAMP)
 
 $(BUILT_STAMP):
-	$(MAKE) -C $(PKG_ROOT) all CC=$(TARGET_CC)
+	$(MAKE) -C $(PKG_ROOT) all CC=$(TARGET_CC) EXTRA_INCLUDES=-I$(UC_ROOT)/usr/include/libnl3
 	touch $(BUILT_STAMP)
 
 install: build

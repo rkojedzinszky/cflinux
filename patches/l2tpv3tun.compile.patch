@@ -1,10 +1,11 @@
 --- l2tpv3tun-0.2/Makefile.orig	2012-08-22 17:34:57.493149039 +0200
 +++ l2tpv3tun-0.2/Makefile	2012-08-22 17:35:03.109149173 +0200
-@@ -1,4 +1,4 @@
+@@ -1,4 +1,5 @@
 -LDFLAGS=		-lnl
-+LDFLAGS=		-lnl -lnl-genl
++LDFLAGS=		-lnl-3 -lnl-genl-3
  
  CFLAGS=			-g -I. -MMD \
++			$(EXTRA_INCLUDES) \
  			-Wall -Werror -DL2TP_CMD_ROOT=\"l2tpv3tun\"
 --- l2tpv3tun-0.2/main.c.orig	2012-08-22 17:24:41.625133378 +0200
 +++ l2tpv3tun-0.2/main.c	2012-08-22 17:31:20.961144426 +0200
