@@ -18,10 +18,12 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := libnl
-PKG_VERSION = 3.2.19
+PKG_VERSION = 3.2.23
 SRC_FILENAME = $(PKG)-$(PKG_VERSION).tar.gz
 EXTRACTED_DIR = $(PKG)-$(PKG_VERSION)
 DOWNLOAD_SITES = http://www.infradead.org/~tgr/libnl/files/
+
+PATCHES = libnl.lib,addr.c.no_af_rds.patch
 
 # include the common package targets
 include $(TOP_DIR)/packages.mk

@@ -1,0 +1,10 @@
+--- libnl-3.2.23/lib/addr.c.orig	2013-11-23 21:05:05.447637019 +0100
++++ libnl-3.2.23/lib/addr.c	2013-11-23 21:05:09.955637181 +0100
+@@ -1024,7 +1024,6 @@
+ 	__ADD(AF_ASH,ash)
+ 	__ADD(AF_ECONET,econet)
+ 	__ADD(AF_ATMSVC,atmsvc)
+-	__ADD(AF_RDS,rds)
+ 	__ADD(AF_SNA,sna)
+ 	__ADD(AF_IRDA,irda)
+ 	__ADD(AF_PPPOX,pppox)
