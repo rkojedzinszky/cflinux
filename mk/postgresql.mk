@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := postgres
-POSTGRES_VER = 9.1.2
+POSTGRES_VER = 9.3.1
 SRC_FILENAME = postgresql-$(POSTGRES_VER).tar.bz2
 EXTRACTED_DIR = postgresql-$(POSTGRES_VER)
 DOWNLOAD_SITES = \
