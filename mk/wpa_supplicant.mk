@@ -20,8 +20,8 @@
 # $Id$
 
 PKG := wpa_supplicant
-SRC_FILENAME = wpa_supplicant-1.0.tar.gz
-EXTRACTED_DIR = wpa_supplicant-1.0
+SRC_FILENAME = wpa_supplicant-2.0.tar.gz
+EXTRACTED_DIR = wpa_supplicant-2.0
 DOWNLOAD_SITES = http://hostap.epitest.fi/releases/ \
 		$(CFLINUX_PACKAGES)
 PATCHES =
@@ -34,7 +34,8 @@ configure: patch $(CONFIGURED_STAMP)
 $(CONFIGURED_STAMP):
 	perl -ne 's/^#(?=(CONFIG_(RADIUS_SERVER|IEEE80211W|DRIVER_NL80211)))//;' \
 		-e 'print;' $(PKG_ROOT)/wpa_supplicant/defconfig > $(PKG_ROOT)/wpa_supplicant/.config
-	echo "CONFIG_LIBNL20=y" >> $(PKG_ROOT)/wpa_supplicant/.config
+	echo "CONFIG_LIBNL32=y" >> $(PKG_ROOT)/wpa_supplicant/.config
+	echo "CFLAGS += -I$(UC_ROOT)/usr/include/libnl3" >> $(PKG_ROOT)/wpa_supplicant/.config
 	touch $(CONFIGURED_STAMP)
 
 clean:
