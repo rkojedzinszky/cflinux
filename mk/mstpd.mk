@@ -18,12 +18,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := mstpd-code
-PKG_VERSION = r34
+PKG_VERSION = r59
 SRC_FILENAME = $(PKG)-$(PKG_VERSION).tar.gz
 EXTRACTED_DIR = $(PKG)-$(PKG_VERSION)
 DOWNLOAD_SITES = $(CFLINUX_PACKAGES)
-
-PATCHES = mstpd-code.install.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -31,6 +29,7 @@ include $(TOP_DIR)/packages.mk
 configure: patch $(CONFIGURED_STAMP)
 
 $(CONFIGURED_STAMP):
+	sed -i -e '/#include[[:space:]]*<linux\/if_bridge.h>/i#include <netinet\/in.h>' $(PKG_ROOT)/*.[ch]
 	touch $(CONFIGURED_STAMP)
 
 clean:
@@ -46,6 +45,6 @@ $(BUILT_STAMP):
 	touch $(BUILT_STAMP)
 
 install: build
-	$(MAKE) -C $(PKG_ROOT) install DESTDIR=$(ROOTFS) CC=$(TARGET_CC)
+	for i in mstpd mstpctl bridge-stp ; do $(INSTALL_BIN) $(PKG_ROOT)/$$i $(ROOTFS)/sbin/ ; done
 
 .PHONY: configure clean build install
