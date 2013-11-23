@@ -18,13 +18,11 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := quagga
-SRC_FILENAME = quagga-0.99.21.tar.gz
-EXTRACTED_DIR = quagga-0.99.21
+SRC_FILENAME = quagga-0.99.22.3.tar.gz
+EXTRACTED_DIR = quagga-0.99.22.3
 DOWNLOAD_SITES = http://download.savannah.gnu.org/releases/quagga/ \
 		$(CFLINUX_PACKAGES)
-PATCHES = \
-	quagga.patch \
-	quagga-0.99.1-forward_sysctl-2.6.14.patch
+PATCHES = quagga.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -42,6 +40,7 @@ $(CONFIGURED_STAMP):
 		--enable-multipath=64 \
 		--localstatedir=/var/quagga \
 		--enable-tcp-md5 \
+		--disable-doc \
 		ac_cv_func_malloc_0_nonnull=yes \
 		ac_cv_func_realloc_0_nonnull=yes
 	touch $(CONFIGURED_STAMP)
