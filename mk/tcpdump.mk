@@ -18,13 +18,13 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := tcpdump
-PKG_VERSION = 4.2.0
+PKG_VERSION = 4.4.0
 SRC_FILENAME = tcpdump-$(PKG_VERSION).tar.gz
 EXTRACTED_DIR = tcpdump-$(PKG_VERSION)
 DOWNLOAD_SITES = http://www.tcpdump.org/release/ \
 		$(CFLINUX_PACKAGES)
 
-PATCHES = tcpdump.ppi.h.patch
+PATCHES =
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
@@ -35,6 +35,8 @@ $(CONFIGURED_STAMP):
 	cd $(PKG_ROOT) && \
 		ac_cv_linux_vers=2 \
 		td_cv_buggygetaddrinfo=no \
+		PCAP_CONFIG=/bin/true \
+		LDFLAGS=-lpcap \
 		./configure --host=$(TARGET_HOST) \
 		--prefix=/usr \
 		--enable-ipv6 \
