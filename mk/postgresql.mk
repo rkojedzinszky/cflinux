@@ -55,6 +55,7 @@ $(BUILT_STAMP):
 	touch $(BUILT_STAMP)
 
 install: build
+	-mkdir $(ROOTFS)/usr/share/postgresql
 	$(MAKE) -C $(PKG_ROOT)/src/bin/psql install DESTDIR=$(ROOTFS)
 	$(MAKE) -C $(PKG_ROOT)/src/interfaces/libpq install-lib-shared DESTDIR=$(ROOTFS)/usr
 
