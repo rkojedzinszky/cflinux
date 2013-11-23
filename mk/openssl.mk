@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := openssl
-SRC_FILENAME = openssl-1.0.0e.tar.gz
-EXTRACTED_DIR = openssl-1.0.0e
+SRC_FILENAME = openssl-1.0.0k.tar.gz
+EXTRACTED_DIR = openssl-1.0.0k
 DOWNLOAD_SITES = http://www.openssl.org/source/ \
 		$(CFLINUX_PACKAGES)
 
@@ -44,7 +44,7 @@ $(BUILT_STAMP):
 	$(MAKE) -C $(PKG_ROOT) build-shared CC=$(TARGET_CC) MAKEDEPPROG=$(TARGET_CC) RANLIB=$(TARGET_RANLIB)
 	cp -a $(PKG_ROOT)/libcrypto.so* $(UC_ROOT)/usr/lib
 	cp -a $(PKG_ROOT)/libssl.so* $(UC_ROOT)/usr/lib
-	cp -vLr $(PKG_ROOT)/include/openssl $(UC_ROOT)/usr/include
+	-cp -vLr $(PKG_ROOT)/include/openssl $(UC_ROOT)/usr/include
 	touch $(BUILT_STAMP)
 
 install: build
