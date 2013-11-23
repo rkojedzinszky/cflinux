@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := openssh
-SRC_FILENAME = openssh-5.9p1.tar.gz
-EXTRACTED_DIR = openssh-5.9p1
+SRC_FILENAME = openssh-6.4p1.tar.gz
+EXTRACTED_DIR = openssh-6.4p1
 DOWNLOAD_SITES = \
 		ftp://ftp.fsn.hu/pub/openbsd/OpenSSH/portable/ \
 		ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/ \
