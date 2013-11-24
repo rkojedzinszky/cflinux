@@ -25,7 +25,7 @@ include $(TOP_DIR)/local.mk
 endif
 
 # cflinux version
-RELEASE_STRING := $(shell $(TOP_DIR)/tools/GIT_VERSION_GEN)
+RELEASE_STRING := $(shell cd $(TOP_DIR) && tools/GIT_VERSION_GEN)
 VERSION_MAJOR = $(shell echo $(RELEASE_STRING) | cut -d . -f 1)
 VERSION_MINOR = $(shell echo $(RELEASE_STRING) | cut -d . -f 2- | cut -d p -f 1)
 VERSION_PATCH = $(shell echo $(RELEASE_STRING) | cut -d . -f 2- | cut -d p -f 2- | cut -d - -f 1)
