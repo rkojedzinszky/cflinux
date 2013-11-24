@@ -24,6 +24,7 @@ DOWNLOAD_SITES = \
 		http://netcologne.dl.sourceforge.net/project/ipsec-tools/ipsec-tools/0.8.0 \
 		http://ignum.dl.sourceforge.net/project/ipsec-tools/ipsec-tools/0.8.0 \
 		$(CFLINUX_PACKAGES)
+PATCHES = ipsec-tools.src.racoon.ipsec_doi.c.memset_fix.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
