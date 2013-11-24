@@ -1,0 +1,41 @@
+From dcbb6720d348d63f74e41964a6e4d2bfa5c1e78a Mon Sep 17 00:00:00 2001
+From: tteras <tteras>
+Date: Fri, 12 Jul 2013 13:12:24 +0000
+Subject: [PATCH 9/9] From Sven Vermeulen <sven.vermeulen@siphos.be>: Moves
+ ploginit() up, allowing logging events from init_avc() to show up as well.
+
+---
+ src/racoon/main.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/src/racoon/main.c b/src/racoon/main.c
+index ab71b3e..8936204 100644
+--- a/src/racoon/main.c
++++ b/src/racoon/main.c
+@@ -1,4 +1,4 @@
+-/*	$NetBSD: main.c,v 1.12 2009/01/26 18:13:06 tteras Exp $	*/
++/*	$NetBSD: main.c,v 1.12.6.1 2013/07/12 13:12:24 tteras Exp $	*/
+ 
+ /* Id: main.c,v 1.25 2006/06/20 20:31:34 manubsd Exp */
+ 
+@@ -290,6 +290,8 @@ main(ac, av)
+ 		/* NOTREACHED*/
+ 	}
+ 
++	ploginit();
++
+ #ifdef DEBUG_RECORD_MALLOCATION
+ 	DRM_init();
+ #endif
+@@ -302,8 +304,6 @@ main(ac, av)
+ 	oakley_dhinit();
+ 	compute_vendorids();
+ 
+-	ploginit();
+-
+ 	plog(LLV_INFO, LOCATION, NULL, "%s\n", version);
+ 	plog(LLV_INFO, LOCATION, NULL, "@(#)"
+ 	    "This product linked %s (http://www.openssl.org/)"
+-- 
+1.8.4.3
+

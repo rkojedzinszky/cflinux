@@ -1,0 +1,33 @@
+From 6635c1defca4afea891582dfbc278ca14c96ad88 Mon Sep 17 00:00:00 2001
+From: tteras <tteras>
+Date: Fri, 12 Apr 2013 10:04:21 +0000
+Subject: [PATCH 5/9] From Rainer Weikusat <rweikusat@mobileactivedefense.com>:
+ Do not send out illegal zero length MODE_CFG attributes.
+
+---
+ src/racoon/isakmp_cfg.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/src/racoon/isakmp_cfg.c b/src/racoon/isakmp_cfg.c
+index 0ec30ee..6746459 100644
+--- a/src/racoon/isakmp_cfg.c
++++ b/src/racoon/isakmp_cfg.c
+@@ -1,4 +1,4 @@
+-/*	$NetBSD: isakmp_cfg.c,v 1.24 2010/09/21 13:14:17 vanhu Exp $	*/
++/*	$NetBSD: isakmp_cfg.c,v 1.24.4.1 2013/04/12 10:04:21 tteras Exp $	*/
+ 
+ /* Id: isakmp_cfg.c,v 1.55 2006/08/22 18:17:17 manubsd Exp */
+ 
+@@ -1000,6 +1000,9 @@ isakmp_cfg_varlen(iph1, attr, string, len)
+ 	struct isakmp_data *new;
+ 	char *data;
+ 
++	if (!len)
++		return NULL;
++
+ 	if ((buffer = vmalloc(sizeof(*attr) + len)) == NULL) {
+ 		plog(LLV_ERROR, LOCATION, NULL, "Cannot allocate memory\n");
+ 		return NULL;
+-- 
+1.8.4.3
+

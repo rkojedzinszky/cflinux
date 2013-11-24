@@ -1,0 +1,83 @@
+From 620cfd98e5c92ee3e78e7cfc35e3bc73b0845a42 Mon Sep 17 00:00:00 2001
+From: tteras <tteras>
+Date: Fri, 12 Apr 2013 09:53:52 +0000
+Subject: [PATCH 4/9] Some logging improvements.
+
+---
+ src/racoon/grabmyaddr.c | 5 +++--
+ src/racoon/isakmp_inf.c | 7 ++++++-
+ 2 files changed, 9 insertions(+), 3 deletions(-)
+
+diff --git a/src/racoon/grabmyaddr.c b/src/racoon/grabmyaddr.c
+index 35d5fac..467a487 100644
+--- a/src/racoon/grabmyaddr.c
++++ b/src/racoon/grabmyaddr.c
+@@ -1,4 +1,4 @@
+-/*	$NetBSD: grabmyaddr.c,v 1.28.2.1 2013/02/05 11:36:41 tteras Exp $	*/
++/*	$NetBSD: grabmyaddr.c,v 1.28.2.2 2013/04/12 09:53:52 tteras Exp $	*/
+ /*
+  * Copyright (C) 1995, 1996, 1997, and 1998 WIDE Project.
+  * Copyright (C) 2008 Timo Teras <timo.teras@iki.fi>.
+@@ -764,6 +764,7 @@ kernel_handle_message(msg)
+ 	case RTM_ADD:
+ 	case RTM_DELETE:
+ 	case RTM_CHANGE:
++	case RTM_GET:
+ 	case RTM_MISS:
+ 	case RTM_IFINFO:
+ #ifdef RTM_OIFINFO
+@@ -779,7 +780,7 @@ kernel_handle_message(msg)
+ 		break;
+ 	default:
+ 		plog(LLV_WARNING, LOCATION, NULL,
+-		     "unrecognized route message with rtm_type: %d",
++		     "unrecognized route message with rtm_type: %d\n",
+ 		     rtm->rtm_type);
+ 		break;
+ 	}
+diff --git a/src/racoon/isakmp_inf.c b/src/racoon/isakmp_inf.c
+index 3290c37..99daffb 100644
+--- a/src/racoon/isakmp_inf.c
++++ b/src/racoon/isakmp_inf.c
+@@ -1,4 +1,4 @@
+-/*	$NetBSD: isakmp_inf.c,v 1.47.2.2 2013/01/24 06:48:27 tteras Exp $	*/
++/*	$NetBSD: isakmp_inf.c,v 1.47.2.3 2013/04/12 09:53:52 tteras Exp $	*/
+ 
+ /* Id: isakmp_inf.c,v 1.44 2006/05/06 20:45:52 manubsd Exp */
+ 
+@@ -1116,6 +1116,7 @@ purge_ipsec_spi(dst0, proto, spi, n)
+ 	u_int64_t created;
+ 	size_t i;
+ 	caddr_t mhp[SADB_EXT_MAX + 1];
++	unsigned num_purged = 0;
+ 
+ 	plog(LLV_DEBUG2, LOCATION, NULL,
+ 		 "purge_ipsec_spi:\n");
+@@ -1172,6 +1173,7 @@ purge_ipsec_spi(dst0, proto, spi, n)
+ 
+ 		plog(LLV_DEBUG2, LOCATION, NULL, "src: %s\n", saddr2str(src));
+ 		plog(LLV_DEBUG2, LOCATION, NULL, "dst: %s\n", saddr2str(dst));
++		plog(LLV_DEBUG2, LOCATION, NULL, "spi: %u\n", ntohl(sa->sadb_sa_spi));
+ 
+ 		/* XXX n^2 algorithm, inefficient */
+ 
+@@ -1210,6 +1212,7 @@ purge_ipsec_spi(dst0, proto, spi, n)
+ 				"purged IPsec-SA proto_id=%s spi=%u.\n",
+ 				s_ipsecdoi_proto(proto),
+ 				ntohl(spi[i]));
++			num_purged++;
+ 		}
+ 
+ 		msg = next;
+@@ -1217,6 +1220,8 @@ purge_ipsec_spi(dst0, proto, spi, n)
+ 
+ 	if (buf)
+ 		vfree(buf);
++
++	plog(LLV_DEBUG, LOCATION, NULL, "purged %u SAs.\n", num_purged);
+ }
+ 
+ /*
+-- 
+1.8.4.3
+

@@ -18,13 +18,22 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := ipsec-tools
-SRC_FILENAME = ipsec-tools-0.8.0.tar.bz2
-EXTRACTED_DIR = ipsec-tools-0.8.0
+SRC_FILENAME = ipsec-tools-0.8.1.tar.bz2
+EXTRACTED_DIR = ipsec-tools-0.8.1
 DOWNLOAD_SITES = \
 		http://netcologne.dl.sourceforge.net/project/ipsec-tools/ipsec-tools/0.8.0 \
 		http://ignum.dl.sourceforge.net/project/ipsec-tools/ipsec-tools/0.8.0 \
 		$(CFLINUX_PACKAGES)
-PATCHES = ipsec-tools.src.racoon.ipsec_doi.c.memset_fix.patch
+PATCHES = \
+	ipsec-tools.0001-Fix-handling-of-deletion-notification.patch \
+	ipsec-tools.0002-From-Ian-West-ian-niw.com.au-Fix-double-free-of-the-.patch \
+	ipsec-tools.0003-Fix-source-port-selection.patch \
+	ipsec-tools.0004-Some-logging-improvements.patch \
+	ipsec-tools.0005-From-Rainer-Weikusat-rweikusat-mobileactivedefense.c.patch \
+	ipsec-tools.0006-From-Rainer-Weikusat-rweikusat-mobileactivedefense.c.patch \
+	ipsec-tools.0007-From-Alexander-Sbitnev-alexander.sbitnev-gmail.com-f.patch \
+	ipsec-tools.0008-From-Paul-Barker-Remove-redundant-memset-after-callo.patch \
+	ipsec-tools.0009-From-Sven-Vermeulen-sven.vermeulen-siphos.be-Moves-p.patch
 
 # include the common package targets 
 include $(TOP_DIR)/packages.mk 
