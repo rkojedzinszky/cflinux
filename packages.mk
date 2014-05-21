@@ -57,6 +57,8 @@ $(EXTRACTED_STAMP):
 		tar xzf "$(SOURCES_DIR)/$(SRC_FILENAME)" -C "$(BUILD_DIR)" ; \
 	elif echo "$(SRC_FILENAME)" | grep -qE "\.t(ar\.)?bz2$$" ; then \
 		tar xjf "$(SOURCES_DIR)/$(SRC_FILENAME)" -C "$(BUILD_DIR)" ; \
+	elif echo "$(SRC_FILENAME)" | grep -qE "\.t(ar\.)?xz$$" ; then \
+		tar xJf "$(SOURCES_DIR)/$(SRC_FILENAME)" -C "$(BUILD_DIR)" ; \
 	else echo "Cannot handle $(SRC_FILENAME)"; exit 1; fi
 	@echo "done"
 	@[ "$(EXTRACTED_DIR)" = "$(PKG)" ] || \
