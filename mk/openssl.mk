@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := openssl
-SRC_FILENAME = openssl-1.0.0k.tar.gz
-EXTRACTED_DIR = openssl-1.0.0k
+SRC_FILENAME = openssl-1.0.0l.tar.gz
+EXTRACTED_DIR = openssl-1.0.0l
 DOWNLOAD_SITES = http://www.openssl.org/source/ \
 		$(CFLINUX_PACKAGES)
 
