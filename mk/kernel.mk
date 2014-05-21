@@ -20,7 +20,7 @@
 # $Id$
 
 PKG := kernel
-SRC_FILENAME = linux-$(KERNEL_VERSION).tar.bz2
+SRC_FILENAME = linux-$(KERNEL_VERSION).tar.xz
 EXTRACTED_DIR = linux-$(KERNEL_VERSION)
 KERNEL_DIR = $(shell echo $(KERNEL_VERSION) | sed 's/^2\.6\..*$$/v2.6/;s/^3\..*$$/v3.x/')
 
