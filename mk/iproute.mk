@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 PKG := iproute
-SRC_FILENAME = iproute2-3.5.1.tar.bz2
-EXTRACTED_DIR = iproute2-3.5.1
+SRC_FILENAME = iproute2-3.14.0.tar.xz
+EXTRACTED_DIR = iproute2-3.14.0
 DOWNLOAD_SITES = http://www.kernel.org/pub/linux/utils/net/iproute2/ \
 	$(CFLINUX_PACKAGES)
 
